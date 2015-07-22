@@ -5019,7 +5019,7 @@ class BaseModel(object):
 
         :param cr: database cursor
         :param uid: current user id
-        :param id: id of the record to copy
+        :param id: id of the record to copy, or list with the id to copy.
         :param default: field values to override in the original values of the copied record
         :type default: dictionary
         :param context: context arguments, like lang, time zone
@@ -5029,6 +5029,8 @@ class BaseModel(object):
 
         if context is None:
             context = {}
+        if type(id) is list:
+            id = id[0]
 
         # avoid recursion through already copied records in case of circular relationship
         seen_map = context.setdefault('__copy_data_seen',{})
