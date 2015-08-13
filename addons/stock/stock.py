@@ -29,7 +29,7 @@ from openerp.osv import fields, osv, orm
 from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import tools
-from openerp.tools import float_compare, DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools import float_compare, float_round, DEFAULT_SERVER_DATETIME_FORMAT
 import openerp.addons.decimal_precision as dp
 import logging
 _logger = logging.getLogger(__name__)
@@ -642,7 +642,7 @@ class stock_picking(osv.osv):
         'origin': fields.char('Source Document', size=64, states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="Reference of the document", select=True),
         'backorder_id': fields.many2one('stock.picking', 'Back Order of', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="If this shipment was split, then this field links to the shipment which contains the already processed part.", select=True),
         'type': fields.selection([('out', 'Sending Goods'), ('in', 'Getting Goods'), ('internal', 'Internal')], 'Shipping Type', required=True, select=True, help="Shipping type specify, goods coming in or going out."),
-        'note': fields.text('Notes', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
+        'note': fields.text('Notes'),
         'stock_journal_id': fields.many2one('stock.journal','Stock Journal', select=True, states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}),
         'location_id': fields.many2one('stock.location', 'Location', states={'done':[('readonly', True)], 'cancel':[('readonly',True)]}, help="Keep empty if you produce at the location where the finished products are needed." \
                 "Set a location if you produce at a fixed location. This can be a partner location " \
@@ -1437,7 +1437,15 @@ class stock_production_lot(osv.osv):
         """ Searches Ids of products
         @return: Ids of locations
         """
-        locations = self.pool.get('stock.location').search(cr, uid, [('usage', '=', 'internal')])
+        if context is None:
+            context = {}
+
+        if 'location_id' not in context:
+            locations = self.pool['stock.location'].search(
+                cr, uid, [('usage', '=', 'internal')], context=context)
+        else:
+            locations = context['location_id'] and [context['location_id']] or []
+
         cr.execute('''select
                 prodlot_id,
                 sum(qty)
@@ -1610,7 +1618,7 @@ class stock_move(osv.osv):
                 "the product reservation, and should be done with care."
         ),
         'product_uom': fields.many2one('product.uom', 'Unit of Measure', required=True,states={'done': [('readonly', True)]}),
-        'product_uos_qty': fields.float('Quantity (UOS)', digits_compute=dp.get_precision('Product Unit of Measure'), states={'done': [('readonly', True)]}),
+        'product_uos_qty': fields.float('Quantity (UOS)', digits_compute=dp.get_precision('Product UoS'), states={'done': [('readonly', True)]}),
         'product_uos': fields.many2one('product.uom', 'Product UOS', states={'done': [('readonly', True)]}),
         'product_packaging': fields.many2one('product.packaging', 'Packaging', help="It specifies attributes of packaging like type, quantity of packaging,etc."),
 
@@ -1865,7 +1873,8 @@ class stock_move(osv.osv):
                 break
 
         if product_uos and product_uom and (product_uom != product_uos):
-            result['product_uos_qty'] = product_qty * uos_coeff['uos_coeff']
+            precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Product UoS')
+            result['product_uos_qty'] = float_round(product_qty * uos_coeff['uos_coeff'], precision_digits=precision)
         else:
             result['product_uos_qty'] = product_qty
 
@@ -1895,7 +1904,8 @@ class stock_move(osv.osv):
         # The clients should call onchange_quantity too anyway
 
         if product_uos and product_uom and (product_uom != product_uos):
-            result['product_qty'] = product_uos_qty / uos_coeff['uos_coeff']
+            precision = self.pool.get('decimal.precision').precision_get(cr, uid, 'Product Unit of Measure')
+            result['product_qty'] = float_round(product_uos_qty / uos_coeff['uos_coeff'], precision_digits=precision)
         else:
             result['product_qty'] = product_uos_qty
         return {'value': result}
@@ -2354,7 +2364,11 @@ class stock_move(osv.osv):
                     new_std_price = new_price
                 else:
                     # Get the standard price
-                    amount_unit = product.price_get('standard_price', context=context)[product.id]
+                    pricetype_obj = self.pool.get('product.price.type')
+                    price_type_id = pricetype_obj.search(cr, uid, [('field','=','standard_price')])[0]
+                    price_type_currency_id = pricetype_obj.browse(cr, uid, price_type_id).currency_id.id
+                    amount_unit = self.pool.get('res.currency').compute(cr, uid, price_type_currency_id,
+                        context['currency_id'], product.standard_price, round=False, context=context)
                     new_std_price = ((amount_unit * product_avail[product.id])\
                         + (new_price * qty))/(product_avail[product.id] + qty)
 
