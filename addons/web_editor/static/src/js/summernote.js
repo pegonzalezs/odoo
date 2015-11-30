@@ -676,6 +676,13 @@ dom.isFont = function (node) {
 dom.isVisibleText = function (textNode) {
   return !!textNode.textContent.match(/\S|\u00A0/);
 };
+
+/* avoid thinking HTML comment are visible */
+var old_isVisiblePoint = dom.isVisiblePoint;
+dom.isVisiblePoint = function (point) {
+  return point.node.nodeType !== 8 && old_isVisiblePoint.apply(this, arguments);
+};
+
 /**
  * order the style of the node to compare 2 nodes and remove attribute if empty
  *
@@ -2313,6 +2320,12 @@ function summernote_paste (event) {
 
     var html = clipboardData.getData("text/html");
     var $node = $('<div/>').html(html);
+    // if copying source did not provide html, default to plain text
+    if(!html) {
+      $node.text(clipboardData.getData("text/plain")).html(function(_, html){
+          return html.replace(/\r?\n/g,'<br>');
+      });
+    }
 
     /* 
         remove undesirable tag

@@ -232,7 +232,7 @@ class ResPartner(models.Model):
     def _credit_debit_get(self):
         tables, where_clause, where_params = self.env['account.move.line']._query_get()
         where_params = [tuple(self.ids)] + where_params
-        self._cr.execute("""SELECT l.partner_id, act.type, SUM(l.debit-l.credit)
+        self._cr.execute("""SELECT l.partner_id, act.type, SUM(l.amount_residual)
                       FROM account_move_line l
                       LEFT JOIN account_account a ON (l.account_id=a.id)
                       LEFT JOIN account_account_type act ON (a.user_type_id=act.id)
@@ -329,7 +329,10 @@ class ResPartner(models.Model):
         if only_unblocked:
             domain += [('blocked', '=', False)]
         if self.ids:
-            domain += [('partner_id', 'in', self.ids)]
+            if 'exclude_given_ids' in self._context:
+                domain += [('partner_id', 'not in', self.ids)]
+            else:
+                domain += [('partner_id', 'in', self.ids)]
         #adding the overdue lines
         overdue_domain = ['|', '&', ('date_maturity', '!=', False), ('date_maturity', '<=', date), '&', ('date_maturity', '=', False), ('date', '<=', date)]
         if overdue_only:
@@ -380,7 +383,7 @@ class ResPartner(models.Model):
                     GROUP BY p.last_time_entries_checked
                 ) as s
                 WHERE (last_time_entries_checked IS NULL OR max_date > last_time_entries_checked)
-            """ % (self.id,))
+            """, (self.id,))
         self.has_unreconciled_entries = self.env.cr.rowcount == 1
 
     @api.multi
