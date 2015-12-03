@@ -5086,7 +5086,8 @@ instance.web.form.FieldMany2ManyKanban = instance.web.form.AbstractField.extend(
             pop.select_element(
                 this.field.relation,
                 {
-                    title: _t("Add: ") + this.string
+                    title: _t("Add: ") + this.string,
+                    no_create: this.options.no_create,
                 },
                 new instance.web.CompoundDomain(this.build_domain(), ["!", ["id", "in", this.dataset.ids]]),
                 this.build_context()
