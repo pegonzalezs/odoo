@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
 
@@ -33,7 +15,7 @@ class restaurant_floor(osv.osv):
     _columns = {
         'name':             fields.char('Floor Name', required=True, help='An internal identification of the restaurant floor'),
         'pos_config_id':    fields.many2one('pos.config','Point of Sale'),
-        'background_image': fields.binary('Background Image', help='A background image used to display a floor layout in the point of sale interface'),  
+        'background_image': fields.binary('Background Image', attachment=True, help='A background image used to display a floor layout in the point of sale interface'),
         'background_color': fields.char('Background Color', help='The background color of the floor layout, (must be specified in a html-compatible format)'),
         'table_ids':        fields.one2many('restaurant.table','floor_id','Tables', help='The list of tables in this floor'),
         'sequence':         fields.integer('Sequence',help='Used to sort Floors'),

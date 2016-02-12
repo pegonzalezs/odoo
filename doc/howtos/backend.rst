@@ -1,3 +1,5 @@
+:banner: banners/build_a_module.jpg
+
 .. queue:: backend/series
 
 =================
@@ -621,12 +623,12 @@ instead of a single view its ``arch`` field is composed of any number of
     <!-- improved idea categories list -->
     <record id="idea_category_list2" model="ir.ui.view">
         <field name="name">id.category.list2</field>
-        <field name="model">ir.ui.view</field>
+        <field name="model">idea.category</field>
         <field name="inherit_id" ref="id_category_list"/>
         <field name="arch" type="xml">
-            <!-- find field description inside tree, and add the field
+            <!-- find field description and add the field
                  idea_ids after it -->
-            <xpath expr="/tree/field[@name='description']" position="after">
+            <xpath expr="//field[@name='description']" position="after">
               <field name="idea_ids" string="Number of ideas"/>
             </xpath>
         </field>
@@ -649,6 +651,22 @@ instead of a single view its ``arch`` field is composed of any number of
     ``attributes``
         alters the attributes of the matched element using special
         ``attribute`` elements in the ``xpath``'s body
+
+.. tip::
+
+    When matching a single element, the ``position`` attribute can be set directly
+    on the element to be found. Both inheritances below will give the same result.
+
+    .. code-block:: xml
+
+        <xpath expr="//field[@name='description']" position="after">
+            <field name="idea_ids" />
+        </xpath>
+
+        <field name="description" position="after">
+            <field name="idea_ids" />
+        </field>
+
 
 .. exercise:: Alter existing content
 
@@ -757,24 +775,18 @@ method should simply set the value of the field to compute on every record in
 .. code-block:: python
 
     import random
-    from openerp import models, fields
+    from openerp import models, fields, api
 
     class ComputedModel(models.Model):
         _name = 'test.computed'
 
         name = fields.Char(compute='_compute_name')
 
+        @api.multi
         def _compute_name(self):
             for record in self:
                 record.name = str(random.randint(1, 1e6))
 
-Our compute method is very simple: it loops over ``self`` and performs the same
-operation on every record. We can make it slightly simpler by using the
-decorator :func:`~openerp.api.one` to automatically loop on the collection::
-
-        @api.one
-        def _compute_name(self):
-            self.name = str(random.randint(1, 1e6))
 
 Dependencies
 ------------
@@ -793,10 +805,10 @@ field whenever some of its dependencies have been modified::
         name = fields.Char(compute='_compute_name')
         value = fields.Integer()
 
-        @api.one
         @api.depends('value')
         def _compute_name(self):
-            self.name = "Record with value %s" % self.value
+            for record in self:
+                record.name = "Record with value %s" % record.value
 
 .. exercise:: Computed fields
 
@@ -971,18 +983,30 @@ Tree views can take supplementary attributes to further customize their
 behavior:
 
 ``colors``
-    mappings of colors to conditions. If the condition evaluates to ``True``,
-    the corresponding color is applied to the row:
+    .. deprecated:: 9.0
+        replaced by ``decoration-{$name}``
+
+``decoration-{$name}``
+    allow changing the style of a row's text based on the corresponding
+    record's attributes.
+
+    Values are Python expressions. For each record, the expression is evaluated
+    with the record's attributes as context values and if ``true``, the
+    corresponding style is applied to the row. Other context values are
+    ``uid`` (the id of the current user) and ``current_date`` (the current date
+    as a string of the form ``yyyy-MM-dd``).
+
+    ``{$name}`` can be ``bf`` (``font-weight: bold``), ``it``
+    (``font-style: italic``), or any bootstrap contextual color (``danger``,
+    ``info``, ``muted``, ``primary``, ``success`` or ``warning``).
 
     .. code-block:: xml
 
-        <tree string="Idea Categories" colors="blue:state=='draft';red:state=='trashed'">
+        <tree string="Idea Categories" decoration-info="state=='draft'"
+            decoration-danger="state=='trashed'">
             <field name="name"/>
             <field name="state"/>
         </tree>
-
-    Clauses are separated by ``;``, the color and condition are separated by
-    ``:``.
 
 ``editable``
     Either ``"top"`` or ``"bottom"``. Makes the tree view editable in-place
@@ -1073,7 +1097,7 @@ predefined searches. Filters must have one of the following attributes:
                 domain="[('inventor_id', '=', uid)]"/>
         <group string="Group By">
             <filter name="group_by_inventor" string="Inventor"
-                    context="{'group_by': 'inventor'}"/>
+                    context="{'group_by': 'inventor_id'}"/>
         </group>
     </search>
 
@@ -1129,13 +1153,15 @@ Graph views
 Graph views allow aggregated overview and analysis of models, their root
 element is ``<graph>``.
 
+.. note::
+    Pivot views (element ``<pivot>``) a multidimensional table, allows the
+    selection of filers and dimensions to get the right aggregated dataset
+    before moving to a more graphical overview. The pivot view shares the same
+    content definition as graph views.
+
 Graph views have 4 display modes, the default mode is selected using the
 ``@type`` attribute.
 
-Pivot
-    a multidimensional table, allows the selection of filers and dimensions
-    to get the right aggregated dataset before moving to a more graphical
-    overview
 Bar (default)
     a bar chart, the first dimension is used to define groups on the
     horizontal axis, other dimensions define aggregated bars within each group.
@@ -1610,6 +1636,30 @@ http://localhost:8069/report/html/account.report_invoice/1 (if ``account`` is
 installed) and the PDF version through
 http://localhost:8069/report/pdf/account.report_invoice/1.
 
+.. _reference/backend/reporting/printed-reports/pdf-without-styles:
+
+.. danger::
+
+    If it appears that your PDF report is missing the styles (i.e. the text
+    appears but the style/layout is different from the html version), probably
+    your wkhtmltopdf_ process cannot reach your web server to download them.
+
+    If you check your server logs and see that the CSS styles are not being
+    downloaded when generating a PDF report, most surely this is the problem.
+
+    The wkhtmltopdf_ process will use the ``web.base.url`` system parameter as
+    the *root path* to all linked files, but this parameter is automatically
+    updated each time the Administrator is logged in. If your server resides
+    behind some kind of proxy, that could not be reachable. You can fix this by
+    adding one of these system parameters:
+
+    - ``report.url``, pointing to an URL reachable from your server
+      (probably ``http://localhost:8069`` or something similar). It will be
+      used for this particular purpose only.
+
+    - ``web.base.url.freeze``, when set to ``True``, will stop the
+      automatic updates to ``web.base.url``.
+
 .. exercise:: Create a report for the Session model
 
    For each session, it should display session's name, its start and end,
@@ -1771,7 +1821,7 @@ with the standard Python libraries ``urllib2`` and ``json``::
     note_id = call(url, "object", "execute", DB, uid, PASS, 'note.note', 'create', args)
 
 Here is the same program, using the library
-`jsonrpclib <https://pypi.python.org/pypi/jsonrpclib>`::
+`jsonrpclib <https://pypi.python.org/pypi/jsonrpclib>`_::
 
     import jsonrpclib
 

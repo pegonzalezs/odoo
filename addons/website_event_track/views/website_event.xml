@@ -187,6 +187,7 @@
                     <t t-call="website.publish_management">
                         <t t-set="object" t-value="track"/>
                         <t t-set="publish_edit" t-value="True"/>
+                        <t t-set="action" t-value="'website_event_track.action_event_track'"/>
                     </t>
                 </div>
             </div>
@@ -207,14 +208,28 @@
 
             <section class="row mt32">
                 <div class="col-md-8">
-                    <div t-field="track.description"/>
+                    <section>
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <h2 t-field="track.name"/>
+                                    <small>Proposed by <span t-field="track.partner_name"/></small>
+                                </div>
+                                <div class="col-md-12">
+                                    <p t-field="track.description"/>
+                                </div>
+                                <div class="col-md-12">
+                                    <h3>About The Author</h3>
+                                    <p t-field="track.partner_biography"/>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
                     <div t-foreach="track.speaker_ids" t-as="speaker" class="well mt32">
                         <div class="row">
                             <div class="col-sm-2">
-                                <span t-field="track.image"
+                                <span t-field="speaker.sudo().image_medium"
                                     t-field-options='{"widget": "image", "class": "img-circle"}'/>
-                                    <!-- <span t-field="speaker.self" t-field-options='{"widget": "contact", "fields": ["name", "country_id"]}'
-                                        style="display: inline-block;"/> -->
                             </div><div class="col-sm-10">
                                <h4 t-field="speaker.name" class="mb4"/>
                                <div class="fa fa-home mb16" t-if="speaker.website">
@@ -319,7 +334,8 @@
                         </section>
                     </div>
                     <section id="forms" t-if="event.show_track_proposal">
-                        <form class="form-horizontal mt32" t-attf-action="/event/#{event.id}/track_proposal/post" method="post" enctype="multipart/form-data">
+                        <form class="form-horizontal mt32 js_website_submit_form" t-attf-action="/event/#{event.id}/track_proposal/post" method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <div class="form-group">
                                 <label class="col-md-3 col-sm-4 control-label" for="partner_name">Your Name</label>
                                 <div class="col-md-7 col-sm-8">
@@ -429,6 +445,19 @@
             We will evaluate your proposition and get back to you shortly.
         </p>
     </t>
+</template>
+
+<!-- Chatter templates -->
+<template id="event_track_template_new">
+    <h3>New track proposal</h3>
+    <ul>
+        <li><b>Proposed By</b>: <t t-esc="object.partner_id.name or object.partner_name or object.partner_email"/></li>
+        <li><b>Mail</b>: <a t-attf-href="mailto:#{object.partner_email}"><t t-esc="object.partner_email"/></a></li>
+        <li><b>Phone</b>: <t t-esc="object.partner_phone"/></li>
+        <li><b>Title</b>: <t t-esc="object.name"/></li>
+        <li><b>Speakers Biography</b>: <t t-esc="object.partner_biography"/></li>
+        <li><b>Talk Introduction</b>: <t t-esc="object.description"/></li>
+    </ul>
 </template>
 
 </data>

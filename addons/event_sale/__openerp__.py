@@ -18,14 +18,13 @@ that product, you will be able to choose an existing event of that category and
 when you confirm your sale order it will automatically create a registration for
 this event.
 """,
-    'author': 'OpenERP SA',
-    'depends': ['event', 'sale_crm'],
+    'depends': ['event', 'sale'],
     'data': [
         'views/event.xml',
         'views/product.xml',
         'views/sale_order.xml',
         'event_sale_data.xml',
-        'views/report_registrationbadge.xml',
+        'report/event_event_templates.xml',
         'security/ir.model.access.csv',
         'wizard/event_edit_registration.xml',
     ],

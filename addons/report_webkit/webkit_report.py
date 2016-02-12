@@ -1,34 +1,9 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 # Copyright (c) 2010 Camptocamp SA (http://www.camptocamp.com)
-# All Right Reserved
-#
 # Author : Nicolas Bessi (Camptocamp)
 # Contributor(s) : Florent Xicluna (Wingo SA)
-#
-# WARNING: This program as such is intended to be used by professional
-# programmers who take the whole responsability of assessing all potential
-# consequences resulting from its eventual inadequacies and bugs
-# End users who are looking for a ready-to-use solution with commercial
-# garantees and support are strongly adviced to contract a Free Software
-# Service Company
-#
-# This program is Free Software; you can redistribute it and/or
-# modify it under the terms of the GNU General Public License
-# as published by the Free Software Foundation; either version 2
-# of the License, or (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-#
-##############################################################################
 
 import subprocess
 import os
@@ -43,6 +18,7 @@ from report_helper import WebKitHelper
 import openerp
 from openerp.modules.module import get_module_resource
 from openerp.report.report_sxw import *
+from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.tools.translate import _
 from urllib import urlencode, quote as quote
@@ -127,7 +103,7 @@ class WebKitParser(report_sxw):
     def get_lib(self, cursor, uid):
         """Return the lib wkhtml path"""
         proxy = self.pool['ir.config_parameter']
-        webkit_path = proxy.get_param(cursor, uid, 'webkit_path')
+        webkit_path = proxy.get_param(cursor, SUPERUSER_ID, 'webkit_path')
 
         if not webkit_path:
             try:

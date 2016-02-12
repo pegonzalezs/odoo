@@ -22,14 +22,26 @@ var Action = core.Class.extend({
         this.title = action.display_name || action.name;
     },
     /**
+     * Not implemented for client actions
+     * @return {Deferred} a rejected Deferred
+     */
+    appendTo: function() {
+        return $.Deferred().reject();
+    },
+    /**
      * This method should restore this previously loaded action
      * Calls on_reverse_breadcrumb callback if defined
      * @return {Deferred} resolved when widget is enabled
      */
     restore: function() {
-        if (this.__on_reverse_breadcrumb) {
-            return this.__on_reverse_breadcrumb();
+        if (this.on_reverse_breadcrumb) {
+            return this.on_reverse_breadcrumb();
         }
+    },
+    /**
+     * Not implemented for functions
+     */
+    detach: function() {
     },
     /**
      * Destroyer: there is nothing to destroy in the case of a client function
@@ -42,6 +54,18 @@ var Action = core.Class.extend({
      */
     set_on_reverse_breadcrumb: function(on_reverse_breadcrumb) {
         this.on_reverse_breadcrumb = on_reverse_breadcrumb;
+    },
+    /**
+     * Stores the DOM fragment of the action
+     * @param {jQuery} [fragment] the DOM fragment
+     */
+    set_fragment: function($fragment) {
+        this.$fragment = $fragment;
+    },
+    /**
+     * Not implemented for client actions
+     */
+    set_is_in_DOM: function() {
     },
     /**
      * @return {Object} the description of the action
@@ -61,6 +85,12 @@ var Action = core.Class.extend({
     get_nb_views: function() {
         return 0;
     },
+    /**
+     * @return {jQuery} the DOM fragment of the action
+     */
+    get_fragment: function() {
+        return this.$fragment;
+    },
 });
 /**
  * Specialization of Action for client actions that are Widgets
@@ -77,19 +107,42 @@ var WidgetAction = Action.extend({
         if (!this.widget.get('title')) {
             this.widget.set('title', this.title);
         }
+        this.widget.on('change:title', this, function(widget) {
+            this.title = widget.get('title');
+        });
+    },
+    /**
+     * Wraps the action's widget in a container and appends it to el
+     * @param {DocumentFragment} [el] where to append the widget
+     * @return {Deferred} resolved when the widget is appended
+     */
+    appendTo: function(el) {
+        this.$client_action_container = $('<div>').addClass('oe_client_action');
+        this.$client_action_container.appendTo(el);
+        return this.widget.appendTo(this.$client_action_container);
     },
     /**
      * Restores WidgetAction by calling do_show on its widget
      */
     restore: function() {
-        this.widget.do_show();
-        return this._super();
+        var self = this;
+        return $.when(this._super()).then(function() {
+            return self.widget.do_show();
+        });
+    },
+    /**
+     * Detaches the client action's container from the DOM
+     * @return {jQuery} the action's container
+     */
+    detach: function() {
+        return this.$client_action_container.detach();
     },
     /**
      * Destroys the widget
      */
-    destroy: function() { 
+    destroy: function() {
         this.widget.destroy();
+        this.detach();
     },
 });
 /**
@@ -97,16 +150,46 @@ var WidgetAction = Action.extend({
  */
 var ViewManagerAction = WidgetAction.extend({
     /**
+     * Appends the action's widget to el
+     * @param {DocumentFragment} [el] where to append the widget
+     * @return {Deferred} resolved when the widget is appended
+     */
+    appendTo: function(el) {
+        return this.widget.appendTo(el);
+    },
+    /**
      * Restores a ViewManagerAction
      * Switches to the requested view by calling select_view on the ViewManager
      * @param {int} [view_index] the index of the view to select
      */
     restore: function(view_index) {
-        var self = this;
-        var _super = this._super;
+        var _super = this._super.bind(this);
         return this.widget.select_view(view_index).then(function() {
-            _super.call(self);
+            return _super();
         });
+    },
+    /**
+     * Sets is_in_DOM on this.widget
+     * @param {Boolean} [is_in_DOM] true iff the widget is attached in the DOM
+     */
+    set_is_in_DOM: function(is_in_DOM) {
+        this.widget.is_in_DOM = is_in_DOM;
+    },
+    /**
+     * Detaches the view_manager from the DOM
+     * @return {jQuery} the view_manager's $el
+     */
+    detach: function() {
+        // Hack to remove badly inserted nvd3 tooltips ; should be removed when upgrading nvd3 lib
+        $('body > .nvtooltip').remove();
+
+        return this.widget.$el.detach();
+    },
+    /**
+     * Destroys the widget
+     */
+    destroy: function() { 
+        this.widget.destroy();
     },
     /**
      * @return {Array} array of Objects that will be interpreted to display the breadcrumbs
@@ -148,9 +231,9 @@ var ActionManager = Widget.extend({
         this.main_control_panel = new ControlPanel(this);
         // Listen to event "on_breadcrumb_click" trigerred on the control panel when
         // clicking on a part of the breadcrumbs. Call select_action for this breadcrumb.
-        this.main_control_panel.on("on_breadcrumb_click", this, function(action, index) {
+        this.main_control_panel.on("on_breadcrumb_click", this, _.debounce(function(action, index) {
             this.select_action(action, index);
-        });
+        }, 200, true));
 
         // Append the main control panel to the DOM (inside the ActionManager jQuery element)
         this.main_control_panel.appendTo(this.$el);
@@ -172,14 +255,13 @@ var ActionManager = Widget.extend({
      */
     push_action: function(widget, action_descr, options) {
         var self = this;
-        var to_destroy;
         var old_widget = this.inner_widget;
         var old_action = this.inner_action;
+        var old_action_stack = this.action_stack;
         options = options || {};
 
         // Empty action_stack if requested
         if (options.clear_breadcrumbs) {
-            to_destroy = this.action_stack;
             this.action_stack = [];
         }
 
@@ -198,7 +280,8 @@ var ActionManager = Widget.extend({
             old_action.set_on_reverse_breadcrumb(options.on_reverse_breadcrumb);
         }
 
-        // Update action_stack
+        // Update action_stack (must be done before appendTo to properly
+        // compute the breadcrumbs and to perform do_push_state)
         this.action_stack.push(new_action);
         this.inner_action = new_action;
         this.inner_widget = widget;
@@ -206,24 +289,39 @@ var ActionManager = Widget.extend({
         if (widget.need_control_panel) {
             // Set the ControlPanel bus on the widget to allow it to communicate its status
             widget.set_cp_bus(this.main_control_panel.get_bus());
-        } else {
-            // Hide the main ControlPanel for widgets that do not use it
-            this.main_control_panel.do_hide();
         }
 
         // render the inner_widget in a fragment, and append it to the
         // document only when it's ready
         var new_widget_fragment = document.createDocumentFragment();
-        return $.when(this.inner_widget.appendTo(new_widget_fragment)).done(function() {
-            self.$el.append(new_widget_fragment);
+        return $.when(this.inner_action.appendTo(new_widget_fragment)).done(function() {
+            // Detach the fragment of the previous action and store it within the action
+            if (old_action) {
+                old_action.set_fragment(old_action.detach());
+                old_action.set_is_in_DOM(false);
+            }
+            if (!widget.need_control_panel) {
+                // Hide the main ControlPanel for widgets that do not use it
+                self.main_control_panel.do_hide();
+            }
+
+            framework.append(self.$el, new_widget_fragment, true);
+            self.inner_action.set_is_in_DOM(true);
+
             // Hide the old_widget as it will be removed from the DOM when it
             // is destroyed
             if (old_widget) {
-                old_widget.$el.hide();
+                old_widget.do_hide();
             }
             if (options.clear_breadcrumbs) {
-                self.clear_action_stack(to_destroy);
+                self.clear_action_stack(old_action_stack);
             }
+        }).fail(function () {
+            // Destroy failed action and restore internal state
+            new_action.destroy();
+            self.action_stack = old_action_stack;
+            self.inner_action = old_action;
+            self.inner_widget = old_widget;
         });
     },
     get_breadcrumbs: function () {
@@ -241,7 +339,8 @@ var ActionManager = Widget.extend({
                 return action.title;
             }
         }
-        return _.pluck(this.get_breadcrumbs(), 'title').join(' / ');
+        var last_breadcrumb = _.last(this.get_breadcrumbs());
+        return last_breadcrumb ? last_breadcrumb.title : "";
     },
     get_action_stack: function () {
         return this.action_stack;
@@ -267,16 +366,33 @@ var ActionManager = Widget.extend({
         return $.Deferred().reject();
     },
     select_action: function(action, index) {
-        if (this.webclient.has_uncommitted_changes()) {
+        var self = this;
+        return this.webclient.clear_uncommitted_changes().then(function() {
+            // Set the new inner_action/widget and update the action stack
+            var old_action = self.inner_action;
+            var action_index = self.action_stack.indexOf(action);
+            var to_destroy = self.action_stack.splice(action_index + 1);
+            self.inner_action = action;
+            self.inner_widget = action.widget;
+
+            // Hide the ControlPanel if the widget doesn't use it
+            if (!self.inner_widget.need_control_panel) {
+                self.main_control_panel.do_hide();
+            }
+
+            return $.when(action.restore(index)).done(function() {
+                if (action !== old_action) {
+                    // Clear the action stack (this also removes the current action from the DOM)
+                    self.clear_action_stack(to_destroy);
+
+                    // Append the fragment of the action to restore to self.$el
+                    framework.append(self.$el, action.get_fragment(), true);
+                    self.inner_action.set_is_in_DOM(true);
+                }
+            });
+        }).fail(function() {
             return $.Deferred().reject();
-        }
-
-        // Set the new inner_widget and clear the action_stack
-        this.inner_widget = action.widget;
-        var action_index = this.action_stack.indexOf(action);
-        this.clear_action_stack(this.action_stack.splice(action_index + 1));
-
-        return action.restore(index);
+        });
     },
     clear_action_stack: function(action_stack) {
         _.map(action_stack || this.action_stack, function(action) {
@@ -369,7 +485,7 @@ var ActionManager = Widget.extend({
                     if (warm) {
                         this.null_action();
                     }
-                    action_loaded = this.do_action(state.action, { additional_context: add_context });
+                    action_loaded = this.do_action(state.action, { additional_context: add_context, state: state });
                     $.when(action_loaded || null).done(function() {
                         self.webclient.menu.is_bound.done(function() {
                             if (self.inner_action && self.inner_action.get_action_descr().id) {
@@ -388,7 +504,7 @@ var ActionManager = Widget.extend({
                 res_model: state.model,
                 res_id: state.id,
                 type: 'ir.actions.act_window',
-                views: [[false, 'form']]
+                views: [[_.isNumber(state.view_id) ? state.view_id : false, 'form']]
             };
             action_loaded = this.do_action(action);
         } else if (state.sa) {
@@ -496,13 +612,13 @@ var ActionManager = Widget.extend({
             var form = _.str.startsWith(action.view_mode, 'form');
             action.flags = _.defaults(action.flags || {}, {
                 views_switcher : !popup && !inline,
-                search_view : !popup && !inline,
+                search_view : !(popup && form) && !inline,
                 action_buttons : !popup && !inline,
                 sidebar : !popup && !inline,
                 pager : (!popup || !form) && !inline,
                 display_title : !popup,
                 headless: (popup || inline) && form,
-                search_disable_custom_filters: action.context && action.context.search_disable_custom_filters
+                search_disable_custom_filters: action.context && action.context.search_disable_custom_filters,
             });
         }
 
@@ -523,14 +639,13 @@ var ActionManager = Widget.extend({
      * @return {*}
      */
     ir_actions_common: function(executor, options) {
-        var widget;
         if (executor.action.target === 'new') {
             var pre_dialog = (this.dialog && !this.dialog.isDestroyed()) ? this.dialog : null;
             if (pre_dialog){
                 // prevent previous dialog to consider itself closed,
                 // right now, as we're opening a new one (prevents
                 // reload of original form view)
-                pre_dialog.off('closing', null, pre_dialog.on_close);
+                pre_dialog.off('closed', null, pre_dialog.on_close);
             }
             if (this.dialog_widget && !this.dialog_widget.isDestroyed()) {
                 this.dialog_widget.destroy();
@@ -541,6 +656,7 @@ var ActionManager = Widget.extend({
             this.dialog = new Dialog(this, {
                 title: executor.action.name,
                 dialogClass: executor.klass,
+                buttons: []
             });
 
             // chain on_close triggers with previous dialog, if any
@@ -554,43 +670,45 @@ var ActionManager = Widget.extend({
                     pre_dialog.on_close();
                 }
             };
-            this.dialog.on("closing", null, this.dialog.on_close);
-            widget = executor.widget();
-            if (widget instanceof ViewManager) {
-                _.extend(widget.flags, {
-                    $buttons: this.dialog.$buttons,
+            this.dialog.on("closed", null, this.dialog.on_close);
+            this.dialog_widget = executor.widget();
+            if (this.dialog_widget instanceof ViewManager) {
+                _.extend(this.dialog_widget.flags, {
+                    $buttons: this.dialog.$footer,
                     footer_to_buttons: true,
                 });
-                if (widget.action.view_mode === 'form') {
-                    widget.flags.headless = true;
+                if (this.dialog_widget.action.view_mode === 'form') {
+                    this.dialog_widget.flags.headless = true;
                 }
             }
-            if (widget.need_control_panel) {
+            if (this.dialog_widget.need_control_panel) {
                 // Set a fake bus to Dialogs needing a ControlPanel as they should not
                 // communicate with the main ControlPanel
-                widget.set_cp_bus(new core.Bus());
+                this.dialog_widget.set_cp_bus(new core.Bus());
             }
-            this.dialog_widget = widget;
             this.dialog_widget.setParent(this.dialog);
-            var initialized = this.dialog_widget.appendTo(this.dialog.$el);
             this.dialog.open();
-            return $.when(initialized);
+            
+            return this.dialog_widget.appendTo(this.dialog.$el);
         }
-        if (this.inner_widget && this.webclient.has_uncommitted_changes()) {
+        // Clear uncommitted changes on the current inner widget if there is one
+        var self = this;
+        var def = (this.inner_widget && this.webclient.clear_uncommitted_changes()) || $.when();
+        return def.then(function() {
+            self.dialog_stop(executor.action);
+            return self.push_action(executor.widget(), executor.action, options);
+        }).fail(function() {
             return $.Deferred().reject();
-        }
-        widget = executor.widget();
-        this.dialog_stop(executor.action);
-        return this.push_action(widget, executor.action, options);
+        });
     },
     ir_actions_act_window: function (action, options) {
         var self = this;
         return this.ir_actions_common({
             widget: function () {
-                return new ViewManager(self, null, null, null, action);
+                return new ViewManager(self, null, null, null, action, options);
             },
             action: action,
-            klass: 'oe_act_window',
+            klass: 'o_act_window',
         }, options);
     },
     ir_actions_client: function (action, options) {
@@ -609,7 +727,7 @@ var ActionManager = Widget.extend({
 
         return this.ir_actions_common({
             widget: function () {
-                return new ClientWidget(self, action);
+                return new ClientWidget(self, action, options);
             },
             action: action,
             klass: 'oe_act_client',
@@ -673,10 +791,15 @@ var ActionManager = Widget.extend({
         });
     },
     ir_actions_act_url: function (action) {
+        var url = action.url;
+        if (session.debug && url && url.length && url[0] === '/') {
+            url = $.param.querystring(url, 'debug');
+        }
+
         if (action.target === 'self') {
-            framework.redirect(action.url);
+            framework.redirect(url);
         } else {
-            window.open(action.url, '_blank');
+            window.open(url, '_blank');
         }
         return $.when();
     },

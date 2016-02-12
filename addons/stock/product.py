@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -74,9 +56,9 @@ class product_product(osv.osv):
 
         location_ids = []
         if context.get('location', False):
-            if type(context['location']) == type(1):
+            if isinstance(context['location'], (int, long)):
                 location_ids = [context['location']]
-            elif type(context['location']) in (type(''), type(u'')):
+            elif isinstance(context['location'], basestring):
                 domain = [('complete_name','ilike',context['location'])]
                 if context.get('force_company', False):
                     domain += [('company_id', '=', context['force_company'])]
@@ -85,7 +67,15 @@ class product_product(osv.osv):
                 location_ids = context['location']
         else:
             if context.get('warehouse', False):
-                wids = [context['warehouse']]
+                if isinstance(context['warehouse'], (int, long)):
+                    wids = [context['warehouse']]
+                elif isinstance(context['warehouse'], basestring):
+                    domain = [('name', 'ilike', context['warehouse'])]
+                    if context.get('force_company', False):
+                        domain += [('company_id', '=', context['force_company'])]
+                    wids = warehouse_obj.search(cr, uid, domain, context=context)
+                else:
+                    wids = context['warehouse']
             else:
                 wids = warehouse_obj.search(cr, uid, [], context=context)
 
@@ -161,7 +151,9 @@ class product_product(osv.osv):
         moves_in = dict(map(lambda x: (x['product_id'][0], x['product_qty']), moves_in))
         moves_out = dict(map(lambda x: (x['product_id'][0], x['product_qty']), moves_out))
         res = {}
-        for product in self.browse(cr, uid, ids, context=context):
+        ctx = context.copy()
+        ctx.update({'prefetch_fields': False})
+        for product in self.browse(cr, uid, ids, context=ctx):
             id = product.id
             qty_available = float_round(quants.get(id, 0.0), precision_rounding=product.uom_id.rounding)
             incoming_qty = float_round(moves_in.get(id, 0.0), precision_rounding=product.uom_id.rounding)
@@ -219,6 +211,15 @@ class product_product(osv.osv):
             res[product.id] = str(product.qty_available) +  _(" On Hand")
         return res
 
+    def _compute_nbr_reordering_rules(self, cr, uid, ids, field_names=None, arg=None, context=None):
+        res = dict.fromkeys(ids, {'nbr_reordering_rules': 0, 'reordering_min_qty': 0, 'reordering_max_qty': 0})
+        product_data = self.pool['stock.warehouse.orderpoint'].read_group(cr, uid, [('product_id', 'in', ids)], ['product_id', 'product_min_qty', 'product_max_qty'], ['product_id'], context=context)
+        for data in product_data:
+            res[data['product_id'][0]]['nbr_reordering_rules'] = int(data['product_id_count'])
+            res[data['product_id'][0]]['reordering_min_qty'] = data['product_min_qty']
+            res[data['product_id'][0]]['reordering_max_qty'] = data['product_max_qty']
+        return res
+
     _columns = {
         'reception_count': fields.function(_stock_move_count, string="Receipt", type='integer', multi='pickings'),
         'delivery_count': fields.function(_stock_move_count, string="Delivery", type='integer', multi='pickings'),
@@ -236,7 +237,6 @@ class product_product(osv.osv):
                  "or any of its children.\n"
                  "Otherwise, this includes goods stored in any Stock Location "
                  "with 'internal' type."),
-        'qty_available2': fields.related('qty_available', type="float", relation="product.product", string="On Hand"),
         'virtual_available': fields.function(_product_available, multi='qty_available',
             type='float', digits_compute=dp.get_precision('Product Unit of Measure'),
             string='Forecast Quantity',
@@ -274,16 +274,19 @@ class product_product(osv.osv):
                  "any of its children.\n"
                  "Otherwise, this includes goods leaving any Stock "
                  "Location with 'internal' type."),
-        'location_id': fields.dummy(string='Location', relation='stock.location', type='many2one'),
-        'warehouse_id': fields.dummy(string='Warehouse', relation='stock.warehouse', type='many2one'),
         'orderpoint_ids': fields.one2many('stock.warehouse.orderpoint', 'product_id', 'Minimum Stock Rules'),
+        'nbr_reordering_rules': fields.function(_compute_nbr_reordering_rules, string='Reordering Rules', type='integer', multi=True),
+        'reordering_min_qty': fields.function(_compute_nbr_reordering_rules, type='float', multi=True),
+        'reordering_max_qty': fields.function(_compute_nbr_reordering_rules, type='float', multi=True),
     }
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
-        res = super(product_product,self).fields_view_get(cr, uid, view_id, view_type, context, toolbar=toolbar, submenu=submenu)
+        res = super(product_product, self).fields_view_get(
+            cr, uid, view_id=view_id, view_type=view_type, context=context,
+            toolbar=toolbar, submenu=submenu)
         if context is None:
             context = {}
-        if ('location' in context) and context['location']:
+        if context.get('location') and isinstance(context['location'], int):
             location_info = self.pool.get('stock.location').browse(cr, uid, context['location'])
             fields=res.get('fields',{})
             if fields:
@@ -295,7 +298,7 @@ class product_product(osv.osv):
 
                 if location_info.usage == 'internal':
                     if fields.get('virtual_available'):
-                        res['fields']['virtual_available']['string'] = _('Future Stock')
+                        res['fields']['virtual_available']['string'] = _('Forecasted Quantity')
 
                 if location_info.usage == 'customer':
                     if fields.get('virtual_available'):
@@ -328,14 +331,14 @@ class product_product(osv.osv):
         templ_ids = list(set([x.product_tmpl_id.id for x in self.browse(cr, uid, ids, context=context)]))
         return template_obj.action_view_routes(cr, uid, templ_ids, context=context)
 
-    def onchange_track_all(self, cr, uid, ids, track_all, context=None):
-        if not track_all:
+    def onchange_tracking(self, cr, uid, ids, tracking, context=None):
+        if not tracking or tracking == 'none':
             return {}
         unassigned_quants = self.pool['stock.quant'].search_count(cr, uid, [('product_id','in', ids), ('lot_id','=', False), ('location_id.usage','=', 'internal')], context=context)
         if unassigned_quants:
             return {'warning' : {
                     'title': _('Warning!'),
-                    'message' : _("Lots are not defined for all the existing inventory of this product. You should assign serial numbers (e.g. by creating an inventory) first.")
+                    'message' : _("You have products in stock that have no lot number.  You can assign serial numbers by doing an inventory.  ")
             }}
         return {}
 
@@ -381,11 +384,23 @@ class product_template(osv.osv):
             res[product.id] = str(product.qty_available) +  _(" On Hand")
         return res
 
+    def _compute_nbr_reordering_rules(self, cr, uid, ids, field_names=None, arg=None, context=None):
+        res = dict.fromkeys(ids, {'nbr_reordering_rules': 0, 'reordering_min_qty': 0, 'reordering_max_qty': 0})
+        product_data = self.pool['stock.warehouse.orderpoint'].read_group(cr, uid, [('product_id.product_tmpl_id', 'in', ids)], ['product_id', 'product_min_qty', 'product_max_qty'], ['product_id'], context=context)
+        for data in product_data:
+            product_tmpl_id = data['__domain'][1][2][0]
+            res[product_tmpl_id]['nbr_reordering_rules'] = res[product_tmpl_id].get('nbr_reordering_rules', 0) + int(data['product_id_count'])
+            res[product_tmpl_id]['reordering_min_qty'] = data['product_min_qty']
+            res[product_tmpl_id]['reordering_max_qty'] = data['product_max_qty']
+        return res
 
+    def _get_product_template_type(self, cr, uid, context=None):
+        res = super(product_template, self)._get_product_template_type(cr, uid, context=context)
+        if 'product' not in [item[0] for item in res]:
+            res.append(('product', _('Stockable Product')))
+        return res
 
     _columns = {
-        'type': fields.selection([('product', 'Stockable Product'), ('consu', 'Consumable'), ('service', 'Service')], 'Product Type', required=True, help="Consumable: Will not imply stock management for this product. \nStockable product: Will imply stock management for this product."),
-        'qty_available2': fields.related('qty_available', type="float", relation="product.template", string="On Hand"),
         'property_stock_procurement': fields.property(
             type='many2one',
             relation='stock.location',
@@ -405,13 +420,8 @@ class product_template(osv.osv):
             domain=[('usage','like','inventory')],
             help="This stock location will be used, instead of the default one, as the source location for stock moves generated when you do an inventory."),
         'sale_delay': fields.float('Customer Lead Time', help="The average delay in days between the confirmation of the customer order and the delivery of the finished products. It's the time you promise to your customers."),
-        'loc_rack': fields.char('Rack', size=16),
-        'loc_row': fields.char('Row', size=16),
-        'loc_case': fields.char('Case', size=16),
-        'track_incoming': fields.boolean('Track Incoming Lots', help="Forces to specify a Serial Number for all moves containing this product and coming from a Supplier Location"),
-        'track_outgoing': fields.boolean('Track Outgoing Lots', help="Forces to specify a Serial Number for all moves containing this product and going to a Customer Location"),
-        'track_all': fields.boolean('Full Lots Traceability', help="Forces to specify a Serial Number on each and every operation related to this product"),
-        
+        'tracking': fields.selection(selection=[('serial', 'By Unique Serial Number'), ('lot', 'By Lots'), ('none', 'No Tracking')], string="Tracking", required=True),
+        'description_picking': fields.text('Description on Picking', translate=True),
         # sum of product variant qty
         # 'reception_count': fields.function(_product_available, multi='qty_available',
         #     fnct_search=_search_product_quantity, type='float', string='Quantity On Hand'),
@@ -420,18 +430,24 @@ class product_template(osv.osv):
         'qty_available': fields.function(_product_available, multi='qty_available', digits_compute=dp.get_precision('Product Unit of Measure'),
             fnct_search=_search_product_quantity, type='float', string='Quantity On Hand'),
         'virtual_available': fields.function(_product_available, multi='qty_available', digits_compute=dp.get_precision('Product Unit of Measure'),
-            fnct_search=_search_product_quantity, type='float', string='Quantity Available'),
+            fnct_search=_search_product_quantity, type='float', string='Forecasted Quantity'),
         'incoming_qty': fields.function(_product_available, multi='qty_available', digits_compute=dp.get_precision('Product Unit of Measure'),
             fnct_search=_search_product_quantity, type='float', string='Incoming'),
         'outgoing_qty': fields.function(_product_available, multi='qty_available', digits_compute=dp.get_precision('Product Unit of Measure'),
             fnct_search=_search_product_quantity, type='float', string='Outgoing'),
-        
+        'location_id': fields.dummy(string='Location', relation='stock.location', type='many2one'),
+        'warehouse_id': fields.dummy(string='Warehouse', relation='stock.warehouse', type='many2one'),
         'route_ids': fields.many2many('stock.location.route', 'stock_route_product', 'product_id', 'route_id', 'Routes', domain="[('product_selectable', '=', True)]",
                                     help="Depending on the modules installed, this will allow you to define the route of the product: whether it will be bought, manufactured, MTO/MTS,..."),
+        'nbr_reordering_rules': fields.function(_compute_nbr_reordering_rules, string='Reordering Rules', type='integer', multi=True),
+        'reordering_min_qty': fields.function(_compute_nbr_reordering_rules, type='float', multi=True),
+        'reordering_max_qty': fields.function(_compute_nbr_reordering_rules, type='float', multi=True),
+        'route_from_categ_ids': fields.related('categ_id', 'total_route_ids', type="many2many", relation="stock.location.route", string="Category Routes"),
     }
 
     _defaults = {
-        'sale_delay': 7,
+        'sale_delay': 0,
+        'tracking': 'none',
     }
 
     def action_view_routes(self, cr, uid, ids, context=None):
@@ -448,12 +464,12 @@ class product_template(osv.osv):
         result['domain'] = "[('id','in',[" + ','.join(map(str, route_ids)) + "])]"
         return result
 
-    def onchange_track_all(self, cr, uid, ids, track_all, context=None):
-        if not track_all:
+    def onchange_tracking(self, cr, uid, ids, tracking, context=None):
+        if not tracking:
             return {}
         product_product = self.pool['product.product']
         variant_ids = product_product.search(cr, uid, [('product_tmpl_id', 'in', ids)], context=context)
-        return product_product.onchange_track_all(cr, uid, variant_ids, track_all, context=context)
+        return product_product.onchange_tracking(cr, uid, variant_ids, tracking, context=context)
 
     def _get_products(self, cr, uid, ids, context=None):
         products = []
@@ -467,14 +483,14 @@ class product_template(osv.osv):
         result = mod_obj.xmlid_to_res_id(cr, uid, name, raise_if_not_found=True)
         result = act_obj.read(cr, uid, [result], context=context)[0]
         return result
-    
+
     def action_open_quants(self, cr, uid, ids, context=None):
         products = self._get_products(cr, uid, ids, context=context)
         result = self._get_act_window_dict(cr, uid, 'stock.product_open_quants', context=context)
         result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "])]"
         result['context'] = "{'search_default_locationgroup': 1, 'search_default_internal_loc': 1}"
         return result
-    
+
     def action_view_orderpoints(self, cr, uid, ids, context=None):
         products = self._get_products(cr, uid, ids, context=context)
         result = self._get_act_window_dict(cr, uid, 'stock.product_open_orderpoint', context=context)
@@ -485,18 +501,12 @@ class product_template(osv.osv):
             result['context'] = "{}"
         return result
 
-
     def action_view_stock_moves(self, cr, uid, ids, context=None):
         products = self._get_products(cr, uid, ids, context=context)
         result = self._get_act_window_dict(cr, uid, 'stock.act_product_stock_move_open', context=context)
-        if len(ids) == 1 and len(products) == 1:
-            ctx = "{'tree_view_ref':'stock.view_move_tree', \
-                  'default_product_id': %s, 'search_default_product_id': %s}" \
-                  % (products[0], products[0])
-            result['context'] = ctx
-        else:
-            result['domain'] = "[('product_id','in',[" + ','.join(map(str, products)) + "])]"
-            result['context'] = "{'tree_view_ref':'stock.view_move_tree'}"
+        if products:
+            result['context'] = "{'default_product_id': %d}" % products[0]
+        result['domain'] = "[('product_id.product_tmpl_id','in',[" + ','.join(map(str,ids)) + "])]"
         return result
 
     def write(self, cr, uid, ids, vals, context=None):

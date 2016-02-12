@@ -317,10 +317,10 @@ var py = {};
                 } else if (token in symbols) {
                     var symbol;
                     // transform 'not in' and 'is not' in a single token
-                    if (token === 'in' && tokens[tokens.length-1].id === 'not') {
+                    if (token === 'in' && tokens.length > 1 && tokens[tokens.length-1].id === 'not') {
                         symbol = symbols['not in'];
                         tokens.pop();
-                    } else if (token === 'not' && tokens.length > 0 && tokens[tokens.length-1].id === 'is') {
+                    } else if (token === 'not' && tokens.length > 1 && tokens[tokens.length-1].id === 'is') {
                         symbol = symbols['is not'];
                         tokens.pop();
                     } else {
@@ -1006,7 +1006,12 @@ var py = {};
             return t;
         }
     });
-    py.list = py.tuple;
+    py.list = py.type('list', null, {
+        __nonzero__: function () {
+            return this.__len__ > 0 ? py.True : py.False;
+        },
+    });
+    _.defaults(py.list, py.tuple) // Copy attributes not redefined in type list
     py.dict = py.type('dict', null, {
         __init__: function () {
             this._store = {};

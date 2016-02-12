@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from openerp.osv import fields,osv
 from openerp import tools
@@ -43,6 +25,8 @@ class mrp_workorder(osv.osv):
         'user_id': fields.many2one('res.users', 'Responsible'),
         'routing_id': fields.many2one('mrp.routing', string='Routing', readonly=True),
         'bom_id': fields.many2one('mrp.bom', 'Bill of Material', readonly=True),
+        'weight': fields.float('Gross Weight', readonly=True),
+        'volume': fields.float('Volume', readonly=True),
     }
 
     def init(self, cr):
@@ -63,6 +47,8 @@ class mrp_workorder(osv.osv):
                     sum(wl.cycle) as total_cycles,
                     count(*) as nbr,
                     sum(mp.product_qty) as product_qty,
+                    sum(p.weight * mp.product_qty) as weight,
+                    sum(p.volume * mp.product_qty) as volume,
                     wl.state as state,
                     mp.user_id,
                     mp.routing_id,

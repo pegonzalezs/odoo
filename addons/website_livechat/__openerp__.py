@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 {
     'name': 'Website Live Support',
     'category': 'Website',
@@ -6,10 +7,9 @@
     'description': """
 Odoo Website LiveChat
 ========================
-For website built with Odoo CMS, this module include a chat button on your Website, and allow your visitors to chat with your collabarators.
+For website built with Odoo CMS, this module include a chat button on your Website, and allow your visitors to chat with your collaborators.
 It also will include the feedback tool for the livechat, and web pages to display your channel and its ratings on the website.
         """,
-    'author': 'OpenERP SA',
     'depends': ['website', 'im_livechat'],
     'installable': True,
     'data': [

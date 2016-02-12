@@ -86,7 +86,7 @@ class barcode_nomenclature(osv.osv):
         return self.sanitize_ean('0'+upc)[1:]
 
     # Checks if barcode matches the pattern
-    # Additionnaly retrieves the optional numerical content in barcode
+    # Additionaly retrieves the optional numerical content in barcode
     # Returns an object containing:
     # - value: the numerical value encoded in the barcode (0 if no value encoded)
     # - base_code: the barcode in which numerical content is replaced by 0's
@@ -173,26 +173,28 @@ class barcode_nomenclature(osv.osv):
 
         return parsed_result
 
-ENCODINGS = [
-    ('any','Any'),
-    ('ean13','EAN-13'),
-    ('ean8','EAN-8'),
-    ('upca','UPC-A'),
-]
-
 class barcode_rule(models.Model):
     _name = 'barcode.rule'
     _order = 'sequence asc'
 
     @api.model
+    def _encoding_selection_list(self):
+        return [
+                ('any', _('Any')),
+                ('ean13', 'EAN-13'),
+                ('ean8', 'EAN-8'),
+                ('upca', 'UPC-A'),
+        ]
+
+    @api.model
     def _get_type_selection(self):
-        return [('alias','Alias'),('product','Unit Product')]
-        
+        return [('alias', _('Alias')), ('product', _('Unit Product'))]
+
     _columns = {
         'name':     fields.char('Rule Name', size=32, required=True, help='An internal identification for this barcode nomenclature rule'),
         'barcode_nomenclature_id':     fields.many2one('barcode.nomenclature','Barcode Nomenclature'),
         'sequence': fields.integer('Sequence', help='Used to order rules such that rules with a smaller sequence match first'),
-        'encoding': fields.selection(ENCODINGS,'Encoding',required=True,help='This rule will apply only if the barcode is encoded with the specified encoding'),
+        'encoding': fields.selection('_encoding_selection_list','Encoding',required=True,help='This rule will apply only if the barcode is encoded with the specified encoding'),
         'type':     fields.selection('_get_type_selection','Type', required=True),
         'pattern':  fields.char('Barcode Pattern', size=32, help="The barcode matching pattern", required=True),
         'alias':    fields.char('Alias',size=32,help='The matched pattern will alias to this barcode', required=True),      

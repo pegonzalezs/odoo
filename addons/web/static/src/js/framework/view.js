@@ -7,15 +7,26 @@ var pyeval = require('web.pyeval');
 var Widget = require('web.Widget');
 
 var View = Widget.extend({
+    events: {
+        'click a[type=action]': function (ev) {
+            ev.preventDefault();
+            var action_data = $(ev.target).attr('name');
+            this.do_action(action_data);
+        }
+    },
     // name displayed in view switchers
     display_name: '',
-    /**
-     * Define a view type for each view to allow automatic call to fields_view_get.
-     */
+    // define a view type for each view to allow automatic call to fields_view_get.
     view_type: undefined,
+    // used by views that need a searchview.
+    searchable: true,
+    // used by views that need a searchview but don't want it to be displayed.
+    searchview_hidden: false,
     // multi_record is used to distinguish views displaying a single record
     // (e.g. FormView) from those that display several records (e.g. ListView)
     multi_record: true,
+    // icon is the font-awesome icon to display in the view switcher
+    icon: 'fa-question',
     init: function(parent, dataset, view_id, options) {
         this._super(parent);
         this.ViewManager = parent;
@@ -98,7 +109,7 @@ var View = Widget.extend({
                 // Wrong group_by values will simply fail and forbid rendering of the destination view
                 var ncontext = new data.CompoundContext(
                     _.object(_.reject(_.pairs(dataset.get_context().eval()), function(pair) {
-                      return pair[0].match('^(?:(?:default_|search_default_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids)$') !== null;
+                      return pair[0].match('^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids)$') !== null;
                     }))
                 );
                 ncontext.add(action_data.context || {});
@@ -159,17 +170,8 @@ var View = Widget.extend({
         this.embedded_view = embedded_view;
     },
     do_show: function () {
-        var self = this;
-        this.$el.show();
-        setTimeout(function () {
-            self.$el.parent().addClass('in');
-        }, 0);
-
+        this._super();
         core.bus.trigger('view_shown', this);
-    },
-    do_hide: function () {
-        this.$el.parent().removeClass('in');
-        this.$el.hide();
     },
     is_active: function () {
         return this.ViewManager.active_view.controller === this;

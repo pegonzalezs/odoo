@@ -18,14 +18,15 @@
         </record>
     </data>
     <data noupdate="1">
-        <!-- After installation of the module, open the related menu -->
+        <!-- After closing the PoS, open the dashboard menu -->
         <record id="action_client_pos_menu" model="ir.actions.client">
             <field name="name">Open POS Menu</field>
             <field name="tag">reload</field>
             <field name="params" eval="{'menu_id': ref('menu_point_root')}"/>
         </record>
+        <!-- After installation of the module, open the related menu -->
         <record id="base.open_menu" model="ir.actions.todo">
-            <field name="action_id" ref="action_client_pos_menu"/>
+            <field name="action_id" ref="base.action_open_website"/>
             <field name="state">open</field>
         </record>
         <record model="pos.config" id="pos_config_main">
@@ -36,9 +37,9 @@
 
         <!-- notify all employees of module installation -->
         <record model="mail.message" id="module_install_notification">
-            <field name="model">mail.group</field>
-            <field name="res_id" ref="mail.group_all_employees"/>
-            <field name="type">notification</field>
+            <field name="model">mail.channel</field>
+            <field name="res_id" ref="mail.channel_all_employees"/>
+            <field name="message_type">notification</field>
             <field name="subtype_id" ref="mail.mt_comment"/>
             <field name="subject">Point of Sale application installed!</field>
             <field name="body"><![CDATA[<p>Record sale orders, register payments, compute change to return, create invoices, and manage refunds through a specific web touch-screen interface.</p>

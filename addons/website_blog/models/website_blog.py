@@ -9,6 +9,7 @@ from openerp import SUPERUSER_ID
 from openerp.addons.website.models.website import slug
 from openerp.osv import osv, fields
 from openerp.tools.translate import _
+from openerp.tools.translate import html_translate
 
 
 class Blog(osv.Model):
@@ -59,6 +60,9 @@ class BlogTag(osv.Model):
             'blog.post', string='Posts',
         ),
     }
+    _sql_constraints = [
+            ('name_uniq', 'unique (name)', "Tag name already exists !"),
+    ]
 
 
 class BlogPost(osv.Model):
@@ -100,11 +104,11 @@ class BlogPost(osv.Model):
         'tag_ids': fields.many2many(
             'blog.tag', string='Tags',
         ),
-        'content': fields.html('Content', translate=True, sanitize=False),
+        'content': fields.html('Content', translate=html_translate, sanitize=False),
         'website_message_ids': fields.one2many(
             'mail.message', 'res_id',
             domain=lambda self: [
-                '&', '&', ('model', '=', self._name), ('type', '=', 'comment'), ('path', '=', False)
+                '&', '&', ('model', '=', self._name), ('message_type', '=', 'comment'), ('path', '=', False)
             ],
             string='Website Messages',
             help="Website communication history",
@@ -209,18 +213,12 @@ class BlogPost(osv.Model):
 
     def _check_for_publication(self, cr, uid, ids, vals, context=None):
         if vals.get('website_published'):
-            base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
             for post in self.browse(cr, uid, ids, context=context):
-                post.blog_id.message_post(
-                    body='<p>%(post_publication)s <a href="%(base_url)s/blog/%(blog_slug)s/post/%(post_slug)s">%(post_link)s</a></p>' % {
-                        'post_publication': _('A new post %s has been published on the %s blog.') % (post.name, post.blog_id.name),
-                        'post_link': _('Click here to access the post.'),
-                        'base_url': base_url,
-                        'blog_slug': slug(post.blog_id),
-                        'post_slug': slug(post),
-                    },
-                    subtype='website_blog.mt_blog_blog_published',
-                    context=context)
+                post.blog_id.message_post_with_view(
+                    'website_blog.blog_post_template_new_post',
+                    subject=post.name,
+                    values={'post': post},
+                    subtype_id=self.pool['ir.model.data'].xmlid_to_res_id(cr, SUPERUSER_ID, 'website_blog.mt_blog_blog_published'))
             return True
         return False
 
@@ -242,6 +240,27 @@ class BlogPost(osv.Model):
         result = super(BlogPost, self).write(cr, uid, ids, vals, context)
         self._check_for_publication(cr, uid, ids, vals, context=context)
         return result
+
+    def get_access_action(self, cr, uid, ids, context=None):
+        """ Override method that generated the link to access the document. Instead
+        of the classic form view, redirect to the post on the website directly """
+        post = self.browse(cr, uid, ids[0], context=context)
+        return {
+            'type': 'ir.actions.act_url',
+            'url': '/blog/%s/post/%s' % (post.blog_id.id, post.id),
+            'target': 'self',
+            'res_id': self.id,
+        }
+
+    def _notification_get_recipient_groups(self, cr, uid, ids, message, recipients, context=None):
+        """ Override to set the access button: everyone can see an access button
+        on their notification email. It will lead on the website view of the
+        post. """
+        res = super(BlogPost, self)._notification_get_recipient_groups(cr, uid, ids, message, recipients, context=context)
+        access_action = self._notification_link_helper('view', model=message.model, res_id=message.res_id)
+        for category, data in res.iteritems():
+            res[category]['button_access'] = {'url': access_action, 'title': _('View Blog Post')}
+        return res
 
 
 class Website(osv.Model):
@@ -265,7 +284,7 @@ class Website(osv.Model):
             dep[page_key] = []
         for p in post_obj.browse(cr, uid, posts, context=context):
             dep[page_key].append({
-                'text': _('Blog Post <b>%s</b> seems to have a link to this page !' % p.name),
+                'text': _('Blog Post <b>%s</b> seems to have a link to this page !') % p.name,
                 'link': p.website_url
             })
 

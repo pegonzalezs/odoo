@@ -1,24 +1,5 @@
 #-*- coding:utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>). All Rights Reserved
-#    d$
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
 from datetime import date
@@ -281,7 +262,7 @@ class hr_payslip(osv.osv):
             \n* When user cancel payslip the status is \'Rejected\'.'),
         'line_ids': one2many_mod2('hr.payslip.line', 'slip_id', 'Payslip Lines', readonly=True, states={'draft':[('readonly',False)]}),
         'company_id': fields.many2one('res.company', 'Company', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
-        'worked_days_line_ids': fields.one2many('hr.payslip.worked_days', 'payslip_id', 'Payslip Worked Days', required=False, readonly=True, states={'draft': [('readonly', False)]}),
+        'worked_days_line_ids': fields.one2many('hr.payslip.worked_days', 'payslip_id', 'Payslip Worked Days', copy=True, required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'input_line_ids': fields.one2many('hr.payslip.input', 'payslip_id', 'Payslip Inputs', required=False, readonly=True, states={'draft': [('readonly', False)]}),
         'paid': fields.boolean('Made Payment Order ? ', required=False, readonly=True, states={'draft': [('readonly', False)]}, copy=False),
         'note': fields.text('Internal Note', readonly=True, states={'draft':[('readonly',False)]}),
@@ -323,7 +304,6 @@ class hr_payslip(osv.osv):
         mod_obj = self.pool.get('ir.model.data')
         for payslip in self.browse(cr, uid, ids, context=context):
             id_copy = self.copy(cr, uid, payslip.id, {'credit_note': True, 'name': _('Refund: ')+payslip.name}, context=context)
-            self.compute_sheet(cr, uid, [id_copy], context=context)
             self.signal_workflow(cr, uid, [id_copy], 'hr_verify_sheet')
             self.signal_workflow(cr, uid, [id_copy], 'process_sheet')
             
@@ -338,7 +318,6 @@ class hr_payslip(osv.osv):
             'view_type': 'form',
             'res_model': 'hr.payslip',
             'type': 'ir.actions.act_window',
-            'nodestroy': True,
             'target': 'current',
             'domain': "[('id', 'in', %s)]" % [id_copy],
             'views': [(tree_res, 'tree'), (form_res, 'form')],
@@ -704,6 +683,50 @@ class hr_payslip(osv.osv):
             res['value'].update({'struct_id': False})
         return self.onchange_employee_id(cr, uid, ids, date_from=date_from, date_to=date_to, employee_id=employee_id, contract_id=contract_id, context=context)
 
+    @api.onchange('employee_id', 'date_from')
+    def onchange_employee(self):
+
+        if (not self.employee_id) or (not self.date_from) or (not self.date_to):
+            return
+
+        employee_id = self.employee_id
+        date_from = self.date_from
+        date_to = self.date_to
+
+        ttyme = datetime.fromtimestamp(time.mktime(time.strptime(date_from, "%Y-%m-%d")))
+        self.name = _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(ttyme.strftime('%B-%Y')))
+        self.company_id = employee_id.company_id
+
+        if not self.env.context.get('contract') or not self.contract_id:
+            contract_ids = self.get_contract(employee_id, date_from, date_to)
+            if not contract_ids:
+                return
+            self.contract_id = self.contract_id.browse(contract_ids[0])
+
+        if not self.contract_id.struct_id:
+            return
+        self.struct_id = self.contract_id.struct_id
+
+        #computation of the salary input
+        worked_days_line_ids = self.get_worked_day_lines(contract_ids, date_from, date_to)
+        worked_days_lines = self.worked_days_line_ids.browse([])
+        for r in worked_days_line_ids:
+            worked_days_lines += worked_days_lines.new(r)
+        self.worked_days_line_ids = worked_days_lines
+
+        input_line_ids = self.get_inputs(contract_ids, date_from, date_to)
+        input_lines = self.input_line_ids.browse([])
+        for r in input_line_ids:
+            input_lines += input_lines.new(r)
+        self.input_line_ids = input_lines
+        return
+
+    @api.onchange('contract_id')
+    def onchange_contract(self):
+        if not self.contract_id:
+            self.struct_id = False
+        self.with_context(contract=True).onchange_employee()
+        return
 
 class hr_payslip_worked_days(osv.osv):
     '''
@@ -755,7 +778,7 @@ class hr_salary_rule(osv.osv):
         'name':fields.char('Name', required=True, readonly=False),
         'code':fields.char('Code', size=64, required=True, help="The code of salary rules can be used as reference in computation of other rules. In that case, it is case sensitive."),
         'sequence': fields.integer('Sequence', required=True, help='Use to arrange calculation sequence', select=True),
-        'quantity': fields.char('Quantity', help="It is used in computation for percentage and fixed amount.For e.g. A rule for Meal Voucher having fixed amount of 1€ per worked day can have its quantity defined in expression like worked_days.WORK100.number_of_days."),
+        'quantity': fields.char('Quantity', help=u"It is used in computation for percentage and fixed amount.For e.g. A rule for Meal Voucher having fixed amount of 1€ per worked day can have its quantity defined in expression like worked_days.WORK100.number_of_days."),
         'category_id':fields.many2one('hr.salary.rule.category', 'Category', required=True),
         'active':fields.boolean('Active', help="If the active field is set to false, it will allow you to hide the salary rule without removing it."),
         'appears_on_payslip': fields.boolean('Appears on Payslip', help="Used to display the salary rule on payslip."),
@@ -945,24 +968,6 @@ class hr_employee(osv.osv):
     _inherit = 'hr.employee'
     _description = 'Employee'
 
-    def _calculate_total_wage(self, cr, uid, ids, name, args, context):
-        if not ids: return {}
-        res = {}
-        current_date = datetime.now().strftime('%Y-%m-%d')
-        for employee in self.browse(cr, uid, ids, context=context):
-            if not employee.contract_ids:
-                res[employee.id] = {'basic': 0.0}
-                continue
-            cr.execute( 'SELECT SUM(wage) '\
-                        'FROM hr_contract '\
-                        'WHERE employee_id = %s '\
-                        'AND date_start <= %s '\
-                        'AND (date_end > %s OR date_end is NULL)',
-                         (employee.id, current_date, current_date))
-            result = dict(cr.dictfetchone())
-            res[employee.id] = {'basic': result['sum']}
-        return res
-
     def _payslip_count(self, cr, uid, ids, field_name, arg, context=None):
         Payslip = self.pool['hr.payslip']
         return {
@@ -972,6 +977,5 @@ class hr_employee(osv.osv):
 
     _columns = {
         'slip_ids':fields.one2many('hr.payslip', 'employee_id', 'Payslips', required=False, readonly=True),
-        'total_wage': fields.function(_calculate_total_wage, method=True, type='float', string='Total Basic Salary', digits_compute=dp.get_precision('Payroll'), help="Sum of all current contract's wage of employee."),
-        'payslip_count': fields.function(_payslip_count, type='integer', string='Payslips'),
+        'payslip_count': fields.function(_payslip_count, type='integer', string='Payslips', groups="base.group_hr_user"),
     }

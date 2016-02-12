@@ -4,7 +4,7 @@ import logging
 import werkzeug
 
 from openerp.addons.web import http
-from openerp.exceptions import AccessError
+from openerp.exceptions import AccessError, UserError
 from openerp.http import request
 from openerp.tools.translate import _
 
@@ -127,6 +127,7 @@ class website_slides(http.Controller):
             'user': user,
             'pager': pager,
             'is_public_user': user == request.website.user_id,
+            'display_channel_settings': not request.httprequest.cookies.get('slides_channel_%s' % (channel.id), False) and channel.can_see_full,
         }
         if search:
             values['search'] = search
@@ -159,10 +160,10 @@ class website_slides(http.Controller):
             self._set_viewed_slide(slide, 'slide')
         return request.website.render('website_slides.slide_detail_view', values)
 
-    @http.route('/slides/slide/<model("slide.slide"):slide>/pdf_content', type='http', auth="public", website=True)
+    @http.route('''/slides/slide/<model("slide.slide", "[('datas', '!=', False), ('slide_type', '=', 'presentation')]"):slide>/pdf_content''', type='http', auth="public", website=True)
     def slide_get_pdf_content(self, slide):
         response = werkzeug.wrappers.Response()
-        response.data = slide.datas.decode('base64')
+        response.data = slide.datas and slide.datas.decode('base64') or ''
         response.mimetype = 'application/pdf'
         return response
 
@@ -173,7 +174,6 @@ class website_slides(http.Controller):
         right partner. Their comments are not published by default. Logged
         users can post as usual. """
         # TDE TODO :
-        # - fix _find_partner_from_emails -> is an api.one + strange results + should work as public user
         # - subscribe partner instead of user writing the message ?
         # - public user -> cannot create mail.message ?
         if not post.get('comment'):
@@ -187,7 +187,7 @@ class website_slides(http.Controller):
             # be investigated - using SUPERUSER_ID meanwhile
             contextual_slide = slide.sudo().with_context(mail_create_nosubcribe=True)
             # TDE FIXME: check in mail_thread, find partner from emails should maybe work as public user
-            partner_id = slide.sudo()._find_partner_from_emails([post.get('email')])[0][0]
+            partner_id = slide.sudo()._find_partner_from_emails([post.get('email')])[0]
             if partner_id:
                 partner = request.env['res.partner'].sudo().browse(partner_id)
             else:
@@ -207,7 +207,7 @@ class website_slides(http.Controller):
 
         contextual_slide.message_post(
             body=post['comment'],
-            type='comment',
+            message_type='comment',
             subtype='mt_comment',
             **post_kwargs
         )
@@ -258,7 +258,7 @@ class website_slides(http.Controller):
 
         def slide_mapped_dict(slide):
             return {
-                'img_src': '/website/image/slide.slide/%s/image_thumb' % (slide.id),
+                'img_src': '/web/image/slide.slide/%s/image_thumb' % (slide.id),
                 'caption': slide.name,
                 'url': slide.website_url
             }
@@ -282,11 +282,11 @@ class website_slides(http.Controller):
             return preview
         existing_slide = Slide.search([('channel_id', '=', int(data['channel_id'])), ('document_id', '=', document_id)], limit=1)
         if existing_slide:
-            preview['error'] = _('This video already exists in this channel <a target="_blank" href="/slides/slide/%s">click here to view it </a>' % existing_slide.id)
+            preview['error'] = _('This video already exists in this channel <a target="_blank" href="/slides/slide/%s">click here to view it </a>') % existing_slide.id
             return preview
         values = Slide._parse_document_url(data['url'], only_preview_fields=True)
         if values.get('error'):
-            preview['error'] = _('Could not fetch data from url. Document or access right not available.\nHere is the received response: %s' % values['error'])
+            preview['error'] = _('Could not fetch data from url. Document or access right not available.\nHere is the received response: %s') % values['error']
             return preview
         return values
 
@@ -295,8 +295,8 @@ class website_slides(http.Controller):
         payload = request.httprequest.content_length
         # payload is total request content size so it's not exact size of file.
         # already add client validation this is for double check if client alter.
-        if (payload / 1024 / 1024 > 17):
-            return {'error': _('File is too big.')}
+        if (payload / 1024 / 1024 > 15):
+            return {'error': _('File is too big. File size cannot exceed 15MB')}
 
         values = dict((fname, post[fname]) for fname in [
             'name', 'url', 'tag_ids', 'slide_type', 'channel_id',
@@ -313,12 +313,12 @@ class website_slides(http.Controller):
         # otherwise client slide create dialog box continue processing even server fail to create a slide.
         try:
             slide_id = request.env['slide.slide'].create(values)
-        except AccessError as e:
+        except (UserError, AccessError) as e:
             _logger.error(e)
             return {'error': e.name}
         except Exception as e:
             _logger.error(e)
-            return {'error': _('Internal server error, please try again later or contact administrator.\nHere is the error message: %s' % e.message)}
+            return {'error': _('Internal server error, please try again later or contact administrator.\nHere is the error message: %s') % e.message}
         return {'url': "/slides/slide/%s" % (slide_id.id)}
 
     # --------------------------------------------------

@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='UTF-8' ?>
 <openerp>
     <data>
 
@@ -22,21 +23,28 @@
                 <search string="Search Leave">
                     <field name="name"/>
                     <filter domain="[('state','in',('confirm','validate1'))]" string="To Approve" name="approve"/>
-                    <filter domain="[('state','=','validate')]" string="Validated" name="validated"/>
+                    <filter string="Approved Leaves" domain="[('state', '=', 'validate')]" name="validated"/>
                     <separator/>
-                    <filter string="New Mail" name="message_unread" domain="[('message_unread','=',True)]"/>
+                    <filter name="active_types" string="Active Types" domain="[('holiday_status_id.active', '=', True)]" help="Filters only on allocations and requests that belong to an holiday type that is 'active' (active field is True)"/>
                     <separator/>
-                    <filter string="Approved Leaves" name="validated" domain="[('state','=','validate')]"/>
+                    <filter string="Unread Messages" name="message_needaction" domain="[('message_needaction','=',True)]"/>
+                    <separator/>
+                    <filter string="My Department Leaves" name="department" domain="[('department_id.manager_id.user_id', '=', uid)]" help="My Department Leaves"/>
+                    <filter string="My Team Leaves" domain="[('employee_id.parent_id.user_id', '=', uid)]" groups="base.group_hr_manager" help="Leaves of Your Team Member"/>
                     <separator/>
                     <filter string="To Report in Payslip" name="gray" domain="[('payslip_status', '=', False)]" groups="base.group_hr_manager"/>
                     <separator/>
-                    <filter name="year" string="Year" domain="[('holiday_status_id.active','=',True)]" help="Filters only on allocations and requests that belong to an holiday type that is 'active' (active field is True)"/>
-                    <separator/>
                     <filter string="To Do" name="todo" domain="[('payslip_status', '=', False), ('holiday_status_id.active', '=', True)]"/>
                     <separator/>
-                    <filter string="My Department Leaves" help="My Department Leaves" domain="[('department_id.manager_id','=',uid)]"/>
+                    <filter name="year" string="Current"
+                        domain="[('holiday_status_id.active', '=', True)]" help="Active Leaves and Allocations"/>
+                    <separator/>
+                    <filter string="My Requests" name="my_leaves" domain="[('user_id', '=', uid)]"/>
+                    <separator/>
+                    <filter name="leaves" string="Leaves" domain="[('type', '=', 'remove')]"/>
+                    <filter name="allocations" string="Allocations" domain="[('type', '=', 'add')]"/>
                     <field name="employee_id"/>
-                    <field name="department_id" groups="hr.group_multi_departments"/>
+                    <field name="department_id"/>
                     <field name="holiday_status_id"/>
                     <group expand="0" string="Group By">
                         <filter name="group_name" string="Description" context="{'group_by':'name'}"/>
@@ -59,6 +67,7 @@
             <field name="arch" type="xml">
                 <calendar string="Leave Request" color="employee_id"
                           date_start="date_from" date_stop="date_to"
+                          mode="month"
                           quick_add="False" avatar_model="hr.employee">
                     <field name="employee_id"/>
                     <field name="holiday_status_id"/>
@@ -86,14 +95,15 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="name" attrs="{'readonly':[('state','!=','draft'),('state','!=','confirm')]}" required="1"/>
+                            <field name="name" attrs="{'readonly':[('state','!=','draft'),('state','!=','confirm')]}"/>
                             <field name="holiday_status_id" context="{'employee_id':employee_id}"/>
-                                <label for="number_of_days_temp" string="Duration"/>
+                            <label for="number_of_days_temp" string="Duration"/>
                             <div>
-                                <group col="3" attrs="{'invisible': [('type', '=', 'add')]}">
-                                    <field name="date_from" nolabel="1" on_change="onchange_date_from(date_to, date_from)" attrs="{'required':[('type', '=', 'remove')]}" class="oe_inline"/><label string="-" class="oe_inline"/>
-                                    <field name="date_to" nolabel="1" on_change="onchange_date_to(date_to, date_from)"  attrs="{'required':[('type', '=', 'remove')]}" class="oe_inline"/>
-                                </group>
+                                <div attrs="{'invisible': [('type', '=', 'add')]}">
+                                    <field name="date_from" on_change="onchange_date_from(date_to, date_from)" attrs="{'required':[('type', '=', 'remove')]}" class="oe_inline"/>
+                                    <label string="-" class="oe_inline"/>
+                                    <field name="date_to" on_change="onchange_date_to(date_to, date_from)"  attrs="{'required':[('type', '=', 'remove')]}" class="oe_inline"/>
+                                </div>
                                 <div>
                                     <field name="number_of_days_temp" class="oe_inline"/> days
                                 </div>
@@ -125,8 +135,8 @@
             <field name="name">hr.holidays.allocation.tree</field>
             <field name="model">hr.holidays</field>
             <field name="arch" type="xml">
-                <tree colors="red:state == 'refuse';blue:state == 'draft';black:state in ('confirm','validate','validate1')" string="Allocation Requests"
-                        fonts="bold: message_unread == True">
+                <tree decoration-danger="state == 'refuse'" decoration-info="state == 'draft'" string="Allocation Requests"
+                       decoration-bf="message_needaction == True">
                     <field name="employee_id"/>
                     <field name="holiday_type"/>
                     <field name="category_id"/>
@@ -137,7 +147,7 @@
                     <field name="manager_id" invisible="1"/>
                     <field name="user_id" invisible="1"/>
                     <field name="date_from" invisible="1"/>
-                    <field name="message_unread" invisible="1"/>
+                    <field name="message_needaction" invisible="1"/>
                     <field name="state"/>
                 </tree>
             </field>
@@ -168,7 +178,7 @@
             <field name="model">hr.holidays</field>
             <field name="priority">20</field>
             <field name="arch" type="xml">
-                <tree colors="red:state == 'refuse';blue:state == 'draft';black:state in ('confirm','validate','validate1')" string="Leaves Summary">
+                <tree decoration-danger="state == 'refuse'" decoration-info="state == 'draft'" string="Leaves Summary">
                     <field name="employee_id"/>
                     <field name="category_id" invisible="1"/>
                     <field name="department_id" invisible="1"/>
@@ -190,7 +200,7 @@
             <field name="model">hr.holidays</field>
             <field name="priority">21</field>
             <field name="arch" type="xml">
-                <tree colors="red:state == 'refuse';blue:state == 'draft';black:state in ('confirm','validate','validate1')" string="Employee's Leave">
+                <tree decoration-danger="state == 'refuse'" decoration-info="state == 'draft'" string="Employee's Leave">
                     <field name="employee_id"/>
                     <field name="type"/>
                     <field name="name"/>
@@ -211,8 +221,8 @@
             <field name="name">hr.holidays.tree</field>
             <field name="model">hr.holidays</field>
             <field name="arch" type="xml">
-                <tree colors="red:state == 'refuse';blue:state == ' draft';black:state in ('confirm','validate','validate1')" string="Leave Requests"
-                        fonts="bold: message_unread == True">
+                <tree decoration-danger="state == 'refuse'" decoration-info="state == ' draft'" string="Leave Requests"
+                       decoration-bf="message_needaction == True">
                     <field name="employee_id"/>
                     <field name="holiday_type" string="Mode" groups="base.group_no_one"/>
                     <field name="holiday_status_id"/>
@@ -228,15 +238,29 @@
                     <field name="department_id" invisible="not context.get('set_visible',False)"/>
                     <field name="manager_id" invisible="1"/>
                     <field name="user_id" invisible="1"/>
-                    <field name="message_unread" invisible="1"/>
+                    <field name="message_needaction" invisible="1"/>
                 </tree>
             </field>
         </record>
 
-        <menuitem name="Leaves" parent="hr.menu_hr_root" id="menu_open_ask_holidays" sequence="20"/>
+        <record model="ir.actions.act_window" id="action_hr_holidays_dashboard">
+            <field name="name">All Leaves</field>
+            <field name="res_model">hr.holidays</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">calendar</field>
+            <field name="context">{'search_default_year': 1, 'search_default_group_employee': 1}</field>
+            <field name="domain">[('holiday_type','=','employee'), ('type', '=', 'remove')]</field>
+            <field name="search_view_id" ref="view_hr_holidays_filter"/>
+        </record>
+
+        <menuitem name="Leaves" id="menu_hr_holidays_root" sequence="95" web_icon="hr_holidays,static/description/icon.png" groups="base.group_user"/>
+        <menuitem name="Dashboard" id="menu_hr_holidays_dashboard" parent="menu_hr_holidays_root" sequence="1" action="action_hr_holidays_dashboard"/>
+        <menuitem name="My Leaves" id="menu_hr_holidays_my_leaves" parent="menu_hr_holidays_root" sequence="2"/>
+        <menuitem name="Leaves to Approve" id="menu_hr_holidays_approvals" parent="menu_hr_holidays_root" sequence="3" groups="base.group_hr_manager,base.group_hr_user"/>
+        <menuitem name="Reports" id="menu_hr_holidays_report" parent="menu_hr_holidays_root" sequence="99" groups="base.group_hr_manager,base.group_hr_user"/>
 
         <record model="ir.actions.act_window" id="open_ask_holidays">
-            <field name="name">Leave Request</field>
+            <field name="name">Leaves Request</field>
             <field name="res_model">hr.holidays</field>
             <field name="view_type">form</field>
             <field name="view_id" ref="edit_holiday_new"/>
@@ -248,7 +272,7 @@
                     'hr_holidays.menu_open_company_allocation',
                 ]
             }</field>
-            <field name="domain">[('type','=','remove'), ('employee_id.user_id','=', uid)]</field>
+            <field name="domain">[('type','=','remove')]</field>
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
@@ -283,7 +307,7 @@
             <field name="act_window_id" ref="open_ask_holidays"/>
         </record>
 
-        <menuitem parent="menu_open_ask_holidays" id="menu_open_ask_holidays_new" action="open_ask_holidays"/>
+        <menuitem parent="menu_hr_holidays_my_leaves" id="menu_open_ask_holidays_new" action="open_ask_holidays" sequence="22"/>
 
         <record model="ir.actions.act_window" id="request_approve_holidays">
             <field name="name">Requests to Approve</field>
@@ -318,10 +342,8 @@
             <field name="act_window_id" ref="request_approve_holidays"/>
         </record>
 
-        <menuitem name="Leave Requests to Approve" parent="menu_open_ask_holidays" id="menu_request_approve_holidays" action="request_approve_holidays" groups="base.group_hr_user"/>
-
         <record model="ir.actions.act_window" id="open_allocation_holidays">
-            <field name="name">Allocation Requests</field>
+            <field name="name">Allocation Request</field>
             <field name="res_model">hr.holidays</field>
             <field name="view_type">form</field>
             <field name="context">{
@@ -332,7 +354,7 @@
                     'hr_holidays.menu_open_company_allocation',
                 ]
             }</field>
-            <field name="domain">[('type','=','add'), ('employee_id.user_id','=', uid)]</field>
+            <field name="domain">[('type','=','add')]</field>
             <field name="view_id" ref="edit_holiday_new"/>
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
@@ -351,10 +373,10 @@
             <field name="act_window_id" ref="open_allocation_holidays"/>
         </record>
 
-        <menuitem parent="menu_open_ask_holidays" id="menu_open_allocation_holidays" action="open_allocation_holidays"/>
+        <menuitem parent="menu_hr_holidays_my_leaves" id="menu_open_allocation_holidays" action="open_allocation_holidays" sequence="40"/>
 
         <record model="ir.actions.act_window" id="request_approve_allocation">
-            <field name="name">Allocation Requests to Approve</field>
+            <field name="name">Allocation Request</field>
             <field name="res_model">hr.holidays</field>
             <field name="view_type">form</field>
             <field name="context">{
@@ -385,8 +407,6 @@
             <field name="act_window_id" ref="request_approve_allocation"/>
         </record>
 
-        <menuitem parent="menu_open_ask_holidays" id="menu_request_approve_allocation" action="request_approve_allocation" groups="base.group_hr_manager"/>
-
         <record model="ir.actions.act_window" id="open_company_allocation">
             <field name="name">Leaves Summary</field>
             <field name="res_model">hr.holidays</field>
@@ -396,10 +416,10 @@
             <field name="context">{
                 'search_default_group_type': 1,
                 'search_default_year': 1 ,
+                'search_default_my_leaves': 1,
                 'needaction_menu_ref':
                 [
                     'hr_holidays.menu_open_ask_holidays_new',
-                    'hr_holidays.menu_request_approve_holidays',
                     'hr_holidays.menu_open_allocation_holidays',
                     'hr_holidays.menu_request_approve_allocation',
                     'hr_holidays.menu_open_employee_leave',
@@ -409,20 +429,44 @@
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
 
-        <menuitem name="Leaves Summary" parent="menu_open_ask_holidays" id="menu_open_company_allocation" action="open_company_allocation" sequence="40"/>
+        <menuitem name="Leaves Summary" parent="menu_hr_holidays_my_leaves" id="menu_open_company_allocation" action="open_company_allocation" sequence="21"/>
 
         <record model="ir.actions.act_window" id="open_employee_leaves">
-            <field name="name">Employee's Leaves</field>
+            <field name="name">Leave Details</field>
             <field name="res_model">hr.holidays</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
+            <field name="view_mode">tree,form,calendar</field>
             <field name="view_id" eval="view_holiday_employee"/>
             <field name="context">{'default_type': 'remove', 'search_default_todo': 1}</field>
             <field name="domain">[('type','=','remove')]</field>
             <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
 
-        <menuitem name="Employee's Leaves" parent="menu_open_ask_holidays" id="menu_open_employee_leave" groups="base.group_hr_manager,base.group_hr_user" action="open_employee_leaves" sequence="41"/>
+         <record model="ir.actions.act_window" id="open_department_holidays_approve">
+            <field name="name">Department Leaves</field>
+            <field name="res_model">hr.holidays</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="context">{'search_default_department':1, 'search_default_approve':1}</field>
+            <field name="domain">[('type','=','remove')]</field>
+            <field name="search_view_id" ref="view_hr_holidays_filter"/>
+        </record>
+
+        <menuitem name="Leaves" parent="menu_hr_holidays_approvals" id="menu_open_department_leave_approve" groups="base.group_hr_manager,base.group_hr_user" action="open_department_holidays_approve" sequence="1"/>
+
+         <record model="ir.actions.act_window" id="open_department_holidays_allocation_approve">
+            <field name="name">Department Leaves Allocation</field>
+            <field name="res_model">hr.holidays</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form,calendar</field>
+            <field name="context">{'default_type':'add', 'search_default_department':1, 'search_default_approve':1}</field>
+            <field name="domain">[('type','=','add')]</field>
+            <field name="search_view_id" ref="view_hr_holidays_filter"/>
+        </record>
+
+        <menuitem name="Leaves Allocation" parent="menu_hr_holidays_approvals" id="menu_open_department_leave_allocation_approve" groups="base.group_hr_manager,base.group_hr_user" action="open_department_holidays_allocation_approve" sequence="2"/>
+
+        <menuitem name="Leave Details" parent="menu_hr_holidays_report" id="menu_open_employee_leave" groups="base.group_hr_manager,base.group_hr_user" action="open_employee_leaves" sequence="4"/>
 
         <!-- Holidays status -->
         <record id="view_holidays_status_filter" model="ir.ui.view">
@@ -451,6 +495,7 @@
                             <field name="categ_id"/>
                             <field name="color_name"/>
                             <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
                 </form>
@@ -503,8 +548,8 @@
             <field name="search_view_id" ref="view_hr_holidays_status_search"/>
         </record>
 
-        <menuitem sequence="3" id="hr.menu_open_view_attendance_reason_config" parent="hr.menu_hr_configuration" name="Leaves" groups="base.group_hr_manager"/>
-        <menuitem name="Leave Types" action="open_view_holiday_status" id="menu_open_view_holiday_status" parent="hr.menu_hr_configuration_employees" sequence="4" groups="base.group_hr_manager"/>
+        <menuitem id="menu_hr_holidays_configuration" name="Configuration" parent="menu_hr_holidays_root"
+            sequence="100" groups="base.group_configuration,base.group_hr_manager" action="open_view_holiday_status"/>
 
         <!-- Holiday on resource leave -->
         <record id="resource_calendar_leave_form_inherit" model="ir.ui.view">
@@ -526,9 +571,10 @@
             <field name="src_model">hr.employee</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="context">{'search_default_employee_id': [active_id], 'default_employee_id': active_id}</field>
-            <field name="domain">[('type','=','remove')]</field>
-            <field name="view_id" eval="view_holiday"/>
+            <field name="context">{'search_default_employee_id': [active_id], 'default_employee_id': active_id, 'search_default_group_type': 1,
+                'search_default_year': 1}</field>
+            <field name="domain">[('holiday_type','=','employee'), ('holiday_status_id.limit', '=', False), ('state','!=', 'refuse')]</field>
+            <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
 
         <record id="act_hr_employee_holiday_request_approved" model="ir.actions.act_window">
@@ -577,7 +623,7 @@
             <field name="model">hr.employee</field>
             <field name="inherit_id" ref="hr.view_employee_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//group[@name='active_group']" position="before">
+                <xpath expr="//group[@name='active_group']" position="after">
                     <group string="Leaves" groups="base.group_no_one">
                         <label for="remaining_leaves"/>
                         <div>
@@ -585,22 +631,18 @@
                         </div>
                     </group>
                 </xpath>
-                <xpath expr="//div[@name='button_box']" position="inside">
-                    <button name="%(act_hr_employee_holiday_request_approved)d"
-                            icon="fa-calendar"
-                            class="oe_stat_button"
-                            type="action"
-                            groups="base.group_hr_user">
-                        <field name="approved_leaves_count" widget="statinfo"/>
-                    </button>
+                <div name="button_box" position="inside">
+                    <field name="show_leaves" invisible="1"/>
                     <button name="%(act_hr_employee_holiday_request)d"
                             type="action"
                             class="oe_stat_button"
                             icon="fa-calendar"
-                            groups="base.group_hr_user">
-                        <field name="leaves_count" widget="statinfo"/>
+                            attrs="{'invisible': [('show_leaves','=', False)]}"
+                            groups="base.group_user"
+                            help="Remaining leaves">
+                        <field string="Leaves Left" name="leaves_count" widget="statinfo"/>
                     </button>
-                </xpath>
+                </div>
             </field>
         </record>
 
@@ -642,7 +684,7 @@
             name="Leave Meetings"
             src_model="hr.holidays"
             res_model="calendar.event"
-            view_mode="tree,form,calendar,gantt"
+            view_mode="tree,form,calendar"
             view_type="form"/>
 
         <record id="hr_holidays_action_request_from_department" model="ir.actions.act_window">
@@ -689,53 +731,26 @@
             <field name="search_view_id" ref="hr_employee_view_search"/>
         </record>
 
-        <!--Hr Department Inherit Kanban view-->
-        <record id="hr_department_view_kanban" model="ir.ui.view">
-            <field name="name">hr.department.kanban.inherit</field>
-            <field name="model">hr.department</field>
-            <field name="inherit_id" ref="hr.hr_department_view_kanban"/>
-            <field name="arch" type="xml">
-                <data>
-                    <xpath expr="//templates" position="before">
-                        <field name="leave_to_approve_count"/>
-                        <field name="allocation_to_approve_count"/>
-                        <field name="total_employee"/>
-                    </xpath>
-                    <xpath expr="//div[@name='to_approve']" position="attributes">
-                        <attribute name="class">col-md-6 col-xs-6</attribute>
-                    </xpath>
-                    <xpath expr="//div[@name='to_approve']" position="inside">
-                        <div>
-                            <a name="%(hr_holidays_action_request_from_department)d" type="action">
-                                <t t-esc="record.leave_to_approve_count.raw_value or 0"/> Leave Requests
-                            </a>
-                        </div>
-                        <div>
-                            <a name="%(hr_holidays_action_allocation_from_department)d" type="action">
-                                <t t-esc="record.allocation_to_approve_count.raw_value or 0"/> Allocation Requests
-                            </a>
-                        </div>
-                    </xpath>
-                    <xpath expr="//div[@name='gauge_to_approve']" position="attributes">
-                        <attribute name="class">col-md-6 col-xs-6</attribute>
-                    </xpath>
-                    <xpath expr="//div[@name='gauge_to_approve']" position="inside">
-                        <div class="row">
-                            <a name="%(hr_employee_action_from_department)d" type="action">
-                                <field name="absence_of_today"
-                                    options="{
-                                    'max_field': 'total_employee',
-                                    'label': 'Absence(s) of Today',
-                                    'levelcolors': ['#a9d70b', '#f9c802', '#ff0000']}"
-                                    widget="gauge"
-                                    style="width:160px; height: 120px; cursor: pointer;">Absence(s) of Today
-                                </field>
-                            </a>
-                        </div>
-                    </xpath>
+        <record model="ir.actions.act_window" id="action_hr_holidays_leaves_analysis">
+            <field name="name">Leaves Analysis</field>
+            <field name="res_model">hr.holidays</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="domain">[('holiday_type','=','employee')]</field>
+            <field name="search_view_id" ref="view_hr_holidays_filter"/>
+        </record>
 
-                </data>
+        <record model="ir.actions.act_window" id="action_hr_holidays_leaves_analysis_filtered">
+            <field name="name">Leaves Analysis</field>
+            <field name="res_model">hr.holidays</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">pivot,graph</field>
+            <field name="domain">[('holiday_type','=','employee')]</field>
+            <field name="context">{
+                'search_default_department_id': [active_id],
+                'default_department_id': active_id}
             </field>
+            <field name="search_view_id" ref="view_hr_holidays_filter"/>
         </record>
 
     </data>

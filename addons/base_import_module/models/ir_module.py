@@ -5,8 +5,9 @@ import zipfile
 from os.path import join as opj
 
 import openerp
+from openerp import fields
 from openerp.osv import osv
-from openerp.tools import convert_file
+from openerp.tools import convert_file, exception_to_unicode
 from openerp.tools.translate import _
 from openerp.exceptions import UserError
 
@@ -14,8 +15,10 @@ _logger = logging.getLogger(__name__)
 
 MAX_FILE_SIZE = 100 * 1024 * 1024 # in megabytes
 
-class view(osv.osv):
+class ir_module_module(osv.osv):
     _inherit = "ir.module.module"
+
+    imported = fields.Boolean(string="Imported Module", default=False)
 
     def import_module(self, cr, uid, module, path, force=False, context=None):
         known_mods = self.browse(cr, uid, self.search(cr, uid, []))
@@ -36,7 +39,7 @@ class view(osv.osv):
             mode = 'update' if not force else 'init'
         else:
             assert terp.get('installable', True), "Module not installable"
-            self.create(cr, uid, dict(name=module, state='installed', **values))
+            self.create(cr, uid, dict(name=module, state='installed', imported=True, **values))
             mode = 'init'
 
         for kind in ['data', 'init_xml', 'update_xml']:
@@ -102,7 +105,8 @@ class view(osv.osv):
                         self.import_module(cr, uid, mod_name, path, force=force, context=context)
                         success.append(mod_name)
                     except Exception, e:
-                        errors[mod_name] = str(e)
+                        _logger.exception('Error while importing module')
+                        errors[mod_name] = exception_to_unicode(e)
         r = ["Successfully imported module '%s'" % mod for mod in success]
         for mod, error in errors.items():
             r.append("Error while importing module '%s': %r" % (mod, error))

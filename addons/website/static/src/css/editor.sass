@@ -229,30 +229,6 @@ table.editorbar-panel
 
 // }}}
 
-/* ---- TRANSLATIONS ---- {{{ */
-
-.oe_translate_or
-    color: white
-    padding: 0 0 0 1em
-.oe_translate_examples li
-    margin: 10px
-    padding: 4px
-.oe_translatable_text
-    outline: 1px solid black
-.oe_translatable_field
-    outline: 1px dashed black
-.oe_translatable_text.oe_dirty, .oe_translatable_field.oe_dirty
-    outline-color: red
-.oe_translatable_text.oe_dirty:empty
-    padding: 0 10px
-.oe_translatable_todo
-    background: rgb(255, 255, 182)
-    &:hover
-        background: inherit
-        cursor: text
-
-// }}}
-
 /* ---- MENU ---- {{{ */
 
 div.oe_menu_buttons
@@ -339,32 +315,6 @@ ul.oe_menu_editor
 
     .font-icons-selected
         background-color: #ddd
-
-$attachment-border-color: #848490
-.existing-attachments
-    .pager .disabled
-        display: none
-
-    .existing-attachment-cell
-        position: relative
-        .img
-            border: 1px solid $attachment-border-color
-        .existing-attachment-remove
-            position: absolute
-            top: 0
-            left: 15px // padding-left on col-*
-
-            cursor: pointer
-            background: white
-            padding: 2px
-            border: 1px solid $attachment-border-color
-            border-top: none
-            border-left: none
-            +border-bottom-right-radius(8px)
-        &.media_selected
-            > i, > img 
-                border-width: 5px
-                border-color: rgb(0, 248, 248)
 
 .oe_carlos_danger
     outline: 1px solid red !important
@@ -546,7 +496,7 @@ $infobar_height: 20px
         +opacity(0.97)
     &.oe_ace_closed
         z-index: -1000
-        +opacity(0)
+        display: none
 
 .oe_include_bundles
     font-weight: normal
@@ -558,7 +508,7 @@ $infobar_height: 20px
 #theme_error
     background: #ffc
 #theme_customize_modal
-    overflow: visible
+    overflow: auto
     z-index: 1020
     background: transparent
     display: block
@@ -615,11 +565,3 @@ $infobar_height: 20px
             opacity: 0.3
             position: absolute
             z-index: 1
-
-/* ---- force the browse to re-compute the stylesheets ---- */
-body.theme_customize_css_loading
-    magin-top: 1px
-    #wrapwrap
-        magin-top: -1px
-
-// }}}

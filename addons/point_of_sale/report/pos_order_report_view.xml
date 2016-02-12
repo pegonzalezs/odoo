@@ -37,10 +37,11 @@
                     <filter string="Year" name="year" domain="[('date','&lt;=', time.strftime('%%Y-12-31')),('date','&gt;=',time.strftime('%%Y-01-01'))]" help="POS ordered created during current year"/>
                     <separator/>
                     <filter string="My Sales" help="My Sales" domain="[('user_id','=',uid)]"/>
+                    <field name="config_id"/>
                     <field name="partner_id"/>
                     <field name="user_id"/>
-                    <field name="partner_id"/>
-                    <field name="user_id"/>
+                    <field name="product_id"/>
+                    <field name="product_categ_id"/>
                     <group expand="1" string="Group By">
                         <filter string="Salesperson" name="User" context="{'group_by':'user_id'}"/>
                         <filter string="Product Category" context="{'group_by':'product_categ_id'}"/>
@@ -61,6 +62,6 @@
             <field name="context">{'group_by_no_leaf':1,'group_by':[]}</field>
         </record>
 
-        <menuitem action="action_report_pos_order_all" id="menu_report_pos_order_all" parent="menu_point_rep" sequence="3"/>
+        <menuitem name="Orders" action="action_report_pos_order_all" id="menu_report_pos_order_all" parent="menu_point_rep" sequence="3"/>
     </data>
 </openerp>

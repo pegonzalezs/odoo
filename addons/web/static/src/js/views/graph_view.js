@@ -6,7 +6,7 @@ odoo.define('web.GraphView', function (require) {
 
 var core = require('web.core');
 var GraphWidget = require('web.GraphWidget');
-var Model = require('web.Model');
+var Model = require('web.DataModel');
 var View = require('web.View');
 
 var _lt = core._lt;
@@ -16,6 +16,7 @@ var QWeb = core.qweb;
 var GraphView = View.extend({
     className: 'oe_graph',
     display_name: _lt('Graph'),
+    icon: 'fa-bar-chart',
     view_type: 'graph',
 
     init: function(parent, dataset, view_id, options) {
@@ -28,7 +29,7 @@ var GraphView = View.extend({
         this.widget = undefined;
     },
     start: function () {
-        var load_fields = this.model.call('fields_get', [])
+        var load_fields = this.model.call('fields_get', [], {context: this.dataset.get_context()})
                 .then(this.prepare_fields.bind(this));
 
         return $.when(this._super(), load_fields);
@@ -74,7 +75,6 @@ var GraphView = View.extend({
     },
     do_show: function () {
         this.do_push_state({});
-        this.$el.show();
         return this._super();
     },
     prepare_fields: function (fields) {
@@ -101,7 +101,6 @@ var GraphView = View.extend({
                 fields: this.fields,
             });
             // append widget
-            this.$el.hide();
             this.widget.appendTo(this.$el);
         } else {
             var groupbys = group_by.length ? group_by : this.initial_groupbys.slice(0);

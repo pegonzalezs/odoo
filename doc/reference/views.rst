@@ -1,5 +1,6 @@
-.. highlight:: xml
+:banner: banners/views.jpg
 
+.. highlight:: xml
 .. _reference/views:
 
 =====
@@ -12,7 +13,7 @@ Common Structure
 ================
 
 View objects expose a number of fields, they are optional unless specified
-otherwise)
+otherwise.
 
 ``name`` (mandatory)
     only useful as a mnemonic/description of the view when looking for one in
@@ -21,7 +22,7 @@ otherwise)
     the model linked to the view, if applicable (it doesn't for QWeb views)
 ``priority``
     client programs can request views by ``id``, or by ``(model, type)``. For
-    the latter, all the views for the right type and model will be looked for,
+    the latter, all the views for the right type and model will be searched,
     and the one with the lowest ``priority`` number will be returned (it is
     the "default view").
 
@@ -141,28 +142,24 @@ root can have the following attributes:
 
         <tree default_order="sequence,name desc">
 ``colors``
-    allows changing the color of a row's text based on the corresponding
+    .. deprecated:: 9.0
+        replaced by ``decoration-{$name}``
+``fonts``
+    .. deprecated:: 9.0
+        replaced by ``decoration-{$name}``
+``decoration-{$name}``
+    allow changing the style of a row's text based on the corresponding
     record's attributes.
 
-    Defined as a mapping of colors to Python expressions. Values are of the
-    form: :samp:`{color}:{expr}[;...]`. For each record, pairs are tested
-    in-order, the expression is evaluated for the record and if ``true`` the
-    corresponding color is applied to the row. If no color matches, uses the
-    default text color (black).
+    Values are Python expressions. For each record, the expression is evaluated
+    with the record's attributes as context values and if ``true``, the
+    corresponding style is applied to the row. Other context values are
+    ``uid`` (the id of the current user) and ``current_date`` (the current date
+    as a string of the form ``yyyy-MM-dd``).
 
-    * ``color`` can be any valid `CSS color unit`_.
-    * ``expr`` should be a Python expression evaluated with the current
-      record's attributes as context values. Other context values are ``uid``
-      (the id of the current user) and ``current_date`` (the current date as
-      a string of the form ``yyyy-MM-dd``)
-``fonts``
-    allows changing a row's font style based on the corresponding record's
-    attributes.
-
-    The format is the same as for ``color``, but the ``color`` of each pair
-    is replaced by ``bold``, ``italic`` or ``underline``, the expression
-    evaluating to ``true`` will apply the corresponding style to the row's
-    text. Contrary to ``colors``, multiple pairs can match each record
+    ``{$name}`` can be ``bf`` (``font-weight: bold``), ``it``
+    (``font-style: italic``), or any bootstrap contextual color (``danger``,
+    ``info``, ``muted``, ``primary``, ``success`` or ``warning``).
 ``create``, ``edit``, ``delete``
     allows *dis*\ abling the corresponding action in the view by setting the
     corresponding attribute to ``false``
@@ -230,8 +227,8 @@ Possible children elements of the list view are:
         Possible attributes are ``invisible`` (hides the button) and
         ``readonly`` (disables the button but still shows it)
     ``states``
-        shorthand for ``invisible`` ``attrs``: a list of space, separated
-        states, requires that the model has a ``state`` field and that it is
+        shorthand for ``invisible`` ``attrs``: a list of states, comma separated,
+        requires that the model has a ``state`` field and that it is
         used in the view.
 
         Makes the button ``invisible`` if the record is *not* in one of the
@@ -571,20 +568,20 @@ Button Box
 ..........
 
 Many relevant actions or links can be displayed in the form. For example, in
-Opportunity form, the actions "Schedule a Call" and "Schedule a Meeting" take
+Opportunity form, the actions "Schedule a Call" and "Schedule a Meeting" have
 an important place in the use of the CRM. Instead of placing them in the
-"More" menu, put them directly in the sheet as buttons (on the top right) to
-make them more visible and more easily accessible.
+"More" menu, put them directly in the sheet as buttons (on the top) to make
+them more visible and more easily accessible.
 
 .. image:: forms/header3.png
    :class: img-responsive
 
-Technically, the buttons are placed inside a <div> to group them as a block on
-the right-hand side of the sheet.
+Technically, the buttons are placed inside a ``<div>`` to group them as a
+block on the top of the sheet.
 
 ::
 
-    <div class="oe_button_box oe_right">
+    <div class="oe_button_box" name="button_box">
         <button string="Schedule/Log Call" name="..." type="action"/>
         <button string="Schedule Meeting" name="action_makeMeeting" type="object"/>
     </div>
@@ -640,7 +637,7 @@ place inside the field, it *must not* be an example as they are often confused
 with filled data.
 
 One can also group fields together by rendering them "inline" inside an
-explicit block element like `<div>``. This allows grouping semantically
+explicit block element like ``<div>``. This allows grouping semantically
 related fields as if they were a single (composite) fields.
 
 The following example, taken from the *Leads* form, shows both placeholders and
@@ -864,7 +861,7 @@ Possible children of the view element are:
     according to current user parameters, the latter is the direct value from
     a :meth:`~openerp.models.Model.read` (except for date and datetime fields
     that are `formatted according to user's locale
-    <https://github.com/odoo/odoo/blob/8.0/addons/web_kanban/static/src/js/kanban.js#L900>`_)
+    <https://github.com/odoo/odoo/blob/a678bd4e/addons/web_kanban/static/src/js/kanban_record.js#L102>`_)
   ``read_only_mode``
     self-explanatory
 
@@ -952,7 +949,7 @@ calendar view are:
     ``date_stop`` is provided records become movable (via drag and drop)
     directly in the calendar
 ``date_delay``
-    alternative to ``date_end``, provides the duration of the event instead of
+    alternative to ``date_stop``, provides the duration of the event instead of
     its end date
 
     .. todo:: what's the unit? Does it allow moving the record?
@@ -974,6 +971,9 @@ calendar view are:
 ``all_day``
     name of a boolean field on the record indicating whether the corresponding
     event is flagged as day-long (and duration is irrelevant)
+``mode``
+    Default display mode when loading the calendar.
+    Possible attributes are: ``day``, ``week``, ``month``
 
 
 .. todo::
@@ -1018,17 +1018,21 @@ take the following attributes:
   between 0 and 100
 ``default_group_by``
   name of a field to group tasks by
-
-.. previously documented content which don't seem to be used anymore:
-
-   * string
-   * day_length
-   * color
-   * mode
-   * date_string
-   * <level>
-   * <field>
-   * <html>
+``fold_last_level``
+  If a value is set, the last grouping level is folded
+``round_dnd_dates``
+  enables rounding the task's start and end dates to the nearest scale marks
+``consolidation``
+  field name to display consolidation value in record cell
+``consolidation_max``
+  dictionary with the "group by" field as key and the maximum consolidation
+  value that can be reached before displaying the cell in red
+.. consolidation_exclude
+.. consolidation_color
+..  ``type``
+      ``gantt`` classic gantt view (default)
+      ``consolidate`` values of the first children are consolidated in the gantt's task
+      ``planning`` children are displayed in the gantt's task
 
 .. _reference/views/diagram:
 
@@ -1165,10 +1169,6 @@ Possible children elements of the search view are:
         tooltip
     ``groups``
         makes a filter only available to specific users
-    ``icon``
-        an icon to display next to the label, if there's sufficient space
-
-        .. deprecated:: 7.0
 
     .. tip::
 

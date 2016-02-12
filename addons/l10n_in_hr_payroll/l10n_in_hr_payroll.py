@@ -1,23 +1,5 @@
 #-*- coding:utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2011 OpenERP SA (<http://openerp.com>). All Rights Reserved
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
 from datetime import datetime
@@ -153,7 +135,7 @@ class payroll_advice(osv.osv):
         if company_id:
             company = self.pool.get('res.company').browse(cr, uid, [company_id], context=context)[0]
             if company.partner_id.bank_ids:
-                res.update({'bank_id': company.partner_id.bank_ids[0].bank.id})
+                res.update({'bank_id': company.partner_id.bank_ids[0].bank_id.id})
         return {
             'value':res
         }
@@ -187,7 +169,7 @@ class hr_payslip_run(osv.osv):
                         'company_id': users[0].company_id.id,
                         'name': run.name,
                         'date': run.date_end,
-                        'bank_id': users[0].company_id.bank_ids and users[0].company_id.bank_ids[0].id or False
+                        'bank_id': users[0].company_id.partner_id.bank_ids and users[0].company_id.partner_id.bank_ids[0].id or False
                     }
             advice_id = advice_pool.create(cr, uid, advice_data, context=context)
             slip_ids = []

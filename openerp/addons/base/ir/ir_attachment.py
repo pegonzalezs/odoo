@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import hashlib
 import itertools
@@ -52,21 +34,21 @@ except ImportError:
 def guess_mimetype(bin_data):
     # by default, guess the type using the magic number of file hex signature (like magic, but more limited)
     # see http://www.filesignatures.net/ for file signatures
-    mapping = {
+    mapping = (
         # pdf
-        'application/pdf' : ['%PDF'],
-         # jpg, jpeg, png, gif
-        'image/jpeg' : ['\xFF\xD8\xFF\xE0', '\xFF\xD8\xFF\xE2', '\xFF\xD8\xFF\xE3', '\xFF\xD8\xFF\xE1'],
-        'image/png' : ['\x89\x50\x4E\x47\x0D\x0A\x1A\x0A'],
-        'image/gif' : ['GIF87a', '\x47\x49\x46\x38\x37\x61', 'GIF89a', '\x47\x49\x46\x38\x39\x61'],
+        ('application/pdf', ['%PDF']),
+        # jpg, jpeg, png, gif
+        ('image/jpeg', ['\xFF\xD8\xFF\xE0', '\xFF\xD8\xFF\xE2', '\xFF\xD8\xFF\xE3', '\xFF\xD8\xFF\xE1']),
+        ('image/png', ['\x89\x50\x4E\x47\x0D\x0A\x1A\x0A']),
+        ('image/gif', ['GIF87a', '\x47\x49\x46\x38\x37\x61', 'GIF89a', '\x47\x49\x46\x38\x39\x61']),
+        # docx, odt, doc, xls
+        ('application/msword', ['PK\x03\x04', '\xCF\x11\xE0\xA1\xB1\x1A\xE1\x00', '\xEC\xA5\xC1\x00', '\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1', '\x0D\x44\x4F\x43']),
         # zip, but will include jar, odt, ods, odp, docx, xlsx, pptx, apk
-        'application/zip' : ['PK'],
-        # doc, xls
-        'application/msword' : ['\xCF\x11\xE0\xA1\xB1\x1A\xE1\x00', '\xEC\xA5\xC1\x00', '\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1', '\x0D\x44\x4F\x43'],
-        'application/vnd.ms-excel' : ['\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1','\x09\x08\x10\x00\x00\x06\x05\x00','\xFD\xFF\xFF\xFF\x10','\xFD\xFF\xFF\xFF\x1F','\xFD\xFF\xFF\xFF\x23','\xFD\xFF\xFF\xFF\x28','\xFD\xFF\xFF\xFF\x29'],
-    }
-    for mimetype in mapping.keys():
-        for signature in mapping[mimetype]:
+        ('application/zip', ['PK']),
+        ('application/vnd.ms-excel', ['\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1', '\x09\x08\x10\x00\x00\x06\x05\x00', '\xFD\xFF\xFF\xFF\x10', '\xFD\xFF\xFF\xFF\x1F', '\xFD\xFF\xFF\xFF\x23', '\xFD\xFF\xFF\xFF\x28', '\xFD\xFF\xFF\xFF\x29']),
+    )
+    for mimetype, signatures in mapping:
+        for signature in signatures:
             if bin_data.startswith(signature):
                 return mimetype
     return 'application/octet-stream'
@@ -89,7 +71,7 @@ class ir_attachment(osv.osv):
 
     The 'data' function field (_data_get,data_set) is implemented using
     _file_read, _file_write and _file_delete which can be overridden to
-    implement other storage engines, shuch methods should check for other
+    implement other storage engines, such methods should check for other
     location pseudo uri (example: hdfs://hadoppserver)
 
     The default implementation is the file:dirname location that stores files
@@ -122,7 +104,7 @@ class ir_attachment(osv.osv):
 
     def force_storage(self, cr, uid, context=None):
         """Force all attachments to be stored in the currently configured storage"""
-        if not self.pool['res.users'].has_group(cr, uid, 'base.group_erp_manager'):
+        if not self.pool['res.users']._is_admin(cr, uid, [uid]):
             raise AccessError(_('Only administrators can execute this action.'))
 
         location = self._storage(cr, uid, context)
@@ -167,7 +149,7 @@ class ir_attachment(osv.osv):
                 r = os.path.getsize(full_path)
             else:
                 r = open(full_path,'rb').read().encode('base64')
-        except IOError:
+        except (IOError, OSError):
             _logger.info("_read_file reading %s", full_path, exc_info=True)
         return r
 
@@ -255,9 +237,8 @@ class ir_attachment(osv.osv):
         """ compute the checksum for the given datas
             :param bin_data : datas in its binary form
         """
-        if bin_data:
-            return hashlib.sha1(bin_data).hexdigest()
-        return False
+        # an empty file has a checksum too (for caching)
+        return hashlib.sha1(bin_data or '').hexdigest()
 
     def _compute_mimetype(self, values):
         """ compute the mimetype of the given values
@@ -267,7 +248,9 @@ class ir_attachment(osv.osv):
         mimetype = 'application/octet-stream'
         if values.get('datas_fname'):
             mimetype = mimetypes.guess_type(values['datas_fname'])[0]
-        if values.get('datas'):
+        if values.get('url'):
+            mimetype = mimetypes.guess_type(values['url'])[0]
+        if values.get('datas') and (not mimetype or mimetype == 'application/octet-stream'):
             mimetype = guess_mimetype(values['datas'].decode('base64'))
         return mimetype
 
@@ -293,12 +276,13 @@ class ir_attachment(osv.osv):
         'description': fields.text('Description'),
         'res_name': fields.function(_name_get_resname, type='char', string='Resource Name', store=True),
         'res_model': fields.char('Resource Model', readonly=True, help="The database object this attachment will be attached to"),
+        'res_field': fields.char('Resource Field', readonly=True),
         'res_id': fields.integer('Resource ID', readonly=True, help="The record id this is attached to"),
         'create_date': fields.datetime('Date Created', readonly=True),
         'create_uid':  fields.many2one('res.users', 'Owner', readonly=True),
         'company_id': fields.many2one('res.company', 'Company', change_default=True),
-        'type': fields.selection( [ ('url','URL'), ('binary','Binary'), ],
-                'Type', help="Binary File or URL", required=True, change_default=True),
+        'type': fields.selection( [ ('url','URL'), ('binary','File'), ],
+                'Type', help="You can either upload a file from your computer or copy/paste an internet link to your file", required=True, change_default=True),
         'url': fields.char('Url', size=1024),
         # al: We keep shitty field names for backward compatibility with document
         'datas': fields.function(_data_get, fnct_inv=_data_set, string='File Content', type="binary", nodrop=True),
@@ -309,6 +293,7 @@ class ir_attachment(osv.osv):
         'checksum': fields.char("Checksum/SHA1", size=40, select=True, readonly=True),
         'mimetype': fields.char('Mime Type', readonly=True),
         'index_content': fields.text('Indexed Content', readonly=True),
+        'public': fields.boolean('Is public document'),
     }
 
     _defaults = {
@@ -335,8 +320,10 @@ class ir_attachment(osv.osv):
         if ids:
             if isinstance(ids, (int, long)):
                 ids = [ids]
-            cr.execute('SELECT DISTINCT res_model, res_id, create_uid FROM ir_attachment WHERE id = ANY (%s)', (ids,))
-            for rmod, rid, create_uid in cr.fetchall():
+            cr.execute('SELECT res_model, res_id, create_uid, public FROM ir_attachment WHERE id = ANY (%s)', (ids,))
+            for rmod, rid, create_uid, public in cr.fetchall():
+                if public and mode == 'read':
+                    continue
                 if not (rmod and rid):
                     if create_uid != uid:
                         require_employee = True
@@ -368,14 +355,22 @@ class ir_attachment(osv.osv):
                 raise AccessError(_("Sorry, you are not allowed to access this document."))
 
     def _search(self, cr, uid, args, offset=0, limit=None, order=None, context=None, count=False, access_rights_uid=None):
+        # add res_field=False in domain if not present; the arg[0] trick below
+        # works for domain items and '&'/'|'/'!' operators too
+        if not any(arg[0] in ('id', 'res_field') for arg in args):
+            args.insert(0, ('res_field', '=', False))
+
         ids = super(ir_attachment, self)._search(cr, uid, args, offset=offset,
                                                  limit=limit, order=order,
                                                  context=context, count=False,
                                                  access_rights_uid=access_rights_uid)
+
+        if uid == SUPERUSER_ID:
+            # rules do not apply for the superuser
+            return len(ids) if count else ids
+
         if not ids:
-            if count:
-                return 0
-            return []
+            return 0 if count else []
 
         # Work with a set, as list.remove() is prohibitive for large lists of documents
         # (takes 20+ seconds on a db with 100k docs during search_count()!)
@@ -387,11 +382,11 @@ class ir_attachment(osv.osv):
         # the linked document.
         # Use pure SQL rather than read() as it is about 50% faster for large dbs (100k+ docs),
         # and the permissions are checked in super() and below anyway.
-        cr.execute("""SELECT id, res_model, res_id FROM ir_attachment WHERE id = ANY(%s)""", (list(ids),))
+        cr.execute("""SELECT id, res_model, res_id, public FROM ir_attachment WHERE id = ANY(%s)""", (list(ids),))
         targets = cr.dictfetchall()
         model_attachments = {}
         for target_dict in targets:
-            if not target_dict['res_model']:
+            if not target_dict['res_model'] or target_dict['public']:
                 continue
             # model_attachments = { 'model': { 'res_id': [id1,id2] } }
             model_attachments.setdefault(target_dict['res_model'],{}).setdefault(target_dict['res_id'] or 0, set()).add(target_dict['id'])
@@ -470,11 +465,3 @@ class ir_attachment(osv.osv):
     def action_get(self, cr, uid, context=None):
         return self.pool.get('ir.actions.act_window').for_xml_id(
             cr, uid, 'base', 'action_attachment', context=context)
-
-    def invalidate_bundle(self, cr, uid, type='%', xmlid=None, context=None):
-        assert type in ('%', 'css', 'js'), "Unhandled bundle type"
-        xmlid = '%' if xmlid is None else xmlid + '%'
-        domain = [('url', '=like', '/web/%s/%s/%%' % (type, xmlid))]
-        ids = self.search(cr, uid, domain, context=context)
-        if ids:
-            self.unlink(cr, uid, ids, context=context)

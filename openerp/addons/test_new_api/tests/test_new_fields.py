@@ -3,7 +3,9 @@
 #
 from datetime import date, datetime
 
+from openerp.exceptions import AccessError, except_orm
 from openerp.tests import common
+from openerp.tools import mute_logger
 
 
 class TestNewFields(common.TransactionCase):
@@ -61,6 +63,13 @@ class TestNewFields(common.TransactionCase):
 
     def test_10_non_stored(self):
         """ test non-stored fields """
+        # a field declared with store=False should not have a column
+        field = self.env['test_new_api.category']._fields['dummy']
+        self.assertFalse(field.store)
+        self.assertFalse(field.compute)
+        self.assertFalse(field.inverse)
+        self.assertFalse(field.column)
+
         # find messages
         for message in self.env['test_new_api.message'].search([]):
             # check definition of field
@@ -77,27 +86,50 @@ class TestNewFields(common.TransactionCase):
 
     def test_11_stored(self):
         """ test stored fields """
-        # find the demo discussion
-        discussion = self.env.ref('test_new_api.discussion_0')
-        self.assertTrue(len(discussion.messages) > 0)
+        def check_stored(disc):
+            """ Check the stored computed field on disc.messages """
+            for msg in disc.messages:
+                self.assertEqual(msg.name, "[%s] %s" % (disc.name, msg.author.name))
 
-        # check messages
-        name0 = discussion.name or ""
-        for message in discussion.messages:
-            self.assertEqual(message.name, "[%s] %s" % (name0, message.author.name))
+        # find the demo discussion, and check messages
+        discussion1 = self.env.ref('test_new_api.discussion_0')
+        self.assertTrue(discussion1.messages)
+        check_stored(discussion1)
 
         # modify discussion name, and check again messages
-        discussion.name = name1 = 'Talking about stuff...'
-        for message in discussion.messages:
-            self.assertEqual(message.name, "[%s] %s" % (name1, message.author.name))
+        discussion1.name = 'Talking about stuff...'
+        check_stored(discussion1)
 
         # switch message from discussion, and check again
-        name2 = 'Another discussion'
-        discussion2 = discussion.copy({'name': name2})
-        message2 = discussion.messages[0]
+        discussion2 = discussion1.copy({'name': 'Another discussion'})
+        message2 = discussion1.messages[0]
         message2.discussion = discussion2
-        for message in discussion2.messages:
-            self.assertEqual(message.name, "[%s] %s" % (name2, message.author.name))
+        check_stored(discussion2)
+
+        # create a new discussion with messages, and check their name
+        user_root = self.env.ref('base.user_root')
+        user_demo = self.env.ref('base.user_demo')
+        discussion3 = self.env['test_new_api.discussion'].create({
+            'name': 'Stuff',
+            'participants': [(4, user_root.id), (4, user_demo.id)],
+            'messages': [
+                (0, 0, {'author': user_root.id, 'body': 'one'}),
+                (0, 0, {'author': user_demo.id, 'body': 'two'}),
+                (0, 0, {'author': user_root.id, 'body': 'three'}),
+            ],
+        })
+        check_stored(discussion3)
+
+        # modify the discussion messages: edit the 2nd one, remove the last one
+        # (keep modifications in that order, as they reproduce a former bug!)
+        discussion3.write({
+            'messages': [
+                (4, discussion3.messages[0].id),
+                (1, discussion3.messages[1].id, {'author': user_root.id}),
+                (2, discussion3.messages[2].id),
+            ],
+        })
+        check_stored(discussion3)
 
     def test_12_recursive(self):
         """ test recursively dependent fields """
@@ -306,6 +338,19 @@ class TestNewFields(common.TransactionCase):
         self.assertEqual(discussion.name, 'Bar')
         self.assertEqual(message.discussion_name, 'Bar')
 
+        # change discussion name via related field on several records
+        discussion1 = discussion.create({'name': 'X1'})
+        discussion2 = discussion.create({'name': 'X2'})
+        discussion1.participants = discussion2.participants = self.env.user
+        message1 = message.create({'discussion': discussion1.id})
+        message2 = message.create({'discussion': discussion2.id})
+        self.assertEqual(message1.discussion_name, 'X1')
+        self.assertEqual(message2.discussion_name, 'X2')
+
+        (message1 + message2).write({'discussion_name': 'X3'})
+        self.assertEqual(discussion1.name, 'X3')
+        self.assertEqual(discussion2.name, 'X3')
+
         # search on related field, and check result
         search_on_related = self.env['test_new_api.message'].search([('discussion_name', '=', 'Bar')])
         search_on_regular = self.env['test_new_api.message'].search([('discussion.name', '=', 'Bar')])
@@ -337,6 +382,24 @@ class TestNewFields(common.TransactionCase):
             self.assertEqual(data['display_name'], display_name)
             self.assertEqual(data['size'], size)
 
+    def test_31_prefetch(self):
+        """ test prefetch of records handle AccessError """
+        Category = self.env['test_new_api.category']
+        cat_1 = Category.create({'name': 'NOACCESS'}).id
+        cat_2 = Category.create({'name': 'ACCESS', 'parent': cat_1}).id
+
+        self.env.clear()
+
+        cat = Category.browse(cat_2)
+        self.assertEqual(cat.name, 'ACCESS')
+        # both categories should be in prefetch ids
+        self.assertSetEqual(self.env.prefetch[Category._name], set([cat_1, cat_2]))
+        # but due to our (lame) overwrite of `read`, it should not forbid us to read records we have access to
+        self.assertFalse(len(cat.discussions))
+        self.assertEqual(cat.parent.id, cat_1)
+        with self.assertRaises(AccessError):
+            Category.browse(cat_1).name
+
     def test_40_new(self):
         """ test new records. """
         discussion = self.env.ref('test_new_api.discussion_0')
@@ -357,7 +420,49 @@ class TestNewFields(common.TransactionCase):
         self.assertEqual(message.name, "[%s] %s" % (discussion.name, ''))
         self.assertEqual(message.size, len(BODY))
 
-    def test_41_defaults(self):
+    @mute_logger('openerp.addons.base.ir.ir_model')
+    def test_41_new_related(self):
+        """ test the behavior of related fields starting on new records. """
+        # make discussions unreadable for demo user
+        access = self.env.ref('test_new_api.access_discussion')
+        access.write({'perm_read': False})
+
+        # create an environment for demo user
+        env = self.env(user=self.env.ref('base.user_demo'))
+        self.assertEqual(env.user.login, "demo")
+
+        # create a new message as demo user
+        discussion = self.env.ref('test_new_api.discussion_0')
+        message = env['test_new_api.message'].new({'discussion': discussion})
+        self.assertEqual(message.discussion, discussion)
+
+        # read the related field discussion_name
+        self.assertEqual(message.discussion.env, env)
+        self.assertEqual(message.discussion_name, discussion.name)
+        with self.assertRaises(AccessError):
+            message.discussion.name
+
+    @mute_logger('openerp.addons.base.ir.ir_model')
+    def test_42_new_related(self):
+        """ test the behavior of related fields traversing new records. """
+        # make discussions unreadable for demo user
+        access = self.env.ref('test_new_api.access_discussion')
+        access.write({'perm_read': False})
+
+        # create an environment for demo user
+        env = self.env(user=self.env.ref('base.user_demo'))
+        self.assertEqual(env.user.login, "demo")
+
+        # create a new discussion and a new message as demo user
+        discussion = env['test_new_api.discussion'].new({'name': 'Stuff'})
+        message = env['test_new_api.message'].new({'discussion': discussion})
+        self.assertEqual(message.discussion, discussion)
+
+        # read the related field discussion_name
+        self.assertNotEqual(message.sudo().env, message.env)
+        self.assertEqual(message.discussion_name, discussion.name)
+
+    def test_50_defaults(self):
         """ test default values. """
         fields = ['discussion', 'body', 'author', 'size']
         defaults = self.env['test_new_api.message'].default_get(fields)
@@ -365,6 +470,13 @@ class TestNewFields(common.TransactionCase):
 
         defaults = self.env['test_new_api.mixed'].default_get(['number'])
         self.assertEqual(defaults, {'number': 3.14})
+
+    def test_50_search_many2one(self):
+        """ test search through a path of computed fields"""
+        messages = self.env['test_new_api.message'].search(
+            [('author_partner.name', '=', 'Demo User')])
+        self.assertEqual(messages, self.env.ref('test_new_api.message_0_1'))
+
 
 
 class TestMagicFields(common.TransactionCase):

@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 """
 OpenERP - Server
@@ -50,12 +32,11 @@ __version__ = openerp.release.version
 _logger = logging.getLogger('openerp')
 
 def check_root_user():
-    """ Exit if the process's user is 'root' (on POSIX system)."""
+    """Warn if the process's user is 'root' (on POSIX system)."""
     if os.name == 'posix':
         import pwd
-        if pwd.getpwuid(os.getuid())[0] == 'root' :
-            sys.stderr.write("Running as user 'root' is a security risk, aborting.\n")
-            sys.exit(1)
+        if pwd.getpwuid(os.getuid())[0] == 'root':
+            sys.stderr.write("Running as user 'root' is a security risk.\n")
 
 def check_postgres_user():
     """ Exit if the configured database user is 'postgres'.
@@ -80,9 +61,9 @@ def report_configuration():
     user = config['db_user'] or os.environ.get('PGUSER', 'default')
     _logger.info('database: %s@%s:%s', user, host, port)
 
-def rm_pid_file():
+def rm_pid_file(main_pid):
     config = openerp.tools.config
-    if not openerp.evented and config['pidfile']:
+    if config['pidfile'] and main_pid == os.getpid():
         try:
             os.unlink(config['pidfile'])
         except OSError:
@@ -95,10 +76,10 @@ def setup_pid_file():
     """
     config = openerp.tools.config
     if not openerp.evented and config['pidfile']:
+        pid = os.getpid()
         with open(config['pidfile'], 'w') as fd:
-            pidtext = "%d" % (os.getpid())
-            fd.write(pidtext)
-        atexit.register(rm_pid_file)
+            fd.write(str(pid))
+        atexit.register(rm_pid_file, pid)
 
 def export_translation():
     config = openerp.tools.config

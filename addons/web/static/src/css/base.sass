@@ -145,6 +145,11 @@ $sheet-padding: 16px
 
 // Notifications {{{
 
+.oe_tz_warning
+    color: red
+    float: right
+    margin: 4px
+
 .oe_indicator
     z-index: 99999
     position: absolute
@@ -156,18 +161,11 @@ $sheet-padding: 16px
     box-shadow: 0 0 1px black
     left: 50%
     transform: translate(-50%, 0)
+    -webkit-filter: blur(0)
 
 .oe_notification
     z-index: 1600
     
-.oe_webclient_timezone_notification
-    a
-        color: white
-        text-decoration: underline
-    p
-        margin-top: 1em
-    dt
-        font-weight: bold
 .oe_timezone_systray
     span
         margin-top: 1px
@@ -183,6 +181,9 @@ $sheet-padding: 16px
         overflow: hidden // Customize to bring ellipsis when topbar_name is over sized.
         vertical-align: middle
 // }}}
+
+.o_hidden
+    display: none!important
 
 .openerp
     // Global style {{{
@@ -240,8 +241,6 @@ $sheet-padding: 16px
         vertical-align: middle
     td
         vertical-align: top
-    .oe_title
-        float: left
     .oe_title:after
         content: "."
         display: block
@@ -266,45 +265,6 @@ $sheet-padding: 16px
         margin: 4px 0
         font-weight: bold
         font-size: inherit
-    // }}}
-    // Button style {{{
-    a.button:link, a.button:visited, .oe_button, input[type='submit']
-        display: inline-block
-        border: 1px solid rgba(0,0,0,0.4)
-        color: #4c4c4c
-        margin: 0
-        padding: 3px 12px
-        font-size: 13px
-        text-align: center
-        @include vertical-gradient(#efefef, #d8d8d8)
-        @include radius(3px)
-        @include box-shadow((0 1px 2px rgba(0, 0, 0, .1), 0 1px 1px rgba(255, 255, 255, .8) inset))
-        text-shadow: 0 1px 1px rgba(255, 255, 255, .5)
-        -webkit-font-smoothing: antialiased
-        outline: none
-
-    a.button:hover,.oe_button:hover, input[type='submit']:hover
-        @include vertical-gradient(#f6f6f6, #e3e3e3)
-        cursor: pointer
-        background-position: 0
-
-    a.button:focus, .oe_button:focus, input[type='submit']:focus
-        border: 1px solid #80bfff
-        background-position: 0
-        @include vertical-gradient(#f6f6f6, #e3e3e3)
-        @include box-shadow((0 0 3px #80bfff, 0 1px 1px rgba(255, 255, 255, .8) inset))
-
-    a.button:active, a.button.active, .oe_button:active, .oe_button.active, input[type='submit']:active, input[type='submit'].active
-        @include vertical-gradient(#e3e3e3, #f6f6f6)
-        @include box-shadow(none)
-
-    a.button.disabled, .oe_button:disabled, input[type='submit']:disabled
-        background: #efefef !important
-        border: 1px solid #d1d1d1 !important
-        @include box-shadow(none !important)
-        color: #aaa !important
-        cursor: default
-        text-shadow: 0 1px 1px #fff !important
     // }}}
     // Jquery ui Overrides {{{
     .ui-widget-content a
@@ -352,24 +312,9 @@ $sheet-padding: 16px
         font-weight: bold
     .oe_inline
         width: auto !important
-    .oe_highlight
-        color: white
-        background: #DC5F59
-    button.oe_highlight
-        @include vertical-gradient(#729fcf, #3465a4)
-        @include box-shadow((0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 1px rgba(155, 155, 155, 0.4) inset))
-    button.oe_highlight:hover
-        @include vertical-gradient(darken(#729fcf, 10%), darken(#3465a4, 10%))
-    button.oe_highlight:active
-        @include vertical-gradient(lighten(#729fcf, 4%), lighten(#3465a4, 4%))
     .oe_background_grey
         background: #eee !important
 
-    .oe_form_dirty
-        .oe_highlight_on_dirty
-            color: white
-            background: #dc5f59
-            font-weight: bold
     .oe_warning_redirect
         border: none !important
         padding: 0 !important
@@ -385,7 +330,6 @@ $sheet-padding: 16px
         color: #666
         margin: 0px -1px -1px 0px
         padding: 0
-        border: 1px solid #dddddd
         border-radius: 0
         box-shadow: none
         background: white
@@ -395,7 +339,7 @@ $sheet-padding: 16px
             text-align: left
             padding: 0
             line-height: 120%
-        .stat_button_icon
+        .o_button_icon
             color: #7C7BAD
             font-size: 24px
             padding: 0px 3px
@@ -410,16 +354,16 @@ $sheet-padding: 16px
             height: 38px
             display: inline
             vertical-align: middle
-    .oe_stat_button:hover
-        background: #7c7bad
-        color: white
-        .fa
-            color: white
     .oe_button_box
         width: 400px
         text-align: right
         .oe_stat_button
             display: inline-table
+        // boolean_button rules: show the elements depending on hover status
+        .oe_stat_button:not(:hover) .o_stat_info > .o_hover
+            display: none !important
+        .oe_stat_button:hover .o_stat_info > .o_not_hover
+            display: none !important
     button.oe_toggle_button
         box-shadow: none
         white-space: nowrap
@@ -442,16 +386,6 @@ $sheet-padding: 16px
     .oe_image_medium > img
         max-width: 180px
         max-height: 180px
-    .oe_button.oe_link
-        @include reset()
-        img
-            display: inline-block
-        span
-            @include reset()
-            color: $link-color
-            font-weight: bold
-            &:hover
-                text-decoration: underline
     .oe_star_on, .oe_star_off
         color: #cccccc
         text-shadow: 0 0 2px black
@@ -508,16 +442,18 @@ $sheet-padding: 16px
         @include radius(3px)
         background: $tag-bg-light
         color: #4C4C4C
+        display: inline-block
+        word-break: break-word
     .oe_tag_dark
         background: $tag-bg-dark
         color: #eee
     .oe_form_field_radio
         &.oe_horizontal
-            white-space: nowrap
             label
                 display: inline-block
-                text-align: center
-                height: 16px
+                margin-left: 20px
+            > span > div
+                display: inline-block
         &.oe_vertical
             label
                 display: inline-block
@@ -538,10 +474,12 @@ $sheet-padding: 16px
             min-width: 250px
         .text-wrap
             width: 100% !important
+            position: static
             textarea
                 width: 100% !important
         .text-core
-            min-height: 22px
+            height: initial !important
+            word-break: break-word
             .text-wrap .text-dropdown .text-list .text-suggestion em
                 font-style: italic
                 text-decoration: none
@@ -700,6 +638,9 @@ $sheet-padding: 16px
         font-weight: bold
         margin-left: 8px
         color: $link-color
+        > .oe_menu_leaf
+            font-weight: bold
+            color: $link-color
     .oe_secondary_submenu
         margin-bottom: 10px !important
         line-height: 1.1em
@@ -792,8 +733,6 @@ $sheet-padding: 16px
                 color: #007bb6
     // }}}
     // ActionManager {{{
-    a.oe_form_uri:hover
-        text-decoration: underline
     .oe_application
         height: 100%
         width: 100%
@@ -807,6 +746,11 @@ $sheet-padding: 16px
         flex-direction: column        
         .oe_application
             width: 100%
+
+        .oe_client_action
+            height: 100%
+            overflow: auto
+            position: relative
     // }}}
     // ViewManager common {{{
     .oe-view-manager
@@ -822,8 +766,6 @@ $sheet-padding: 16px
             bottom: 0
             right: 0
             left: 0
-            a
-                color: $link-color
             > div
                 height: 100%
                 position: static
@@ -832,7 +774,7 @@ $sheet-padding: 16px
                 position: static
                 > div
                     display: block
-    .oe-o2m-control-panel
+    .oe-x2m-control-panel
         width: 100%
         .oe-cp-buttons
             div
@@ -902,35 +844,19 @@ $sheet-padding: 16px
         .oe-cp-switch-buttons
             button
                 width: 34px
-            .oe-cp-switch-kanban:before
-                content: "\f009"
-            .oe-cp-switch-list:before
-                content: ""
-            .oe-cp-switch-form:before
-                content: "\f044"
-            .oe-cp-switch-graph:before
-                content: "\f080"
-            .oe-cp-switch-calendar:before
-                content: "\f073"
-            .oe-cp-switch-gantt:before
-                content: "\f0ae"
-            .oe-cp-switch-pivot:before
-                content: "\f0ce"
-            .oe-cp-switch-tree:before
-                content: "\f036"
         .oe-cp-buttons
             display: inline-block
         .oe-cp-sidebar
             display: inline-block
             float: right
-            .oe_form_binary_form
+            .o_form_binary_form
                 cursor: pointer
                 span
                     padding: 3px 20px
-                input.oe_form_binary_file
+                input.o_form_input_file
                     width: 100%
 
-            .oe_form_binary_form:hover
+            .o_form_binary_form:hover
                 background-color: #f5f5f5
             .oe_file_attachment
                 padding: 3px 20px
@@ -945,7 +871,7 @@ $sheet-padding: 16px
                         width: 100%
         .oe_form_buttons
             padding: 0
-        .oe_form_buttons_view
+        .o_form_buttons_view
             > button
                 float: left
                 &:last-child
@@ -956,26 +882,10 @@ $sheet-padding: 16px
             min-height: 30px
 
         // }}}
-    // FormPopup {{{
-    .o-modal-header
-        > div
-            margin-left: 45%
-    .oe_popup_form 
-        display: none
-        .oe_formview .oe_form_pager
-            display: none !important
-        // Customize label weight for popup wizard appear from another wizard according bootstrap3
-        table label
-            font-weight: normal
-        // End of customize
-    .oe_popup_list_pager
-        float: right
-    // }}}
     // SearchView {{{
     .oe_searchview
         cursor: text
         position: relative
-        display: none
         height: auto
         padding-top: 1px
         padding-bottom: 1px
@@ -1119,21 +1029,6 @@ $sheet-padding: 16px
         .filters-menu
             .divider
                 display: list-item
-        .closed-menu
-            a:before
-                font-family: FontAwesome
-                position: absolute
-                left: 12px
-                top: 3px
-                content: "\f0da"
-        .open-menu
-            a:before
-                font-family: FontAwesome
-                position: absolute
-                left: 9px
-                top: 3px
-                content: "\f0d7"
-
         .oe-select-group
             margin: 3px 25px
         .oe-add-group
@@ -1164,14 +1059,14 @@ $sheet-padding: 16px
             > select, > input
                 width: -webkit-calc(100% - 20px)
                 width: calc(100% - 20px)
-            .oe_datepicker_main
+            .o_datepicker
                 width: -webkit-calc(100% - 20px)
                 width: calc(100% - 20px)
-            .oe_datepicker_master
-                width: 100%
-            .fa-calendar
-                margin-left: -21px
-                cursor: pointer
+                .o_datepicker_input
+                    width: 100%
+                .o_datepicker_button
+                    margin-left: -21px
+                    cursor: pointer
         span.remove-filter
             position: absolute
             top: 6px
@@ -1307,7 +1202,7 @@ $sheet-padding: 16px
             .pivot-dropdown-submenu:hover
                 > .dropdown-menu
                     display: block
-    .o-dashboard
+    .o_dashboard
         .oe_pivot
             th
                 border-top: 1px solid #bfbfb6
@@ -1337,20 +1232,7 @@ $sheet-padding: 16px
         input, select, textarea
             background-color: #F66 !important
             border: 1px solid #D00 !important
-    .oe_view_manager_current .oe_form_editable
-        .oe_highlight
-            color: #404040
-            background: none
-        button.oe_highlight
-            @include vertical-gradient(#efefef, #d8d8d8)
-            @include box-shadow((0 1px 2px rgba(0, 0, 0, .1), 0 1px 1px rgba(255, 255, 255, .8) inset))
-        button.oe_highlight:active
-            @include vertical-gradient(#e3e3e3, #f6f6f6)
-            @include box-shadow(none)
-        button.oe_highlight:hover
-            @include vertical-gradient(#f6f6f6, #e3e3e3)
-            @include box-shadow((0 1px 2px rgba(0, 0, 0, .1), 0 1px 1px rgba(255, 255, 255, .8) inset))
-    .oe_form_invisible
+    .o_form_invisible
         display: none !important
     .oe_form_editable
         .oe_read_only
@@ -1381,6 +1263,7 @@ $sheet-padding: 16px
             margin: 0
     .oe_form_sheetbg
         padding: 16px 0
+        position: relative
     .oe_form_sheet_width
         min-width: 650px
         max-width: $sheet-max-width
@@ -1412,14 +1295,12 @@ $sheet-padding: 16px
     // }}}
     // FormView.header {{{
     .oe_form > :not(.oe_form_nosheet) header, .oe_form > .oe_form_nosheet header
-        padding-left: 2px
+        padding-left: 14px
         ul:not(.oe_tooltip_technical):not(.oe_dropdown_menu)
             display: inline-block
             float: right
-        .oe_button
-            margin: 3px 2px 1px
-            &:first-child
-                margin-left: 6px
+        > button
+            margin: 0 2px
 
     .oe_form  header
         border-bottom: 1px solid #cacaca
@@ -1692,7 +1573,7 @@ $sheet-padding: 16px
         // Position: relative is used for the hidden input[type=file]
         // Do not remove it anymore !
         position: relative
-        input.oe_form_binary_file
+        input.o_form_input_file
             z-index: 0
             line-height: 0
             font-size: 12px
@@ -1758,7 +1639,7 @@ $sheet-padding: 16px
                 .fa
                     position: relative
                     font-size: 18px
-            input.oe_form_binary_file
+            input.o_form_input_file
                 display: inline-block
                 margin-left: -85px
                 height: 22px
@@ -1775,14 +1656,30 @@ $sheet-padding: 16px
             border-radius: 2px
             border: solid 1px rgba(124,123,173,0.14)
             .oe_attachment
+                background-repeat: no-repeat
+                word-wrap: break-word
                 padding: 2px
                 padding-left: 4px
                 padding-right: 4px
-                .fa
+                overflow: hidden
+                position: relative
+                a
+                    display: block
+                    background-repeat: no-repeat
+                    background-size: contain
+                    word-wrap: break-word
+                    width: 100px
+                    height: 80px
+                > .fa
                     font-size: 23px
-                    margin-top: -5px
-                .fa:hover
+                    position: absolute
+                    top: -5px
+                    right: -8px
+                > .fa:hover
                     text-decoration: none
+                .fa-inverse
+                    font-size: 1.15em
+                    margin-top: 1px
             .oe_attachment:nth-child(odd)
                 background: white
             .oe_attachment:nth-child(even)
@@ -1923,7 +1820,7 @@ $sheet-padding: 16px
             .oe_view_manager_view_list
                 min-height: 132px
 
-        .oe_form_field_one2many_list_row_add,.oe_form_field_many2many_list_row_add
+        .oe_form_field_x2many_list_row_add
             font-weight: bold
         .oe_list_content
             > thead
@@ -1951,7 +1848,7 @@ $sheet-padding: 16px
                         li
                             height: auto
                             line-height: 16px
-        .oe_list_buttons.oe_editing .oe_list_save
+        .oe_list_buttons.oe_editing .o_list_button_save
             // keep "save row" button hidden in o2m
             visibility: hidden
     .oe_form_editable
@@ -1961,12 +1858,15 @@ $sheet-padding: 16px
                     background-color: #d2d2ff
                 td.oe_readonly
                     background-color: #eee
-
     $row-height: 27px
-    .oe_list_editable .oe_list_content td.oe_list_field_cell
-        padding: 4px 6px 3px
+    .oe_list_editable
+        .oe_list_content td.oe_list_field_cell
+            padding: 4px 6px 3px
+        .o_temp_visible
+            opacity: 0
+            display: block !important
     .oe_list.oe_list_editable.oe_editing
-        .oe_edition .oe_list_field_cell
+        .oe_edition .oe_list_field_cell:not(.oe-button)
             *
                 visibility: hidden
             color: transparent
@@ -2002,9 +1902,9 @@ $sheet-padding: 16px
                     width: 100% !important
                     text-align: right
             &.oe_form_field_datetime,&.oe_form_field_date
-                input.oe_datepicker_master
+                input.o_datepicker_input
                     width: 100% !important
-                .oe_datepicker_main
+                .o_datepicker
                     width: -webkit-calc(100% - 20px)
                     width: calc(100% - 20px)
             &.oe_form_field_reference
@@ -2019,19 +1919,15 @@ $sheet-padding: 16px
     // }}}
     // ListView {{{
     .oe_list_buttons
-        .oe_alternative
-            visibility: hidden
-        .oe_list_save, .oe_list_discard
+        .o_list_button_save, .o_list_button_discard
             display: none
         &.oe_editing
-            .oe_list_add
+            .o_list_button_add
                 display: none
-            .oe_list_save
+            .o_list_button_save
                 display: inline-block
-            .oe_list_discard
+            .o_list_button_discard
                 display: inline
-            .oe_alternative
-                visibility: visible
 
     .oe_list
         &.oe_cannot_edit
@@ -2106,6 +2002,10 @@ $sheet-padding: 16px
             > tr
                 height: $row-height
                 border-top: 1px solid #ddd
+                &.text-bf
+                    font-weight: bold
+                &.text-it
+                    font-style: italic
                 > td.oe_list_field_cell
                     padding: 3px 6px
                     white-space: pre-line
@@ -2406,7 +2306,7 @@ body.oe_single_form
     .placeholder
         color: $tag-border !important
         font-style: italic !important
-    .oe_form_binary_file
+    .o_form_input_file
         width: 80px
     .oe_form_field_boolean input
         background: #fff
@@ -2419,25 +2319,8 @@ body.oe_single_form
     .oe_logo
         img
             border: none
-    .oe_header_row
-        button.oe_highlight
-            padding-top: 0
-            padding-bottom: 0
     .oe_view_manager_view_kanban
         display: table-cell
-    .oe_view_manager_buttons
-        button.oe_write_full
-            padding-top: 0
-            padding-bottom: 0
-        button.oe_highlight
-            padding-top: 0
-            padding-bottom: 0
-        button .oe_form_button_edit
-            padding-top: 0
-            padding-bottom: 0
-        button .oe_form_button_create
-            padding-top: 0
-            padding-bottom: 0
     .oe_kanban_image
         border: none
     .oe_msg_icon
@@ -2518,9 +2401,19 @@ body.oe_single_form
 @media print
     body
         height: auto !important
+        overflow: visible !important
+    tr, td
+        page-break-inside: avoid
+        page-break-after: auto
     .openerp#announcement_bar_table
         display: none
     .openerp
+        &.openerp_webclient_container
+            display: block
+            height: auto !important
+        .oe-view-manager
+            display: block
+            overflow: visible
         .oe_application, .oe_view_manager_wrapper
             height: auto !important
         .oe_application > div > .oe_view_manager > .oe_view_manager_wrapper > div > .oe_view_manager_body
@@ -2532,7 +2425,7 @@ body.oe_single_form
         .oe_list_content
             button, input[type=checkbox]
                 visibility: hidden
-        .tree_header button, .oe_mail .oe_mail_thread_msg .oe_mail_unread, .oe_mail_fetch_more, .oe_m2o_drop_down_button img, .oe_form_field_one2many_list_row_add
+        .tree_header button, .oe_mail .oe_mail_thread_msg .oe_mail_unread, .oe_mail_fetch_more, .oe_m2o_drop_down_button img, .oe_form_field_x2many_list_row_add
             visibility: hidden
         a
             &.oe_m2o_cm_button, &.fa
@@ -2548,7 +2441,8 @@ body.oe_single_form
                 box-shadow: 0px 0px 0px
                 .oe_list
                     overflow-x: visible
-        .oe-control-panel, .oe-o2m-control-panel
+            width: auto
+        .oe-control-panel, .oe-x2m-control-panel
             border: 0px !important
             box-shadow: 0px 0px 0px
         text-shadow: none
@@ -2556,6 +2450,8 @@ body.oe_single_form
             background: none
         .openerp div.oe_mail_wall
             overflow: hidden !important
+        .oe-view-manager .oe-view-manager-content
+            overflow: visible
     .openerp.openerp_webclient_container
         overflow: visible
 // }}}
@@ -2613,41 +2509,6 @@ body.oe_single_form
     background-image: url("/web/static/lib/jquery.ui/images/ui-icons_ffffff_256x240.png")
 // End jquery-ui override}}}
 
-// Customized modal according bootstrap3
-.modal
-    .modal-header button.close
-        border: none
-        background: none
-        padding: 1px
-        height: 18px
-        font-size: 20px
-    .modal-body
-        overflow: auto
-        padding: 0
-        .oe_application
-            width: 100%
-        .oe_popup_list
-            display: none
-            min-height: 150px
-        .oe-view-manager
-            min-height: 150px
-        .oe_form_sheetbg
-            .oe_form_sheet
-                padding: 0
-    .modal-footer
-        text-align: left
-    .oe_button
-        margin: 0 4px 0 0
-    .oe_act_window.modal-body
-        padding: 0
-    .oe-view-manager-content
-        position: static !important
-
-@media (min-width: 768px)
-    .modal .modal-body
-        max-height: -webkit-calc(100vh - 170px)
-        max-height: calc(100vh - 170px)
-
 .ui-datepicker
     z-index: 1500 !important
 
@@ -2700,3 +2561,35 @@ body
 
 
 // au BufWritePost,FileWritePost *.sass :!sass --style expanded --line-numbers <afile> > "%:p:r.css"
+
+// ProgresBar widget
+
+.o_progressbar
+    > div
+        display: inline-block
+
+    .o_progressbar_title
+        white-space: nowrap
+        padding-right: 10px
+
+    .o_progress
+        width: 100px
+        height: 15px
+        vertical-align: middle
+
+        border: 1px solid silver
+        border-radius: 10px
+        overflow: hidden
+
+        background-color: white
+        &.o_progress_overflow
+            background-color: gray
+
+        .o_progressbar_complete
+            background-color: #3071A9
+            height: 100%
+
+    .o_progressbar_value
+        width: 100px
+        white-space: nowrap
+        padding-left: 10px

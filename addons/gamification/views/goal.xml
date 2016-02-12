@@ -23,7 +23,7 @@
             <field name="name">Goal List</field>
             <field name="model">gamification.goal</field>
             <field name="arch" type="xml">
-                <tree string="Goal List" colors="red:state == 'failed';green:state == 'reached';grey:state == 'canceled'" create="false">
+                <tree string="Goal List" decoration-danger="state == 'failed'" decoration-success="state == 'reached'" decoration-muted="state == 'canceled'" create="false">
                     <field name="definition_id" invisible="1" />
                     <field name="user_id" invisible="1" />
                     <field name="start_date"/>
@@ -78,7 +78,7 @@
                                 <label for="current" />
                                 <div>
                                     <field name="current" class="oe_inline"/>
-                                    <button string="refresh" type="object" name="update" class="oe_link" attrs="{'invisible':['|',('computation_mode', '=', 'manually'),('state', '=', 'draft')]}" />
+                                    <button string="refresh" type="object" name="update_goal" class="oe_link" attrs="{'invisible':['|',('computation_mode', '=', 'manually'),('state', '=', 'draft')]}" />
                                     <div class="oe_grey" attrs="{'invisible':[('definition_id', '=', False)]}">
                                         Reached when current value is <strong><field name="definition_condition" class="oe_inline"/></strong> than the target.
                                     </div>
@@ -162,7 +162,7 @@
                                             <div class="oe_goal_state">
                                                 <t t-if="record.state.raw_value=='reached'"><i class="oe_green fa fa-check" title="Goal Reached"/></t>
                                                 <t t-if="record.state.raw_value=='inprogress'"><i class="fa fa-clock-o" title="Goal in Progress"/></t>
-                                                <t t-if="record.state.raw_value=='failed'"><i class="oe_red fa fa-remove" title="Goal Failed"/></t>
+                                                <t t-if="record.state.raw_value=='failed'"><i class="oe_red fa fa-times" title="Goal Failed"/></t>
                                             </div>
                                         </t>
                                         <t t-if="record.definition_display.raw_value == 'progress'">
@@ -232,7 +232,7 @@
                     <sheet>
                             <label for="name" class="oe_edit_only"/>
                             <h1>
-                                <field name="name" class="oe_inline"/>
+                                <field name="name"/>
                             </h1>
                             <label for="description" class="oe_edit_only"/>
                             <div>
@@ -246,20 +246,11 @@
                                 <!-- Hide the fields below if manually -->
                                 <field name="model_id" class="oe_inline" on_change="on_change_model_id(model_id)"
                                     attrs="{'invisible':[('computation_mode','not in',('sum', 'count'))], 'required':[('computation_mode','in',('sum', 'count'))]}"/>
-                                <field name="model_inherited_model_ids" invisible="True" />
                                 <field name="field_id" class="oe_inline"
-                                    attrs="{'invisible':[('computation_mode','!=','sum')], 'required':[('computation_mode','=','sum')]}"
-                                    domain="['|',
-                                        ('model_id', '=', model_id),
-                                        ('model_id', 'in', model_inherited_model_ids and model_inherited_model_ids[0] and model_inherited_model_ids[0][2])]" />
-                                <field name="field_date_id" class="oe_inline" attrs="{'invisible':[('computation_mode','not in',('sum', 'count'))]}"
-                                    domain="[
-                                        ('ttype', 'in', ('date', 'datetime')),
-                                        '|',
-                                            ('model_id', '=', model_id),
-                                            ('model_id', 'in', model_inherited_model_ids and model_inherited_model_ids[0] and model_inherited_model_ids[0][2])]" />
+                                    attrs="{'invisible':[('computation_mode','!=','sum')], 'required':[('computation_mode','=','sum')]}"/>
+                                <field name="field_date_id" class="oe_inline" attrs="{'invisible':[('computation_mode','not in',('sum', 'count'))]}"/>
                                 <field name="domain" attrs="{'invisible':[('computation_mode','not in',('sum', 'count'))], 'required':[('computation_mode','in',('sum', 'count'))]}" class="oe_inline"/>
-                                <field name="compute_code" attrs="{'invisible':[('computation_mode','!=','python')], 'required':[('computation_mode','=','python')]}" placeholder="e.g. result = pool.get('mail.followers').search(cr, uid, [('res_model', '=', 'mail.group'), ('partner_id', '=', object.user_id.partner_id.id)], count=True, context=context)"/>
+                                <field name="compute_code" attrs="{'invisible':[('computation_mode','!=','python')], 'required':[('computation_mode','=','python')]}" placeholder="e.g. result = pool.get('mail.followers').search(cr, uid, [('res_model', '=', 'mail.channel'), ('partner_id', '=', object.user_id.partner_id.id)], count=True, context=context)"/>
                                 <field name="condition" widget="radio"/>
                             </group>
                             <group string="Optimisation" attrs="{'invisible': [('computation_mode', '!=', 'count')]}">

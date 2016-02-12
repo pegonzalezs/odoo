@@ -17,13 +17,8 @@
     -->
 
       <!-- After installation of the module, open the related menu -->
-      <record id="action_fleet_menu" model="ir.actions.client">
-          <field name="name">Open Fleet Menu</field>
-          <field name="tag">reload</field>
-          <field name="params" eval="{'menu_id': ref('fleet.menu_root')}"/>
-      </record>
       <record id="base.open_menu" model="ir.actions.todo">
-          <field name="action_id" ref="action_fleet_menu"/>
+          <field name="action_id" ref="base.action_open_website"/>
           <field name="state">open</field>
       </record>
 
@@ -418,34 +413,42 @@
 
       <record id="vehicle_tag_junior" model="fleet.vehicle.tag" >
         <field name="name">Junior</field>
+        <field name="color" eval="1"/>
       </record>
 
       <record id="vehicle_tag_senior" model="fleet.vehicle.tag" >
         <field name="name">Senior</field>
+        <field name="color" eval="2"/>
       </record>
 
       <record id="vehicle_tag_leasing" model="fleet.vehicle.tag" >
         <field name="name">Employee Car</field>
+        <field name="color" eval="3"/>
       </record>
 
       <record id="vehicle_tag_purchased" model="fleet.vehicle.tag" >
         <field name="name">Purchased</field>
+        <field name="color" eval="4"/>
       </record>
 
       <record id="vehicle_tag_compact" model="fleet.vehicle.tag" >
         <field name="name">Compact</field>
+        <field name="color" eval="5"/>
       </record>
 
       <record id="vehicle_tag_sedan" model="fleet.vehicle.tag" >
         <field name="name">Sedan</field>
+        <field name="color" eval="6"/>
       </record>
 
       <record id="vehicle_tag_convertible" model="fleet.vehicle.tag" >
         <field name="name">Convertible</field>
+        <field name="color" eval="7"/>
       </record>
 
       <record id="vehicle_tag_break" model="fleet.vehicle.tag" >
         <field name="name">Break</field>
+        <field name="color" eval="8"/>
       </record>
 
       <record id="model_corsa" model="fleet.vehicle.model">

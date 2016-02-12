@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2011-2012 OpenERP s.a. (<http://openerp.com>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 """
 
@@ -170,24 +152,6 @@ def wsgi_xmlrpc(environ, start_response):
         params, method = xmlrpclib.loads(data)
         return xmlrpc_return(start_response, service, method, params, string_faultcode)
 
-# WSGI handlers registered through the register_wsgi_handler() function below.
-module_handlers = []
-# RPC endpoints registered through the register_rpc_endpoint() function below.
-rpc_handlers = {}
-
-def register_wsgi_handler(handler):
-    """ Register a WSGI handler.
-
-    Handlers are tried in the order they are added. We might provide a way to
-    register a handler for specific routes later.
-    """
-    module_handlers.append(handler)
-
-def register_rpc_endpoint(endpoint, handler):
-    """ Register a handler for a given RPC enpoint.
-    """
-    rpc_handlers[endpoint] = handler
-
 def application_unproxied(environ, start_response):
     """ WSGI entry point."""
     # cleanup db/uid trackers - they're set at HTTP dispatch in
@@ -202,9 +166,7 @@ def application_unproxied(environ, start_response):
 
     with openerp.api.Environment.manage():
         # Try all handlers until one returns some result (i.e. not None).
-        wsgi_handlers = [wsgi_xmlrpc]
-        wsgi_handlers += module_handlers
-        for handler in wsgi_handlers:
+        for handler in [wsgi_xmlrpc, openerp.http.root]:
             result = handler(environ, start_response)
             if result is None:
                 continue

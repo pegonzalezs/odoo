@@ -8,7 +8,6 @@ from openerp import tools
 from openerp.addons.web import http
 from openerp.addons.web.http import request
 from openerp.addons.website.models.website import slug, unslug
-from openerp.addons.web.controllers.main import login_redirect
 from openerp.exceptions import UserError
 from openerp.osv.orm import browse_record
 from openerp.tools.translate import _
@@ -158,6 +157,7 @@ class WebsiteBlog(http.Controller):
         values = {
             'blog': blog,
             'blogs': blogs,
+            'main_object': blog,
             'tags': all_tags,
             'active_tag_ids': active_tag_ids,
             'tags_list' : tags_list,
@@ -169,6 +169,15 @@ class WebsiteBlog(http.Controller):
         }
         response = request.website.render("website_blog.blog_post_short", values)
         return response
+
+    @http.route(['/blog/<model("blog.blog"):blog>/feed'], type='http', auth="public")
+    def blog_feed(self, blog, limit='15'):
+        v = {}
+        v['blog'] = blog
+        v['base_url'] = request.env['ir.config_parameter'].get_param('web.base.url')
+        v['posts'] = request.env['blog.post'].search([('blog_id','=', blog.id)], limit=min(int(limit), 50))
+        r = request.render("website_blog.blog_feed", v, headers=[('Content-Type', 'application/atom+xml')])
+        return r
 
     @http.route([
             '''/blog/<model("blog.blog"):blog>/post/<model("blog.post", "[('blog_id','=',blog[0])]"):blog_post>''',
@@ -264,23 +273,12 @@ class WebsiteBlog(http.Controller):
         message_id = BlogPost.message_post(
             cr, uid, int(blog_post_id),
             body=message_content,
-            type='comment',
+            message_type='comment',
             subtype='mt_comment',
             author_id=partner_id,
             path=post.get('path', False),
             context=context)
         return message_id
-
-    @http.route(['/blog/post_comment/<int:blog_post_id>'], type='http', auth="public", website=True)
-    def blog_post_comment(self, blog_post_id=0, **kw):
-        if not request.session.uid:
-            return login_redirect()
-        cr, uid, context = request.cr, request.uid, request.context
-        if kw.get('comment'):
-            self._blog_post_message(blog_post_id, kw.get('comment'), **kw)
-        blog_post = request.registry['blog.post'].browse(cr, uid, blog_post_id, context=context)
-        return werkzeug.utils.redirect("/blog/%s/post/%s#comments" % (slug(blog_post.blog_id), slug(blog_post)))
-
 
     def _get_discussion_detail(self, ids, publish=False, **post):
         cr, uid, context = request.cr, request.uid, request.context
@@ -317,7 +315,7 @@ class WebsiteBlog(http.Controller):
         new_blog_post = request.registry['blog.post'].browse(cr, uid, new_blog_post_id, context=context)
         return werkzeug.utils.redirect("/blog/%s/post/%s?enable_editor=1" % (slug(new_blog_post.blog_id), slug(new_blog_post)))
 
-    @http.route('/blog/post_duplicate', type='http', auth="public", website=True)
+    @http.route('/blog/post_duplicate', type='http', auth="public", website=True, methods=['POST'])
     def blog_post_copy(self, blog_post_id, **post):
         """ Duplicate a blog.
 
@@ -358,7 +356,7 @@ class WebsiteBlog(http.Controller):
     def change_bg(self, post_id=0, cover_properties={}, **post):
         if not post_id:
             return False
-        return request.registry['blog.post'].write(request.cr, request.uid, [int(post_id)], {'cover_properties': cover_properties}, request.context)
+        return request.registry['blog.post'].write(request.cr, request.uid, [int(post_id)], {'cover_properties': json.dumps(cover_properties)}, request.context)
 
     @http.route('/blog/get_user/', type='json', auth="public", website=True)
     def get_user(self, **post):

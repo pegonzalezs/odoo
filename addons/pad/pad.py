@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from openerp.osv import fields, osv
 import random
 import re
 import string
 import urllib2
 import logging
-from openerp import SUPERUSER_ID
+
+from openerp import models, SUPERUSER_ID
 from openerp.tools.translate import _
 from openerp.tools import html2plaintext
 from py_etherpad import EtherpadLiteClient
@@ -13,7 +13,7 @@ from openerp.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-class pad_common(osv.osv_memory):
+class pad_common(models.AbstractModel):
     _name = 'pad.common'
 
     def pad_is_configured(self, cr, uid, context=None):
@@ -36,7 +36,7 @@ class pad_common(osv.osv_memory):
         pad["server"] = pad["server"].rstrip('/')
         # generate a salt
         s = string.ascii_uppercase + string.digits
-        salt = ''.join([s[random.randint(0, len(s) - 1)] for i in range(10)])
+        salt = ''.join([s[random.SystemRandom().randint(0, len(s) - 1)] for i in range(10)])
         #path
         # etherpad hardcodes pad id length limit to 50
         path = '-%s-%s' % (self._name, salt)

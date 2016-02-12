@@ -7,7 +7,9 @@ odoo.define('point_of_sale.gui', function (require) {
 // it is available to all pos objects trough the '.gui' field.
 
 var core = require('web.core');
-var Model = require('web.Model');
+var Model = require('web.DataModel');
+var formats = require('web.formats');
+var session = require('web.session');
 
 var _t = core._t;
 
@@ -26,6 +28,7 @@ var Gui = core.Class.extend({
         this.current_screen = null; 
 
         this.chrome.ready.then(function(){
+            self.close_other_tabs();
             var order = self.pos.get_order();
             if (order) {
                 self.show_saved_screen(order);
@@ -157,7 +160,7 @@ var Gui = core.Class.extend({
             this.close_popup();
         }
         this.current_popup = this.popup_instances[name];
-        this.current_popup.show(options);
+        return this.current_popup.show(options);
     },
 
     // close the current popup.
@@ -172,6 +175,36 @@ var Gui = core.Class.extend({
     // is there an active popup ?
     has_popup: function() {
         return !!this.current_popup;
+    },
+
+    /* ---- Gui: INTER TAB COMM ---- */
+
+    // This sets up automatic pos exit when open in
+    // another tab.
+    close_other_tabs: function() {
+        var self = this;
+
+        localStorage['message'] = '';
+        localStorage['message'] = JSON.stringify({
+            'message':'close_tabs',
+            'session': this.pos.pos_session.id,
+        });
+
+        window.addEventListener("storage", function(event) {
+            var msg = event.data;
+
+            if ( event.key === 'message' && event.newValue) {
+
+                var msg = JSON.parse(event.newValue);
+                if ( msg.message  === 'close_tabs' &&
+                     msg.session  ==  self.pos.pos_session.id ) {
+
+                    console.info('POS / Session opened in another window. EXITING POS')
+                    self._close();
+                }
+            }
+
+        }, false);
     },
 
     /* ---- Gui: ACCESS CONTROL ---- */
@@ -266,13 +299,45 @@ var Gui = core.Class.extend({
 
     close: function() {
         var self = this;
+        var pending = this.pos.db.get_orders().length;
+
+        if (!pending) {
+            this._close();
+        } else {
+            this.pos.push_order().always(function() {
+                var pending = self.pos.db.get_orders().length;
+                if (!pending) {
+                    self._close();
+                } else {
+                    var reason = self.pos.get('failed') ? 
+                                 'configuration errors' : 
+                                 'internet connection issues';  
+
+                    self.show_popup('confirm', {
+                        'title': _t('Offline Orders'),
+                        'body':  _t(['Some orders could not be submitted to',
+                                     'the server due to ' + reason + '.',
+                                     'You can exit the Point of Sale, but do',
+                                     'not close the session before the issue',
+                                     'has been resolved.'].join(' ')),
+                        'confirm': function() {
+                            self._close();
+                        },
+                    });
+                }
+            });
+        }
+    },
+
+    _close: function() {
+        var self = this;
         this.chrome.loading_show();
         this.chrome.loading_message(_t('Closing ...'));
 
         this.pos.push_order().then(function(){
             return new Model("ir.model.data").get_func("search_read")([['name', '=', 'action_client_pos_menu']], ['res_id'])
             .pipe(function(res) {
-                window.location = '/web#action=' + res[0]['res_id'];
+                window.location = '/web' + ((session.debug)? '?debug' : '') + '#action=' + res[0]['res_id'];
             },function(err,event) {
                 event.preventDefault();
                 self.show_popup('error',{
@@ -299,6 +364,43 @@ var Gui = core.Class.extend({
         $('body').append('<audio src="'+src+'" autoplay="true"></audio>');
     },
 
+    /* ---- Gui: FILE I/O ---- */
+
+    // This will make the browser download 'contents' as a 
+    // file named 'name'
+    // if 'contents' is not a string, it is converted into
+    // a JSON representation of the contents. 
+
+    download_file: function(contents, name) {
+        var URL = window.URL || window.webkitURL;
+        
+        if (typeof contents !== 'string') {
+            contents = JSON.stringify(contents,null,2);
+        }
+
+        var blob = new Blob([contents]);
+
+        var evt  = document.createEvent("HTMLEvents");
+            evt.initEvent("click");
+
+        $("<a>",{
+            download: name || 'document.txt',
+            href: URL.createObjectURL(blob),
+        }).get(0).dispatchEvent(evt);
+    },
+
+    /* ---- Gui: EMAILS ---- */
+
+    // This will launch the user's email software
+    // with a new email with the address, subject and body
+    // prefilled.
+
+    send_email: function(address, subject, body) {
+        window.open("mailto:" + address + 
+                          "?subject=" + (subject ? window.encodeURIComponent(subject) : '') +
+                          "&body=" + (body ? window.encodeURIComponent(body) : ''));
+    },
+
     /* ---- Gui: KEYBOARD INPUT ---- */
 
     // This is a helper to handle numpad keyboard input. 
@@ -311,14 +413,16 @@ var Gui = core.Class.extend({
     numpad_input: function(buffer, input, options) { 
         var newbuf  = buffer.slice(0);
         options = options || {};
+        var newbuf_float  = formats.parse_value(newbuf, {type: "float"}, 0);
+        var decimal_point = _t.database.parameters.decimal_point;
 
-        if (input === '.') {
+        if (input === decimal_point) {
             if (options.firstinput) {
                 newbuf = "0.";
             }else if (!newbuf.length || newbuf === '-') {
                 newbuf += "0.";
-            } else if (newbuf.indexOf('.') < 0){
-                newbuf = newbuf + '.';
+            } else if (newbuf.indexOf(decimal_point) < 0){
+                newbuf = newbuf + decimal_point;
             }
         } else if (input === 'CLEAR') {
             newbuf = ""; 
@@ -335,7 +439,7 @@ var Gui = core.Class.extend({
                 newbuf = '-' + newbuf;
             }
         } else if (input[0] === '+' && !isNaN(parseFloat(input))) {
-            newbuf = '' + ((parseFloat(newbuf) || 0) + parseFloat(input));
+            newbuf = this.chrome.format_currency_no_symbol(newbuf_float + parseFloat(input));
         } else if (!isNaN(parseInt(input))) {
             if (options.firstinput) {
                 newbuf = '' + input;

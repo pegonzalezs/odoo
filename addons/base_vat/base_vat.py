@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2012 OpenERP SA (<http://openerp.com>)
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
 import string
@@ -32,10 +14,9 @@ except ImportError:
                                           "Install it to support more countries, for example with `easy_install vatnumber`.")
     vatnumber = None
 
-from openerp.osv import fields, osv
+from openerp.osv import osv
 from openerp.tools.misc import ustr
 from openerp.tools.translate import _
-from openerp.exceptions import UserError
 
 _ref_vat = {
     'at': 'ATU12345675',
@@ -114,12 +95,6 @@ class res_partner(osv.osv):
             # country code or empty VAT number), so we fall back to the simple check.
             return self.simple_vat_check(cr, uid, country_code, vat_number, context=context)
 
-    def button_check_vat(self, cr, uid, ids, context=None):
-        if not self.check_vat(cr, uid, ids, context=context):
-            msg = self._construct_constraint_msg(cr, uid, ids, context=context)
-            raise UserError(msg)
-        return True
-
     def check_vat(self, cr, uid, ids, context=None):
         user_company = self.pool.get('res.users').browse(cr, uid, uid).company_id
         if user_company.vat_check_vies:
@@ -133,15 +108,9 @@ class res_partner(osv.osv):
                 continue
             vat_country, vat_number = self._split_vat(partner.vat)
             if not check_func(cr, uid, vat_country, vat_number, context=context):
-                _logger.info(_("Importing VAT Number [%s] is not valid !" % vat_number))
+                _logger.info("Importing VAT Number [%s] is not valid !", vat_number)
                 return False
         return True
-
-    def vat_change(self, cr, uid, ids, value, context=None):
-        return {'value': {'vat_subjected': bool(value)}}
-
-    def _commercial_fields(self, cr, uid, context=None):
-        return super(res_partner, self)._commercial_fields(cr, uid, context=context) + ['vat_subjected']
 
     def _construct_constraint_msg(self, cr, uid, ids, context=None):
         def default_vat_check(cn, vn):

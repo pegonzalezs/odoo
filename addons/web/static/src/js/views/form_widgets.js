@@ -5,14 +5,17 @@ var core = require('web.core');
 var crash_manager = require('web.crash_manager');
 var data = require('web.data');
 var datepicker = require('web.datepicker');
+var ProgressBar = require('web.ProgressBar');
 var Dialog = require('web.Dialog');
 var common = require('web.form_common');
 var formats = require('web.formats');
 var framework = require('web.framework');
-var Model = require('web.Model');
+var Model = require('web.DataModel');
+var Priority = require('web.Priority');
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var utils = require('web.utils');
+var dom_utils = require('web.dom_utils');
 
 var _t = core._t;
 var QWeb = core.qweb;
@@ -21,8 +24,6 @@ var WidgetButton = common.FormWidget.extend({
     template: 'WidgetButton',
     init: function(field_manager, node) {
         node.attrs.type = node.attrs['data-button-type'];
-        this.is_stat_button = /\boe_stat_button\b/.test(node.attrs['class']);
-        this.icon_class = node.attrs.icon && "stat_button_icon fa " + node.attrs.icon + " fa-fw";
         this._super(field_manager, node);
         this.force_disabled = false;
         this.string = (this.node.attrs.string || '').replace(/_/g, '');
@@ -30,8 +31,12 @@ var WidgetButton = common.FormWidget.extend({
             // TODO fme: provide enter key binding to widgets
             this.view.default_focus_button = this;
         }
-        if (this.node.attrs.icon && (! /\//.test(this.node.attrs.icon))) {
-            this.node.attrs.icon = '/web/static/src/img/icons/' + this.node.attrs.icon + '.png';
+        if (this.node.attrs.icon) {
+            // if the icon isn't a font-awesome one, find it in the icons folder
+            this.fa_icon = this.node.attrs.icon.indexOf('fa-') === 0;
+            if (!this.fa_icon && (! /\//.test(this.node.attrs.icon))) {
+                this.node.attrs.icon = '/web/static/src/img/icons/' + this.node.attrs.icon + '.png';
+            }
         }
     },
     start: function() {
@@ -51,6 +56,9 @@ var WidgetButton = common.FormWidget.extend({
         this.execute_action().always(function() {
             self.force_disabled = false;
             self.check_disable();
+            if (self.$el.hasClass('o_wow')) {
+                self.show_wow();
+            }
         });
     },
     execute_action: function() {
@@ -58,23 +66,8 @@ var WidgetButton = common.FormWidget.extend({
         var exec_action = function() {
             if (self.node.attrs.confirm) {
                 var def = $.Deferred();
-                var dialog = new Dialog(this, {
-                    title: _t('Confirm'),
-                    buttons: [
-                        {text: _t("Cancel"), click: function() {
-                                this.parents('.modal').modal('hide');
-                            }
-                        },
-                        {text: _t("Ok"), click: function() {
-                                var self2 = this;
-                                self.on_confirmed().always(function() {
-                                    self2.parents('.modal').modal('hide');
-                                });
-                            }
-                        }
-                    ],
-                }, $('<div/>').text(self.node.attrs.confirm)).open();
-                dialog.on("closing", null, function() {def.resolve();});
+                Dialog.confirm(self, self.node.attrs.confirm, { confirm_callback: self.on_confirmed })
+                      .on("closed", null, function() { def.resolve(); });
                 return def.promise();
             } else {
                 return self.on_confirmed();
@@ -88,7 +81,6 @@ var WidgetButton = common.FormWidget.extend({
     },
     on_confirmed: function() {
         var self = this;
-
         var context = this.build_context();
         return this.view.do_execute_action(
             _.extend({}, this.node.attrs, {context: context}),
@@ -96,12 +88,27 @@ var WidgetButton = common.FormWidget.extend({
                 if (!_.isObject(reason)) {
                     self.view.recursive_reload();
                 }
+            }).fail(function () {
+                self.view.recursive_reload();
             });
     },
     check_disable: function() {
         var disabled = (this.force_disabled || !this.view.is_interactible_record());
         this.$el.prop('disabled', disabled);
         this.$el.css('color', disabled ? 'grey' : '');
+    },
+    show_wow: function() {
+        var class_to_add = 'o_wow_thumbs';
+        if (Math.random() > 0.9) {
+            var other_classes = ['o_wow_peace', 'o_wow_heart'];
+            class_to_add = other_classes[Math.floor(Math.random()*other_classes.length)];
+        }
+
+        var $body = $('body');
+        $body.addClass(class_to_add);
+        setTimeout(function() {
+            $body.removeClass(class_to_add);
+        }, 1000);
     }
 });
 
@@ -176,6 +183,7 @@ var FieldChar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
 });
 
 var KanbanSelection = FieldChar.extend({
+    template: "FormSelection",
     init: function (field_manager, node) {
         this._super(field_manager, node);
     },
@@ -191,53 +199,58 @@ var KanbanSelection = FieldChar.extend({
     prepare_dropdown_selection: function() {
         var self = this;
         var _data = [];
-        var fetch_stage;
-        var selection = this.field.selection || [];
-        var stage_id = _.isArray(this.view.datarecord.stage_id) ? this.view.datarecord.stage_id[0] : this.view.datarecord.stage_id;
-        var legend_field = this.options && this.options.states_legend_field || false;
-        var fields_to_read = _.map(
-            this.options && this.options.states_legend || {},
-            function (value, key, list) { return value; });
-        if (legend_field && fields_to_read && stage_id) {
-            fetch_stage = new data.DataSet(
-                this,
-                self.view.fields[legend_field].field.relation).read_ids([stage_id],
-                fields_to_read);
-        }
-        else { fetch_stage = $.Deferred().resolve(false); }
-        return $.when(fetch_stage).then(function (stage_data) {
-            _.map(selection, function(res) {
-                var value = {
-                    'name': res[0],
-                    'tooltip': res[1],
-                    'state_name': res[1],
-                };
-                if (stage_data && stage_data[0][self.options.states_legend[res[0]]]) {
-                    value['state_name'] = stage_data[0][self.options.states_legend[res[0]]];
-                    value['tooltip'] = stage_data[0][self.options.states_legend[res[0]]];
-                }
-                if (res[0] == 'normal') { value['state_class'] = 'oe_kanban_status'; }
-                else if (res[0] == 'done') { value['state_class'] = 'oe_kanban_status oe_kanban_status_green'; }
-                else { value['state_class'] = 'oe_kanban_status oe_kanban_status_red'; }
-                _data.push(value);
-            });
-            return _data;
+        var current_stage_id = self.view.datarecord.stage_id[0];
+        var stage_data = {
+            id: current_stage_id,
+            legend_normal: self.view.datarecord.legend_normal || undefined,
+            legend_blocked : self.view.datarecord.legend_blocked || undefined,
+            legend_done: self.view.datarecord.legend_done || undefined,
+        };
+        _.map(self.field.selection || [], function(selection_item) {
+            var value = {
+                'name': selection_item[0],
+                'tooltip': selection_item[1],
+            };
+            if (selection_item[0] === 'normal') {
+                value.state_name = stage_data.legend_normal ? stage_data.legend_normal : selection_item[1];
+            } else if (selection_item[0] === 'done') {
+                value.state_class = 'oe_kanban_status_green';
+                value.state_name = stage_data.legend_done ? stage_data.legend_done : selection_item[1];
+            } else {
+                value.state_class = 'oe_kanban_status_red';
+                value.state_name = stage_data.legend_blocked ? stage_data.legend_blocked : selection_item[1];
+            }
+            _data.push(value);
         });
+        return _data;
     },
     render_value: function() {
+        this._super();
+        this.states = this.prepare_dropdown_selection();
         var self = this;
-        var dd_fetched = this.prepare_dropdown_selection();
-        return $.when(dd_fetched).then(function (states) {
-            self.states = states;
-            self.$el.html(QWeb.render("KanbanSelection", {'widget': self}));
-            self.$el.find('li').on('click', self.set_kanban_selection.bind(self));
+        // Adapt "FormSelection"
+        var current_state = _.find(this.states, function(state) {
+            return state.name === self.get('value');
         });
+        this.$('.oe_kanban_status')
+            .removeClass('oe_kanban_status_red oe_kanban_status_green')
+            .addClass(current_state.state_class);
+
+        // Render "FormSelection.Items" and move it into "FormSelection"
+        var $items = $(QWeb.render('FormSelection.items', {
+            states: _.without(this.states, current_state)
+        }));
+        var $dropdown = this.$el.find('.dropdown-menu');
+        $dropdown.children().remove(); // remove old items
+        $items.appendTo($dropdown);
+        this.$el.find('a').on('click', this.set_kanban_selection.bind(this));
     },
     /* setting the value: in view mode, perform an asynchronous call and reload
     the form view; in edit mode, use set_value to save the new value that will
     be written when saving the record. */
     set_kanban_selection: function (ev) {
         var self = this;
+        ev.preventDefault();
         var li = $(ev.target).closest('li');
         if (li.length) {
             var value = String(li.data('value'));
@@ -261,60 +274,54 @@ var KanbanSelection = FieldChar.extend({
     },
 });
 
-var Priority = FieldChar.extend({
-    init: function (field_manager, node) {
-        this._super(field_manager, node);
+var FieldPriority = common.AbstractField.extend({
+    events: {
+        'mouseup': function(e) {
+            e.stopPropagation();
+        },
     },
-    prepare_priority: function() {
-        var self = this;
-        var selection = this.field.selection || [];
-        var init_value = selection && selection[0][0] || 0;
-        var data = _.map(selection.slice(1), function(element, index) {
-            var value = {
-                'value': element[0],
-                'name': element[1],
-                'click_value': element[0],
-            };
-            if (index === 0 && self.get('value') === element[0]) {
-                value['click_value'] = init_value;
-            }
-            return value;
+    start: function() {
+        this.priority = new Priority(this, {
+            readonly: this.get('readonly'),
+            value: this.get('value'),
+            values: this.field.selection || [],
         });
-        return data;
+
+        this.priority.on('update', this, function(update) {
+            /* setting the value: in view mode, perform an asynchronous call and reload
+            the form view; in edit mode, use set_value to save the new value that will
+            be written when saving the record. */
+            var view = this.view;
+            if(view.get('actual_mode') === 'view') {
+                var write_values = {};
+                write_values[this.name] = update.value;
+                view.dataset._model.call('write', [
+                    [view.datarecord.id],
+                    write_values,
+                    view.dataset.get_context()
+                ]).done(function() {
+                    view.reload();
+                });
+            } else {
+                this.set_value(update.value);
+            }
+        });
+
+        this.on('change:readonly', this, function() {
+            this.priority.readonly = this.get('readonly');
+            var $div = $('<div/>').insertAfter(this.$el);
+            this.priority.replace($div);
+            this.setElement(this.priority.$el);
+        });
+
+        var self = this;
+        return $.when(this._super(), this.priority.appendTo('<div>').then(function() {
+            self.priority.$el.addClass(self.$el.attr('class'));
+            self.replaceElement(self.priority.$el);
+        }));
     },
     render_value: function() {
-        this.priorities = this.prepare_priority();
-        this.$el.html(QWeb.render("Priority", {'widget': this}));
-        if (!this.get('readonly')){
-            this.$el.find('li').on('click', this.set_priority.bind(this));
-        }
-    },
-    /* setting the value: in view mode, perform an asynchronous call and reload
-    the form view; in edit mode, use set_value to save the new value that will
-    be written when saving the record. */
-    set_priority: function (ev) {
-        var self = this;
-        var li = $(ev.target).closest('li');
-        if (li.length) {
-            var value = String(li.data('value'));
-            if (this.view.get('actual_mode') == 'view') {
-                var write_values = {};
-                write_values[self.name] = value;
-                return this.view.dataset._model.call(
-                    'write', [
-                        [this.view.datarecord.id],
-                        write_values,
-                        self.view.dataset.get_context()
-                    ]).done(self.reload_record.bind(self));
-            }
-            else {
-                return this.set_value(value);
-            }
-        }
-
-    },
-    reload_record: function() {
-        this.view.reload();
+        this.priority.set_value(this.get('value'));
     },
 });
 
@@ -413,47 +420,61 @@ var FieldFloat = FieldChar.extend({
 });
 
 var FieldCharDomain = common.AbstractField.extend(common.ReinitializeFieldMixin, {
+    template: "FieldCharDomain",
+    events: {
+        'click button': 'on_click',
+        'change .o_debug_input': function(e) {
+            this.set('value', $(e.target).val());
+        }
+    },
+    init: function() {
+        this._super.apply(this, arguments);
+        this.debug = session.debug;
+    },
     render_value: function() {
         var self = this;
-        this.$el.html(QWeb.render("FieldCharDomain", {widget: this}));
+
         if (this.get('value')) {
             var model = this.options.model || this.field_manager.get_field_value(this.options.model_field);
             var domain = pyeval.eval('domain', this.get('value'));
             var ds = new data.DataSetStatic(self, model, self.build_context());
             ds.call('search_count', [domain]).then(function (results) {
-                $('.oe_domain_count', self.$el).text(results + ' records selected');
+                self.$('.o_count').text(results + _t(' selected records'));
                 if (self.get('effective_readonly')) {
-                    $('button span', self.$el).text(' See selection');
+                    self.$('button').text(_t('See selection '));
                 }
                 else {
-                    $('button span', self.$el).text(' Change selection');
+                    self.$('button').text(_t('Change selection '));
                 }
+                self.$('button').append($("<span/>").addClass('fa fa-arrow-right'));
             });
+
+            if(this.debug) {
+                this.$('.o_debug_input').val(this.get('value'));
+            }
         } else {
-            $('.oe_domain_count', this.$el).text('0 record selected');
-            $('button span', this.$el).text(' Select records');
+            this.$('.o_count').text(_t('No selected record'));
+            var $arrow = this.$('button span').detach();
+            this.$('button').text(_('Select records ')).append($("<span/>").addClass('fa fa-arrow-right'));
         }
-        this.$('.select_records').on('click', self.on_click);
     },
     on_click: function(event) {
         event.preventDefault();
-        var self = this;
-        var model = this.options.model || this.field_manager.get_field_value(this.options.model_field);
 
-        var options = {
-                title: this.get('effective_readonly') ? 'Selected records' : 'Select records...',
-                readonly: this.get('effective_readonly'),
-                disable_multiple_selection: this.get('effective_readonly'),
-                no_create: this.get('effective_readonly'),
-            };
-        var domain = this.get('value');
-        var popup = new common.DomainEditorPopup(this);
-        popup.select_element(model, options, domain, {});
-        popup.on("elements_selected", self, function(selected_ids) {
-            if (!self.get('effective_readonly')) {
-                self.set_value(popup.get_domain(selected_ids));
+        var self = this;
+        var dialog = new common.DomainEditorDialog(this, {
+            res_model: this.options.model || this.field_manager.get_field_value(this.options.model_field),
+            default_domain: this.get('value'),
+            title: this.get('effective_readonly') ? _t('Selected records') : _t('Select records...'),
+            readonly: this.get('effective_readonly'),
+            disable_multiple_selection: this.get('effective_readonly'),
+            no_create: this.get('effective_readonly'),
+            on_selected: function(selected_ids) {
+                if (!self.get('effective_readonly')) {
+                    self.set_value(dialog.get_domain(selected_ids));
+                }
             }
-        });
+        }).open();
     },
 });
 
@@ -487,7 +508,7 @@ var FieldDatetime = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
     is_syntax_valid: function() {
         if (!this.get("effective_readonly") && this.datewidget) {
-            return this.datewidget.is_valid_();
+            return this.datewidget.is_valid();
         }
         return true;
     },
@@ -554,16 +575,8 @@ var FieldText = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     render_value: function() {
         if (! this.get("effective_readonly")) {
             var show_value = formats.format_value(this.get('value'), this, '');
-            if (show_value === '') {
-                this.$textarea.css('height', parseInt(this.default_height, 10)+"px");
-            }
             this.$textarea.val(show_value);
-            if (! this.auto_sized) {
-                this.auto_sized = true;
-                this.$textarea.autosize();
-            } else {
-                this.$textarea.trigger("autosize");
-            }
+            dom_utils.autoresize(this.$textarea, {parent: this, min_height: parseInt(this.default_height)});
         } else {
             var txt = this.get("value") || '';
             this.$(".oe_form_text_content").text(txt);
@@ -594,61 +607,6 @@ var FieldText = common.AbstractField.extend(common.ReinitializeFieldMixin, {
                 width: width,
                 minHeight: height
             });
-        }
-    },
-});
-
-/**
- * FieldTextHtml Widget
- * Intended for FieldText widgets meant to display HTML content. This
- * widget will instantiate the CLEditor (see cleditor in static/src/lib)
- * To find more information about CLEditor configutation: go to
- * http://premiumsoftware.net/cleditor/docs/GettingStarted.html
- */
-var FieldTextHtml = common.AbstractField.extend(common.ReinitializeFieldMixin, {
-    template: 'FieldTextHtml',
-    init: function() {
-        this._super.apply(this, arguments);
-    },
-    initialize_content: function() {
-        var self = this;
-        if (! this.get("effective_readonly")) {
-            self._updating_editor = false;
-            this.$textarea = this.$el.find('textarea');
-            var width = ((this.node.attrs || {}).editor_width || 'calc(100% - 4px)');
-            var height = ((this.node.attrs || {}).editor_height || 250);
-            this.$textarea.cleditor({
-                width:      width, // width not including margins, borders or padding
-                height:     height, // height not including margins, borders or padding
-                controls:   // controls to add to the toolbar
-                            "bold italic underline strikethrough " +
-                            "| removeformat | bullets numbering | outdent " +
-                            "indent | link unlink | source",
-                bodyStyle:  // style to assign to document body contained within the editor
-                            "margin:4px; color:#4c4c4c; font-size:13px; font-family:'Lucida Grande',Helvetica,Verdana,Arial,sans-serif; cursor:text"
-            });
-            this.$cleditor = this.$textarea.cleditor()[0];
-            this.$cleditor.change(function() {
-                if (! self._updating_editor) {
-                    self.$cleditor.updateTextArea();
-                    self.internal_set_value(self.$textarea.val());
-                }
-            });
-            if (this.field.translate) {
-                var $img = $('<img class="oe_field_translate oe_input_icon" src="/web/static/src/img/icons/terp-translate.png" width="16" height="16" border="0"/>')
-                    .click(this.on_translate);
-                this.$cleditor.$toolbar.append($img);
-            }
-        }
-    },
-    render_value: function() {
-        if (! this.get("effective_readonly")) {
-            this.$textarea.val(this.get('value') || '');
-            this._updating_editor = true;
-            this.$cleditor.updateFrame();
-            this._updating_editor = false;
-        } else {
-            this.$el.html(this.get('value'));
         }
     },
 });
@@ -687,18 +645,76 @@ var FieldBoolean = common.AbstractField.extend({
 });
 
 /**
+    This widget is intended to be used on stat button boolean fields.
+    It is a read-only field that will display a simple string "<label of value>".
+*/
+var FieldBooleanButton = common.AbstractField.extend({
+    className: 'o_stat_info',
+    init: function() {
+        this._super.apply(this, arguments);
+        switch (this.options["terminology"]) {
+            case "active":
+                this.string_true = _t("Active");
+                this.hover_true = _t("Deactivate");
+                this.string_false = _t("Inactive");
+                this.hover_false = _t("Activate");
+                break;
+            case "archive":
+                this.string_true = _t("Not Archived");
+                this.hover_true = _t("Archive");
+                this.string_false = _t("Archived");
+                this.hover_false = _t("Unarchive");
+                break;
+            case "prod_environment":
+                this.string_true = _t("Production Environment");
+                this.hover_true = _t("Switch to test environment");
+                this.string_false = _t("Test Environment");
+                this.hover_false = _t("Switch to production environment");
+                break;
+            default:
+                this.string_true = _t("On");
+                this.hover_true = _t("Switch Off");
+                this.string_false = _t("Off");
+                this.hover_false = _t("Switch On");
+        }
+    },
+    render_value: function() {
+        this._super();
+        this.$el.html(QWeb.render("BooleanButton", {widget: this}));
+    },
+    is_false: function() {
+        return false;
+    },
+});
+
+/**
     The progressbar field expect a float from 0 to 100.
 */
-var FieldProgressBar = common.AbstractField.extend({
-    template: 'FieldProgressBar',
-    render_value: function() {
-        this.$el.progressbar({
+var FieldProgressBar = common.AbstractField.extend(common.ReinitializeFieldMixin, {
+    initialize_content: function() {
+        if(this.progressbar) {
+            this.progressbar.destroy();
+        }
+
+        this.progressbar = new ProgressBar(this, {
+            readonly: this.get('effective_readonly'),
+            edit_on_click: true,
             value: this.get('value') || 0,
-            disabled: this.get("effective_readonly")
         });
-        var formatted_value = formats.format_value(this.get('value') || 0, { type : 'float' });
-        this.$('span').html(formatted_value + '%');
-    }
+
+        var self = this;
+        this.progressbar.appendTo('<div>').done(function() {
+            self.progressbar.$el.addClass(self.$el.attr('class'));
+            self.replaceElement(self.progressbar.$el);
+
+            self.progressbar.on('update', self, function(update) {
+                self.set('value', update.changed_value);
+            });
+        });
+    },
+    render_value: function() {
+        this.progressbar.set_value(this.get('value'));
+    },
 });
 
 /**
@@ -722,9 +738,10 @@ var FieldPercentPie = common.AbstractField.extend({
                 .donut(true) 
                 .showLegend(false)
                 .showLabels(false)
-                .tooltips(false)
                 .color(['#7C7BAD','#DDD'])
                 .donutRatio(0.62);
+
+            chart.tooltip.enabled(false);
    
             d3.select(svg)
                 .datum([{'x': 'value', 'y': value}, {'x': 'complement', 'y': 100 - value}])
@@ -762,12 +779,13 @@ var FieldBarChart = common.AbstractField.extend({
                 .width(width)
                 .height(height)
                 .margin({top: 0, right: 0, bottom: 0, left: 0})
-                .tooltips(false)
                 .showValues(false)
-                .transitionDuration(350)
+                .transition(350)
                 .showXAxis(false)
                 .showYAxis(false);
-   
+
+            chart.tooltip.enabled(false);
+
             d3.select(svg)
                 .datum([{key: 'values', values: value}])
                 .transition()
@@ -888,6 +906,66 @@ var FieldSelection = common.AbstractField.extend(common.ReinitializeFieldMixin, 
     }
 });
 
+/**
+    This widget is intended to display a warning near a label of a 'timezone' field
+    indicating if the browser timezone is identical (or not) to the selected timezone.
+    This widget depends on a field given with the param 'tz_offset_field', which contains
+    the time difference between UTC time and local time, in minutes.
+*/
+var TimezoneMismatch = FieldSelection.extend({
+    initialize_content: function(){
+        this._super.apply(this, arguments);
+        this.tz_offset_field = (this.options && this.options.tz_offset_field) || this.tz_offset_field || 'tz_offset';
+        this.set({"tz_offset": this.field_manager.get_field_value(this.tz_offset_field)});
+        this.on("change:tz_offset", this, this.render_value);
+    },
+    start: function(){
+        this._super.apply(this, arguments);
+        // trigger a render_value when tz_offset field change
+        this.field_manager.on("field_changed:" + this.tz_offset_field, this, function() {
+            this.set({"tz_offset": this.field_manager.get_field_value(this.tz_offset_field)});
+        });
+    },
+    check_timezone: function(){
+        var user_offset = this.get('tz_offset');
+        if (user_offset) {
+            var offset = -(new Date().getTimezoneOffset());
+            var browser_offset = (offset < 0) ? "-" : "+";
+            browser_offset += _.str.sprintf("%02d", Math.abs(offset / 60));
+            browser_offset += _.str.sprintf("%02d", Math.abs(offset % 60));
+            return (browser_offset !== user_offset);
+        }
+        return false;
+    },
+    render_value: function(){
+        this._super.apply(this, arguments);
+        if(this.check_timezone()){
+            this.$label.find('.oe_tz_warning').remove();
+            var options = _.extend({
+                delay: { show: 501, hide: 0 },
+                title: _t("Timezone Mismatch : The timezone of your browser doesn't match the selected one. The time in Odoo is displayed according to your field timezone."),
+            });
+            this.$label.css('white-space', 'normal');
+            $(QWeb.render('WebClient.timezone_warning')).appendTo(this.$label);
+            this.$label.find('.oe_tz_warning').tooltip(options);
+        }
+    }
+});
+
+var LabelSelection = FieldSelection.extend({
+    init: function(field_manager, node) {
+        this._super(field_manager, node);
+        this.classes = this.options && this.options.classes || {};
+    },
+    render_value: function() {
+        this._super.apply(this, arguments);
+        if (this.get("effective_readonly")) {
+            var btn_class = this.classes[this.get('value')] || 'default';
+            this.$el.wrapInner($('<span/>').addClass('label label-' + btn_class));
+        }
+    },
+});
+
 var FieldRadio = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     template: 'FieldRadio',
     events: {
@@ -965,7 +1043,7 @@ var FieldRadio = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
     get_value: function () {
         var value = this.get('value');
-        return value instanceof Array ? value[0] : value;
+        return ((value instanceof Array)? value[0] : value) || false;
     },
     render_value: function () {
         var self = this;
@@ -1051,7 +1129,7 @@ var FieldReference = common.AbstractField.extend(common.ReinitializeFieldMixin, 
         }
         this.m2o.field.relation = this.get('value')[0];
         this.m2o.set_value(this.get('value')[1]);
-        this.m2o.$el.toggle(!!this.get('value')[0]);
+        this.m2o.do_toggle(!!this.get('value')[0]);
         this.reference_ready = true;
     },
 });
@@ -1079,11 +1157,11 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     },
     initialize_content: function() {
         var self= this;
-        this.$el.find('input.oe_form_binary_file').change(this.on_file_change);
-        this.$el.find('button.oe_form_binary_file_save').click(this.on_save_as);
-        this.$el.find('.oe_form_binary_file_clear').click(this.on_clear);
-        this.$el.find('.oe_form_binary_file_edit').click(function(event){
-            self.$el.find('input.oe_form_binary_file').click();
+        this.$('input.o_form_input_file').change(this.on_file_change);
+        this.$('button.oe_form_binary_file_save').click(this.on_save_as);
+        this.$('.oe_form_binary_file_clear').click(this.on_clear);
+        this.$('.oe_form_binary_file_edit').click(function() {
+            self.$('input.o_form_input_file').click();
         });
     },
     on_file_change: function(e) {
@@ -1094,7 +1172,7 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
                 var file = file_node.files[0];
                 if (file.size > this.max_upload_size) {
                     var msg = _t("The selected file exceed the maximum file size of %s.");
-                    core.bus.trigger('display_notification_warning', _t("File upload"), _.str.sprintf(msg, utils.human_size(this.max_upload_size)));
+                    this.do_warn(_t("File upload"), _.str.sprintf(msg, utils.human_size(this.max_upload_size)));
                     return false;
                 }
                 var filereader = new FileReader();
@@ -1105,8 +1183,8 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
                     self.on_file_uploaded(file.size, file.name, file.type, data);
                 };
             } else {
-                this.$el.find('form.oe_form_binary_form input[name=session_id]').val(this.session.session_id);
-                this.$el.find('form.oe_form_binary_form').submit();
+                this.$el.find('form.o_form_binary_form input[name=session_id]').val(this.session.session_id);
+                this.$el.find('form.o_form_binary_form').submit();
             }
             this.$el.find('.oe_form_binary_progress').show();
             this.$el.find('.oe_form_binary').hide();
@@ -1137,18 +1215,18 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
             var filename_fieldname = this.node.attrs.filename;
             var filename_field = this.view.fields && this.view.fields[filename_fieldname];
             this.session.get_file({
-                url: '/web/binary/saveas_ajax',
-                data: {data: JSON.stringify({
-                    model: this.view.dataset.model,
-                    id: (this.view.datarecord.id || ''),
-                    field: this.name,
-                    filename_field: (filename_fieldname || ''),
-                    data: utils.is_bin_size(value) ? null : value,
-                    filename: filename_field ? filename_field.get('value') : null,
-                    context: this.view.dataset.get_context()
-                })},
-                complete: framework.unblockUI,
-                error: c.rpc_error.bind(c)
+                'url': '/web/content',
+                'data': {
+                    'model': this.view.dataset.model,
+                    'id': this.view.datarecord.id,
+                    'field': this.name,
+                    'filename_field': filename_fieldname,
+                    'filename': filename_field ? filename_field.get('value') : null,
+                    'download': true,
+                    'data': utils.is_bin_size(value) ? null : value,
+                },
+                'complete': framework.unblockUI,
+                'error': c.rpc_error.bind(c)
             });
             ev.stopPropagation();
             return false;
@@ -1157,9 +1235,11 @@ var FieldBinary = common.AbstractField.extend(common.ReinitializeFieldMixin, {
     set_filename: function(value) {
         var filename = this.node.attrs.filename;
         if (filename) {
-            var tmp = {};
-            tmp[filename] = value;
-            this.field_manager.set_values(tmp);
+            var field = this.field_manager.fields[filename];
+            if (field) {
+                field.set_value(value);
+                field._dirty_flag = true;
+            }
         }
     },
     on_clear: function() {
@@ -1206,16 +1286,27 @@ var FieldBinaryFile = FieldBinary.extend({
     },
     on_file_uploaded_and_valid: function(size, name, content_type, file_base64) {
         this.binary_value = true;
+        this.set_filename(name);
         this.internal_set_value(file_base64);
         var show_value = name + " (" + utils.human_size(size) + ")";
         this.$el.find('input').eq(0).val(show_value);
-        this.set_filename(name);
     },
     on_clear: function() {
         this._super.apply(this, arguments);
         this.$el.find('input').eq(0).val('');
         this.set_filename('');
-    }
+    },
+    set_value: function(value_){
+        var changed = value_ !== this.get_value();
+        this._super.apply(this, arguments);
+        // Trigger value change if size is the same
+        if (!changed){
+            this.trigger("change:value", this, {
+                oldValue: value_,
+                newValue: value_
+            });
+        }
+     }
 });
 
 var FieldBinaryImage = FieldBinary.extend({
@@ -1232,11 +1323,11 @@ var FieldBinaryImage = FieldBinary.extend({
             var field = this.name;
             if (this.options.preview_image)
                 field = this.options.preview_image;
-            url = session.url('/web/binary/image', {
+            url = session.url('/web/image', {
                                         model: this.view.dataset.model,
                                         id: id,
                                         field: field,
-                                        t: (new Date().getTime()),
+                                        unique: (this.view.datarecord.__last_update || '').replace(/[^0-9]/g, ''),
             });
         } else {
             url = this.placeholder;
@@ -1259,7 +1350,7 @@ var FieldBinaryImage = FieldBinary.extend({
         });
         $img.on('error', function() {
             $img.attr('src', self.placeholder);
-            core.bus.trigger('display_notification_warning', _t("Image"), _t("Could not display the selected image."));
+            self.do_warn(_t("Image"), _t("Could not display the selected image."));
         });
     },
     on_file_uploaded_and_valid: function(size, name, content_type, file_base64) {
@@ -1439,7 +1530,7 @@ var FieldMonetary = FieldFloat.extend({
     init: function() {
         this._super.apply(this, arguments);
         this.set({"currency": false});
-        var currency_field = (this.options && this.options.currency_field) || this.currency_field || 'currency_id';
+        var currency_field = (this.options && this.options.currency_field) || this.field.currency_field || 'currency_id';
         if (currency_field) {
             this.field_manager.on("field_changed:" + currency_field, this, function() {
                 this.set({"currency": this.field_manager.get_field_value(currency_field)});
@@ -1509,6 +1600,7 @@ var StatInfo = common.AbstractField.extend({
             }
         }
         this.$el.html(QWeb.render("StatInfo", options));
+        this.$el.addClass('o_stat_info');
     },
 
 });
@@ -1545,6 +1637,92 @@ var FieldToggleBoolean = common.AbstractField.extend({
     },
 });
 
+/**
+    This widget is intended to be used in config settings.
+    When checked, an upgrade popup is showed to the user.
+*/
+
+var AbstractFieldUpgrade = {
+    events: {
+        'click input': 'on_click_input',
+    },
+    
+    start: function() {
+        this._super.apply(this, arguments);
+        
+        this.get_enterprise_label().after($("<span>", {
+            text: "Enterprise",
+            'class': "label label-primary oe_inline"
+        }));
+    },
+    
+    open_dialog: function() {
+        var message = $(QWeb.render('EnterpriseUpgrade'));
+
+        var buttons = [
+            {
+                text: _t("Upgrade now"),
+                classes: 'btn-primary',
+                close: true,
+                click: this.confirm_upgrade,
+            },
+            {
+                text: _t("Cancel"),
+                close: true,
+            },
+        ];
+        
+        return new Dialog(this, {
+            size: 'medium',
+            buttons: buttons,
+            $content: $('<div>', {
+                html: message,
+            }),
+            title: _t("Odoo Enterprise"),
+        }).open();
+    },
+  
+    confirm_upgrade: function() {
+        new Model("res.users").call("search_count", [[["share", "=", false]]]).then(function(data) {
+            framework.redirect("https://www.odoo.com/odoo-enterprise/upgrade?num_users=" + data);
+        });
+    },
+    
+    get_enterprise_label: function() {},
+    on_click_input: function() {},
+};
+
+var UpgradeBoolean = FieldBoolean.extend(AbstractFieldUpgrade, {
+    template: "FieldUpgradeBoolean",
+    
+    get_enterprise_label: function() {
+        return this.$label;
+    },
+
+    on_click_input: function(event) {
+        if(this.$checkbox.prop("checked")) {
+            this.open_dialog().on('closed', this, function() {
+                this.$checkbox.prop("checked", false);
+            });
+        }
+    },
+});
+
+var UpgradeRadio = FieldRadio.extend(AbstractFieldUpgrade, {
+  
+    get_enterprise_label: function() {
+        return this.$('label').last();
+    },
+    
+    on_click_input: function(event) {
+        if($(event.target).val() == 1) {
+            this.open_dialog().on('closed', this, function() {
+                this.$('input').first().prop("checked", true);
+            });
+        }
+    },
+});
+
 
 /**
  * Registry of form fields, called by :js:`instance.web.FormView`.
@@ -1558,7 +1736,6 @@ core.form_widget_registry
     .add('email', FieldEmail)
     .add('url', FieldUrl)
     .add('text',FieldText)
-    .add('html', FieldTextHtml)
     .add('char_domain', FieldCharDomain)
     .add('date', FieldDate)
     .add('datetime', FieldDatetime)
@@ -1566,6 +1743,7 @@ core.form_widget_registry
     .add('radio', FieldRadio)
     .add('reference', FieldReference)
     .add('boolean', FieldBoolean)
+    .add('boolean_button', FieldBooleanButton)
     .add('toggle_button', FieldToggleBoolean)
     .add('float', FieldFloat)
     .add('percentpie', FieldPercentPie)
@@ -1577,9 +1755,13 @@ core.form_widget_registry
     .add('binary', FieldBinaryFile)
     .add('statusbar', FieldStatus)
     .add('monetary', FieldMonetary)
-    .add('priority', Priority)
+    .add('priority', FieldPriority)
     .add('kanban_state_selection', KanbanSelection)
-    .add('statinfo', StatInfo);
+    .add('statinfo', StatInfo)
+    .add('timezone_mismatch', TimezoneMismatch)
+    .add('label_selection', LabelSelection)
+    .add('upgrade_boolean', UpgradeBoolean)
+    .add('upgrade_radio', UpgradeRadio);
 
 
 /**
@@ -1592,6 +1774,9 @@ core.form_tag_registry.add('button', WidgetButton);
 
 return {
     FieldChar: FieldChar,
+    FieldFloat: FieldFloat,
+    FieldMonetary: FieldMonetary,
+    WidgetButton: WidgetButton
 };
 
 });

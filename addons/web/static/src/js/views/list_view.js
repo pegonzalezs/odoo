@@ -7,7 +7,7 @@ var data = require('web.data');
 var DataExport = require('web.DataExport');
 var formats = require('web.formats');
 var common = require('web.list_common');
-var Model = require('web.Model');
+var Model = require('web.DataModel');
 var pyeval = require('web.pyeval');
 var session = require('web.session');
 var Sidebar = require('web.Sidebar');
@@ -20,8 +20,22 @@ var _lt = core._lt;
 var QWeb = core.qweb;
 var list_widget_registry = core.list_widget_registry;
 
+// Allowed decoration on the list's rows: bold, italic and bootstrap semantics classes
+var row_decoration = [
+    'decoration-bf',
+    'decoration-it',
+    'decoration-danger',
+    'decoration-info',
+    'decoration-muted',
+    'decoration-primary',
+    'decoration-success',
+    'decoration-warning'
+];
+
 var ListView = View.extend( /** @lends instance.web.ListView# */ {
     _template: 'ListView',
+    accesskey: 'L',
+    icon: 'fa-list-ul',
     display_name: _lt('List'),
     defaults: {
         // records can be selected one by one
@@ -162,59 +176,30 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
      * @returns {$.Deferred} loading promise
      */
     start: function() {
-        this.$el.addClass('oe_list');
+        this.$el.addClass('oe_list o_list_view');
         return this._super();
     },
     /**
-     * Returns the style for the provided record in the current view (from the
-     * ``@colors`` and ``@fonts`` attributes)
+     * Computes and returns the classnames for the provided record (from the
+     * ``@decoration`` attribute)
      *
      * @param {Record} record record for the current row
-     * @returns {String} CSS style declaration
+     * @returns {String} classnames
      */
-    style_for: function (record) {
-        var len, style= '';
-
+    compute_decoration_classnames: function (record) {
+        var classnames= '';
         var context = _.extend({}, record.attributes, {
             uid: session.uid,
             current_date: moment().format('YYYY-MM-DD')
             // TODO: time, datetime, relativedelta
         });
-        var i;
-        var pair;
-        var expression;
-        if (this.fonts) {
-            for(i=0, len=this.fonts.length; i<len; ++i) {
-                pair = this.fonts[i];
-                var font = pair[0];
-                expression = pair[1];
-                if (py.PY_isTrue(py.evaluate(expression, context))) {
-                    switch(font) {
-                    case 'bold':
-                        style += 'font-weight: bold;';
-                        break;
-                    case 'italic':
-                        style += 'font-style: italic;';
-                        break;
-                    case 'underline':
-                        style += 'text-decoration: underline;';
-                        break;
-                    }
-                }
-            }
-        }
 
-        if (!this.colors) { return style; }
-        for(i=0, len=this.colors.length; i<len; ++i) {
-            pair = this.colors[i];
-            var color = pair[0];
-            expression = pair[1];
-            if (py.PY_isTrue(py.evaluate(expression, context))) {
-                return style += 'color: ' + color + ';';
+        _.each(this.decoration, function(expr, decoration) {
+            if (py.PY_isTrue(py.evaluate(expr, context))) {
+                classnames += ' ' + decoration.replace('decoration', 'text');
             }
-            // TODO: handle evaluation errors
-        }
-        return style;
+        });
+        return classnames;
     },
     /**
      * Called after loading the list view's description, sets up such things
@@ -242,27 +227,15 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         var self = this;
         this.fields_view = data;
         this.name = "" + this.fields_view.arch.attrs.string;
+        this._limit = parseInt(this.fields_view.arch.attrs.limit, 10) || this._limit;
 
-        if (this.fields_view.arch.attrs.colors) {
-            this.colors = _(this.fields_view.arch.attrs.colors.split(';')).chain()
-                .compact()
-                .map(function(color_pair) {
-                    var pair = color_pair.split(':'),
-                        color = pair[0],
-                        expr = pair[1];
-                    return [color, py.parse(py.tokenize(expr)), expr];
-                }).value();
-        }
-
-        if (this.fields_view.arch.attrs.fonts) {
-            this.fonts = _(this.fields_view.arch.attrs.fonts.split(';')).chain().compact()
-                .map(function(font_pair) {
-                    var pair = font_pair.split(':'),
-                        font = pair[0],
-                        expr = pair[1];
-                    return [font, py.parse(py.tokenize(expr)), expr];
-                }).value();
-        }
+        // Retrieve the decoration defined on the model's list view
+        this.decoration = _.pick(this.fields_view.arch.attrs, function(value, key) {
+            return row_decoration.indexOf(key) >= 0;
+        });
+        this.decoration = _.mapObject(this.decoration, function(value) {
+            return py.parse(py.tokenize(value));
+        });
 
         this.setup_columns(this.fields_view.fields, this.grouped);
 
@@ -307,7 +280,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
         if (!this.$buttons) {
             this.$buttons = $(QWeb.render("ListView.buttons", {'widget': this}));
 
-            this.$buttons.find('.oe_list_add').click(this.proxy('do_add_record'));
+            this.$buttons.find('.o_list_button_add').click(this.proxy('do_add_record'));
 
             $node = $node || this.options.$buttons;
             if ($node) {
@@ -326,12 +299,14 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
      **/
     render_sidebar: function($node) {
         if (!this.sidebar && this.options.sidebar) {
-            this.sidebar = new Sidebar(this);
+            this.sidebar = new Sidebar(this, {editable: this.is_action_enabled('edit')});
             if (this.fields_view.toolbar) {
                 this.sidebar.add_toolbar(this.fields_view.toolbar);
             }
             this.sidebar.add_items('other', _.compact([
                 { label: _t("Export"), callback: this.on_sidebar_export },
+                this.fields_view.fields.active && {label: _t("Archive"), callback: this.do_archive_selected},
+                this.fields_view.fields.active && {label: _t("Unarchive"), callback: this.do_unarchive_selected},
                 this.is_action_enabled('delete') && { label: _t('Delete'), callback: this.do_delete_selected }
             ]));
 
@@ -579,7 +554,7 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
                     return r.tag === 'field';
                 }), 'name'),
             {check_access_rule: true}
-        ).done(function (records) {
+        ).then(function (records) {
             var values = records[0];
             if (!values) {
                 self.records.remove(record);
@@ -591,6 +566,15 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
                 record.set(key, value, {silent: true});            
             });
             record.trigger('change', record);
+
+            /* When a record is reloaded, there is a rendering lag because of the addition/suppression of 
+            a table row. Since the list view editable need to wait for the end of this rendering lag before
+            computing the position of the editable fields, a 100ms delay is added. */
+            var def = $.Deferred();
+            setTimeout(function() {
+                def.resolve(records);
+            }, 100);
+            return def;
         });
     },
 
@@ -651,16 +635,21 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
             _(ids).each(function (id) {
                 self.records.remove(self.records.get(id));
             });
-            if (self.records.length === 0 && self.dataset.size() > 0) {
-                //Trigger previous manually to navigate to previous page, 
-                //If all records are deleted on current page.
-                self.$pager.find('ul li:first a').trigger('click');
-            } else if (self.dataset.size() == self._limit) {
-                //Reload listview to update current page with next page records 
-                //because pager going to be hidden if dataset.size == limit
-                self.reload();
+            // Hide the table if there is no more record in the dataset
+            if (self.dataset.size() === 0) {
+                self.no_result();
             } else {
-                self.configure_pager(self.dataset);
+                if (self.records.length === 0 && self.dataset.size() > 0) {
+                    //Trigger previous manually to navigate to previous page,
+                    //If all records are deleted on current page.
+                    self.$pager.find('ul li:first a').trigger('click');
+                } else if (self.dataset.size() === self._limit) {
+                    //Reload listview to update current page with next page records
+                    //because pager going to be hidden if dataset.size == limit
+                    self.reload();
+                } else {
+                    self.configure_pager(self.dataset);
+                }
             }
             self.compute_aggregates();
         });
@@ -770,6 +759,30 @@ var ListView = View.extend( /** @lends instance.web.ListView# */ {
             this.do_delete(this.groups.get_selection().ids);
         } else {
             this.do_warn(_t("Warning"), _t("You must select at least one record."));
+        }
+    },
+    /**
+     * Handles archiving/unarchiving of selected lines
+     */
+    do_archive_selected: function () {
+        var records = this.groups.get_selection().records;
+        this.do_archive(records, true);
+    },
+    do_unarchive_selected: function () {
+        var records = this.groups.get_selection().records;
+        this.do_archive(records, false);
+    },
+    do_archive: function (records, archive) {
+        var active_value = !archive;
+        var record_ids = [];
+        _.each(records, function(record) {
+            if (record.active != active_value) {
+                record_ids.push(record.id);
+            }
+        });
+        if (record_ids.length) {
+            this.dataset.call('write', [record_ids, {active: active_value}])
+                        .done(_.bind(this.reload, this));
         }
     },
     /**
@@ -1012,7 +1025,10 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
                     $row = self.$current.children(
                         '[data-id=' + record.get('id') + ']');
                 }
-                $row.replaceWith(self.render_record(record));
+
+                var $newRow = $(self.render_record(record));
+                $newRow.find('.oe_list_record_selector input').prop('checked', !!$row.find('.oe_list_record_selector input').prop('checked'));
+                $row.replaceWith($newRow);
             },
             'add': function (ev, records, record, index) {
                 var $new_row = $(self.render_record(record));
@@ -1053,10 +1069,14 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
                 $(self).trigger(
                         'selected', [selection.ids, selection.records, ! checked]);
             })
-            .delegate('td.oe_list_record_delete button', 'click', function (e) {
+            .delegate('td.oe_list_record_delete', 'click', function (e) {
                 e.stopPropagation();
                 var $row = $(e.target).closest('tr');
                 $(self).trigger('deleted', [[self.row_id($row)]]);
+                // IE Edge go crazy when we use confirm dialog and remove the focused element
+                if(document.hasFocus && !document.hasFocus()) {
+                    $('<input />').appendTo('body').focus().remove();
+                }
             })
             .delegate('td.oe_list_field_cell button', 'click', function (e) {
                 e.stopPropagation();
@@ -1144,18 +1164,20 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
                 var ids;
                 // they come in two shapes:
                 if (value[0] instanceof Array) {
-                    var command = value[0];
-                    // 1. an array of m2m commands (usually (6, false, ids))
-                    if (command[0] !== 6) {
-                        throw new Error(_.str.sprintf( _t("Unknown m2m command %s"), command[0]));
-                    }
-                    ids = command[2];
+                    _.each(value, function(command) {
+                        switch (command[0]) {
+                            case 4: ids.push(command[1]); break;
+                            case 5: ids = []; break;
+                            case 6: ids = command[2]; break;
+                            default: throw new Error(_.str.sprintf( _t("Unknown m2m command %s"), command[0]));
+                        }
+                    });
                 } else {
                     // 2. an array of ids
                     ids = value;
                 }
                 new Model(column.relation)
-                    .call('name_get', [ids, this.dataset.context]).done(function (names) {
+                    .call('name_get', [ids, this.dataset.get_context()]).done(function (names) {
                         // FIXME: nth horrible hack in this poor listview
                         record.set(column.id + '__display',
                                    _(names).pluck(1).join(', '));
@@ -1172,11 +1194,11 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
     },
     render: function () {
         var self = this;
-        this.$current.empty().append(
-            QWeb.render('ListView.rows', _.extend({
+        this.$current.html(
+            QWeb.render('ListView.rows', _.extend({}, this, {
                     render_cell: function () {
                         return self.render_cell.apply(self, arguments); }
-                }, this)));
+                })));
         this.pad_table_to(4);
     },
     pad_table_to: function (count) {
@@ -1195,7 +1217,7 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
             cells.push('<td title="' + column.string + '">&nbsp;</td>');
         });
         if (this.options.deletable) {
-            cells.push('<td class="oe_list_record_delete"><button type="button" style="visibility: hidden"> </button></td>');
+            cells.push('<td class="oe_list_record_delete"></td>');
         }
         cells.unshift('<tr>');
         cells.push('</tr>');
@@ -1623,32 +1645,34 @@ ListView.Groups = Class.extend( /** @lends instance.web.ListView.Groups# */{
                     return;
                 }
 
-                list.records.remove(to_move);
+                list.records.remove(to_move, {silent: true});
                 var to = target_id ? list.records.indexOf(target) + 1 : 0;
-                list.records.add(to_move, { at: to });
+                list.records.add(to_move, { at: to, silent: true });
 
                 // resequencing time!
                 var record, index = to,
                     // if drag to 1st row (to = 0), start sequencing from 0
                     // (exclusive lower bound)
                     seq = to ? list.records.at(to - 1).get(seqname) : 0;
+                var defs = [];
                 var fct = function (dataset, id, seq) {
-                    $.async_when().done(function () {
+                    defs.push($.async_when().then(function () {
                         var attrs = {};
                         attrs[seqname] = seq;
-                        dataset.write(id, attrs);
-                    });
+                        return dataset.write(id, attrs, {internal_dataset_changed: true});
+                    }));
                 };
                 while (++seq, (record = list.records.at(index++))) {
                     // write are independent from one another, so we can just
                     // launch them all at the same time and we don't really
                     // give a fig about when they're done
-                    // FIXME: breaks on o2ms (e.g. Accounting > Financial
-                    //        Accounting > Taxes > Taxes, child tax accounts)
-                    //        when synchronous (without setTimeout)
                     fct(dataset, record.get('id'), seq);
                     record.set(seqname, seq);
                 }
+                $.when.apply($, defs).then(function () {
+                    // use internal_dataset_changed and trigger one onchange after all writes
+                    dataset.trigger("dataset_changed");
+                });
             }
         });
     },
@@ -1928,7 +1952,7 @@ var ColumnBinary = Column.extend({
      * @private
      */
     _format: function (row_data, options) {
-        var text = _t("Download");
+        var text = _t("Download"), filename=_t('Binary file');
         var value = row_data[this.id].value;
         if (!value) {
             return options.value_if_empty || '';
@@ -1938,7 +1962,7 @@ var ColumnBinary = Column.extend({
         if (value.substr(0, 10).indexOf(' ') == -1) {
             download_url = "data:application/octet-stream;base64," + value;
         } else {
-            download_url = session.url('/web/binary/saveas', {model: options.model, field: this.id, id: options.id});
+            download_url = session.url('/web/content', {model: options.model, field: this.id, id: options.id, download: true});
             if (this.filename) {
                 download_url += '&filename_field=' + this.filename;
             }
@@ -1946,11 +1970,13 @@ var ColumnBinary = Column.extend({
         if (this.filename && row_data[this.filename]) {
             text = _.str.sprintf(_t("Download \"%s\""), formats.format_value(
                     row_data[this.filename].value, {type: 'char'}));
+            filename = row_data[this.filename].value;
         }
-        return _.template('<a href="<%-href%>"><%-text%></a> (<%-size%>)')({
+        return _.template('<a download="<%-download%>" href="<%-href%>"><%-text%></a> (<%-size%>)')({
             text: text,
             href: download_url,
             size: utils.binary_to_binsize(value),
+            download: filename,
         });
     }
 });
@@ -2074,9 +2100,9 @@ var ColumnMonetary = Column.extend({
         var value = formats.format_value(row_data[this.id].value || 0, {type: this.type, digits: digits_precision}, options.value_if_empty);
         if (currency) {
             if (currency.position === "after") {
-                value += ' ' + currency.symbol;
+                value += '&nbsp;' + currency.symbol;
             } else {
-                value = currency.symbol + ' ' + value;
+                value = currency.symbol + '&nbsp;' + value;
             }
         }
         return value;

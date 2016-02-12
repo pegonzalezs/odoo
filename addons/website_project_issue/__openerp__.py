@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 
 {
@@ -26,17 +8,14 @@
     'category': 'Tools',
     'complexity': 'easy',
     'description': """
-This module adds issue menu and features to your portal if project_issue and portal are installed.
+This module adds project issues inside your account's page on website if project_issue and website_portal are installed.
 ==================================================================================================
     """,
-    'author': 'OpenERP SA',
-    'depends': ['project_issue','portal', 'website'],
+    'depends': ['project_issue', 'website_portal'],
     'data': [
         'security/portal_security.xml',
         'security/ir.model.access.csv',
-        'portal_project_issue_view.xml',
-        'website_project_issue_view.xml',
-        'views/portal_project_issue.xml',
+        'views/project_issue_templates.xml',
     ],
     'installable': True,
     'auto_install': True,

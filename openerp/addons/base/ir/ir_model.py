@@ -1,24 +1,6 @@
 # -*- coding: utf-8 -*-
 
-##############################################################################
-#
-#    OpenERP, Open Source Business Applications
-#    Copyright (C) 2004-2014 OpenERP S.A. (<http://openerp.com>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 from collections import defaultdict
 import logging
 import re
@@ -28,6 +10,7 @@ import types
 import openerp
 from openerp import SUPERUSER_ID
 from openerp import models, tools, api
+from openerp.modules import init_models
 from openerp.modules.registry import RegistryManager
 from openerp.osv import fields, osv
 from openerp.osv.orm import BaseModel, Model, MAGIC_COLUMNS
@@ -39,6 +22,10 @@ from openerp.tools.translate import _
 _logger = logging.getLogger(__name__)
 
 MODULE_UNINSTALL_FLAG = '_force_unlink'
+
+def encode(s):
+    """ Return an UTF8-encoded version of ``s``. """
+    return s.encode('utf8') if isinstance(s, unicode) else s
 
 def _get_fields_type(self, cr, uid, context=None):
     # Avoid too many nested `if`s below, as RedHat's Python 2.6
@@ -63,6 +50,13 @@ def _in_modules(self, cr, uid, ids, field_name, arg, context=None):
         result[k] = ', '.join(sorted(installed_modules & set(xml_id.split('.')[0] for xml_id in v)))
     return result
 
+#
+# IMPORTANT: this must be the first model declared in the module
+#
+class Base(models.AbstractModel):
+    """ The base model, which is implicitly inherited by all models. """
+    _name = 'base'
+
 class unknown(models.AbstractModel):
     """
     Abstract model used as a substitute for relational fields with an unknown
@@ -74,27 +68,6 @@ class ir_model(osv.osv):
     _name = 'ir.model'
     _description = "Models"
     _order = 'model'
-
-    def _is_osv_memory(self, cr, uid, ids, field_name, arg, context=None):
-        models = self.browse(cr, uid, ids, context=context)
-        res = dict.fromkeys(ids)
-        for model in models:
-            if model.model in self.pool:
-                res[model.id] = self.pool[model.model].is_transient()
-            else:
-                _logger.error('Missing model %s' % (model.model, ))
-        return res
-
-    def _search_osv_memory(self, cr, uid, model, name, domain, context=None):
-        if not domain:
-            return []
-        __, operator, value = domain[0]
-        if operator not in ['=', '!=']:
-            raise UserError(_("Invalid Search Criteria") + ": " + _("The osv_memory field can only be compared with = and != operator."))
-        value = bool(value) if operator == '=' else not bool(value)
-        all_model_ids = self.search(cr, uid, [], context=context)
-        is_osv_mem = self._is_osv_memory(cr, uid, all_model_ids, 'osv_memory', arg=None, context=context)
-        return [('id', 'in', [id for id in is_osv_mem if bool(is_osv_mem[id]) == value])]
 
     def _view_ids(self, cr, uid, ids, field_name, arg, context=None):
         models = self.browse(cr, uid, ids)
@@ -121,16 +94,14 @@ class ir_model(osv.osv):
             help="The list of models that extends the current model."),
         'state': fields.selection([('manual','Custom Object'),('base','Base Object')],'Type', readonly=True),
         'access_ids': fields.one2many('ir.model.access', 'model_id', 'Access'),
-        'osv_memory': fields.function(_is_osv_memory, string='Transient Model', type='boolean',
-            fnct_search=_search_osv_memory,
-            help="This field specifies whether the model is transient or not (i.e. if records are automatically deleted from the database or not)"),
-        'modules': fields.function(_in_modules, type='char', string='In Modules', help='List of modules in which the object is defined or inherited'),
+        'transient': fields.boolean(string="Transient Model"),
+        'modules': fields.function(_in_modules, type='char', string='In Apps', help='List of modules in which the object is defined or inherited'),
         'view_ids': fields.function(_view_ids, type='one2many', obj='ir.ui.view', string='Views'),
     }
 
     _defaults = {
         'model': 'x_',
-        'state': lambda self,cr,uid,ctx=None: (ctx and ctx.get('manual',False)) and 'manual' or 'base',
+        'state': 'manual',
     }
 
     def _check_model_name(self, cr, uid, ids, context=None):
@@ -199,6 +170,12 @@ class ir_model(osv.osv):
         if context:
             context = dict(context)
             context.pop('__last_update', None)
+        if 'model' in vals:
+            raise UserError(_('Field "Model" cannot be modified on models.'))
+        if 'state' in vals:
+            raise UserError(_('Field "Type" cannot be modified on models.'))
+        if 'transient' in vals:
+            raise UserError(_('Field "Transient Model" cannot be modified on models.'))
         # Filter out operations 4 link from field id, because openerp-web
         # always write (4,id,False) even for non dirty items
         if 'field_id' in vals:
@@ -208,35 +185,28 @@ class ir_model(osv.osv):
     def create(self, cr, user, vals, context=None):
         if  context is None:
             context = {}
-        if context and context.get('manual'):
-            vals['state']='manual'
         res = super(ir_model,self).create(cr, user, vals, context)
-        if vals.get('state','base')=='manual':
-            # add model in registry
-            self.instanciate(cr, user, vals['model'], context)
+        if vals.get('state','manual')=='manual':
+            # setup models; this automatically adds model in registry
             self.pool.setup_models(cr, partial=(not self.pool.ready))
             # update database schema
             model = self.pool[vals['model']]
-            ctx = dict(context,
-                field_name=vals['name'],
-                field_state='manual',
-                select=vals.get('select_level', '0'),
-                update_custom_fields=True)
-            model._auto_init(cr, ctx)
-            model._auto_end(cr, ctx) # actually create FKs!
+            init_models([model], cr, dict(context, update_custom_fields=True))
             RegistryManager.signal_registry_change(cr.dbname)
         return res
 
-    def instanciate(self, cr, user, model, context=None):
-        if isinstance(model, unicode):
-            model = model.encode('utf-8')
-
+    @api.model
+    def _instanciate(self, model_data):
+        """ Instanciate a model class for the custom model given by parameters ``model_data``. """
         class CustomModel(models.Model):
-            _name = model
+            _name = encode(model_data['model'])
+            _description = model_data['name']
             _module = False
             _custom = True
+            _transient = bool(model_data['transient'])
+            __doc__ = model_data['info']
 
-        CustomModel._build_model(self.pool, cr)
+        CustomModel._build_model(self.pool, self._cr)
 
 class ir_model_fields(osv.osv):
     _name = 'ir.model.fields'
@@ -244,7 +214,7 @@ class ir_model_fields(osv.osv):
     _rec_name = 'field_description'
 
     _columns = {
-        'name': fields.char('Name', required=True, select=1),
+        'name': fields.char('Field Name', required=True, select=1),
         'complete_name': fields.char('Complete Name', select=1),
         'model': fields.char('Object Name', required=True, select=1,
             help="The technical name of the model this field belongs to"),
@@ -254,14 +224,17 @@ class ir_model_fields(osv.osv):
             help="For one2many fields, the field on the target model that implement the opposite many2one relationship"),
         'model_id': fields.many2one('ir.model', 'Model', required=True, select=True, ondelete='cascade',
             help="The model this field belongs to"),
-        'field_description': fields.char('Field Label', required=True),
+        'field_description': fields.char('Field Label', required=True, translate=True),
+        'help': fields.text('Field Help', translate=True),
         'ttype': fields.selection(_get_fields_type, 'Field Type', required=True),
         'selection': fields.char('Selection Options', help="List of options for a selection field, "
             "specified as a Python expression defining a list of (key, label) pairs. "
             "For example: [('blue','Blue'),('yellow','Yellow')]"),
+        'copy': fields.boolean('Copied', help="Whether the value is copied when duplicating a record."),
+        'related': fields.char('Related Field', help="The corresponding related field, if any. This must be a dot-separated list of field names."),
         'required': fields.boolean('Required'),
         'readonly': fields.boolean('Readonly'),
-        'select_level': fields.selection([('0','Not Searchable'),('1','Always Searchable'),('2','Advanced Search (deprecated)')],'Searchable', required=True),
+        'index': fields.boolean('Indexed'),
         'translate': fields.boolean('Translatable', help="Whether values for this field can be translated (enables the translation mechanism for that field)"),
         'size': fields.integer('Size'),
         'state': fields.selection([('manual','Custom Field'),('base','Base Field')],'Type', required=True, readonly=True, select=1),
@@ -272,23 +245,35 @@ class ir_model_fields(osv.osv):
             "For example: [('color','=','red')]"),
         'groups': fields.many2many('res.groups', 'ir_model_fields_group_rel', 'field_id', 'group_id', 'Groups'),
         'selectable': fields.boolean('Selectable'),
-        'modules': fields.function(_in_modules, type='char', string='In Modules', help='List of modules in which the field is defined'),
+        'modules': fields.function(_in_modules, type='char', string='In Apps', help='List of modules in which the field is defined'),
         'serialization_field_id': fields.many2one('ir.model.fields', 'Serialization Field', domain = "[('ttype','=','serialized')]",
                                                   ondelete='cascade', help="If set, this field will be stored in the sparse "
                                                                            "structure of the serialization field, instead "
                                                                            "of having its own database column. This cannot be "
                                                                            "changed after creation."),
+        'relation_table': fields.char("Relation Table", help="Used for custom many2many fields to define a custom relation table name"),
+        'column1': fields.char("Column 1", help="Column referring to the record in the model table"),
+        'column2': fields.char("Column 2", help="Column referring to the record in the comodel table"),
+        'compute': fields.text("Compute", help="Code to compute the value of the field.\n"
+                        "Iterate on the recordset 'self' and assign the field's value:\n\n"
+                        "    for record in self:\n"
+                        "        record['size'] = len(record.name)\n\n"
+                        "Modules time, datetime, dateutil are available."),
+        'depends': fields.char("Dependencies", help="Dependencies of compute method; "
+                        "a list of comma-separated field names, like\n\n"
+                        "    name, partner_id.name"),
+        'store': fields.boolean('Stored', help="Whether the value is stored in the database."),
     }
     _rec_name='field_description'
     _defaults = {
         'selection': "",
         'domain': "[]",
         'name': 'x_',
-        'state': lambda self,cr,uid,ctx=None: (ctx and ctx.get('manual',False)) and 'manual' or 'base',
+        'state': 'manual',
         'on_delete': 'set null',
-        'select_level': '0',
         'field_description': '',
         'selectable': 1,
+        'store': True,
     }
     _order = "name"
 
@@ -320,25 +305,122 @@ class ir_model_fields(osv.osv):
         ('size_gt_zero', 'CHECK (size>=0)',_size_gt_zero_msg ),
     ]
 
+    def _related_field(self):
+        """ Return the ``Field`` instance corresponding to ``self.related``. """
+        names = self.related.split(".")
+        last = len(names) - 1
+        model = self.env[self.model or self.model_id.model]
+        for index, name in enumerate(names):
+            field = model._fields.get(name)
+            if field is None:
+                raise UserError(_("Unknown field name '%s' in related field '%s'") % (name, self.related))
+            if index < last and not field.relational:
+                raise UserError(_("Non-relational field name '%s' in related field '%s'") % (name, self.related))
+            model = model[name]
+        return field
+
+    @api.one
+    @api.constrains('related')
+    def _check_related(self):
+        if self.state == 'manual' and self.related:
+            field = self._related_field()
+            if field.type != self.ttype:
+                raise UserError(_("Related field '%s' does not have type '%s'") % (self.related, self.ttype))
+            if field.relational and field.comodel_name != self.relation:
+                raise UserError(_("Related field '%s' does not have comodel '%s'") % (self.related, self.relation))
+
+    @api.onchange('related')
+    def _onchange_related(self):
+        if self.related:
+            try:
+                field = self._related_field()
+            except UserError as e:
+                return {'warning': {'title': _("Warning"), 'message': e.message}}
+            self.ttype = field.type
+            self.relation = field.comodel_name
+            self.readonly = True
+            self.copy = False
+
+    @api.onchange('compute')
+    def _onchange_compute(self):
+        if self.compute:
+            self.readonly = True
+            self.copy = False
+
+    @api.one
+    @api.constrains('relation_table')
+    def _check_relation_table(self):
+        models.check_pg_name(self.relation_table)
+
+    @api.model
+    def _custom_many2many_names(self, model_name, comodel_name):
+        """ Return default names for the table and columns of a custom many2many field. """
+        rel1 = self.env[model_name]._table
+        rel2 = self.env[comodel_name]._table
+        table = 'x_%s_%s_rel' % tuple(sorted([rel1, rel2]))
+        if rel1 == rel2:
+            return (table, 'id1', 'id2')
+        else:
+            return (table, '%s_id' % rel1, '%s_id' % rel2)
+
+    @api.onchange('ttype', 'model_id', 'relation')
+    def _onchange_ttype(self):
+        self.copy = (self.ttype != 'one2many')
+        if self.ttype == 'many2many' and self.model_id and self.relation:
+            names = self._custom_many2many_names(self.model_id.model, self.relation)
+            self.relation_table, self.column1, self.column2 = names
+        else:
+            self.relation_table = False
+            self.column1 = False
+            self.column2 = False
+
+    @api.onchange('relation_table')
+    def _onchange_relation_table(self):
+        if self.relation_table:
+            # check whether other fields use the same table
+            others = self.search([('ttype', '=', 'many2many'),
+                                  ('relation_table', '=', self.relation_table),
+                                  ('id', 'not in', self._origin.ids)])
+            if others:
+                for other in others:
+                    if (other.model, other.relation) == (self.relation, self.model):
+                        # other is a candidate inverse field
+                        self.column1 = other.column2
+                        self.column2 = other.column1
+                        return
+                return {'warning':{
+                    'title': _("Warning"),
+                    'message': _("The table %r if used for other, possibly incompatible fields.") % self.relation_table,
+                }}
+
     def _drop_column(self, cr, uid, ids, context=None):
+        tables_to_drop = set()
+
         for field in self.browse(cr, uid, ids, context):
             if field.name in MAGIC_COLUMNS:
                 continue
             model = self.pool[field.model]
-            cr.execute('select relkind from pg_class where relname=%s', (model._table,))
+            cr.execute('SELECT relkind FROM pg_class WHERE relname=%s', (model._table,))
             result = cr.fetchone()
-            cr.execute("SELECT column_name FROM information_schema.columns WHERE table_name ='%s' and column_name='%s'" %(model._table, field.name))
+            cr.execute("""SELECT column_name FROM information_schema.columns
+                          WHERE table_name=%s AND column_name=%s""",
+                       (model._table, field.name))
             column_name = cr.fetchone()
             if column_name and (result and result[0] == 'r'):
                 cr.execute('ALTER table "%s" DROP column "%s" cascade' % (model._table, field.name))
-            # remove m2m relation table for custom fields
-            # we consider the m2m relation is only one way as it's not possible
-            # to specify the relation table in the interface for custom fields
-            # TODO master: maybe use ir.model.relations for custom fields
             if field.state == 'manual' and field.ttype == 'many2many':
-                rel_name = model._fields[field.name].relation
-                cr.execute('DROP table "%s"' % (rel_name))
-            model._pop_field(field.name)
+                rel_name = field.relation_table or model._fields[field.name].relation
+                tables_to_drop.add(rel_name)
+            model._pop_field(cr, uid, field.name, context=context)
+
+        if tables_to_drop:
+            # drop the relation tables that are not used by other fields
+            cr.execute("""SELECT relation_table FROM ir_model_fields
+                          WHERE relation_table IN %s AND id NOT IN %s""",
+                       (tuple(tables_to_drop), tuple(ids)))
+            tables_to_keep = set(row[0] for row in cr.fetchall())
+            for rel_name in tables_to_drop - tables_to_keep:
+                cr.execute('DROP TABLE "%s"' % rel_name)
 
         return True
 
@@ -354,7 +436,7 @@ class ir_model_fields(osv.osv):
         self._drop_column(cr, user, ids, context)
         res = super(ir_model_fields, self).unlink(cr, user, ids, context)
         if not context.get(MODULE_UNINSTALL_FLAG):
-            # The field we just deleted might have be inherited, and registry is
+            # The field we just deleted might be inherited, and the registry is
             # inconsistent in this case; therefore we reload the registry.
             cr.commit()
             api.Environment.reset()
@@ -368,39 +450,30 @@ class ir_model_fields(osv.osv):
             vals['model'] = model_data.model
         if context is None:
             context = {}
-        if context and context.get('manual',False):
-            vals['state'] = 'manual'
         if vals.get('ttype', False) == 'selection':
             if not vals.get('selection',False):
                 raise UserError(_('For selection fields, the Selection Options must be given!'))
             self._check_selection(cr, user, vals['selection'], context=context)
         res = super(ir_model_fields,self).create(cr, user, vals, context)
-        if vals.get('state','base') == 'manual':
+        if vals.get('state','manual') == 'manual':
             if not vals['name'].startswith('x_'):
                 raise UserError(_("Custom fields must have a name that starts with 'x_' !"))
 
             if vals.get('relation',False) and not self.pool['ir.model'].search(cr, user, [('model','=',vals['relation'])]):
                 raise UserError(_("Model %s does not exist!") % vals['relation'])
 
+            if vals.get('ttype', False) == 'one2many':
+                if not self.search(cr, user, [('model_id','=',vals['relation']), ('name','=',vals['relation_field']), ('ttype','=','many2one')]):
+                    raise UserError(_("Many2one %s on model %s does not exist!") % (vals['relation_field'], vals['relation']))
+
             self.pool.clear_manual_fields()
 
             if vals['model'] in self.pool:
-                model = self.pool[vals['model']]
-                if vals['model'].startswith('x_') and vals['name'] == 'x_name':
-                    model._rec_name = 'x_name'
-
-                # re-initialize model in registry
-                model.__init__(self.pool, cr)
+                # setup models; this re-initializes model in registry
                 self.pool.setup_models(cr, partial=(not self.pool.ready))
                 # update database schema
                 model = self.pool[vals['model']]
-                ctx = dict(context,
-                    field_name=vals['name'],
-                    field_state='manual',
-                    select=vals.get('select_level', '0'),
-                    update_custom_fields=True)
-                model._auto_init(cr, ctx)
-                model._auto_end(cr, ctx) # actually create FKs!
+                init_models([model], cr, dict(context, update_custom_fields=True))
                 RegistryManager.signal_registry_change(cr.dbname)
 
         return res
@@ -408,8 +481,6 @@ class ir_model_fields(osv.osv):
     def write(self, cr, user, ids, vals, context=None):
         if context is None:
             context = {}
-        if context and context.get('manual',False):
-            vals['state'] = 'manual'
 
         #For the moment renaming a sparse field or changing the storing system is not allowed. This may be done later
         if 'serialization_field_id' in vals or 'name' in vals:
@@ -422,68 +493,46 @@ class ir_model_fields(osv.osv):
         # if set, *one* column can be renamed here
         column_rename = None
 
-        # field patches {model: {field_name: {prop_name: prop_value, ...}, ...}, ...}
-        patches = defaultdict(lambda: defaultdict(dict))
-
-        # static table of properties
-        model_props = [ # (our-name, fields.prop, set_fn)
-            ('field_description', 'string', tools.ustr),
-            ('required', 'required', bool),
-            ('readonly', 'readonly', bool),
-            ('domain', 'domain', eval),
-            ('size', 'size', int),
-            ('on_delete', 'ondelete', str),
-            ('translate', 'translate', bool),
-            ('select_level', 'index', lambda x: bool(int(x))),
-            ('selection', 'selection', eval),
-        ]
+        # names of the models to patch
+        patched_models = set()
 
         if vals and ids:
-            checked_selection = False # need only check it once, so defer
+            # check selection if given
+            if vals.get('selection'):
+                self._check_selection(cr, user, vals['selection'], context=context)
 
             for item in self.browse(cr, user, ids, context=context):
-                obj = self.pool.get(item.model)
-                field = getattr(obj, '_fields', {}).get(item.name)
-
                 if item.state != 'manual':
                     raise UserError(_('Properties of base fields cannot be altered in this manner! '
                                         'Please modify them through Python code, '
                                         'preferably through a custom addon!'))
 
-                if item.ttype == 'selection' and 'selection' in vals \
-                        and not checked_selection:
-                    self._check_selection(cr, user, vals['selection'], context=context)
-                    checked_selection = True
-
-                final_name = item.name
-                if 'name' in vals and vals['name'] != item.name:
-                    # We need to rename the column
-                    if column_rename:
-                        raise UserError(_('Can only rename one column at a time!'))
-                    if vals['name'] in obj._columns:
-                        raise UserError(_('Cannot rename column to %s, because that column already exists!') % vals['name'])
-                    if vals.get('state', 'base') == 'manual' and not vals['name'].startswith('x_'):
-                        raise UserError(_('New column name must still start with x_ , because it is a custom field!'))
-                    if '\'' in vals['name'] or '"' in vals['name'] or ';' in vals['name']:
-                        raise ValueError('Invalid character in column name')
-                    column_rename = (obj, (obj._table, item.name, vals['name']))
-                    final_name = vals['name']
-
-                if 'model_id' in vals and vals['model_id'] != item.model_id.id:
+                if vals.get('model_id', item.model_id.id) != item.model_id.id:
                     raise UserError(_("Changing the model of a field is forbidden!"))
 
-                if 'ttype' in vals and vals['ttype'] != item.ttype:
-                    raise UserError(_("Changing the type of a column is not yet supported. " "Please drop it and create it again!"))
+                if vals.get('ttype', item.ttype) != item.ttype:
+                    raise UserError(_("Changing the type of a field is not yet supported. "
+                                      "Please drop it and create it again!"))
+
+                obj = self.pool.get(item.model)
+                field = getattr(obj, '_fields', {}).get(item.name)
+
+                if vals.get('name', item.name) != item.name:
+                    # We need to rename the column
+                    if column_rename:
+                        raise UserError(_('Can only rename one field at a time!'))
+                    if vals['name'] in obj._fields:
+                        raise UserError(_('Cannot rename field to %s, because that field already exists!') % vals['name'])
+                    if vals.get('state', 'manual') == 'manual' and not vals['name'].startswith('x_'):
+                        raise UserError(_('New field name must still start with x_ , because it is a custom field!'))
+                    if '\'' in vals['name'] or '"' in vals['name'] or ';' in vals['name']:
+                        raise ValueError('Invalid character in column name')
+                    column_rename = (obj._table, item.name, vals['name'], item.index)
 
                 # We don't check the 'state', because it might come from the context
                 # (thus be set for multiple fields) and will be ignored anyway.
                 if obj is not None and field is not None:
-                    # find out which properties (per model) we need to update
-                    for field_name, prop_name, func in model_props:
-                        if field_name in vals:
-                            prop_value = func(vals[field_name])
-                            if getattr(field, prop_name) != prop_value:
-                                patches[obj][final_name][prop_name] = prop_value
+                    patched_models.add(obj._name)
 
         # These shall never be written (modified)
         for column_name in ('model_id', 'model', 'state'):
@@ -492,39 +541,25 @@ class ir_model_fields(osv.osv):
 
         res = super(ir_model_fields,self).write(cr, user, ids, vals, context=context)
 
+        self.pool.clear_manual_fields()
+
         if column_rename:
-            obj, rename = column_rename
-            cr.execute('ALTER TABLE "%s" RENAME COLUMN "%s" TO "%s"' % rename)
-            # This is VERY risky, but let us have this feature:
-            # we want to change the key of field in obj._fields and obj._columns
-            field = obj._pop_field(rename[1])
-            obj._add_field(rename[2], field)
+            # rename column in database, and its corresponding index if present
+            table, oldname, newname, index = column_rename
+            cr.execute('ALTER TABLE "%s" RENAME COLUMN "%s" TO "%s"' % (table, oldname, newname))
+            if index:
+                cr.execute('ALTER INDEX "%s_%s_index" RENAME TO "%s_%s_index"' % (table, oldname, table, newname))
+
+        if column_rename or patched_models:
+            # setup models, this will reload all manual fields in registry
             self.pool.setup_models(cr, partial=(not self.pool.ready))
 
-        if patches:
-            # We have to update _columns of the model(s) and then call their
-            # _auto_init to sync the db with the model. Hopefully, since write()
-            # was called earlier, they will be in-sync before the _auto_init.
-            # Anything we don't update in _columns now will be reset from
-            # the model into ir.model.fields (db).
-            ctx = dict(context,
-                select=vals.get('select_level', '0'),
-                update_custom_fields=True,
-            )
+        if patched_models:
+            # update the database schema of the models to patch
+            models = [self.pool[name] for name in patched_models]
+            init_models(models, cr, dict(context, update_custom_fields=True))
 
-            for obj, model_patches in patches.iteritems():
-                for field_name, field_patches in model_patches.iteritems():
-                    # update field properties, and adapt corresponding column
-                    field = obj._fields[field_name]
-                    attrs = dict(field._attrs, **field_patches)
-                    obj._add_field(field_name, field.new(**attrs))
-
-                # update database schema
-                self.pool.setup_models(cr, partial=(not self.pool.ready))
-                obj._auto_init(cr, ctx)
-                obj._auto_end(cr, ctx) # actually create FKs!
-
-        if column_rename or patches:
+        if column_rename or patched_models:
             RegistryManager.signal_registry_change(cr.dbname)
 
         return res
@@ -656,8 +691,8 @@ class ir_model_access(osv.osv):
     _name = 'ir.model.access'
     _columns = {
         'name': fields.char('Name', required=True, select=True),
-        'active': fields.boolean('Active', help='If you uncheck the active field, it will disable the ACL without deleting it (if you delete a native ACL, it will be re-created when you reload the module.'),
-        'model_id': fields.many2one('ir.model', 'Object', required=True, domain=[('osv_memory','=', False)], select=True, ondelete='cascade'),
+        'active': fields.boolean('Active', help='If you uncheck the active field, it will disable the ACL without deleting it (if you delete a native ACL, it will be re-created when you reload the module).'),
+        'model_id': fields.many2one('ir.model', 'Object', required=True, domain=[('transient','=', False)], select=True, ondelete='cascade'),
         'group_id': fields.many2one('res.groups', 'Group', ondelete='cascade', select=True),
         'perm_read': fields.boolean('Read Access'),
         'perm_write': fields.boolean('Write Access'),
@@ -733,7 +768,7 @@ class ir_model_access(osv.osv):
     # But as the method raises an exception in that case,  the key 'lang' might
     # not be really necessary as a cache key, unless the `ormcache_context`
     # decorator catches the exception (it does not at the moment.)
-    @tools.ormcache_context(accepted_keys=('lang',))
+    @tools.ormcache_context('uid', 'model', 'mode', 'raise_exception', keys=('lang',))
     def check(self, cr, uid, model, mode='read', raise_exception=True, context=None):
         if uid==1:
             # User root have all accesses
@@ -876,14 +911,13 @@ class ir_model_data(osv.osv):
         return result
 
     _columns = {
-        'name': fields.char('External Identifier', required=True, select=1,
+        'name': fields.char('External Identifier', required=True,
                             help="External Key/Identifier that can be used for "
                                  "data integration with third-party systems"),
         'complete_name': fields.function(_complete_name_get, type='char', string='Complete ID'),
-        'model': fields.char('Model Name', required=True, select=1),
-        'module': fields.char('Module', required=True, select=1),
-        'res_id': fields.integer('Record ID', select=1,
-                                 help="ID of the target record in the database"),
+        'model': fields.char('Model Name', required=True),
+        'module': fields.char('Module', required=True),
+        'res_id': fields.integer('Record ID', help="ID of the target record in the database"),
         'noupdate': fields.boolean('Non Updatable'),
         'date_update': fields.datetime('Update Date'),
         'date_init': fields.datetime('Init Date')
@@ -894,9 +928,6 @@ class ir_model_data(osv.osv):
         'noupdate': False,
         'module': ''
     }
-    _sql_constraints = [
-        ('module_name_uniq', 'unique(name, module)', 'You cannot have multiple records with the same external ID in the same module!'),
-    ]
 
     def __init__(self, pool, cr):
         osv.osv.__init__(self, pool, cr)
@@ -908,12 +939,15 @@ class ir_model_data(osv.osv):
 
     def _auto_init(self, cr, context=None):
         super(ir_model_data, self)._auto_init(cr, context)
-        cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'ir_model_data_module_name_index\'')
+        cr.execute("SELECT indexname FROM pg_indexes WHERE indexname = 'ir_model_data_module_name_uniq_index'")
         if not cr.fetchone():
-            cr.execute('CREATE INDEX ir_model_data_module_name_index ON ir_model_data (module, name)')
+            cr.execute('CREATE UNIQUE INDEX ir_model_data_module_name_uniq_index ON ir_model_data (module, name)')
+        cr.execute("SELECT indexname FROM pg_indexes WHERE indexname = 'ir_model_data_model_res_id_index'")
+        if not cr.fetchone():
+            cr.execute('CREATE INDEX ir_model_data_model_res_id_index ON ir_model_data (model, res_id)')
 
     # NEW V8 API
-    @tools.ormcache(skiparg=3)
+    @tools.ormcache('xmlid')
     def xmlid_lookup(self, cr, uid, xmlid):
         """Low level xmlid lookup
         Return (id, res_model, res_id) or raise ValueError if not found
@@ -1046,7 +1080,7 @@ class ir_model_data(osv.osv):
 
         if action_id and res_id:
             model_obj.write(cr, uid, [res_id], values, context=context)
-            self.write(cr, uid, [action_id], {
+            self.write(cr, SUPERUSER_ID, [action_id], {
                 'date_update': time.strftime('%Y-%m-%d %H:%M:%S'),
                 },context=context)
         elif res_id:
@@ -1056,14 +1090,14 @@ class ir_model_data(osv.osv):
                     for table in model_obj._inherits:
                         inherit_id = model_obj.browse(cr, uid,
                                 res_id,context=context)[model_obj._inherits[table]]
-                        self.create(cr, uid, {
+                        self.create(cr, SUPERUSER_ID, {
                             'name': xml_id + '_' + table.replace('.', '_'),
                             'model': table,
                             'module': module,
                             'res_id': inherit_id.id,
                             'noupdate': noupdate,
                             },context=context)
-                self.create(cr, uid, {
+                self.create(cr, SUPERUSER_ID, {
                     'name': xml_id,
                     'model': model,
                     'module':module,
@@ -1072,20 +1106,42 @@ class ir_model_data(osv.osv):
                     },context=context)
         else:
             if mode=='init' or (mode=='update' and xml_id):
+                inherit_xml_ids = []
+                if xml_id:
+                    for table, field_name in model_obj._inherits.items():
+                        xml_ids = self.pool['ir.model.data'].search(cr, uid, [
+                            ('module', '=', module),
+                            ('name', '=', xml_id + '_' + table.replace('.', '_')),
+                        ], context=context)
+                        # XML ID found in the database, try to recover an existing record
+                        if xml_ids:
+                            found_xml_id = self.pool['ir.model.data'].browse(cr, uid, xml_ids[0], context=context)
+                            record = self.pool[found_xml_id.model].browse(cr, uid, [found_xml_id.res_id], context=context)[0]
+                            # The record exists, store the id and don't recreate the XML ID
+                            if record.exists():
+                                inherit_xml_ids.append(found_xml_id.model)
+                                values[field_name] = found_xml_id.res_id
+                            # Orphan XML ID, delete it
+                            else:
+                                found_xml_id.unlink()
+
                 res_id = model_obj.create(cr, uid, values, context=context)
                 if xml_id:
                     if model_obj._inherits:
                         for table in model_obj._inherits:
+                            if table in inherit_xml_ids:
+                                continue
+
                             inherit_id = model_obj.browse(cr, uid,
                                     res_id,context=context)[model_obj._inherits[table]]
-                            self.create(cr, uid, {
+                            self.create(cr, SUPERUSER_ID, {
                                 'name': xml_id + '_' + table.replace('.', '_'),
                                 'model': table,
                                 'module': module,
                                 'res_id': inherit_id.id,
                                 'noupdate': noupdate,
                                 },context=context)
-                    self.create(cr, uid, {
+                    self.create(cr, SUPERUSER_ID, {
                         'name': xml_id,
                         'model': model,
                         'module': module,
@@ -1101,30 +1157,8 @@ class ir_model_data(osv.osv):
         return res_id
 
     def ir_set(self, cr, uid, key, key2, name, models, value, replace=True, isobject=False, meta=None, xml_id=False):
-        if isinstance(models[0], (list, tuple)):
-            model,res_id = models[0]
-        else:
-            res_id=None
-            model = models[0]
-
-        if res_id:
-            where = ' and res_id=%s' % (res_id,)
-        else:
-            where = ' and (res_id is null)'
-
-        if key2:
-            where += ' and key2=\'%s\'' % (key2,)
-        else:
-            where += ' and (key2 is null)'
-
-        cr.execute('select * from ir_values where model=%s and key=%s and name=%s'+where,(model, key, name))
-        res = cr.fetchone()
         ir_values_obj = openerp.registry(cr.dbname)['ir.values']
-        if not res:
-            ir_values_obj.set(cr, uid, key, key2, name, models, value, replace, isobject, meta)
-        elif xml_id:
-            cr.execute('UPDATE ir_values set value=%s WHERE model=%s and key=%s and name=%s'+where,(value, model, key, name))
-            ir_values_obj.invalidate_cache(cr, uid, ['value'])
+        ir_values_obj.set(cr, uid, key, key2, name, models, value, replace, isobject, meta)
         return True
 
     def _module_data_uninstall(self, cr, uid, modules_to_remove, context=None):
@@ -1279,7 +1313,6 @@ class wizard_model_menu(osv.osv_memory):
             self.pool.get('ir.ui.menu').create(cr, uid, {
                 'name': menu.name,
                 'parent_id': menu.menu_id.id,
-                'action': 'ir.actions.act_window,%d' % (action_id,),
-                'icon': 'STOCK_INDENT'
+                'action': 'ir.actions.act_window,%d' % (action_id,)
             }, context)
         return {'type':'ir.actions.act_window_close'}

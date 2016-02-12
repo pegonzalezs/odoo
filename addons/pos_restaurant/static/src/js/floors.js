@@ -7,7 +7,7 @@ var gui = require('point_of_sale.gui');
 var models = require('point_of_sale.models');
 var screens = require('point_of_sale.screens');
 var core = require('web.core');
-var Model = require('web.Model');
+var Model = require('web.DataModel');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -301,10 +301,22 @@ var TableWidget = PosBaseWidget.extend({
             if (orders[i].hasChangesToPrint()) {
                 notifications.printing = true;
                 break;
+            } else if (orders[i].hasSkippedChanges()) {
+                notifications.skipped  = true;
             }
         }
         return notifications;
     },
+        update_click_handlers: function(editing){
+            var self = this;
+            this.$el.off('mouseup touchend touchcancel click dragend');
+
+            if (editing) {
+                this.$el.on('mouseup touchend touchcancel', function(event){ self.click_handler(event,$(this)); });
+            } else {
+                this.$el.on('click dragend', function(event){ self.click_handler(event,$(this)); });
+            }
+        },
     renderElement: function(){
         var self = this;
         this.order_count    = this.pos.get_table_orders(this.table).length;
@@ -313,9 +325,8 @@ var TableWidget = PosBaseWidget.extend({
         this.notifications  = this.get_notifications();
         this._super();
 
-        this.$el.on('mouseup',      function(event){ self.click_handler(event,$(this)); });
-        this.$el.on('touchend',     function(event){ self.click_handler(event,$(this)); });
-        this.$el.on('touchcancel',  function(event){ self.click_handler(event,$(this)); });
+        this.update_click_handlers();
+
         this.$el.on('dragstart', function(event,drag){ self.dragstart_handler(event,$(this),drag); });
         this.$el.on('drag',      function(event,drag){ self.dragmove_handler(event,$(this),drag); });
         this.$el.on('dragend',   function(event,drag){ self.dragend_handler(event,$(this),drag); });
@@ -331,7 +342,6 @@ var TableWidget = PosBaseWidget.extend({
 // as well as edit them.
 var FloorScreenWidget = screens.ScreenWidget.extend({
     template: 'FloorScreenWidget',
-    show_leftpane: false,
 
     // Ignore products, discounts, and client barcodes
     barcode_product_action: function(code){},
@@ -358,6 +368,7 @@ var FloorScreenWidget = screens.ScreenWidget.extend({
         for (var i = 0; i < this.table_widgets.length; i++) { 
             this.table_widgets[i].renderElement();
         }
+        this.check_empty_floor();
     },
     click_floor_button: function(event,$el){
         var floor = this.pos.floors_by_id[$el.data('id')];
@@ -368,10 +379,11 @@ var FloorScreenWidget = screens.ScreenWidget.extend({
             this.floor = floor;
             this.selected_table = null;
             this.renderElement();
+            this.check_empty_floor();
         }
     },
     background_image_url: function(floor) { 
-        return '/web/binary/image?model=restaurant.floor&id='+floor.id+'&field=background_image';
+        return '/web/image?model=restaurant.floor&id='+floor.id+'&field=background_image';
     },
     get_floor_style: function() {
         var style = "";
@@ -488,7 +500,9 @@ var FloorScreenWidget = screens.ScreenWidget.extend({
             'shape': 'square',
             'seats': 1,
         });
+        tw.save_changes();
         this.select_table(tw);
+        this.check_empty_floor();
     },
     new_table_name: function(name){
         if (name) {
@@ -537,9 +551,29 @@ var FloorScreenWidget = screens.ScreenWidget.extend({
     toggle_editing: function(){
         this.editing = !this.editing;
         this.update_toolbar();
+            this.update_table_click_handlers();
 
         if (!this.editing) {
             this.deselect_tables();
+            }
+        },
+        update_table_click_handlers: function(){
+            for (var i = 0; i < this.table_widgets.length; ++i) {
+                if (this.editing) {
+                    this.table_widgets[i].update_click_handlers("editing");
+                } else {
+                    this.table_widgets[i].update_click_handlers();
+                }
+        }
+    },
+    check_empty_floor: function(){
+        if (!this.floor.tables.length) {
+            if (!this.editing) {
+                this.toggle_editing();
+            }
+            this.$('.empty-floor').removeClass('oe_hidden');
+        } else {
+            this.$('.empty-floor').addClass('oe_hidden');
         }
     },
     update_toolbar: function(){
@@ -676,13 +710,7 @@ models.Order = models.Order.extend({
         if (!this.table) {
             this.table = this.pos.table;
         }
-        if (!this.customer_count) {
-            if (this.table) {
-                this.customer_count = this.table.seats;
-            } else {
-                this.customer_count = 1;
-            }
-        }
+        this.customer_count = this.customer_count || 1;
         this.save_to_db();
     },
     export_as_JSON: function() {
@@ -760,11 +788,28 @@ models.PosModel = models.PosModel.extend({
         return _super_posmodel.initialize.call(this,session,attributes);
     },
 
-    // changes the current table. 
+    transfer_order_to_different_table: function () {
+        this.order_to_transfer_to_different_table = this.get_order();
+
+        // go to 'floors' screen, this will set the order to null and
+        // eventually this will cause the gui to go to its
+        // default_screen, which is 'floors'
+        this.set_table(null);
+    },
+
+    // changes the current table.
     set_table: function(table) {
         if (!table) { // no table ? go back to the floor plan, see ScreenSelector
-            this.set_order(null);   
-        } else {     // table ? load the associated orders  ...
+            this.set_order(null);
+        } else if (this.order_to_transfer_to_different_table) {
+            this.order_to_transfer_to_different_table.table = table;
+            this.order_to_transfer_to_different_table.save_to_db();
+            this.order_to_transfer_to_different_table = null;
+
+            // set this table
+            this.set_table(table);
+
+        } else {
             this.table = table;
             var orders = this.get_order_list();
             if (orders.length) {   
@@ -895,6 +940,21 @@ screens.OrderWidget.include({
 screens.define_action_button({
     'name': 'guests',
     'widget': TableGuestsButton,
+    'condition': function(){
+        return this.pos.config.iface_floorplan;
+    },
+});
+
+var TransferOrderButton = screens.ActionButtonWidget.extend({
+    template: 'TransferOrderButton',
+    button_click: function() {
+        this.pos.transfer_order_to_different_table();
+    },
+});
+
+screens.define_action_button({
+    'name': 'transfer',
+    'widget': TransferOrderButton,
     'condition': function(){
         return this.pos.config.iface_floorplan;
     },

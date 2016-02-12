@@ -1,25 +1,7 @@
 # -*- coding: utf-8 -*-
-##################################################################################
-#
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 # Copyright (c) 2005-2006 Axelor SARL. (http://www.axelor.com)
-# and 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-# $Id: hr.py 4656 2006-11-24 09:58:42Z Cyp $
-#
-#     This program is free software: you can redistribute it and/or modify
-#     it under the terms of the GNU Affero General Public License as
-#     published by the Free Software Foundation, either version 3 of the
-#     License, or (at your option) any later version.
-#
-#     This program is distributed in the hope that it will be useful,
-#     but WITHOUT ANY WARRANTY; without even the implied warranty of
-#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#     GNU Affero General Public License for more details.
-#
-#     You should have received a copy of the GNU Affero General Public License
-#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
 
 
 import calendar
@@ -29,12 +11,11 @@ import logging
 import math
 import time
 from operator import attrgetter
+from werkzeug import url_encode
 
 from dateutil.relativedelta import relativedelta
-import pytz
 
 from openerp.exceptions import UserError, AccessError
-from openerp import SUPERUSER_ID
 from openerp import tools
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -96,6 +77,7 @@ class hr_holidays_status(osv.osv):
         'remaining_leaves': fields.function(_user_left_days, string='Remaining Leaves', help='Maximum Leaves Allowed - Leaves Already Taken', multi='user_left_days'),
         'virtual_remaining_leaves': fields.function(_user_left_days, string='Virtual Remaining Leaves', help='Maximum Leaves Allowed - Leaves Already Taken - Leaves Waiting Approval', multi='user_left_days'),
         'double_validation': fields.boolean('Apply Double Validation', help="When selected, the Allocation/Leave Requests for this type require a second validation to be approved."),
+        'company_id': fields.many2one('res.company', 'Company'),
     }
     _defaults = {
         'color_name': 'red',
@@ -140,7 +122,7 @@ class hr_holidays_status(osv.osv):
 class hr_holidays(osv.osv):
     _name = "hr.holidays"
     _description = "Leave"
-    _order = "type desc, date_from asc"
+    _order = "type desc, date_from desc"
     _inherit = ['mail.thread', 'ir.needaction_mixin']
 
     def _employee_get(self, cr, uid, context=None):
@@ -246,6 +228,12 @@ class hr_holidays(osv.osv):
         ('date_check', "CHECK ( number_of_days_temp >= 0 )", "The number of days must be greater than 0."),
     ]
 
+    def name_get(self, cr, uid, ids, context=None):
+        res = []
+        for leave in self.browse(cr, uid, ids, context=context):
+            res.append((leave.id, leave.name or _("%s on %s") % (leave.employee_id.name, leave.holiday_status_id.name)))
+        return res
+
     def _create_resource_leave(self, cr, uid, leaves, context=None):
         '''This method will create entry in resource calendar leave object at the time of holidays validated '''
         obj_res_leave = self.pool.get('resource.calendar.leaves')
@@ -349,6 +337,11 @@ class hr_holidays(osv.osv):
             result['value']['number_of_days_temp'] = 0
         return result
 
+    def _check_state_access_right(self, cr, uid, vals, context=None):
+        if vals.get('state') and vals['state'] not in ['draft', 'confirm', 'cancel'] and not self.pool['res.users'].has_group(cr, uid, 'base.group_hr_user'):
+            return False
+        return True
+
     def add_follower(self, cr, uid, ids, employee_id, context=None):
         employee = self.pool.get('hr.employee').browse(cr, uid, employee_id, context=context)
         if employee and employee.user_id:
@@ -359,16 +352,20 @@ class hr_holidays(osv.osv):
         if context is None:
             context = {}
         employee_id = values.get('employee_id', False)
-        context = dict(context, mail_create_nolog=True)
-        if values.get('state') and values['state'] not in ['draft', 'confirm', 'cancel'] and not self.pool['res.users'].has_group(cr, uid, 'base.group_hr_user'):
+        context = dict(context, mail_create_nolog=True, mail_create_nosubscribe=True)
+        if not self._check_state_access_right(cr, uid, values, context):
             raise AccessError(_('You cannot set a leave request as \'%s\'. Contact a human resource manager.') % values.get('state'))
+        if not values.get('name'):
+            employee_name = self.pool['hr.employee'].browse(cr, uid, employee_id, context=context).name
+            holiday_type = self.pool['hr.holidays.status'].browse(cr, uid, values.get('holiday_status_id'), context=context).name
+            values['name'] = _("%s on %s") % (employee_name, holiday_type)
         hr_holiday_id = super(hr_holidays, self).create(cr, uid, values, context=context)
         self.add_follower(cr, uid, [hr_holiday_id], employee_id, context=context)
         return hr_holiday_id
 
     def write(self, cr, uid, ids, vals, context=None):
         employee_id = vals.get('employee_id', False)
-        if vals.get('state') and vals['state'] not in ['draft', 'confirm', 'cancel'] and not self.pool['res.users'].has_group(cr, uid, 'base.group_hr_user'):
+        if not self._check_state_access_right(cr, uid, vals, context):
             raise AccessError(_('You cannot set a leave request as \'%s\'. Contact a human resource manager.') % vals.get('state'))
         hr_holiday_id = super(hr_holidays, self).write(cr, uid, ids, vals, context=context)
         self.add_follower(cr, uid, ids, employee_id, context=context)
@@ -409,7 +406,7 @@ class hr_holidays(osv.osv):
             if record.holiday_type == 'employee' and record.type == 'remove':
                 meeting_obj = self.pool.get('calendar.event')
                 meeting_vals = {
-                    'name': record.name or _('Leave Request'),
+                    'name': record.display_name,
                     'categ_ids': record.holiday_status_id.categ_id and [(6,0,[record.holiday_status_id.categ_id.id])] or [],
                     'duration': record.number_of_days_temp * 8,
                     'description': record.notes,
@@ -429,9 +426,10 @@ class hr_holidays(osv.osv):
                 self._create_resource_leave(cr, uid, [record], context=context)
                 self.write(cr, uid, ids, {'meeting_id': meeting_id})
             elif record.holiday_type == 'category':
-                emp_ids = obj_emp.search(cr, uid, [('category_ids', 'child_of', [record.category_id.id])])
+                emp_ids = record.category_id.employee_ids.ids
                 leave_ids = []
-                for emp in obj_emp.browse(cr, uid, emp_ids):
+                batch_context = dict(context, mail_notify_force_send=False)
+                for emp in obj_emp.browse(cr, uid, emp_ids, context=context):
                     vals = {
                         'name': record.name,
                         'type': record.type,
@@ -444,7 +442,7 @@ class hr_holidays(osv.osv):
                         'parent_id': record.id,
                         'employee_id': emp.id
                     }
-                    leave_ids.append(self.create(cr, uid, vals, context=None))
+                    leave_ids.append(self.create(cr, uid, vals, context=batch_context))
                 for leave_id in leave_ids:
                     # TODO is it necessary to interleave the calls?
                     for sig in ('confirm', 'validate', 'second_validate'):
@@ -452,9 +450,6 @@ class hr_holidays(osv.osv):
         return True
 
     def holidays_confirm(self, cr, uid, ids, context=None):
-        for record in self.browse(cr, uid, ids, context=context):
-            if record.employee_id and record.employee_id.parent_id and record.employee_id.parent_id.user_id:
-                self.message_subscribe_users(cr, uid, [record.id], user_ids=[record.employee_id.parent_id.user_id.id], context=context)
         return self.write(cr, uid, ids, {'state': 'confirm'})
 
     def holidays_refuse(self, cr, uid, ids, context=None):
@@ -506,6 +501,37 @@ class hr_holidays(osv.osv):
         elif 'state' in init_values and record.state == 'refuse':
             return 'hr_holidays.mt_holidays_refused'
         return super(hr_holidays, self)._track_subtype(cr, uid, ids, init_values, context=context)
+
+    def _notification_group_recipients(self, cr, uid, ids, message, recipients, done_ids, group_data, context=None):
+        """ Override the mail.thread method to handle HR users and officers
+        recipients. Indeed those will have specific action in their notification
+        emails. """
+        group_hr_user = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, 'base.group_hr_user')
+        for recipient in recipients:
+            if recipient.id in done_ids:
+                continue
+            if recipient.user_ids and group_hr_user in recipient.user_ids[0].groups_id.ids:
+                group_data['group_hr_user'] |= recipient
+                done_ids.add(recipient.id)
+        return super(hr_holidays, self)._notification_group_recipients(cr, uid, ids, message, recipients, done_ids, group_data, context=context)
+
+    def _notification_get_recipient_groups(self, cr, uid, ids, message, recipients, context=None):
+        res = super(hr_holidays, self)._notification_get_recipient_groups(cr, uid, ids, message, recipients, context=context)
+
+        app_action = '/mail/workflow?%s' % url_encode({'model': self._name, 'res_id': ids[0], 'signal': 'validate'})
+        ref_action = '/mail/workflow?%s' % url_encode({'model': self._name, 'res_id': ids[0], 'signal': 'refuse'})
+
+        holiday = self.browse(cr, uid, ids[0], context=context)
+        actions = []
+        if holiday.state == 'confirm':
+            actions.append({'url': app_action, 'title': 'Approve'})
+        if holiday.state in ['confirm', 'validate', 'validate1']:
+            actions.append({'url': ref_action, 'title': 'Refuse'})
+
+        res['group_hr_user'] = {
+            'actions': actions
+        }
+        return res
 
 
 class resource_calendar_leaves(osv.osv):
@@ -568,7 +594,7 @@ class hr_employee(osv.Model):
         holidays_obj = self.pool.get('hr.holidays')
         holidays_id = holidays_obj.search(cr, uid,
            [('employee_id', 'in', ids), ('date_from','<=',time.strftime('%Y-%m-%d %H:%M:%S')),
-           ('date_to','>=',time.strftime('%Y-%m-%d 23:59:59')),('type','=','remove'),('state','not in',('cancel','refuse'))],
+           ('date_to','>=',time.strftime('%Y-%m-%d %H:%M:%S')),('type','=','remove'),('state','not in',('cancel','refuse'))],
            context=context)
         result = {}
         for id in ids:
@@ -587,14 +613,16 @@ class hr_employee(osv.Model):
 
     def _leaves_count(self, cr, uid, ids, field_name, arg, context=None):
         res = {}
-        Holidays = self.pool['hr.holidays']
-        date_begin = date.today().replace(day=1)
-        date_end = date_begin.replace(day=calendar.monthrange(date_begin.year, date_begin.month)[1])
-        for employee_id in ids:
-            leaves = Holidays.search_count(cr, uid, [('employee_id', '=', employee_id), ('type', '=', 'remove')], context=context)
-            approved_leaves = Holidays.search_count(cr, uid, [('employee_id', '=', employee_id), ('type', '=', 'remove'), ('date_from', '>=', date_begin.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), ('date_from', '<=', date_end.strftime(tools.DEFAULT_SERVER_DATE_FORMAT)), ('state', '=', 'validate'), ('payslip_status', '=', False)], context=context)
-            res[employee_id] = {'leaves_count': leaves, 'approved_leaves_count': approved_leaves}
+        leaves = self.pool['hr.holidays'].read_group(cr, uid, [
+            ('employee_id', 'in', ids),
+            ('holiday_status_id.limit', '=', False), ('state', '=', 'validate')], fields=['number_of_days', 'employee_id'], groupby=['employee_id'])
+        res.update(dict([(leave['employee_id'][0], leave['number_of_days']) for leave in leaves ]))
         return res
+
+    def _show_approved_remaining_leave(self, cr, uid, ids, name, args, context=None):
+        if self.pool['res.users'].has_group(cr, uid, 'base.group_hr_user'):
+            return dict([(employee_id, True) for employee_id in ids])
+        return dict([(employee.id, True) for employee in self.browse(cr, uid, ids, context=context) if employee.user_id.id == uid])
 
     def _absent_employee(self, cr, uid, ids, field_name, arg, context=None):
         today_date = datetime.datetime.utcnow().date()
@@ -631,7 +659,7 @@ class hr_employee(osv.Model):
         'current_leave_id': fields.function(_get_leave_status, multi="leave_status", string="Current Leave Type", type='many2one', relation='hr.holidays.status'),
         'leave_date_from': fields.function(_get_leave_status, multi='leave_status', type='date', string='From Date'),
         'leave_date_to': fields.function(_get_leave_status, multi='leave_status', type='date', string='To Date'),
-        'leaves_count': fields.function(_leaves_count, multi='_leaves_count', type='integer', string='Number of Leaves (current month)'),
-        'approved_leaves_count': fields.function(_leaves_count, multi='_leaves_count', type='integer', string='Approved Leaves not in Payslip', help="These leaves are approved but not taken into account for payslip"),
+        'leaves_count': fields.function(_leaves_count, type='integer', string='Number of Leaves'),
+        'show_leaves': fields.function(_show_approved_remaining_leave, type='boolean', string="Able to see Remaining Leaves"),
         'is_absent_totay': fields.function(_absent_employee, fnct_search=_search_absent_employee, type="boolean", string="Absent Today", default=False)
     }

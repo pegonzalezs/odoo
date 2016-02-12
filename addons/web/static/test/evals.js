@@ -1,3 +1,10 @@
+odoo.define_section('eval.basics', ['web.pyeval'], function(test, mock) {
+    test('not prefix', function (assert) {
+        assert.ok(py.eval('not False'));
+        assert.ok(py.eval('not foo', {foo: false}));
+        assert.ok(py.eval('not a in b', {a: 3, b: [1, 2, 4, 8]}));
+    });
+});
 odoo.define_section('eval.types', ['web.pyeval'], function (test, mock) {
 
     function makeTimeCheck (assert, pyeval) {
@@ -385,7 +392,7 @@ odoo.define_section('eval.edc', ['web.pyeval', 'web.session'], function (test, m
             });
     });
 
-    test('empty, context altered', ['web.Model'], function (assert, pyeval, session, Model) {
+    test('empty, context altered', ['web.DataModel'], function (assert, pyeval, session, Model) {
         assert.expect(3);
         var lang = new Model('res.lang');
         var users = new Model('res.users');
@@ -762,12 +769,12 @@ odoo.define_section('eval.contexts', ['web.pyeval'], function (test) {
                                 {"id": false, "journal_id": 10,
                                  "number": false, "type": "out_invoice",
                                  "currency_id": 1, "partner_id": 4,
-                                 "fiscal_position": false,
-                                 "date_invoice": false, "period_id": false,
-                                 "payment_term": false, "reference_type": "none",
+                                 "fiscal_position_id": false,
+                                 "date_invoice": false, "date": false,
+                                 "payment_term_id": false, "reference_type": "none",
                                  "reference": false, "account_id": 440,
-                                 "name": false, "invoice_line": [],
-                                 "tax_line": [], "amount_untaxed": 0,
+                                 "name": false, "invoice_line_ids": [],
+                                 "tax_line_ids": [], "amount_untaxed": 0,
                                  "amount_tax": 0, "reconciled": false,
                                  "amount_total": 0, "state": "draft",
                                  "residual": 0, "company_id": 1,
@@ -784,25 +791,25 @@ odoo.define_section('eval.contexts', ['web.pyeval'], function (test) {
                     "product_id": 4,
                     "name": "[PC1] Basic PC",
                     "quantity": 1,
-                    "uos_id": 1,
+                    "uom_id": 1,
                     "price_unit": 100,
                     "account_id": 853,
                     "discount": 0,
                     "account_analytic_id": false,
                     "company_id": false,
                     "note": false,
-                    "invoice_line_tax_id": [[6, false, [1]]],
+                    "invoice_line_tax_ids": [[6, false, [1]]],
                     "active_id": false,
                     "active_ids": [],
                     "active_model": "account.invoice.line",
                     "parent": {
                         "id": false, "journal_id": 10, "number": false,
                         "type": "out_invoice", "currency_id": 1,
-                        "partner_id": 4, "fiscal_position": false,
-                        "date_invoice": false, "period_id": false,
-                        "payment_term": false, "reference_type": "none",
+                        "partner_id": 4, "fiscal_position_id": false,
+                        "date_invoice": false, "date": false,
+                        "payment_term_id": false, "reference_type": "none",
                         "reference": false, "account_id": 440, "name": false,
-                        "tax_line": [], "amount_untaxed": 0, "amount_tax": 0,
+                        "tax_line_ids": [], "amount_untaxed": 0, "amount_tax": 0,
                         "reconciled": false, "amount_total": 0,
                         "state": "draft", "residual": 0, "company_id": 1,
                         "date_due": false, "user_id": 1,
@@ -818,6 +825,7 @@ odoo.define_section('eval.contexts', ['web.pyeval'], function (test) {
     });
 
     test('return-input-value', function (assert, pyeval) {
+        var date = new Date()
         var result = pyeval.eval('contexts', [{
             __ref: 'compound_context',
             __contexts: ["{'line_id': line_id , 'journal_id': journal_id }"],
@@ -837,7 +845,7 @@ odoo.define_section('eval.contexts', ['web.pyeval'], function (test) {
                     active_model: 'account.move',
                     amount: 0,
                     company_id: 1,
-                    date: '2013-06-21',
+                    date: date,
                     id: false,
                     journal_id: 14,
                     line_id: [
@@ -851,15 +859,14 @@ odoo.define_section('eval.contexts', ['web.pyeval'], function (test) {
                             debit: 0,
                             name: "dscsd",
                             partner_id: false,
-                            tax_amount: 0,
-                            tax_code_id: false,
+                            tax_line_id: false,
                         }]
                     ],
                     name: '/',
                     narration: false,
                     parent: {},
                     partner_id: false,
-                    period_id: 6,
+                    date: '2011-01-1',
                     ref: false,
                     state: 'draft',
                     to_check: false,
@@ -879,8 +886,7 @@ odoo.define_section('eval.contexts', ['web.pyeval'], function (test) {
                 debit: 0,
                 name: "dscsd",
                 partner_id: false,
-                tax_amount: 0,
-                tax_code_id: false,
+                tax_line_id: false,
             }]],
         });
     });

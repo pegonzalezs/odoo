@@ -2,13 +2,16 @@ odoo.define('website_links.charts', function (require) {
 'use strict';
 
 var Widget = require('web.Widget');
+var base = require('web_editor.base');
 var website = require('website.website');
 var Model = require('web.Model');
 
 var exports = {};
 
-website.if_dom_contains('div.o_website_links_chart', function() {
-    
+if(!$('.o_website_links_chart').length) {
+    return $.Deferred().reject("DOM doesn't contain '.o_website_links_chart'");
+}
+
     var BarChart = Widget.extend({
         init: function($element, begin_date, end_date, dates) {
             this.$element = $element;
@@ -56,8 +59,6 @@ website.if_dom_contains('div.o_website_links_chart', function() {
                 var chart = nv.models.lineChart()
                     .x(function(d) { return getDate(d); })
                     .y(function(d) { return getNbClicks(d); })
-                    .tooltips(true)
-                    .transitionDuration(0)
                     .showYAxis(true)
                     .showXAxis(true);
 
@@ -77,9 +78,7 @@ website.if_dom_contains('div.o_website_links_chart', function() {
                     .datum(chart_data)
                     .call(chart);
 
-                nv.utils.windowResize(chart.update);
-
-                return chart;
+                return self.chart = chart;
             });
         },
     });
@@ -106,32 +105,32 @@ website.if_dom_contains('div.o_website_links_chart', function() {
                 var chart = nv.models.pieChart()
                     .x(function(d) { return d.label; })
                     .y(function(d) { return d.value; })
-                    .showLabels(true);
+                    .showLabels(false);
 
                 d3.select(self.$element + ' svg')
                     .datum(processed_data)
                     .transition().duration(1200)
                     .call(chart);
 
-                nv.utils.windowResize(chart.update);
-                return chart;
+                return self.chart = chart;
             });
         },
     });
 
-    website.ready().done(function() {
+    base.ready().done(function() {
         // Resize the chart when a tab is opened, because NVD3 automatically reduce the size
         // of the chart to 5px width when the bootstrap tab is closed.
+        var charts = {};
         $(".graph-tabs li a").click(function (e) {
             e.preventDefault();
             $(this).tab('show');
-            $(window).trigger('resize'); // Force NVD3 to redraw the chart
+            _.chain(charts).pluck('chart').invoke('update'); // Force NVD3 to redraw the chart
         });
 
         // Get the code of the link
         var link_id = $('#link_id').val();
 
-        var clicks = new Model('website.links.click');
+        var clicks = new Model('link.tracker.click');
         var links_domain = ['link_id', '=', parseInt(link_id)];
 
         var total_clicks = function() {
@@ -180,28 +179,26 @@ website.if_dom_contains('div.o_website_links_chart', function() {
                 // Process all time line chart data
                 var now = moment();
 
-                var all_time_chart = new BarChart('#all_time_clicks_chart', begin_date, now, formatted_clicks_by_day);
-                all_time_chart.start();
+                charts.all_time_bar = new BarChart('#all_time_clicks_chart', begin_date, now, formatted_clicks_by_day);
 
                 // Process month line chart data
                 begin_date = moment().subtract(30, 'days');
-                var month_chart = new BarChart('#last_month_clicks_chart', begin_date, now, formatted_clicks_by_day);
-                month_chart.start();
+                charts.last_month_bar = new BarChart('#last_month_clicks_chart', begin_date, now, formatted_clicks_by_day);
 
                 // Process week line chart data
                 begin_date = moment().subtract(7, 'days');
-                var week_chart = new BarChart('#last_week_clicks_chart', begin_date, now, formatted_clicks_by_day);
-                week_chart.start();
+                charts.last_week_bar = new BarChart('#last_week_clicks_chart', begin_date, now, formatted_clicks_by_day);
 
                 // Process pie charts
-                var all_time_pie_chart = new PieChart('#all_time_countries_charts', clicks_by_country);
-                all_time_pie_chart.start();
+                charts.all_time_pie = new PieChart('#all_time_countries_charts', clicks_by_country);
+                charts.last_month_pie = new PieChart('#last_month_countries_charts', last_month_clicks_by_country);
+                charts.last_week_pie = new PieChart('#last_week_countries_charts', last_week_clicks_by_country);
 
-                var last_month_pie_chart = new PieChart('#last_month_countries_charts', last_month_clicks_by_country);
-                last_month_pie_chart.start();
+                _.invoke(charts, 'start');
 
-                var last_week_pie_chart = new PieChart('#last_week_countries_charts', last_week_clicks_by_country);
-                last_week_pie_chart.start();
+                nv.utils.windowResize(function () {
+                    _.chain(charts).pluck('chart').invoke('update');
+                });
             }
             else {
                 $('#all_time_charts').prepend('There is no data to show');
@@ -211,7 +208,7 @@ website.if_dom_contains('div.o_website_links_chart', function() {
         });
 
         // Copy to clipboard link
-        ZeroClipboard.config({swfPath: location.origin + "/website_links/static/lib/zeroclipboard/ZeroClipboard.swf" });
+        ZeroClipboard.config({swfPath: location.origin + "/web/static/lib/zeroclipboard/ZeroClipboard.swf" });
         new ZeroClipboard($('.copy-to-clipboard'));
 
         var animating_copy = false;
@@ -244,7 +241,6 @@ website.if_dom_contains('div.o_website_links_chart', function() {
 
     exports.BarChart = BarChart;
     exports.PieChart = PieChart;
-});
 
 return exports;
 });

@@ -135,7 +135,7 @@ class Category(models.Model):
     _order = "sequence, id"
 
     name = fields.Char('Name', translate=True, required=True)
-    channel_id = fields.Many2one('slide.channel', string="Channel", required=True)
+    channel_id = fields.Many2one('slide.channel', string="Channel", required=True, ondelete='cascade')
     sequence = fields.Integer(default=10, help='Display order')
     slide_ids = fields.One2many('slide.slide', 'category_id', string="Slides")
     nbr_presentations = fields.Integer("Number of Presentations", compute='_count_presentations', store=True)
@@ -213,7 +213,7 @@ class Slide(models.Model):
     _description = 'Slides'
 
     _PROMOTIONAL_FIELDS = [
-        '__last_update', 'name', 'image_thumb', 'slide_type', 'total_views', 'category_id',
+        '__last_update', 'name', 'image_thumb', 'image_medium', 'slide_type', 'total_views', 'category_id',
         'channel_id', 'description', 'tag_ids', 'write_date', 'create_date',
         'website_published', 'website_url', 'website_meta_title', 'website_meta_description', 'website_meta_keywords']
 
@@ -231,16 +231,16 @@ class Slide(models.Model):
         [('none', 'No One'), ('user', 'Authentified Users Only'), ('public', 'Everyone')],
         string='Download Security',
         required=True, default='user')
-    image = fields.Binary('Image')
-    image_medium = fields.Binary('Medium', compute="_get_image", store=True)
-    image_thumb = fields.Binary('Thumbnail', compute="_get_image", store=True)
+    image = fields.Binary('Image', attachment=True)
+    image_medium = fields.Binary('Medium', compute="_get_image", store=True, attachment=True)
+    image_thumb = fields.Binary('Thumbnail', compute="_get_image", store=True, attachment=True)
 
     @api.depends('image')
     def _get_image(self):
         for record in self:
             if record.image:
-                record.image_medium = image.crop_image(record.image, thumbnail_ratio=3)
-                record.image_thumb = image.crop_image(record.image, thumbnail_ratio=4)
+                record.image_medium = image.crop_image(record.image, type='top', ratio=(4, 3), thumbnail_ratio=4)
+                record.image_thumb = image.crop_image(record.image, type='top', ratio=(4, 3), thumbnail_ratio=6)
             else:
                 record.image_medium = False
                 record.iamge_thumb = False
@@ -253,7 +253,7 @@ class Slide(models.Model):
         ('video', 'Video')],
         string='Type', required=True,
         default='document',
-        help="Document type will be set automatically depending on file type, height and width.")
+        help="The document type will be set automatically based on the document URL and properties (e.g. height and width for presentation and document).")
     index_content = fields.Text('Transcript')
     datas = fields.Binary('Content')
     url = fields.Char('Document URL', help="Youtube or Google Document URL")
@@ -277,7 +277,7 @@ class Slide(models.Model):
     date_published = fields.Datetime('Publish Date')
     website_message_ids = fields.One2many(
         'mail.message', 'res_id',
-        domain=lambda self: [('model', '=', self._name), ('type', '=', 'comment')],
+        domain=lambda self: [('model', '=', self._name), ('message_type', '=', 'comment')],
         string='Website Messages', help="Website communication history")
     likes = fields.Integer('Likes')
     dislikes = fields.Integer('Dislikes')
@@ -297,12 +297,12 @@ class Slide(models.Model):
     def _get_embed_code(self):
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
         for record in self:
-            if record.datas and not record.document_id:
+            if record.datas and (not record.document_id or record.slide_type in ['document', 'presentation']):
                 record.embed_code = '<iframe src="%s/slides/embed/%s?page=1" allowFullScreen="true" height="%s" width="%s" frameborder="0"></iframe>' % (base_url, record.id, 315, 420)
             elif record.slide_type == 'video' and record.document_id:
                 if not record.mime_type:
                     # embed youtube video
-                    record.embed_code = '<iframe src="//www.youtube.com/embed/%s?theme=light" frameborder="0"></iframe>' % (record.document_id)
+                    record.embed_code = '<iframe src="//www.youtube.com/embed/%s?theme=light" allowFullScreen="true" frameborder="0"></iframe>' % (record.document_id)
                 else:
                     # embed google doc video
                     record.embed_code = '<embed src="https://video.google.com/get_player?ps=docs&partnerid=30&docid=%s" type="application/x-shockwave-flash"></embed>' % (record.document_id)
@@ -314,7 +314,12 @@ class Slide(models.Model):
     def _website_url(self, name, arg):
         res = super(Slide, self)._website_url(name, arg)
         base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        res.update({(slide.id, '%s/slides/slide/%s' % (base_url, slug(slide))) for slide in self})
+        #link_tracker is not in dependencies, so use it to shorten url only if installed.
+        if self.env.registry.get('link.tracker'):
+            LinkTracker = self.env['link.tracker']
+            res.update({(slide.id, LinkTracker.sudo().create({'url': '%s/slides/slide/%s' % (base_url, slug(slide))}).short_url) for slide in self})
+        else:
+            res.update({(slide.id, '%s/slides/slide/%s' % (base_url, slug(slide))) for slide in self})
         return res
 
 
@@ -354,13 +359,13 @@ class Slide(models.Model):
     def check_field_access_rights(self, operation, fields):
         """ As per channel access configuration (visibility)
          - public  ==> no restriction on slides access
-         - private ==> restrict all slides of channel base on access group defined on channel group_ids field
+         - private ==> restrict all slides of channel based on access group defined on channel group_ids field
          - partial ==> show channel, but presentations based on groups means any user can see channel but not slide's content.
         For private: implement using record rule
         For partial: user can see channel, but channel gridview have slide detail so we have to implement
         partial field access mechanism for public user so he can have access of promotional field (name, view_count) of slides,
         but not all fields like data (actual pdf content)
-        all fields should be accessible only for user group define on channel group_ids
+        all fields should be accessible only for user group defined on channel group_ids
         """
         if self.env.uid == SUPERUSER_ID:
             return fields or list(self._fields)
@@ -376,6 +381,32 @@ class Slide(models.Model):
             if limited_access:
                 fields = [field for field in fields if field in self._PROMOTIONAL_FIELDS]
         return fields
+
+    @api.multi
+    def get_access_action(self):
+        """ Override method that generated the link to access the document. Instead
+        of the classic form view, redirect to the slide on the website directly
+        if it is published. """
+        self.ensure_one()
+        if self.website_published:
+            return {
+                'type': 'ir.actions.act_url',
+                'url': '%s' % self.website_url,
+                'target': 'self',
+                'res_id': self.id,
+            }
+        return super(Slide, self).get_access_action()
+
+    @api.multi
+    def _notification_get_recipient_groups(self, message, recipients):
+        """ Override to set the access button: everyone can see an access button
+        on their notification email if the slide is published. """
+        res = super(Slide, self)._notification_get_recipient_groups(message, recipients)
+        if all(slide.website_published for slide in self):
+            access_action = self._notification_link_helper('view', model=message.model, res_id=message.res_id)
+            for category, data in res.iteritems():
+                res[category]['button_access'] = {'url': access_action, 'title': _('View Slide')}
+        return res
 
     def get_related_slides(self, limit=20):
         domain = [('website_published', '=', True), ('channel_id.visibility', '!=', 'private'), ('id', '!=', self.id)]
@@ -454,7 +485,10 @@ class Slide(models.Model):
             return fetch_res
 
         values = {'slide_type': 'video', 'document_id': document_id}
-        youtube_values = fetch_res['values'].get('items', list(dict()))[0]
+        items = fetch_res['values'].get('items')
+        if not items:
+            return {'error': _('Please enter valid Youtube or Google Doc URL')}
+        youtube_values = items[0]
         if youtube_values.get('snippet'):
             snippet = youtube_values['snippet']
             if only_preview_fields:

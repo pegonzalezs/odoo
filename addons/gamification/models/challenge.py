@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2013 OpenERP SA (<http://www.openerp.com>)
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
@@ -108,7 +90,7 @@ class gamification_challenge(osv.Model):
     
     def _get_categories(self, cr, uid, context=None):
         return [
-            ('hr', 'Human Ressources / Engagement'),
+            ('hr', 'Human Resources / Engagement'),
             ('other', 'Settings / Gamification Tools'),
         ]
 
@@ -159,7 +141,7 @@ class gamification_challenge(osv.Model):
             help="List of goals that will be set",
             required=True, copy=True),
 
-        'reward_id': fields.many2one('gamification.badge', string="For Every Succeding User"),
+        'reward_id': fields.many2one('gamification.badge', string="For Every Succeeding User"),
         'reward_first_id': fields.many2one('gamification.badge', string="For 1st user"),
         'reward_second_id': fields.many2one('gamification.badge', string="For 2nd user"),
         'reward_third_id': fields.many2one('gamification.badge', string="For 3rd user"),
@@ -182,7 +164,7 @@ class gamification_challenge(osv.Model):
                 ('yearly', 'Yearly')
             ],
             string="Report Frequency", required=True),
-        'report_message_group_id': fields.many2one('mail.group',
+        'report_message_group_id': fields.many2one('mail.channel',
             string='Send a copy to',
             help='Group that will receive a copy of the report in addition to the user'),
         'report_template_id': fields.many2one('mail.template', string="Report Template", required=True),
@@ -308,19 +290,22 @@ class gamification_challenge(osv.Model):
         cr.execute("""SELECT gg.id
                         FROM gamification_goal as gg,
                              gamification_challenge as gc,
-                             res_users as ru
+                             res_users as ru,
+                             res_users_log as log
                        WHERE gg.challenge_id = gc.id
                          AND gg.user_id = ru.id
-                         AND gg.write_date < ru.login_date
+                         AND ru.id = log.create_uid
+                         AND gg.write_date < log.create_date
                          AND gg.closed IS false
                          AND gc.id IN %s
                          AND (gg.state = 'inprogress'
                               OR (gg.state = 'reached'
                                   AND (gg.end_date >= %s OR gg.end_date IS NULL)))
+                      GROUP BY gg.id
         """, (tuple(ids), yesterday.strftime(DF)))
         goal_ids = [res[0] for res in cr.fetchall()]
         # update every running goal already generated linked to selected challenges
-        goal_obj.update(cr, uid, goal_ids, context=context)
+        goal_obj.update_goal(cr, uid, goal_ids, context=context)
 
         self._recompute_challenge_users(cr, uid, ids, context=context)
         self._generate_goals_from_challenge(cr, uid, ids, context=context)
@@ -348,7 +333,7 @@ class gamification_challenge(osv.Model):
     def quick_update(self, cr, uid, challenge_id, context=None):
         """Update all the goals of a specific challenge, no generation of new goals"""
         goal_ids = self.pool.get('gamification.goal').search(cr, uid, [('challenge_id', '=', challenge_id)], context=context)
-        self.pool.get('gamification.goal').update(cr, uid, goal_ids, context=context)
+        self.pool.get('gamification.goal').update_goal(cr, uid, goal_ids, context=context)
         return True
 
     def _get_challenger_users(self, cr, uid, domain, context=None):
@@ -381,6 +366,9 @@ class gamification_challenge(osv.Model):
 
         Create goals that haven't been created yet (eg: if added users)
         Recompute the current value for each goal related"""
+        goal_obj = self.pool['gamification.goal']
+        goal_ids = goal_obj.search(cr, uid, [('challenge_id', 'in', ids), ('state', '=', 'inprogress')], context=context)
+        goal_obj.unlink(cr, uid, goal_ids, context=context)
         return self._update_all(cr, uid, ids=ids, context=context)
 
     def action_report_progress(self, cr, uid, ids, context=None):
@@ -471,7 +459,7 @@ class gamification_challenge(osv.Model):
                     goal_id = goal_obj.create(cr, uid, values, context=context)
                     to_update.append(goal_id)
 
-            goal_obj.update(cr, uid, to_update, context=context)
+            goal_obj.update_goal(cr, uid, to_update, context=context)
 
         return True
 
@@ -644,7 +632,7 @@ class gamification_challenge(osv.Model):
                 context=context,
                 subtype='mail.mt_comment')
             if challenge.report_message_group_id:
-                self.pool.get('mail.group').message_post(cr, uid, challenge.report_message_group_id.id,
+                self.pool.get('mail.channel').message_post(cr, uid, challenge.report_message_group_id.id,
                     body=body_html,
                     context=context,
                     subtype='mail.mt_comment')
@@ -666,7 +654,7 @@ class gamification_challenge(osv.Model):
                                   context=context,
                                   subtype='mail.mt_comment')
                 if challenge.report_message_group_id:
-                    self.pool.get('mail.group').message_post(cr, uid, challenge.report_message_group_id.id,
+                    self.pool.get('mail.channel').message_post(cr, uid, challenge.report_message_group_id.id,
                                                              body=body_html,
                                                              context=context,
                                                              subtype='mail.mt_comment')
@@ -749,13 +737,13 @@ class gamification_challenge(osv.Model):
 
             if challenge_ended:
                 # open chatter message
-                message_body = _("The challenge %s is finished." % challenge.name)
+                message_body = _("The challenge %s is finished.") % challenge.name
 
                 if rewarded_users:
                     user_names = self.pool['res.users'].name_get(cr, uid, rewarded_users, context=context)
-                    message_body += _("<br/>Reward (badge %s) for every succeeding user was sent to %s." % (challenge.reward_id.name, ", ".join([name for (user_id, name) in user_names])))
+                    message_body += _("<br/>Reward (badge %s) for every succeeding user was sent to %s.") % (challenge.reward_id.name, ", ".join([name for (user_id, name) in user_names]))
                 else:
-                    message_body += _("<br/>Nobody has succeeded to reach every goal, no badge is rewared for this challenge.")
+                    message_body += _("<br/>Nobody has succeeded to reach every goal, no badge is rewarded for this challenge.")
 
                 # reward bests
                 if challenge.reward_first_id:

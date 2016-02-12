@@ -1,3 +1,5 @@
+:banner: banners/javascript.jpg
+
 .. highlight:: javascript
 
 .. default-domain:: js
@@ -755,6 +757,23 @@ properly.
 Modules are contained in a file, but a file can define several modules 
 (however, it is better to keep them in separate files).
 
+Each module can return a deferred. In that case, the module is marked as loaded
+only when the deferred is resolved, and its value is equal to the resolved value.
+The module can be rejected (unloaded). This will be logged in the console as info.
+
+* ``Missing dependencies``:
+  These modules do not appear in the page. It is possible that the JavaScript 
+  file is not in the page or that the module name is wrong
+* ``Failed modules``:
+  A javascript error is detected
+* ``Rejected modules``:
+  The module returns a rejected deferred. It (and its dependent modules) is not 
+  loaded.
+* ``Rejected linked modules``:
+  Modules who depend on a rejected module
+* ``Non loaded modules``:
+  Modules who depend on a missing or a failed module
+
 
 Web client structure
 --------------------
@@ -1311,11 +1330,6 @@ command-line (or in a CI system), but while actually running it is
 pretty simple the setup of the pre-requisite parts has some
 complexities.
 
-#. Install unittest2_ in your Python environment. Both
-   can trivially be installed via `pip <http://pip-installer.org>`_ or
-   `easy_install
-   <http://packages.python.org/distribute/easy_install.html>`_.
-
 #. Install PhantomJS_. It is a headless
    browser which allows automating running and testing web
    pages. QUnitSuite_ uses it to actually run the qunit_ test suite.
@@ -1382,8 +1396,6 @@ the OpenERP Web test suite.
 .. _qunit: http://qunitjs.com/
 
 .. _qunit assertions: http://api.qunitjs.com/category/assert/
-
-.. _unittest2: http://pypi.python.org/pypi/unittest2
 
 .. _QUnitSuite: http://pypi.python.org/pypi/QUnitSuite/
 

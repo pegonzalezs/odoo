@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import time
 from datetime import datetime
@@ -41,18 +23,24 @@ class hr_timesheet_sheet(osv.osv):
         """ Compute the attendances, analytic lines timesheets and differences between them
             for all the days of a timesheet and the current day
         """
+        res = dict.fromkeys(ids, {
+            'total_attendance': 0.0,
+            'total_timesheet': 0.0,
+            'total_difference': 0.0,
+        })
 
-        res = {}
-        for sheet in self.browse(cr, uid, ids, context=context or {}):
-            res.setdefault(sheet.id, {
-                'total_attendance': 0.0,
-                'total_timesheet': 0.0,
-                'total_difference': 0.0,
-            })
-            for period in sheet.period_ids:
-                res[sheet.id]['total_attendance'] += period.total_attendance
-                res[sheet.id]['total_timesheet'] += period.total_timesheet
-                res[sheet.id]['total_difference'] += period.total_attendance - period.total_timesheet
+        cr.execute("""
+            SELECT sheet_id as id,
+                   sum(total_attendance) as total_attendance,
+                   sum(total_timesheet) as total_timesheet,
+                   sum(total_difference) as  total_difference
+            FROM hr_timesheet_sheet_sheet_day
+            WHERE sheet_id IN %s
+            GROUP BY sheet_id
+        """, (tuple(ids),))
+
+        res.update(dict((x.pop('id'), x) for x in cr.dictfetchall()))
+
         return res
 
     def check_employee_attendance_state(self, cr, uid, sheet_id, context=None):
@@ -70,10 +58,6 @@ class hr_timesheet_sheet(osv.osv):
         if 'employee_id' in vals:
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).user_id:
                 raise UserError(_('In order to create a timesheet for this employee, you must link him/her to a user.'))
-            if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).product_id:
-                raise UserError(_('In order to create a timesheet for this employee, you must link the employee to a product, like \'Consultant\'.'))
-            if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).journal_id:
-                raise UserError(_('In order to create a timesheet for this employee, you must assign an analytic journal to the employee, like \'Timesheet Journal\'.'))
         if vals.get('attendances_ids'):
             # If attendances, we sort them by date asc before writing them, to satisfy the alternance constraint
             vals['attendances_ids'] = self.sort_attendances(cr, uid, vals['attendances_ids'], context=context)
@@ -88,8 +72,6 @@ class hr_timesheet_sheet(osv.osv):
                 raise UserError(_('You cannot have 2 timesheets that overlap!\nYou should use the menu \'My Timesheet\' to avoid this problem.'))
             if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).product_id:
                 raise UserError(_('In order to create a timesheet for this employee, you must link the employee to a product.'))
-            if not self.pool.get('hr.employee').browse(cr, uid, vals['employee_id'], context=context).journal_id:
-                raise UserError(_('In order to create a timesheet for this employee, you must assign an analytic journal to the employee, like \'Timesheet Journal\'.'))
         if vals.get('attendances_ids'):
             # If attendances, we sort them by date asc before writing them, to satisfy the alternance constraint
             # In addition to the date order, deleting attendances are done before inserting attendances
@@ -115,7 +97,7 @@ class hr_timesheet_sheet(osv.osv):
                 date_attendances.append((1, name, att_tuple))
             elif att_tuple[0] in [2,3]:
                 date_attendances.append((0, self.pool['hr.attendance'].browse(cr, uid, att_tuple[1]).name, att_tuple))
-            else: 
+            else:
                 date_attendances.append((0, False, att_tuple))
         date_attendances.sort()
         return [att[2] for att in date_attendances]
@@ -138,17 +120,13 @@ class hr_timesheet_sheet(osv.osv):
         for sheet in self.browse(cr, uid, ids, context=context):
             if sheet.employee_id.id not in employee_ids: employee_ids.append(sheet.employee_id.id)
         return hr_employee.attendance_action_change(cr, uid, employee_ids, context=context)
-    
-    def _count_all(self, cr, uid, ids, field_name, arg, context=None):
-        Timesheet = self.pool['hr.analytic.timesheet']
-        Attendance = self.pool['hr.attendance']
-        return {
-            sheet_id: {
-                'timesheet_activity_count': Timesheet.search_count(cr,uid, [('sheet_id','=', sheet_id)], context=context),
-                'attendance_count': Attendance.search_count(cr,uid, [('sheet_id', '=', sheet_id)], context=context)
-            }
-            for sheet_id in ids
-        }
+
+    def _count_attendances(self, cr, uid, ids, field_name, arg, context=None):
+        res = dict.fromkeys(ids, 0)
+        attendances_groups = self.pool['hr.attendance'].read_group(cr, uid, [('sheet_id' , 'in' , ids)], ['sheet_id'], 'sheet_id', context=context)
+        for attendances in attendances_groups:
+            res[attendances['sheet_id'][0]] = attendances['sheet_id_count']
+        return res
 
     _columns = {
         'name': fields.char('Note', select=1,
@@ -157,7 +135,7 @@ class hr_timesheet_sheet(osv.osv):
         'user_id': fields.related('employee_id', 'user_id', type="many2one", relation="res.users", store=True, string="User", required=False, readonly=True),#fields.many2one('res.users', 'User', required=True, select=1, states={'confirm':[('readonly', True)], 'done':[('readonly', True)]}),
         'date_from': fields.date('Date from', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),
         'date_to': fields.date('Date to', required=True, select=1, readonly=True, states={'new':[('readonly', False)]}),
-        'timesheet_ids' : fields.one2many('hr.analytic.timesheet', 'sheet_id',
+        'timesheet_ids' : fields.one2many('account.analytic.line', 'sheet_id',
             'Timesheet lines',
             readonly=True, states={
                 'draft': [('readonly', False)],
@@ -181,8 +159,7 @@ class hr_timesheet_sheet(osv.osv):
         'account_ids': fields.one2many('hr_timesheet_sheet.sheet.account', 'sheet_id', 'Analytic accounts', readonly=True),
         'company_id': fields.many2one('res.company', 'Company'),
         'department_id':fields.many2one('hr.department','Department'),
-        'timesheet_activity_count': fields.function(_count_all, type='integer', string='Timesheet Activities', multi=True),
-        'attendance_count': fields.function(_count_all, type='integer', string="Attendances", multi=True),
+        'attendance_count': fields.function(_count_attendances, type='integer', string="Attendances"),
     }
 
     def _default_date_from(self, cr, uid, context=None):
@@ -194,7 +171,7 @@ class hr_timesheet_sheet(osv.osv):
             return (datetime.today() + relativedelta(weekday=0, days=-6)).strftime('%Y-%m-%d')
         elif r=='year':
             return time.strftime('%Y-01-01')
-        return time.strftime('%Y-%m-%d')
+        return fields.date.context_today(self, cr, uid, context)
 
     def _default_date_to(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
@@ -205,7 +182,7 @@ class hr_timesheet_sheet(osv.osv):
             return (datetime.today() + relativedelta(weekday=6)).strftime('%Y-%m-%d')
         elif r=='year':
             return time.strftime('%Y-12-31')
-        return time.strftime('%Y-%m-%d')
+        return fields.date.context_today(self, cr, uid, context)
 
     def _default_employee(self, cr, uid, context=None):
         emp_ids = self.pool.get('hr.employee').search(cr, uid, [('user_id','=',uid)], context=context)
@@ -247,7 +224,8 @@ class hr_timesheet_sheet(osv.osv):
             return []
         if isinstance(ids, (long, int)):
             ids = [ids]
-        return [(r['id'], _('Week ')+datetime.strptime(r['date_from'], '%Y-%m-%d').strftime('%U')) \
+        # week number according to ISO 8601 Calendar
+        return [(r['id'], _('Week ')+str(datetime.strptime(r['date_from'], '%Y-%m-%d').isocalendar()[1])) \
                 for r in self.read(cr, uid, ids, ['date_from'],
                     context=context, load='_classic_write')]
 
@@ -260,7 +238,7 @@ class hr_timesheet_sheet(osv.osv):
                 raise UserError(_('You cannot delete a timesheet which have attendance entries.'))
 
         toremove = []
-        analytic_timesheet = self.pool.get('hr.analytic.timesheet')
+        analytic_timesheet = self.pool.get('account.analytic.line')
         for sheet in self.browse(cr, uid, ids, context=context):
             for timesheet in sheet.timesheet_ids:
                 toremove.append(timesheet.id)
@@ -304,36 +282,23 @@ class account_analytic_line(osv.osv):
     def _get_default_date(self, cr, uid, context=None):
         if context is None:
             context = {}
-        #get the default date (should be: today)
+        # get the default date (should be: today)
         res = super(account_analytic_line, self)._get_default_date(cr, uid, context=context)
-        #if we got the dates from and to from the timesheet and if the default date is in between, we use the default
-        #but if the default isn't included in those dates, we use the date start of the timesheet as default
+        # if we got the dates from and to from the timesheet and if the default date is in between, we use the default
+        # but if the default isn't included in those dates, we use the date start of the timesheet as default
         if context.get('timesheet_date_from') and context.get('timesheet_date_to'):
             if context['timesheet_date_from'] <= res <= context['timesheet_date_to']:
                 return res
             return context.get('timesheet_date_from')
-        #if we don't get the dates from the timesheet, we return the default value from super()
+        # if we don't get the dates from the timesheet, we return the default value from super()
         return res
-
-class account_analytic_account(osv.osv):
-    _inherit = "account.analytic.account"
-    
-    def name_create(self, cr, uid, name, context=None):
-        if context is None:
-            context = {}
-        group_template_required = self.pool['res.users'].has_group(cr, uid, 'account_analytic_analysis.group_template_required')
-        if not context.get('default_invoice_on_timesheets') or group_template_required:
-            return super(account_analytic_account, self).name_create(cr, uid, name, context=context)
-        rec_id = self.create(cr, uid, {self._rec_name: name}, context)
-        return self.name_get(cr, uid, [rec_id], context)[0]
-    
-class hr_timesheet_line(osv.osv):
-    _inherit = "hr.analytic.timesheet"
 
     def _sheet(self, cursor, user, ids, name, args, context=None):
         sheet_obj = self.pool.get('hr_timesheet_sheet.sheet')
         res = {}.fromkeys(ids, False)
         for ts_line in self.browse(cursor, user, ids, context=context):
+            if not ts_line.is_timesheet:
+                continue
             sheet_ids = sheet_obj.search(cursor, user,
                 [('date_to', '>=', ts_line.date), ('date_from', '<=', ts_line.date),
                  ('employee_id.user_id', '=', ts_line.user_id.id),
@@ -349,20 +314,15 @@ class hr_timesheet_line(osv.osv):
         for ts in self.browse(cr, uid, ids, context=context):
             cr.execute("""
                     SELECT l.id
-                        FROM hr_analytic_timesheet l
-                    INNER JOIN account_analytic_line al
-                        ON (l.line_id = al.id)
-                    WHERE %(date_to)s >= al.date
-                        AND %(date_from)s <= al.date
-                        AND %(user_id)s = al.user_id
+                        FROM account_analytic_line l
+                    WHERE %(date_to)s >= l.date
+                        AND %(date_from)s <= l.date
+                        AND %(user_id)s = l.user_id
+                        AND l.is_timesheet = True
                     GROUP BY l.id""", {'date_from': ts.date_from,
                                         'date_to': ts.date_to,
                                         'user_id': ts.employee_id.user_id.id,})
             ts_line_ids.extend([row[0] for row in cr.fetchall()])
-        return ts_line_ids
-
-    def _get_account_analytic_line(self, cr, uid, ids, context=None):
-        ts_line_ids = self.pool.get('hr.analytic.timesheet').search(cr, uid, [('line_id', 'in', ids)])
         return ts_line_ids
 
     _columns = {
@@ -370,8 +330,7 @@ class hr_timesheet_line(osv.osv):
             type='many2one', relation='hr_timesheet_sheet.sheet', ondelete="cascade",
             store={
                     'hr_timesheet_sheet.sheet': (_get_hr_timesheet_sheet, ['employee_id', 'date_from', 'date_to'], 10),
-                    'account.analytic.line': (_get_account_analytic_line, ['user_id', 'date'], 10),
-                    'hr.analytic.timesheet': (lambda self,cr,uid,ids,context=None: ids, None, 10),
+                    'account.analytic.line': (lambda self,cr,uid,ids,context=None: ids, ['user_id', 'date'], 10),
                   },
             ),
     }
@@ -380,23 +339,19 @@ class hr_timesheet_line(osv.osv):
         if isinstance(ids, (int, long)):
             ids = [ids]
         self._check(cr, uid, ids)
-        return super(hr_timesheet_line, self).write(cr, uid, ids, values, context=context)
+        return super(account_analytic_line, self).write(cr, uid, ids, values,context=context)
 
     def unlink(self, cr, uid, ids, *args, **kwargs):
         if isinstance(ids, (int, long)):
             ids = [ids]
         self._check(cr, uid, ids)
-        return super(hr_timesheet_line,self).unlink(cr, uid, ids,*args, **kwargs)
+        return super(account_analytic_line,self).unlink(cr, uid, ids,*args, **kwargs)
 
     def _check(self, cr, uid, ids):
         for att in self.browse(cr, uid, ids):
             if att.sheet_id and att.sheet_id.state not in ('draft', 'new'):
                 raise UserError(_('You cannot modify an entry in a confirmed timesheet.'))
         return True
-
-    def multi_on_change_account_id(self, cr, uid, ids, account_ids, context=None):
-        return dict([(el, self.on_change_account_id(cr, uid, ids, el, context.get('user_id', uid))) for el in account_ids])
-
 
 
 class hr_attendance(osv.osv):
@@ -419,8 +374,12 @@ class hr_attendance(osv.osv):
                                INNER JOIN resource_resource r
                                        ON (e.resource_id = r.id)
                             ON (a.employee_id = e.id)
-                        WHERE %(date_to)s >= date_trunc('day', a.name)
-                              AND %(date_from)s <= a.name
+                         LEFT JOIN res_users u
+                         ON r.user_id = u.id
+                         LEFT JOIN res_partner p
+                         ON u.partner_id = p.id
+                         WHERE %(date_to)s >= date_trunc('day', a.name AT TIME ZONE 'UTC' AT TIME ZONE coalesce(p.tz, 'UTC'))
+                              AND %(date_from)s <= date_trunc('day', a.name AT TIME ZONE 'UTC' AT TIME ZONE coalesce(p.tz, 'UTC'))
                               AND %(user_id)s = r.user_id
                          GROUP BY a.id""", {'date_from': ts.date_from,
                                             'date_to': ts.date_to,
@@ -550,7 +509,6 @@ class hr_timesheet_sheet_sheet_day(osv.osv):
     }
     _depends = {
         'account.analytic.line': ['date', 'unit_amount'],
-        'hr.analytic.timesheet': ['line_id', 'sheet_id'],
         'hr.attendance': ['action', 'name', 'sheet_id'],
     }
 
@@ -583,7 +541,7 @@ class hr_timesheet_sheet_sheet_day(osv.osv):
                     FROM
                         ((
                             select
-                                min(hrt.id) as id,
+                                min(l.id) as id,
                                 p.tz as timezone,
                                 l.date::date as name,
                                 s.id as sheet_id,
@@ -591,9 +549,8 @@ class hr_timesheet_sheet_sheet_day(osv.osv):
                                 0 as orphan_attendances,
                                 0.0 as total_attendance
                             from
-                                hr_analytic_timesheet hrt
-                                JOIN account_analytic_line l ON l.id = hrt.line_id
-                                LEFT JOIN hr_timesheet_sheet_sheet s ON s.id = hrt.sheet_id
+                            	account_analytic_line l
+                                LEFT JOIN hr_timesheet_sheet_sheet s ON s.id = l.sheet_id
                                 JOIN hr_employee e ON s.employee_id = e.id
                                 JOIN resource_resource r ON e.resource_id = r.id
                                 LEFT JOIN res_users u ON r.user_id = u.id
@@ -637,32 +594,27 @@ class hr_timesheet_sheet_sheet_account(osv.osv):
         'name': fields.many2one('account.analytic.account', 'Project / Analytic Account', readonly=True),
         'sheet_id': fields.many2one('hr_timesheet_sheet.sheet', 'Sheet', readonly=True),
         'total': fields.float('Total Time', digits=(16,2), readonly=True),
-        'invoice_rate': fields.many2one('hr_timesheet_invoice.factor', 'Invoice rate', readonly=True),
         }
 
     _depends = {
-        'account.analytic.line': ['account_id', 'date', 'to_invoice', 'unit_amount', 'user_id'],
-        'hr.analytic.timesheet': ['line_id'],
+        'account.analytic.line': ['account_id', 'date', 'unit_amount', 'user_id'],
         'hr_timesheet_sheet.sheet': ['date_from', 'date_to', 'user_id'],
     }
 
     def init(self, cr):
         cr.execute("""create or replace view hr_timesheet_sheet_sheet_account as (
             select
-                min(hrt.id) as id,
+                min(l.id) as id,
                 l.account_id as name,
                 s.id as sheet_id,
-                sum(l.unit_amount) as total,
-                l.to_invoice as invoice_rate
+                sum(l.unit_amount) as total
             from
-                hr_analytic_timesheet hrt
-                left join (account_analytic_line l
+                account_analytic_line l
                     LEFT JOIN hr_timesheet_sheet_sheet s
                         ON (s.date_to >= l.date
                             AND s.date_from <= l.date
-                            AND s.user_id = l.user_id))
-                    on (l.id = hrt.line_id)
-            group by l.account_id, s.id, l.to_invoice
+                            AND s.user_id = l.user_id)
+            group by l.account_id, s.id
         )""")
 
 
@@ -671,8 +623,7 @@ class hr_timesheet_sheet_sheet_account(osv.osv):
 class res_company(osv.osv):
     _inherit = 'res.company'
     _columns = {
-        'timesheet_range': fields.selection(
-            [('day','Day'),('week','Week'),('month','Month')], 'Timesheet range',
+        'timesheet_range': fields.selection([('week','Week'),('month','Month')], 'Timesheet range',
             help="Periodicity on which you validate your timesheets."),
         'timesheet_max_difference': fields.float('Timesheet allowed difference(Hours)',
             help="Allowed difference in hours between the sign in/out and the timesheet " \

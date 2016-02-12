@@ -1,11 +1,10 @@
 # -*- encoding: utf-8 -*-
 {
-    'name': 'Website Sale Stock - Website Delivery Informations',
+    'name': 'Website Sale Stock - Website Delivery information',
     'version': '0.0.1',
     'description': """
     Display delivery orders (picking) infos on the website
 """,
-    'author': 'Odoo S.A.',
     'depends': [
         'website_sale',
         'sale_stock',

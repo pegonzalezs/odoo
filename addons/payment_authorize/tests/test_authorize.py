@@ -62,8 +62,8 @@ class AuthorizeForm(AuthorizeCommon):
             'return_url': None,
             'x_currency_code': 'USD',
             'x_invoice_num': 'SO004',
-            'x_first_name': 'Buyer',
-            'x_last_name': 'Norbert',
+            'x_first_name': 'Norbert',
+            'x_last_name': 'Buyer',
             'x_address': 'Huge Street 2/543',
             'x_city': 'Sin City',
             'x_zip': '1000',
@@ -71,6 +71,15 @@ class AuthorizeForm(AuthorizeCommon):
             'x_phone': '0032 12 34 56 78',
             'x_email': 'norbert.buyer@example.com',
             'x_state': None,
+            'x_ship_to_first_name': 'Norbert',
+            'x_ship_to_last_name': 'Buyer',
+            'x_ship_to_address': 'Huge Street 2/543',
+            'x_ship_to_city': 'Sin City',
+            'x_ship_to_zip': '1000',
+            'x_ship_to_country': 'Belgium',
+            'x_ship_to_phone': '0032 12 34 56 78',
+            'x_ship_to_email': 'norbert.buyer@example.com',
+            'x_ship_to_state': None,
         }
 
         form_values['x_fp_hash'] = self._authorize_generate_hashing(form_values)
@@ -78,18 +87,18 @@ class AuthorizeForm(AuthorizeCommon):
         cr, uid, context = self.env.cr, self.env.uid, {}
         res = self.payment_acquirer.render(
             cr, uid, self.authorize_id, 'SO004', 320.0, self.currency_usd.id,
-            partner_id=None, partner_values=self.buyer_values, context=context)
+            values=self.buyer_values, context=context)
         # check form result
         tree = objectify.fromstring(res)
         self.assertEqual(tree.get('action'), 'https://test.authorize.net/gateway/transact.dll', 'Authorize: wrong form POST url')
-        for form_input in tree.input:
-            # Generated and received 'x_fp_hash' are always different so skeep it.
-            if form_input.get('name') in ['submit', 'x_fp_hash']:
+        for el in tree.iterfind('input'):
+            values = el.values()
+            if values[1] in ['submit', 'x_fp_hash', 'return_url', 'x_state', 'x_ship_to_state']:
                 continue
             self.assertEqual(
-                form_input.get('value'),
-                form_values[form_input.get('name')],
-                'Authorize: wrong value for input %s: received %s instead of %s' % (form_input.get('name'), form_input.get('value'), form_values[form_input.get('name')])
+                unicode(values[2], "utf-8"),
+                form_values[values[1]],
+                'Authorize: wrong value for input %s: received %s instead of %s' % (values[1], values[2], form_values[values[1]])
             )
 
     @mute_logger('openerp.addons.payment_authorize.models.authorize', 'ValidationError')
@@ -161,10 +170,10 @@ class AuthorizeForm(AuthorizeCommon):
         self.payment_transaction.form_feedback(cr, uid, authorize_post_data, 'authorize', context=context)
         # check state
         self.assertEqual(tx.state, 'done', 'Authorize: validation did not put tx into done state')
-        self.assertEqual(tx.authorize_txnid, authorize_post_data.get('x_trans_id'), 'Authorize: validation did not update tx payid')
+        self.assertEqual(tx.acquirer_reference, authorize_post_data.get('x_trans_id'), 'Authorize: validation did not update tx payid')
 
         # reset tx
-        tx.write({'state': 'draft', 'date_validate': False, 'authorize_txnid': False})
+        tx.write({'state': 'draft', 'date_validate': False, 'acquirer_reference': False})
 
         # simulate an error
         authorize_post_data['x_response_code'] = u'3'

@@ -1,28 +1,10 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2014 OpenERP S.A. (<http://openerp.com>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 from docutils import nodes
 from docutils.core import publish_string
 from docutils.transforms import Transform, writer_aux
 from docutils.writers.html4css1 import Writer
-import imp
+import importlib
 import logging
 from operator import attrgetter
 import os
@@ -47,8 +29,10 @@ import openerp.exceptions
 from openerp import modules, tools
 from openerp.modules.db import create_categories
 from openerp.modules import get_module_resource
+from openerp.tools import ormcache
 from openerp.tools.parse_version import parse_version
 from openerp.tools.translate import _
+from openerp.tools import html_sanitize
 from openerp.osv import osv, orm, fields
 from openerp import api, fields as fields2
 
@@ -60,7 +44,6 @@ ACTION_DICT = {
     'res_model': 'base.module.upgrade',
     'target': 'new',
     'type': 'ir.actions.act_window',
-    'nodestroy': True,
 }
 
 def backup(path, raise_exception=True):
@@ -102,7 +85,7 @@ class module_category(osv.osv):
         'name': fields.char("Name", required=True, translate=True, select=True),
         'parent_id': fields.many2one('ir.module.category', 'Parent Application', select=True),
         'child_ids': fields.one2many('ir.module.category', 'parent_id', 'Child Applications'),
-        'module_nr': fields.function(_module_nbr, string='Number of Modules', type='integer'),
+        'module_nr': fields.function(_module_nbr, string='Number of Apps', type='integer'),
         'module_ids': fields.one2many('ir.module.module', 'category_id', 'Modules'),
         'description': fields.text("Description", translate=True),
         'sequence': fields.integer('Sequence'),
@@ -161,7 +144,7 @@ class module(osv.osv):
         try:
             info = modules.load_information_from_description_file(name)
         except Exception:
-            _logger.debug('Error when trying to fetch informations for '
+            _logger.debug('Error when trying to fetch information for '
                           'module %s', name, exc_info=True)
         return info
 
@@ -176,7 +159,7 @@ class module(osv.osv):
                     for element, attribute, link, pos in html.iterlinks():
                         if element.get('src') and not '//' in element.get('src') and not 'static/' in element.get('src'):
                             element.set('src', "/%s/static/description/%s" % (module.name, element.get('src')))
-                    res[module.id] = lxml.html.tostring(html)
+                    res[module.id] = html_sanitize(lxml.html.tostring(html))
             else:
                 overrides = {
                     'embed_stylesheet': False,
@@ -185,7 +168,7 @@ class module(osv.osv):
                     'xml_declaration': False,
                 }
                 output = publish_string(source=module.description or '', settings_overrides=overrides, writer=MyWriter())
-                res[module.id] = output
+                res[module.id] = html_sanitize(output)
         return res
 
     def _get_latest_version(self, cr, uid, ids, field_name=None, arg=None, context=None):
@@ -303,7 +286,9 @@ class module(osv.osv):
             ('GPL-3', 'GPL Version 3'),
             ('GPL-3 or any later version', 'GPL-3 or later version'),
             ('AGPL-3', 'Affero GPL-3'),
+            ('LGPL-3', 'LGPL Version 3'),
             ('Other OSI approved licence', 'Other OSI Approved Licence'),
+            ('OEEL-1', 'Odoo Enterprise Edition License v1.0'),
             ('Other proprietary', 'Other Proprietary')
         ], string='License', readonly=True),
         'menus_by_module': fields.function(_get_views, string='Menus', type='text', multi="meta", store=True),
@@ -318,7 +303,7 @@ class module(osv.osv):
         'state': 'uninstalled',
         'sequence': 100,
         'demo': False,
-        'license': 'AGPL-3',
+        'license': 'LGPL-3',
     }
     _order = 'sequence,name'
 
@@ -345,6 +330,7 @@ class module(osv.osv):
         #if ids_meta:
         #    self.pool.get('ir.model.data').unlink(cr, uid, ids_meta, context)
 
+        self.clear_caches()
         return super(module, self).unlink(cr, uid, ids, context=context)
 
     @staticmethod
@@ -353,15 +339,10 @@ class module(osv.osv):
         if not depends:
             return
         for pydep in depends.get('python', []):
-            parts = pydep.split('.')
-            parts.reverse()
-            path = None
-            while parts:
-                part = parts.pop()
-                try:
-                    _, path, _ = imp.find_module(part, path and [path] or None)
-                except ImportError:
-                    raise ImportError('No module named %s' % (pydep,))
+            try:
+                importlib.import_module(pydep)
+            except ImportError:
+                raise ImportError('No module named %s' % (pydep,))
 
         for binary in depends.get('bin', []):
             try:
@@ -414,31 +395,56 @@ class module(osv.osv):
 
         return demo
 
-    def button_install(self, cr, uid, ids, context=None):
+    @api.multi
+    def button_install(self):
+        # domain to select auto-installable (but not yet installed) modules
+        auto_domain = [('state', '=', 'uninstalled'), ('auto_install', '=', True)]
 
-        # Mark the given modules to be installed.
-        self.state_update(cr, uid, ids, 'to install', ['uninstalled'], context=context)
+        # determine whether an auto-install module must be installed:
+        #  - all its dependencies are installed or to be installed,
+        #  - at least one dependency is 'to install'
+        install_states = frozenset(('installed', 'to install', 'to upgrade'))
+        def must_install(module):
+            states = set(dep.state for dep in module.dependencies_id)
+            return states <= install_states and 'to install' in states
 
-        # Mark (recursively) the newly satisfied modules to also be installed
+        modules = self
+        while modules:
+            # Mark the given modules and their dependencies to be installed.
+            modules.state_update('to install', ['uninstalled'])
 
-        # Select all auto-installable (but not yet installed) modules.
-        domain = [('state', '=', 'uninstalled'), ('auto_install', '=', True)]
-        uninstalled_ids = self.search(cr, uid, domain, context=context)
-        uninstalled_modules = self.browse(cr, uid, uninstalled_ids, context=context)
+            # Determine which auto-installable modules must be installed.
+            modules = self.search(auto_domain).filtered(must_install)
 
-        # Keep those with:
-        #  - all dependencies satisfied (installed or to be installed),
-        #  - at least one dependency being 'to install'
-        satisfied_states = frozenset(('installed', 'to install', 'to upgrade'))
-        def all_depencies_satisfied(m):
-            states = set(d.state for d in m.dependencies_id)
-            return states.issubset(satisfied_states) and ('to install' in states)
-        to_install_modules = filter(all_depencies_satisfied, uninstalled_modules)
-        to_install_ids = map(lambda m: m.id, to_install_modules)
+        # retrieve the installed (or to be installed) theme modules
+        theme_category = self.env.ref('base.module_category_theme')
+        theme_modules = self.search([
+            ('state', 'in', list(install_states)),
+            ('category_id', 'child_of', [theme_category.id]),
+        ])
 
-        # Mark them to be installed.
-        if to_install_ids:
-            self.button_install(cr, uid, to_install_ids, context=context)
+        # determine all theme modules that mods depends on, including mods
+        def theme_deps(mods):
+            deps = mods.mapped('dependencies_id.depend_id')
+            while deps:
+                mods |= deps
+                deps = deps.mapped('dependencies_id.depend_id')
+            return mods & theme_modules
+
+        if any(module.state == 'to install' for module in theme_modules):
+            # check: the installation is valid if all installed theme modules
+            # correspond to one theme module and all its theme dependencies
+            if not any(theme_deps(module) == theme_modules for module in theme_modules):
+                state_labels = dict(self.fields_get(['state'])['state']['selection'])
+                themes_list = [
+                    "- %s (%s)" % (module.shortdesc, state_labels[module.state])
+                    for module in theme_modules
+                ]
+                raise UserError(_(
+                    "You are trying to install incompatible themes:\n%s\n\n" \
+                    "Please uninstall your current theme before installing another one.\n"
+                    "Warning: switching themes may significantly alter the look of your current website pages!"
+                ) % ("\n".join(themes_list)))
 
         return dict(ACTION_DICT, name=_('Install'))
 
@@ -463,7 +469,7 @@ class module(osv.osv):
         ir_model_data = self.pool.get('ir.model.data')
         modules_to_remove = [m.name for m in self.browse(cr, uid, ids, context)]
         ir_model_data._module_data_uninstall(cr, uid, modules_to_remove, context)
-        self.write(cr, uid, ids, {'state': 'uninstalled'})
+        self.write(cr, uid, ids, {'state': 'uninstalled', 'latest_version': False})
         return True
 
     def downstream_dependencies(self, cr, uid, ids, known_dep_ids=None,
@@ -539,7 +545,6 @@ class module(osv.osv):
             'params': {'menu_id': menu_ids and menu_ids[0] or False}
         }
 
-    #TODO remove me in master, not called anymore
     def button_immediate_uninstall(self, cr, uid, ids, context=None):
         """
         Uninstall the selected module(s) immediately and fully,
@@ -601,10 +606,6 @@ class module(osv.osv):
         self.write(cr, uid, ids, {'state': 'installed'})
         return True
 
-    def button_update_translations(self, cr, uid, ids, context=None):
-        self.update_translations(cr, uid, ids)
-        return True
-
     @staticmethod
     def get_values_from_terp(terp):
         return {
@@ -614,14 +615,14 @@ class module(osv.osv):
             'maintainer': terp.get('maintainer', False),
             'contributors': ', '.join(terp.get('contributors', [])) or False,
             'website': terp.get('website', ''),
-            'license': terp.get('license', 'AGPL-3'),
+            'license': terp.get('license', 'LGPL-3'),
             'sequence': terp.get('sequence', 100),
             'application': terp.get('application', False),
             'auto_install': terp.get('auto_install', False),
             'icon': terp.get('icon', False),
             'summary': terp.get('summary', ''),
+            'url': terp.get('url') or terp.get('live_test_url', ''),
         }
-
 
     def create(self, cr, uid, vals, context=None):
         new_id = super(module, self).create(cr, uid, vals, context=context)
@@ -674,13 +675,6 @@ class module(osv.osv):
 
             self._update_dependencies(cr, uid, mod, terp.get('depends', []))
             self._update_category(cr, uid, mod, terp.get('category', 'Uncategorized'))
-
-        # Trigger load_addons if new module have been discovered it exists on
-        # wsgi handlers, so they can react accordingly
-        if tuple(res) != (0, 0):
-            for handler in openerp.service.wsgi_server.module_handlers:
-                if hasattr(handler, 'load_addons'):
-                    handler.load_addons()
 
         return res
 
@@ -802,13 +796,22 @@ class module(osv.osv):
             filter_lang = [lang.code for lang in res_lang.browse(cr, uid, lang_ids)]
         elif not isinstance(filter_lang, (list, tuple)):
             filter_lang = [filter_lang]
-        modules = [m.name for m in self.browse(cr, uid, ids) if m.state == 'installed']
+        modules = [m.name for m in self.browse(cr, uid, ids) if m.state in ('installed', 'to install', 'to upgrade')]
         self.pool.get('ir.translation').load_module_terms(cr, modules, filter_lang, context=context)
 
     def check(self, cr, uid, ids, context=None):
         for mod in self.browse(cr, uid, ids, context=context):
             if not mod.description:
                 _logger.warning('module %s: description is empty !', mod.name)
+
+    @api.model
+    @ormcache()
+    def _installed(self):
+        """ Return the set of installed modules as a dictionary {name: id} """
+        return {
+            module.name: module.id
+            for module in self.sudo().search([('state', '=', 'installed')])
+        }
 
 
 DEP_STATES = [

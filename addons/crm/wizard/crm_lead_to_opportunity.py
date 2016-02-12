@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -139,6 +121,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             context = {}
 
         lead_obj = self.pool['crm.lead']
+        partner_obj = self.pool['res.partner']
 
         w = self.browse(cr, uid, ids, context=context)[0]
         opp_ids = [o.id for o in w.opportunity_ids]
@@ -162,6 +145,9 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             lead_ids = context.get('active_ids', [])
             vals.update({'lead_ids': lead_ids, 'user_ids': [w.user_id.id]})
             self._convert_opportunity(cr, uid, ids, vals, context=context)
+            for lead in lead_obj.browse(cr, uid, lead_ids, context=context):
+                if lead.partner_id and lead.partner_id.user_id != lead.user_id:
+                    partner_obj.write(cr, uid, [lead.partner_id.id], {'user_id': lead.user_id.id}, context=context)
 
         return self.pool.get('crm.lead').redirect_opportunity_view(cr, uid, lead_ids[0], context=context)
 
@@ -191,7 +177,7 @@ class crm_lead2opportunity_mass_convert(osv.osv_memory):
 
     _columns = {
         'user_ids':  fields.many2many('res.users', string='Salesmen'),
-        'team_id': fields.many2one('crm.team', 'Sales Team', oldname='section_id'),
+        'team_id': fields.many2one('crm.team', 'Sales Team', select=True, oldname='section_id'),
         'deduplicate': fields.boolean('Apply deduplication', help='Merge with existing leads/opportunities of each partner'),        
         'action': fields.selection([
                 ('each_exist_or_create', 'Use existing partner or create'),

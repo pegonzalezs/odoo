@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Business Applications
-#    Copyright (C) 2004-2012 OpenERP SA (<http://openerp.com>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import openerp
 from openerp.osv import osv, fields
@@ -31,7 +13,7 @@ class base_module_upgrade(osv.osv_memory):
     _description = "Module Upgrade"
 
     _columns = {
-        'module_info': fields.text('Modules to Update',readonly=True),
+        'module_info': fields.text('Apps to Update',readonly=True),
     }
 
     def fields_view_get(self, cr, uid, view_id=None, view_type='form', context=None, toolbar=False, submenu=False):
@@ -50,8 +32,8 @@ class base_module_upgrade(osv.osv_memory):
             res['arch'] = '''<form string="Upgrade Completed" version="7.0">
                                 <separator string="Upgrade Completed" colspan="4"/>
                                 <footer>
-                                    <button name="config" string="Start Configuration" type="object" class="oe_highlight"/> or
-                                    <button special="cancel" string="Close" class="oe_link"/>
+                                    <button name="config" string="Start Configuration" type="object" class="btn-primary"/>
+                                    <button special="cancel" string="Close" class="btn-default"/>
                                 </footer>
                              </form>'''
 
@@ -99,8 +81,9 @@ class base_module_upgrade(osv.osv_memory):
                 raise UserError(_('Following modules are not installed or unknown: %s') % ('\n\n' + '\n'.join(unmet_packages)))
 
             ir_module.download(cr, uid, ids, context=context)
-            cr.commit() # save before re-creating cursor below
 
+        # terminate transaction before re-creating cursor below
+        cr.commit()
         openerp.api.Environment.reset()
         openerp.modules.registry.RegistryManager.new(cr.dbname, update_module=True)
 

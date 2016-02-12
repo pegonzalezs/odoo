@@ -2,43 +2,74 @@
 <openerp>
     <data>
 
-<!-- Layout and generic templates -->
+<!-- Assets -->
 
-<template id="website.assets_frontend" name="Website assets">
-    <t t-call="website.theme"/>
+<template id="assets_common" inherit_id="web.assets_common" name="Website assets">
+    <xpath expr="." position="inside">
+        <script type="text/javascript" src="/website/static/src/js/website.tour.rte.js"></script>
+    </xpath>
+</template>
 
+<template id="assets_frontend" name="Website assets">
+    <link id="bootstrap_css" rel="stylesheet" href='/website/static/src/less/import_bootstrap.less'/>
+
+    <link rel="stylesheet" href='/website/static/src/css/website.css'/>
+
+    <script type="text/javascript" src="/web/static/src/js/framework/session_instance.js"></script>
     <script type="text/javascript" src="/website/static/src/js/website.js"></script>
     <script type="text/javascript" src="/website/static/src/js/website.share.js"></script>
 
     <script type="text/javascript" src="/website/static/src/js/website.snippets.animation.js"></script>
-    <script type="text/javascript" src="/web/static/lib/bootstrap/js/bootstrap.js"></script>
 
-    <link rel="stylesheet" href="/web/static/lib/select2/select2.css"/>
-    <link rel="stylesheet" href="/website/static/lib/select2-bootstrap-css/select2-bootstrap.css"/>
-    <script type="text/javascript" src="/web/static/lib/select2/select2.js"></script>
+    <t t-call="web.bootstrap"/>
 
+    <link rel="stylesheet" href="/web/static/src/less/variables.less"/>
+    <link rel="stylesheet" href="/web/static/src/less/utils.less"/>
 </template>
 
 <template id="assets_backend" name="website assets for backend" inherit_id="web.assets_backend">
     <xpath expr="." position="inside">
-        <link rel="stylesheet" href="/website/static/src/css/website.backend.css"/>
-
         <script type="text/javascript" src="/website/static/src/js/website.backend.js"></script>
     </xpath>
 </template>
 
-<template id="website.submenu" name="Submenu">
+<template id="assets_editor" name="Editor assets">
+    <script type="text/javascript" src="/website/static/src/js/website.editor.js"></script>
+    <script type="text/javascript" src="/website/static/lib/jQuery.transfo.js"></script>
+    <script type="text/javascript" src="/website/static/lib/ace/ace.js"></script>
+    <script type="text/javascript" src="/website/static/lib/ace/theme-monokai.js"></script>
+    <script type="text/javascript" src="/website/static/lib/ace/mode-xml.js"></script>
+    <script type="text/javascript" src="/website/static/lib/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
+    <script type="text/javascript" src="/website/static/lib/jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.mobile.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.seo.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.tour.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.tour.banner.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.ace.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.translator.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.theme.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/web_planner_website.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.contentMenu.js"></script>
+    <link rel='stylesheet' href='/web_editor/static/src/css/web_editor.css'/>
+    <link rel='stylesheet' href='/web_editor/static/src/less/web_editor.less'/>
+    <link rel="stylesheet" href="/website/static/src/css/website.editor.css"/>
+    <script type="text/javascript" src="/website/static/src/js/website.snippets.editor.js"></script>
+    <script type="text/javascript" src="/website/static/src/js/website.snippets.gallery.js"></script>
+</template>
+
+<!-- Layout -->
+
+<template id="submenu" name="Submenu">
     <li t-if="not submenu.child_id" t-att-class="
-        ((submenu.url and submenu.url != '/' and request.httprequest.path.startswith(submenu.url)) or
-         request.httprequest.path == submenu.url) and 'active'
+        'active' if submenu.url and submenu.url != '/' and request.httprequest.path == submenu.url.replace('/page/website.', '/page/') else None
         ">
         <a t-att-href="(website.menu_id.child_id[0] == submenu) and '/' or submenu.url" t-ignore="true" t-att-target="'_blank' if submenu.new_window else None">
             <span t-field="submenu.name"/>
         </a>
     </li>
     <li t-if="submenu.child_id" t-attf-class="dropdown #{
-        ((submenu.url and submenu.url != '/' and [1 for submenu in submenu.child_id if request.httprequest.path.startswith(submenu.url)]) or
-         request.httprequest.path == submenu.url) and 'active'
+        (submenu.url and submenu.url != '/' and any([request.httprequest.path == child.url.replace('/page/website.', '/page/') for child in submenu.child_id if child.url]) or
+         (submenu.url and request.httprequest.path == submenu.url.replace('/page/website.', '/page/'))) and 'active'
         }">
         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
             <span t-field="submenu.name"/> <span class="caret" t-ignore="true"></span>
@@ -53,11 +84,12 @@
 
 <template id="layout" name="Main layout">&lt;!DOCTYPE html&gt;
     <html t-att-lang="lang and lang.replace('_', '-')"
-          t-att-data-website-id="website.id if editable and website else None"
+          t-att-data-website-id="website.id if (editable or translatable) and website else None"
           t-att-data-editable="'1' if editable else None"
           t-att-data-translatable="'1' if translatable else None"
-          t-att-data-view-xmlid="xmlid if editable else None"
-          t-att-data-main-object="repr(main_object) if editable else None"
+          t-att-data-edit_translations="'1' if edit_translations else None"
+          t-att-data-view-xmlid="xmlid if editable or translatable else None"
+          t-att-data-main-object="repr(main_object) if editable or translatable else None"
           t-att-data-oe-company-name="res_company.name">
         <head>
             <meta charset="utf-8" />
@@ -69,6 +101,9 @@
             </t>
             <t t-if="not title">
                 <t t-set="title"><t t-if="additional_title"><t t-raw="additional_title"/> | </t><t t-esc="(website or res_company).name"/></t>
+            </t>
+            <t groups="base.group_website_designer">
+                <t t-set="load_editor" t-value="True"/>
             </t>
 
             <meta name="viewport" content="initial-scale=1"/>
@@ -92,15 +127,27 @@
 
             <t t-set="languages" t-value="website.get_languages() if website else None"/>
             <t t-if="request and request.website_multilang and website">
-                <t t-foreach="website.get_alternate_languages(request.httprequest)" t-as="lang">
-                    <link rel="alternate" t-att-hreflang="lang['hreflang']" t-att-href="lang['href']"/>
+                <t t-foreach="website.get_alternate_languages(request.httprequest)" t-as="lg">
+                    <link rel="alternate" t-att-hreflang="lg['hreflang']" t-att-href="lg['href']"/>
                 </t>
             </t>
 
             <t t-call-assets="web.assets_common" t-js="false"/>
             <t t-call-assets="website.assets_frontend" t-js="false"/>
             <t t-call-assets="web.assets_common" t-css="false"/>
+            <t t-if="load_editor">
+                <t t-call-assets="web_editor.summernote"/>
+            </t>
+            <t groups="base.group_website_designer" t-call-assets="web_editor.editor"/>
             <t t-call-assets="website.assets_frontend" t-css="false"/>
+            <t groups="base.group_website_publisher" t-call-assets="website.assets_editor" async="True"/>
+            <script type="text/javascript">
+                odoo.define('web.csrf', function (require) {
+                    var token = "<t t-esc="request.csrf_token(None)"/>";
+                    require('web.core').csrf_token = token;
+                    require('qweb').default_dict.csrf_token = token;
+                });
+            </script>
 
             <t t-raw="head or ''" name='layout_head'/>
         </head>
@@ -132,7 +179,7 @@
                                             </b>
                                         </a>
                                         <ul class="dropdown-menu js_usermenu" role="menu">
-                                            <li><a t-attf-href="/web/session/logout?redirect=/" role="menuitem">Logout</a></li>
+                                            <li id="o_logout"><a t-attf-href="/web/session/logout?redirect=/" role="menuitem">Logout</a></li>
                                         </ul>
                                     </li>
                                 </ul>
@@ -162,7 +209,7 @@
 </template>
 
 <template id="layout_footer_copyright" inherit_id="website.layout" name="Footer Copyright">
-    <xpath expr="//div[contains(@id, 'footer')]" position="inside">
+    <xpath expr="//footer" position="inside">
         <div class="container mt16 mb8">
             <div class="pull-right" t-ignore="true" t-if="not editable">
                 Create a <a href="http://www.odoo.com/page/website-builder">free website</a> with
@@ -183,114 +230,6 @@
     </xpath>
 </template>
 
-<template id="editor_head" inherit_id="website.layout" name="Editor" groups="base.group_website_publisher,base.group_website_designer">
-    <xpath expr='//t[@t-call-assets="website.assets_frontend"][@t-css="false"]' position="after">
-        <t t-call-assets="website.assets_editor" async="True"/>
-    </xpath>
-</template>
-
-<template id="summernote" name="Summernote">
-    <script type="text/javascript" src="/website/static/src/js/openerp.define.js"></script>
-    <script>odoo.enable_website_define();</script>
-    <script>odoo.website_next_define = 'summernote/core/async';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/async.js"></script>
-    <script>odoo.website_next_define = 'summernote/core/func';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/func.js"></script>
-    <script>odoo.website_next_define = 'summernote/core/agent';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/agent.js"></script>
-    <script>odoo.website_next_define = 'summernote/core/list';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/list.js"></script>
-    <script>odoo.website_next_define = 'summernote/core/dom';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/dom.js"></script>
-    <script>odoo.website_next_define = 'summernote/core/key';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/key.js"></script>
-    <script>odoo.website_next_define = 'summernote/core/range';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/core/range.js"></script>
-
-    <script>odoo.website_next_define = 'summernote/editing/Bullet';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/editing/Bullet.js"></script>
-    <script>odoo.website_next_define = 'summernote/editing/History';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/editing/History.js"></script>
-    <script>odoo.website_next_define = 'summernote/editing/Style';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/editing/Style.js"></script>
-    <script>odoo.website_next_define = 'summernote/editing/Table';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/editing/Table.js"></script>
-    <script>odoo.website_next_define = 'summernote/editing/Typing';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/editing/Typing.js"></script>
-    <script>odoo.website_next_define = 'summernote/editing/Editor';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/editing/Editor.js"></script>
-
-    <script>odoo.website_next_define = 'summernote/module/Button';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/module/Button.js"></script>
-    <script>odoo.website_next_define = 'summernote/module/Dialog';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/module/Dialog.js"></script>
-    <script>odoo.website_next_define = 'summernote/module/Handle';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/module/Handle.js"></script>
-    <script>odoo.website_next_define = 'summernote/module/Popover';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/module/Popover.js"></script>
-    <script>odoo.website_next_define = 'summernote/module/Toolbar';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/module/Toolbar.js"></script>
-
-    <script>odoo.website_next_define = 'summernote/Renderer';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/Renderer.js"></script>
-    <script>odoo.website_next_define = 'summernote/EventHandler';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/EventHandler.js"></script>
-
-    <script>odoo.website_next_define = 'summernote/settings';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/settings.js"></script>
-
-    <script>odoo.website_next_define = 'summernote/summernote';</script>
-    <script type="text/javascript" src="/website/static/lib/summernote/src/js/summernote.js"></script>
-    <script>odoo.disable_website_define();</script>
-    <script type="text/javascript" src="/website/static/src/js/summernote.js"></script>
-
-    <!--link rel="stylesheet" href="/website/static/lib/summernote/src/less/summernote.less"/-->
-    <link rel="stylesheet" href="/website/static/lib/summernote/summernote.css"/>
-</template>
-<template id="editor" name="Editor">
-    <link rel='stylesheet' href='/website/static/src/css/snippets.css'/>
-    <link rel='stylesheet' href='/website/static/src/css/editor.css'/>
-    <link rel='stylesheet' href="/web/static/lib/jquery.ui/jquery-ui.css"/>
-    <script type="text/javascript" src="/website/static/lib/jQuery.transfo.js"></script>
-    <t t-call="web.jqueryui_conflict">
-        <script type="text/javascript" src="/web/static/lib/jquery.ui/jquery-ui.js"></script>
-    </t>
-    <script type="text/javascript" src='/website/static/lib/nearest/jquery.nearest.js'></script>
-
-    <!-- mutation observers shim backed by mutation events (8 < IE < 11, Safari < 6, FF < 14, Chrome < 17) -->
-    <script type="text/javascript" src="/website/static/lib/MutationObservers/test/sidetable.js"></script>
-    <script type="text/javascript" src="/website/static/lib/MutationObservers/MutationObserver.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.editor.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.snippets.editor.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.snippets.gallery.js" />
-</template>
-
-<template id="assets_common" inherit_id="web.assets_common" name="Website common assets">
-    <xpath expr='.' position="inside">
-        <t t-call="website.summernote"/>
-    </xpath>
-</template>
-
-<template id="assets_editor" name="Editor assets">
-    <t t-call="website.editor"/>
-    <script type="text/javascript" src="/website/static/lib/ace/ace.js"></script>
-    <script type="text/javascript" src="/website/static/lib/ace/theme-monokai.js"></script>
-    <script type="text/javascript" src="/website/static/lib/ace/mode-xml.js"></script>
-    <script type="text/javascript" src="/website/static/lib/vkbeautify/vkbeautify.0.99.00.beta.js"></script>
-    <script type="text/javascript" src="/website/static/lib//jquery.mjs.nestedSortable/jquery.mjs.nestedSortable.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.contentMenu.js"></script> <!-- groups="base.group_website_designer" -->
-    <script type="text/javascript" src="/website/static/src/js/website.mobile.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.seo.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.tour.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.tour.banner.js"></script> <!-- groups="base.group_website_designer" -->
-    <script type="text/javascript" src="/website/static/src/js/website.tour.rte.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.ace.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.translator.js"></script>
-    <script type="text/javascript" src="/website/static/src/js/website.theme.js"></script>
-</template>
-
-
-
 <!--
     Optional Bundle for PDFJS lib
     Since PDFJS is quite huge (40000 lines), please only load it when it is necessary.
@@ -298,49 +237,48 @@
     Bundlized, the size is reduced to 3000 lines.
 -->
 <template id="pdf_js_lib" name="PDF JS Library">
-    <script type="text/javascript" src="/website/static/lib/pdfjs/shared/util.js"></script>
-    <!-- files required to handle PDF file. Found in https://github.com/mozilla/pdf.js/blob/master/examples/helloworld/index.html -->
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/api.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/metadata.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/canvas.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/webgl.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/pattern_helper.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/font_loader.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/display/annotation_helper.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/shared/util.js"></script>
+
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/api.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/metadata.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/canvas.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/webgl.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/pattern_helper.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/font_loader.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/annotation_helper.js"></script>
     <!-- files normally dynamically loaded in worker_loader.js -->
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/network.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/chunked_stream.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/pdf_manager.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/core.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/obj.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/charsets.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/annotation.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/function.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/colorspace.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/crypto.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/pattern.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/evaluator.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/cmap.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/fonts.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/font_renderer.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/glyphlist.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/image.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/metrics.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/parser.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/ps_parser.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/stream.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/worker.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/arithmetic_decoder.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/jpg.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/jpx.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/jbig2.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/bidi.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/core/murmurhash3.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/network.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/chunked_stream.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/pdf_manager.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/core.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/obj.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/charsets.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/annotation.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/function.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/colorspace.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/crypto.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/pattern.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/evaluator.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/cmap.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/fonts.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/font_renderer.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/glyphlist.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/image.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/metrics.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/parser.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/ps_parser.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/stream.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/worker.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/arithmetic_decoder.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/jpg.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/jpx.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/jbig2.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/bidi.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/murmurhash3.js"></script>
     <!--
         NOTE JEM : PDFJS not-minified load its assets dynamically. Not minify, this lib is huge (4000 lines).
         To load PDFJS using odoo bundle, we create a custom worker_loader, to avoid reloading all the assets (core/*.js) dynamically.
-        Loading all this assets in a bundle can be problematic in debug mode, since we don't wait all assets to be loaded to start using PDFJS. That's why, in debug mode, we use the native loader,
-        otherwise our custom loader is used.
+        Loading all this assets in a bundle can be problematic in debug mode, since we don't wait all assets to be loaded to start using PDFJS. That's why, in debug mode, we use the native loader, otherwise our custom loader is used.
     -->
     <t t-if="not debug">
         <script>
@@ -354,17 +292,17 @@
             // Specify the main script used to create a new PDF.JS web worker.
             // In production, leave this undefined or change it to point to the
             // combined `pdf.worker.js` file.
-            PDFJS.workerSrc = '/website/static/lib/pdfjs/worker_loader.js';
+            PDFJS.workerSrc = '/website/static/lib/pdfjs/src/worker_loader.js';
         </script>
     </t>
     <!--
         If no loader defined, this file will try to load pdf.worker.js (in build/).
         It will crash since we don't use the minified version of PDFJS
     -->
-    <script type="text/javascript" src="/website/static/lib/pdfjs/pdf.js"></script>
+    <script type="text/javascript" src="/website/static/lib/pdfjs/src/pdf.js"></script>
 </template>
 
-
+<!-- Features template -->
 
 <template id="login_layout" inherit_id="web.login_layout" name="Website Login Layout">
     <xpath expr="t" position="replace">
@@ -374,10 +312,10 @@
     </xpath>
 </template>
 
-<template id="show_sign_in" customize_show="True" inherit_id="website.layout" name="Show Sign In" groups="base.group_public">
+<template id="show_sign_in" customize_show="True" inherit_id="website.layout" name="Show Sign In">
     <xpath expr="//ul[@id='top_menu']" position="inside">
-        <li class="divider"/>
-        <li>
+        <li class="divider" groups="base.group_public"/>
+        <li groups="base.group_public">
             <a t-attf-href="/web/login">
                 <b>Sign in</b>
             </a>
@@ -416,17 +354,39 @@
     </xpath>
 </template>
 
+<template id="language_selector">
+    <ul class="list-inline js_language_selector mt16" t-if="(request and request.website_multilang and len(languages) &gt; 1) or (website and (editable or translatable))">
+        <li t-foreach="languages" t-as="lg">
+          <a
+            t-att-href="url_for(request.httprequest.path + '?' + keep_query(), lang=lg[0])"
+            t-att-data-default-lang="(editable or translatable) and 'true' if website and lg[0] == website.default_lang_code else None"
+            t-att-data-lang="lg[0]"
+            class="js_change_lang"
+          >
+            <t t-esc="lg[1].split('/').pop()"/>
+          </a>
+        </li>
+        <li groups="base.group_website_publisher">
+            <t t-set="url_return" t-value="url_for('', '[lang]') + '?' + keep_query()"/>
+            <a t-attf-href="/web#action=base.action_view_base_language_install&amp;website_id=#{website.id if website else ''}&amp;url_return=#{url_return}">
+                <i class="fa fa-plus-circle"/>
+                Add a language...
+            </a>
+        </li>
+    </ul>
+</template>
+
 <template id="footer_default" inherit_id="website.footer_custom" customize_show="True" name="Automatic Footer">
     <xpath expr="//div[@id='footer']" position="replace">
         <div id="footer" class="container hidden-print">
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-4 col-lg-3">
                     <h4>Our products &amp; Services</h4>
                     <ul class="list-unstyled" id="products">
                         <li><a href="/">Home</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3" id="info">
+                <div class="col-md-4  col-lg-3" id="info">
                     <h4>Connect with us</h4>
                     <ul class="list-unstyled">
                         <li><a href="/page/website.contactus">Contact us</a></li>
@@ -444,7 +404,7 @@
                         <a t-att-href="website.social_github" t-if="website.social_github"><i class="fa fa-github"/></a>
                     </h2>
                 </div>
-                <div class="col-md-5 col-lg-offset-1">
+                <div class="col-md-4 col-lg-5 col-lg-offset-1">
                     <h4>
                         <span t-field="res_company.name" />
                         <small> - <a href="/page/website.aboutus">About us</a></small>
@@ -467,27 +427,7 @@
     </xpath>
 </template>
 
-<template id="language_selector">
-    <ul class="list-inline js_language_selector mt16" t-if="(request and request.website_multilang and len(languages) &gt; 1) or (website and editable)">
-        <li t-foreach="languages" t-as="lg">
-          <a
-            t-att-href="url_for(request.httprequest.path + '?' + keep_query(), lang=lg[0])"
-            t-att-data-default-lang="editable and 'true' if website and lg[0] == website.default_lang_code else None"
-            t-att-data-lang="lg[0]"
-            class="js_change_lang"
-          >
-            <t t-esc="lg[1].split('/').pop()"/>
-          </a>
-        </li>
-        <li groups="base.group_website_publisher">
-            <t t-set="url_return" t-value="url_for('', '[lang]') + '?' + keep_query()"/>
-            <a t-attf-href="/web#action=base.action_view_base_language_install&amp;website_id=#{website.id if website else ''}&amp;url_return=#{url_return}">
-                <i class="fa fa-plus-circle"/>
-                Add a language...
-            </a>
-        </li>
-    </ul>
-</template>
+<!-- Util template -->
 
 <template id="publish_management">
     <div groups="base.group_website_publisher" t-ignore="true" class="pull-right css_editable_mode_hidden" t-att-style="style or ''">
@@ -498,12 +438,6 @@
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu" t-att-aria-labelledby="'dopprod-%s' % object.id">
-                <li>
-                    <a href="#" class="js_publish_btn">
-                        <span class="css_unpublish">Unpublish</span>
-                        <span class="css_publish">Publish</span>
-                    </a>
-                </li>
                 <t t-raw="0"/>
                 <li t-if="publish_edit">
                     <a t-attf-href="/web#return_label=Website&amp;view_type=form&amp;model=#{object._name}&amp;id=#{object.id}&amp;action=#{action}"
@@ -516,7 +450,7 @@
 
 <template id="publish_short">
     <t groups="base.group_website_publisher" t-ignore="true">
-        <div t-attf-class="btn-group pull-right js_publish_management #{object.website_published and 'css_published' or 'css_unpublished'}" t-att-data-id="object.id" t-att-data-object="object._name" t-att-data-controller="publish_controller">
+        <div t-attf-class="pull-right js_publish_management #{object.website_published and 'css_published' or 'css_unpublished'}" t-att-data-id="object.id" t-att-data-object="object._name" t-att-data-controller="publish_controller">
             <button class="btn btn-danger js_publish_btn">Not Published</button>
             <button class="btn btn-success js_publish_btn">Published</button>
         </div>
@@ -535,6 +469,45 @@
             <a t-att-href="pager['page_next']['url'] if pager['page']['num'] != pager['page_count'] else ''">Next</a>
         </li>
     </ul>
+</template>
+
+<!--
+    Customize Themes
+
+    Use INPUT type 'checkbox' or 'radio' or use OPTION in select box
+    'data-xmlid' (optional) xml id of the template to add if the input is checked.
+        You can set a list of xml id separate by comma (all template is enable or
+        disable in same time)
+    'data-enable' (optional) to checked one or more HTML ids, or list separate by comma
+    'data-disable' (optional) to unchecked one or more HTML ids, or list separate by comma
+    'data-reload="/"' (optional) force the reloading of the page if the url match with
+        the string ( = regexp).
+        Otherwise, only the '/web/content/website.assets_frontend' is reloaded
+
+    For the sets (data-enable and/or data-disable without data-xmlid), the set is
+    automatically checked if:
+    - all related fields are enabled for data-enable
+    - all related fields are disabled for data-disable
+    else unchecked
+
+    HTML apply classes:
+    - 'checked': on the parent label when input is checked
+    - 'in': on the container (e.g.: bootstrap modal) after added in DOM (removed together
+       out is added)
+    - 'out': on the container 1 second before removed from ths DOM
+    - 'loading': on the container/modal when the new css is loading
+-->
+
+<template id="website.theme_customize" name="Theme Modal for Customization">
+  <div id="theme_customize_modal" class="modal fade">
+      <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header text-center">
+                <h4 class="modal-title">Please install a theme in order to customize your website.</h4>
+            </div>
+          </div>
+      </div>
+  </div>
 </template>
 
 <template id="kanban">
@@ -670,7 +643,7 @@
         <div class="container">
             <div class="well mt32">
                 <p>This page does not exists, but you can create it as you are administrator of this site.</p>
-                <a class="btn btn-primary" t-attf-href="/website/add/#{ path }">Create Page</a>
+                <a class="btn btn-primary" t-attf-href="/website/add/#{ path }#{ from_template and '?template=%s' % from_template }">Create Page</a>
             </div>
             <div class="text-center text-muted">Edit the content below this line to adapt the default "page not found" page.</div>
         </div>
@@ -804,11 +777,9 @@
     <html>
         <head>
             <title t-esc="status_message">Internal Server Error</title>
-            <link rel='stylesheet' href='/web/static/lib/fontawesome/css/font-awesome.css'/>
-            <link rel='stylesheet' href='/web/static/lib/bootstrap/css/bootstrap.css'/>
-            <link rel='stylesheet' href='/website/static/src/css/website.css'/>
-            <script type="text/javascript" src="/web/static/lib/jquery/jquery.js"></script>
-            <script type="text/javascript" src="/web/static/lib/bootstrap/js/bootstrap.js"></script>
+            <t t-set="debug" t-value="True"/>
+            <t t-call-assets="web.assets_common"/>
+            <t t-call-assets="website.assets_frontend"/>
             <script>
                 $(document).ready(function() {
                     var button = $('#reset_templates_button');
@@ -861,17 +832,19 @@
             </div>
 
             <div id="wrapwrap">
-                <div class="navbar navbar-default navbar-static-top">
-                    <div class="container">
-                        <div class="collapse navbar-collapse navbar-top-collapse">
-                            <ul class="nav navbar-nav pull-right">
-                                <li><a href="/">Home</a></li>
-                                <li><a href="javascript: window.history.back()">Back</a></li>
-                            </ul>
+                <header>
+                    <div class="navbar navbar-default navbar-static-top">
+                        <div class="container">
+                            <div class="collapse navbar-collapse navbar-top-collapse">
+                                <ul class="nav navbar-nav navbar-right" id="top_menu">
+                                    <li><a href="/">Home</a></li>
+                                    <li><a href="javascript: window.history.back()">Back</a></li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="mb32">
+                </header>
+                <main>
                     <div class="oe_structure">
                         <h1 class="container mt32"><t t-esc="status_code"/>: <t t-esc="status_message"/></h1>
                     </div>
@@ -881,6 +854,7 @@
                             <p>An error occured while rendering the template <code t-esc="qweb_exception.qweb['template']"/>.</p>
                             <p>If this error is caused by a change of yours in the templates, you have the possibility to reset one or more templates to their <strong>factory settings</strong>.</p>
                             <form action="/website/reset_templates" method="post" id="reset_templates_form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                 <ul class="oe_template_fallback">
                                     <li t-foreach="views" t-as="view">
                                         <label>
@@ -898,7 +872,7 @@
                     <t t-if="editable or request.debug">
                         <t t-call="website.http_error_debug"/>
                     </t>
-                </div>
+                </main>
             </div>
         </body>
     </html>
@@ -926,12 +900,11 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
 
 <template id="sitemap_index_xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
 <sitemapindex t-attf-xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap t-translate="off" t-foreach="pages" t-as="page">
+  <sitemap t-translation="off" t-foreach="pages" t-as="page">
     <loc><t t-esc="url_root"/>sitemap-<t t-esc="page"/>.xml</loc>
   </sitemap>
 </sitemapindex>
 </template>
-
 
 <!-- Actual pages -->
 
@@ -1024,5 +997,16 @@ Sitemap: <t t-esc="url_root"/>sitemap.xml
     </t>
 </template>
 
+<template id="website_search_box" name="Website Searchbox">
+    <div class="input-group">
+        <div class="oe_search">
+            <input type="text" name="search" class="search-query form-control oe_search_box" placeholder="Search..." t-att-value="search" />
+            <span class="fa fa-remove fa-lg oe_search_clear"></span>
+        </div>
+        <span class="input-group-btn">
+           <button type="submit" class="btn btn-default oe_search_button"><i class="fa fa-search"/></button>
+        </span>
+    </div>
+</template>
      </data>
 </openerp>

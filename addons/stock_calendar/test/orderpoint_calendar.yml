@@ -1,3 +1,9 @@
+-
+  Create a partner
+-
+  !record {model: res.partner, id: res_partner_cal}:
+    name: Supplier
+    supplier: 1
 - 
   Create a calendar
 - 
@@ -11,10 +17,10 @@
 - 
   Create a product A with orderpoint with a calendar
 - 
-  !record {model: product.product, id: product_calendar}:
+  !record {model: product.product, id: product_calendar, view: False}:
     name: Calendar Product
     seller_ids:
-      - name: base.res_partner_2
+      - name: res_partner_cal
         delay: 1
     orderpoint_ids:
       - name: Product A Truck
@@ -26,8 +32,8 @@
   Create delivery order with product A
 - 
   !record {model: stock.picking, id: pick_out_calendar}:
-    name: Delivery order for procurement
-    partner_id: base.res_partner_2
+    name: Delivery order for procurement (calendar)
+    partner_id: res_partner_cal
     picking_type_id: stock.picking_type_out
     move_lines:
         - product_id: product_calendar
@@ -39,8 +45,8 @@
   Create other delivery order with product A that we will give a later date afterwards (date between the two) 
 - 
   !record {model: stock.picking, id: pick_out_calendar2}:
-    name: Delivery order for procurement
-    partner_id: base.res_partner_2
+    name: Delivery order for procurement (calendar2)
+    partner_id: res_partner_cal
     picking_type_id: stock.picking_type_out
     move_lines:
         - product_id: product_calendar
@@ -52,8 +58,8 @@
   Create other delivery order with product A that we will give an even later date, so it should not be taken into account
 - 
   !record {model: stock.picking, id: pick_out_calendar3}:
-    name: Delivery order for procurement
-    partner_id: base.res_partner_2
+    name: Delivery order for procurement (calendar3)
+    partner_id: res_partner_cal
     picking_type_id: stock.picking_type_out
     move_lines:
         - product_id: product_calendar
@@ -88,5 +94,5 @@
     procurement = proc_obj.browse(cr, uid, proc_ids[0])
     assert procurement.product_qty == 17, 'It should have taken the two first pickings into account for the virtual stock for the orderpoint, not the third'
     assert datetime.datetime.strptime(procurement.next_delivery_date, DEFAULT_SERVER_DATETIME_FORMAT).weekday() == 3, 'The next delivery date should be on a Thursday'
-    assert datetime.datetime.strptime(procurement.purchase_line_id.date_planned, DEFAULT_SERVER_DATETIME_FORMAT).weekday() == 3, 'Check it has been put on the purchase line also'
-
+    purchase_line_id_date_planned = datetime.datetime.strptime(procurement.purchase_line_id.date_planned, DEFAULT_SERVER_DATETIME_FORMAT).weekday()
+    assert purchase_line_id_date_planned == 3, 'Check it has been put on the purchase line also, got %d' %purchase_line_id_date_planned

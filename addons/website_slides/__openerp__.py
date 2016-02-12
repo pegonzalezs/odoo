@@ -2,6 +2,7 @@
 {
     'name': 'Slides',
     'version': '1.0',
+    'sequence': 145,
     'summary': 'Share and Publish Videos, Presentations and Documents',
     'category': 'website',
     'description': """
@@ -13,10 +14,8 @@ Share and Publish Videos, Presentations and Documents'
  * Filters and Tagging
  * Statistics of Presentation
  * Channel Subscription
- * Supported document types supported: PDF, images, YouTube videos and Google Drive documents)
+ * Supported document types : PDF, images, YouTube videos and Google Drive documents)
 """,
-    'author': 'Odoo SA',
-    'website': 'https://www.odoo.com',
     'depends': ['website', 'website_mail'],
     'data': [
         'view/res_config.xml',
@@ -31,4 +30,5 @@ Share and Publish Videos, Presentations and Documents'
         'data/website_slides_demo.xml'
     ],
     'installable': True,
+    'application': True,
 }

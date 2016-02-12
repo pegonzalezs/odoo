@@ -1,10 +1,13 @@
+:banner: banners/testing_modules.jpg
+
 .. _reference/testing:
+
 
 ===============
 Testing Modules
 ===============
 
-Odoo provides support for testing modules using unittest2_.
+Odoo provides support for testing modules using unittest.
 
 To write tests, simply define a ``tests`` sub-package in your module, it will
 be automatically inspected for test modules. Test modules should have a name
@@ -77,5 +80,4 @@ Odoo server.
 As of Odoo 8, running tests outside of the install/update cycle is not
 supported.
 
-.. _unittest2: http://pypi.python.org/pypi/unittest2
 .. _unittest documentation: https://docs.python.org/2/library/unittest.html

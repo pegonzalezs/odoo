@@ -1,24 +1,6 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-Today OpenERP SA (<http://www.openerp.com>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import optparse
 import os
@@ -123,12 +105,12 @@ class OdooDocker(object):
     def __init__(self):
         self.log_file = NamedTemporaryFile(mode='w+b', prefix="bash", suffix=".txt", delete=False)
         self.port = 8069  # TODO sle: reliable way to get a free port?
-        self.prompt_re = '\[root@nightly-tests\] #'
+        self.prompt_re = '[root@nightly-tests] # '
         self.timeout = 600
 
     def system(self, command):
         self.docker.sendline(command)
-        self.docker.expect(self.prompt_re)
+        self.docker.expect_exact(self.prompt_re)
 
     def start(self, docker_image, build_dir, pub_dir):
         self.build_dir = build_dir
@@ -137,7 +119,8 @@ class OdooDocker(object):
         self.docker = pexpect.spawn(
             'docker run -v %s:/opt/release -p 127.0.0.1:%s:8069'
             ' -t -i %s /bin/bash --noediting' % (self.build_dir, self.port, docker_image),
-            timeout=self.timeout
+            timeout=self.timeout,
+            searchwindowsize=len(self.prompt_re) + 1,
         )
         time.sleep(2)  # let the bash start
         self.docker.logfile_read = self.log_file
@@ -235,7 +218,7 @@ class KVMWinTestExe(KVM):
         self.ssh("TEMP=/tmp ./%s /S" % setupfile)
         self.ssh('PGPASSWORD=openpgpwd /cygdrive/c/"Program Files"/"Odoo %s"/PostgreSQL/bin/createdb.exe -e -U openpg mycompany' % setupversion)
         self.ssh('/cygdrive/c/"Program Files"/"Odoo %s"/server/openerp-server.exe -d mycompany -i base --stop-after-init' % setupversion)
-        self.ssh('net start odoo-server-8.0')
+        self.ssh('net start odoo-server-%s' % version)
         _rpc_count_modules(port=18069)
 
 #----------------------------------------------------------
@@ -419,7 +402,7 @@ def options():
     op.add_option("-b", "--build-dir", default=build_dir, help="build directory (%default)", metavar="DIR")
     op.add_option("-p", "--pub", default=None, help="pub directory (%default)", metavar="DIR")
     op.add_option("", "--no-testing", action="store_true", help="don't test the builded packages")
-    op.add_option("-v", "--version", default='8.0', help="version (%default)")
+    op.add_option("-v", "--version", default='9.0', help="version (%default)")
 
     op.add_option("", "--no-debian", action="store_true", help="don't build the debian package")
     op.add_option("", "--no-rpm", action="store_true", help="don't build the rpm package")

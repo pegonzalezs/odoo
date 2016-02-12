@@ -1,15 +1,14 @@
 {
-    'name': 'Link Tracker',
+    'name': 'Website Link Tracker',
     'category': 'Hidden',
     'description': """
-Create short and trackable URLs.
+Website interface to create short and trackable URLs.
 =====================================================
 
         """,
     'version': '1.0',
-    'depends':['website','marketing', 'utm'],
-    'data' : [
-        'views/website_links.xml',
+    'depends': ['website', 'link_tracker'],
+    'data': [
         'views/website_links_template.xml',
         'views/website_links_graphs.xml',
         'security/ir.model.access.csv',

@@ -5,12 +5,11 @@
     'website': 'https://www.odoo.com/page/quote-builder',
     'version': '1.0',
     'description': """
-OpenERP Sale Quote Roller
+Odoo Sale Quote Roller
 =========================
 
         """,
-    'author': 'OpenERP SA',
-    'depends': ['website', 'sale', 'mail', 'web_tip'],
+    'depends': ['website', 'sale', 'mail', 'web_tip', 'payment', 'website_portal_sale', 'website_mail'],
     'data': [
         'quotation_report.xml',
         'views/website_quotation.xml',

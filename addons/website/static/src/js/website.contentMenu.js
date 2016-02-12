@@ -1,32 +1,32 @@
 odoo.define('website.contentMenu', function (require) {
 "use strict";
 
-var ajax = require('web.ajax');
 var core = require('web.core');
+var ajax = require('web.ajax');
 var Widget = require('web.Widget');
-var editor = require('website.editor');
+var base = require('web_editor.base');
+var editor = require('web_editor.editor');
+var widget = require('web_editor.widget');
 var website = require('website.website');
 
 var _t = core._t;
-var QWeb = core.qweb;
+var qweb = core.qweb;
 
-website.add_template_file('/website/static/src/xml/website.contentMenu.xml');
+ajax.loadXML('/website/static/src/xml/website.contentMenu.xml', qweb);
 
-var EditorBarContent = Widget.extend({
+var TopBarContent = Widget.extend({
     start: function() {
         var self = this;
         self.$el.on('click', 'a[data-action]', function(ev) {
             ev.preventDefault();
             var $content_item = $(this);
-            var data_action = self[$content_item.data('action')];
-            if (data_action) {
-                data_action();
-            }
+            self[$content_item.data('action')]();
         });
         return this._super();
     },
     edit_menu: function() {
-        var context = website.get_context();
+        var self = this;
+        var context = base.get_context();
         var def = $.Deferred();
         if ($("[data-content_menu_id]").length) {
             var select = new SelectEditMenuDialog();
@@ -78,43 +78,43 @@ var EditorBarContent = Widget.extend({
             }
         });
     },
-        rename_page: function() {
-            var self = this;
-            var context = website.get_context();
-            self.mo_id = self.getMainObject().id;
+    rename_page: function() {
+        var self = this;
+        var context = base.get_context();
+        self.mo_id = self.getMainObject().id;
 
-            openerp.jsonRpc('/web/dataset/call_kw', 'call', {
-                model: 'website',
-                method: 'page_search_dependencies',
-                args: [self.mo_id],
-                kwargs: {
-                    context: context
-                },
-            }).then(function (deps) {
-                website.prompt({
-                    id: "editor_rename_page",
-                    window_title: _t("Rename Page"),
-                    dependencies: deps,
-                }, 'website.rename_page').then(function (val, field, $dialog) {
-                    openerp.jsonRpc('/web/dataset/call_kw', 'call', {
-                        model: 'website',
-                        method: 'rename_page',
-                        args: [
-                            self.mo_id,
-                            val,
-                        ],
-                        kwargs: {
-                            context: context
-                        },
-                    }).then(function (new_name) {
-                        window.location = "/page/" + encodeURIComponent(new_name);
-                    });
+        ajax.jsonRpc('/web/dataset/call_kw', 'call', {
+            model: 'website',
+            method: 'page_search_dependencies',
+            args: [self.mo_id],
+            kwargs: {
+                context: context
+            },
+        }).then(function (deps) {
+            website.prompt({
+                id: "editor_rename_page",
+                window_title: _t("Rename Page"),
+                dependencies: deps,
+            }, 'website.rename_page').then(function (val, field, $dialog) {
+                ajax.jsonRpc('/web/dataset/call_kw', 'call', {
+                    model: 'website',
+                    method: 'rename_page',
+                    args: [
+                        self.mo_id,
+                        val,
+                    ],
+                    kwargs: {
+                        context: context
+                    },
+                }).then(function (new_name) {
+                    window.location = "/page/" + encodeURIComponent(new_name);
                 });
             });
-        },
+        });
+    },
     delete_page: function() {
         var self = this;
-        var context = website.get_context();
+        var context = base.get_context();
         self.mo_id = self.getMainObject().id;
 
         ajax.jsonRpc('/web/dataset/call_kw', 'call', {
@@ -161,7 +161,15 @@ var EditorBarContent = Widget.extend({
     }
 });
 
-var SelectEditMenuDialog = editor.Dialog.extend({
+website.TopBar.include({
+    start: function () {
+        this.content_menu = new TopBarContent();
+        var def = this.content_menu.attachTo($('.oe_content_menu'));
+        return $.when(this._super(), def);
+    }
+});
+
+var SelectEditMenuDialog = widget.Dialog.extend({
     template: 'website.contentMenu.dialog.select',
     init: function () {
         var self = this;
@@ -177,9 +185,9 @@ var SelectEditMenuDialog = editor.Dialog.extend({
     }
 });
 
-var EditMenuDialog = editor.Dialog.extend({
+var EditMenuDialog = widget.Dialog.extend({
     template: 'website.contentMenu.dialog.edit',
-    events: _.extend({}, editor.Dialog.prototype.events, {
+    events: _.extend({}, widget.Dialog.prototype.events, {
         'click a.js_add_menu': 'add_menu',
         'click button.js_edit_menu': 'edit_menu',
         'click button.js_delete_menu': 'delete_menu',
@@ -225,14 +233,14 @@ var EditMenuDialog = editor.Dialog.extend({
                 id: _.uniqueId('new-'),
                 name: link.text,
                 url: link.url,
-                new_window: link.newWindow,
+                new_window: link.isNewWindow,
                 parent_id: false,
                 sequence: 0,
                 children: [],
             };
             self.flat[new_menu.id] = new_menu;
             self.$('.oe_menu_editor').append(
-                QWeb.render('website.contentMenu.dialog.submenu', { submenu: new_menu }));
+                qweb.render('website.contentMenu.dialog.submenu', { submenu: new_menu }));
         });
         dialog.appendTo(document.body);
     },
@@ -241,14 +249,14 @@ var EditMenuDialog = editor.Dialog.extend({
         var menu_id = $(ev.currentTarget).closest('[data-menu-id]').data('menu-id');
         var menu = self.flat[menu_id];
         if (menu) {
-            var dialog = new website.contentMenu.MenuEntryDialog(undefined, menu);
+            var dialog = new MenuEntryDialog(undefined, menu);
             dialog.on('save', this, function (link) {
                 var id = link.id;
                 var menu_obj = self.flat[id];
                 _.extend(menu_obj, {
                     'name': link.text,
                     'url': link.url,
-                    'new_window': link.newWindow,
+                    'new_window': link.isNewWindow,
                 });
                 var $menu = self.$('[data-menu-id="' + id + '"]');
                 $menu.find('.js_menu_label').first().text(menu_obj.name);
@@ -272,7 +280,7 @@ var EditMenuDialog = editor.Dialog.extend({
         var new_menu = this.$('.oe_menu_editor').nestedSortable('toArray', {startDepthCount: 0});
         var levels = [];
         var data = [];
-        var context = website.get_context();
+        var context = base.get_context();
         // Resequence, re-tree and remove useless data
         new_menu.forEach(function (menu) {
             if (menu.item_id) {
@@ -293,16 +301,16 @@ var EditMenuDialog = editor.Dialog.extend({
             },
         }).then(function (menu) {
             self.close();
-            website.reload();
+            editor.reload();
         });
     },
 });
 
-var MenuEntryDialog = editor.LinkDialog.extend({
+var MenuEntryDialog = widget.LinkDialog.extend({
     template: 'website.contentMenu.dialog.add',
     init: function (editor, data) {
         data.text = data.name || '';
-        data.newWindow = data.new_window;
+        data.isNewWindow = data.new_window;
         this.data = data;
         return this._super.apply(this, arguments);
     },
@@ -336,14 +344,8 @@ var MenuEntryDialog = editor.LinkDialog.extend({
     },
 });
 
-$(document).ready(function() {
-    var content = new EditorBarContent();
-    content.setElement($('.oe_content_menu'));
-    content.start();
-});
-
 return {
-    EditorBarContent: EditorBarContent,
+    'TopBar': TopBarContent,
 };
 
 });

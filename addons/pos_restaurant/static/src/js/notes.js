@@ -1,8 +1,6 @@
 odoo.define('pos_restaurant.notes', function (require) {
 "use strict";
 
-console.log("notes");
-
 var models = require('point_of_sale.models');
 var screens = require('point_of_sale.screens');
 var core = require('web.core');
@@ -28,7 +26,7 @@ models.Orderline = models.Orderline.extend({
         if (orderline.get_note() !== this.get_note()) {
             return false;
         } else {
-            return _super_orderline.can_be_merged_with.call(this,orderline);
+            return _super_orderline.can_be_merged_with.apply(this,arguments);
         }
     },
     clone: function(){

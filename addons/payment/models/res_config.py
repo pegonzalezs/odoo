@@ -7,19 +7,29 @@ class AccountPaymentConfig(osv.TransientModel):
     _inherit = 'account.config.settings'
 
     _columns = {
+        'module_payment_transfer': fields.boolean(
+            'Wire Transfer',
+            help='-This installs the module payment_transfer.'),
         'module_payment_paypal': fields.boolean(
-            'Manage Payments Using Paypal',
-            help='-It installs the module payment_paypal.'),
+            'Paypal',
+            help='-This installs the module payment_paypal.'),
         'module_payment_ogone': fields.boolean(
-            'Manage Payments Using Ogone',
-            help='-It installs the module payment_ogone.'),
+            'Ogone',
+            help='-This installs the module payment_ogone.'),
         'module_payment_adyen': fields.boolean(
-            'Manage Payments Using Adyen',
-            help='-It installs the module payment_adyen.'),
+            'Adyen',
+            help='-This installs the module payment_adyen.'),
         'module_payment_buckaroo': fields.boolean(
-            'Manage Payments Using Buckaroo',
-            help='-It installs the module payment_buckaroo.'),
+            'Buckaroo',
+            help='-This installs the module payment_buckaroo.'),
         'module_payment_authorize': fields.boolean(
-            'Manage Payments Using Authorize.Net',
-            help='-It installs the module payment_authorize.'),
+            'Authorize.Net',
+            help='-This installs the module payment_authorize.'),
+        'module_payment_sips': fields.boolean(
+            'Sips',
+            help='-This installs the module payment_sips.'),
+    }
+
+    _defaults = {
+        'module_payment_transfer': True
     }

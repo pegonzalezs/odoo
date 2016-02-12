@@ -2,7 +2,7 @@
 from functools import partial
 import itertools
 
-import unittest2
+import unittest
 
 from lxml import etree as ET
 from lxml.builder import E
@@ -431,28 +431,32 @@ class TestNoModel(ViewCase):
         """
         Test if translations work correctly without a model
         """
-        View = self.registry('ir.ui.view')
-        self.registry('res.lang').load_lang(self.cr, self.uid, 'fr_FR')
-        orig_text = "Copyright copyrighter"
-        translated_text = u"Copyrighter, tous droits réservés"
-        self.text_para.text = orig_text 
-        self.registry('ir.translation').create(self.cr, self.uid, {
-            'name': 'website',
-            'type': 'view',
-            'lang': 'fr_FR',
-            'src': orig_text,
-            'value': translated_text,
+        self.env['res.lang'].load_lang('fr_FR')
+        ARCH = '<template name="foo">%s</template>'
+        TEXT_EN = "Copyright copyrighter"
+        TEXT_FR = u"Copyrighter, tous droits réservés"
+        view = self.env['ir.ui.view'].create({
+            'name': 'dummy',
+            'arch': ARCH % TEXT_EN,
+            'inherit_id': False,
+            'type': 'qweb',
         })
-        sarch = View.translate_qweb(self.cr, self.uid, None, self.arch, 'fr_FR')
-
-        self.text_para.text = translated_text
-        self.assertEqual(sarch, self.arch)
+        self.env['ir.translation'].create({
+            'type': 'model',
+            'name': 'ir.ui.view,arch_db',
+            'res_id': view.id,
+            'lang': 'fr_FR',
+            'src': TEXT_EN,
+            'value': TEXT_FR,
+        })
+        view = view.with_context(lang='fr_FR')
+        self.assertEqual(view.arch, ARCH % TEXT_FR)
 
 class TestTemplating(ViewCase):
     def setUp(self):
         import openerp.modules
         super(TestTemplating, self).setUp()
-        self._pool = openerp.modules.registry.RegistryManager.get(common.DB)
+        self._pool = openerp.modules.registry.RegistryManager.get(common.get_db_name())
         self._init = self._pool._init
         # fuck off
         self._pool._init = False
@@ -544,7 +548,6 @@ class TestTemplating(ViewCase):
                         'data-oe-id': str(id2),
                         'data-oe-field': 'arch',
                         'data-oe-xpath': '/xpath/item/content[1]',
-                        'data-oe-source-id': str(id)
                     }), {
                         'order': '2',
                     }),
@@ -553,7 +556,7 @@ class TestTemplating(ViewCase):
                     'data-oe-model': 'ir.ui.view',
                     'data-oe-id': str(id),
                     'data-oe-field': 'arch',
-                    'data-oe-xpath': '/root[1]/item[1]'
+                    'data-oe-xpath': '/root[1]/item[1]',
                 })
             )
         )
@@ -707,11 +710,10 @@ class test_views(ViewCase):
             'model': 'ir.ui.view',
             'arch': """
                 <form string="Base title" version="7.0">
-                    <separator string="separator" colspan="4"/>
+                    <separator name="separator" string="Separator" colspan="4"/>
                     <footer>
-                        <button name="action_next" type="object" string="Next button"/>
-                        or
-                        <button string="Skip" special="cancel" />
+                        <button name="action_next" type="object" string="Next button" class="btn-primary"/>
+                        <button string="Skip" special="cancel" class="btn-default"/>
                     </footer>
                 </form>
             """
@@ -730,7 +732,7 @@ class test_views(ViewCase):
                             <button name="action_next" type="object" string="New button"/>
                         </footer>
                     </footer>
-                    <separator string="separator" position="replace">
+                    <separator name="separator" position="replace">
                         <p>Replacement data</p>
                     </separator>
                 </data>
@@ -743,7 +745,10 @@ class test_views(ViewCase):
             'priority': 17,
             'arch': """
                 <footer position="attributes">
-                    <attribute name="thing">bob</attribute>
+                    <attribute name="thing">bob tata lolo</attribute>
+                    <attribute name="thing" add="bibi and co" remove="tata" separator=" " />
+                    <attribute name="otherthing">bob, tata,lolo</attribute>
+                    <attribute name="otherthing" remove="tata, bob"/>
                 </footer>
             """
         })
@@ -763,7 +768,7 @@ class test_views(ViewCase):
                 E.p("Replacement data"),
                 E.footer(
                     E.button(name="action_next", type="object", string="New button"),
-                    thing="bob"
+                    thing="bob lolo bibi and co", otherthing="lolo"
                 ),
                 string="Replacement title", version="7.0"))
 
@@ -775,11 +780,10 @@ class test_views(ViewCase):
             'model': 'ir.ui.view.custom',
             'arch': """
                 <form string="Base title" version="7.0">
-                    <separator string="separator" colspan="4"/>
+                    <separator name="separator" string="Separator" colspan="4"/>
                     <footer>
-                        <button name="action_next" type="object" string="Next button"/>
-                        or
-                        <button string="Skip" special="cancel" />
+                        <button name="action_next" type="object" string="Next button" class="btn-primary"/>
+                        <button string="Skip" special="cancel" class="btn-default"/>
                     </footer>
                 </form>
             """
@@ -798,7 +802,7 @@ class test_views(ViewCase):
                             <button name="action_next" type="object" string="New button"/>
                         </footer>
                     </footer>
-                    <separator string="separator" position="replace">
+                    <separator name="separator" position="replace">
                         <p>Replacement data</p>
                     </separator>
                 </data>

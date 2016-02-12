@@ -1,6 +1,7 @@
 # -*- coding: utf-'8' "-*-"
 from hashlib import sha1
 import logging
+import urllib
 import urlparse
 
 from openerp.addons.payment.models.payment_acquirer import ValidationError
@@ -10,6 +11,16 @@ from openerp.tools.float_utils import float_compare
 from openerp.tools.translate import _
 
 _logger = logging.getLogger(__name__)
+
+
+def normalize_keys_upper(data):
+    """Set all keys of a dictionnary to uppercase
+
+    Buckaroo parameters names are case insensitive
+    convert everything to upper case to be able to easily detected the presence
+    of a parameter by checking the uppercase key only
+    """
+    return dict((key.upper(), val) for key, val in data.items())
 
 
 class AcquirerBuckaroo(osv.Model):
@@ -61,42 +72,44 @@ class AcquirerBuckaroo(osv.Model):
         values = dict(values or {})
 
         if inout == 'out':
-            if 'BRQ_SIGNATURE' in values:
-                del values['BRQ_SIGNATURE']
-            items = sorted((k.upper(), v) for k, v in values.items())
-            sign = ''.join('%s=%s' % (k, v) for k, v in items)
+            for key in values.keys():
+                # case insensitive keys
+                if key.upper() == 'BRQ_SIGNATURE':
+                    del values[key]
+                    break
+
+            items = sorted(values.items(), key=lambda (x, y): x.lower())
+            sign = ''.join('%s=%s' % (k, urllib.unquote_plus(v)) for k, v in items)
         else:
             sign = ''.join('%s=%s' % (k,get_value(k)) for k in keys)
         #Add the pre-shared secret key at the end of the signature
         sign = sign + acquirer.brq_secretkey
         if isinstance(sign, str):
+            # TODO: remove me? should not be used
             sign = urlparse.parse_qsl(sign)
-        shasign = sha1(sign).hexdigest()
+        shasign = sha1(sign.encode('utf-8')).hexdigest()
         return shasign
 
 
-    def buckaroo_form_generate_values(self, cr, uid, id, partner_values, tx_values, context=None):
+    def buckaroo_form_generate_values(self, cr, uid, id, values, context=None):
         base_url = self.pool['ir.config_parameter'].get_param(cr, uid, 'web.base.url')
         acquirer = self.browse(cr, uid, id, context=context)
-        buckaroo_tx_values = dict(tx_values)
+        buckaroo_tx_values = dict(values)
         buckaroo_tx_values.update({
             'Brq_websitekey': acquirer.brq_websitekey,
-            'Brq_amount': tx_values['amount'],
-            'Brq_currency': tx_values['currency'] and tx_values['currency'].name or '',
-            'Brq_invoicenumber': tx_values['reference'],
+            'Brq_amount': values['amount'],
+            'Brq_currency': values['currency'] and values['currency'].name or '',
+            'Brq_invoicenumber': values['reference'],
             'brq_test': False if acquirer.environment == 'prod' else True,
             'Brq_return': '%s' % urlparse.urljoin(base_url, BuckarooController._return_url),
             'Brq_returncancel': '%s' % urlparse.urljoin(base_url, BuckarooController._cancel_url),
             'Brq_returnerror': '%s' % urlparse.urljoin(base_url, BuckarooController._exception_url),
             'Brq_returnreject': '%s' % urlparse.urljoin(base_url, BuckarooController._reject_url),
-            'Brq_culture': (partner_values.get('lang') or 'en_US').replace('_', '-'),
+            'Brq_culture': (values.get('partner_lang') or 'en_US').replace('_', '-'),
+            'add_returndata': buckaroo_tx_values.pop('return_url', '') or '',
         })
-        if buckaroo_tx_values.get('return_url'):
-            buckaroo_tx_values['add_returndata'] = {'return_url': '%s' % buckaroo_tx_values.pop('return_url')}
-        else: 
-            buckaroo_tx_values['add_returndata'] = ''
         buckaroo_tx_values['Brq_signature'] = self._buckaroo_generate_digital_sign(acquirer, 'in', buckaroo_tx_values)
-        return partner_values, buckaroo_tx_values
+        return buckaroo_tx_values
 
     def buckaroo_get_form_action_url(self, cr, uid, id, context=None):
         acquirer = self.browse(cr, uid, id, context=context)
@@ -112,10 +125,6 @@ class TxBuckaroo(osv.Model):
     _buckaroo_error_tx_status = [490, 491, 492]
     _buckaroo_reject_tx_status = [690]
 
-    _columns = {
-         'buckaroo_txnid': fields.char('Transaction ID'),
-    }
-    
 
     # --------------------------------------------------
     # FORM RELATED METHODS
@@ -124,9 +133,11 @@ class TxBuckaroo(osv.Model):
     def _buckaroo_form_get_tx_from_data(self, cr, uid, data, context=None):
         """ Given a data dict coming from buckaroo, verify it and find the related
         transaction record. """
+        origin_data = dict(data)
+        data = normalize_keys_upper(data)
         reference, pay_id, shasign = data.get('BRQ_INVOICENUMBER'), data.get('BRQ_PAYMENT'), data.get('BRQ_SIGNATURE')
         if not reference or not pay_id or not shasign:
-            error_msg = _('Buckaroo: received data with missing reference (%s) or pay_id (%s) or shashign (%s)') % (reference, pay_id, shasign)
+            error_msg = _('Buckaroo: received data with missing reference (%s) or pay_id (%s) or shasign (%s)') % (reference, pay_id, shasign)
             _logger.info(error_msg)
             raise ValidationError(error_msg)
 
@@ -142,7 +153,7 @@ class TxBuckaroo(osv.Model):
         tx = self.pool['payment.transaction'].browse(cr, uid, tx_ids[0], context=context)
 
         #verify shasign
-        shasign_check = self.pool['payment.acquirer']._buckaroo_generate_digital_sign(tx.acquirer_id, 'out' ,data)
+        shasign_check = self.pool['payment.acquirer']._buckaroo_generate_digital_sign(tx.acquirer_id, 'out', origin_data)
         if shasign_check.upper() != shasign.upper():
             error_msg = _('Buckaroo: invalid shasign, received %s, computed %s, for data %s') % (shasign, shasign_check, data)
             _logger.info(error_msg)
@@ -152,7 +163,7 @@ class TxBuckaroo(osv.Model):
 
     def _buckaroo_form_get_invalid_parameters(self, cr, uid, tx, data, context=None):
         invalid_parameters = []
-
+        data = normalize_keys_upper(data)
         if tx.acquirer_reference and data.get('BRQ_TRANSACTIONS') != tx.acquirer_reference:
             invalid_parameters.append(('Transaction Id', data.get('BRQ_TRANSACTIONS'), tx.acquirer_reference))
         # check what is buyed
@@ -164,23 +175,24 @@ class TxBuckaroo(osv.Model):
         return invalid_parameters
 
     def _buckaroo_form_validate(self, cr, uid, tx, data, context=None):
+        data = normalize_keys_upper(data)
         status_code = int(data.get('BRQ_STATUSCODE','0'))
         if status_code in self._buckaroo_valid_tx_status:
             tx.write({
                 'state': 'done',
-                'buckaroo_txnid': data.get('BRQ_TRANSACTIONS'),
+                'acquirer_reference': data.get('BRQ_TRANSACTIONS'),
             })
             return True
         elif status_code in self._buckaroo_pending_tx_status:
             tx.write({
                 'state': 'pending',
-                'buckaroo_txnid': data.get('BRQ_TRANSACTIONS'),
+                'acquirer_reference': data.get('BRQ_TRANSACTIONS'),
             })
             return True
         elif status_code in self._buckaroo_cancel_tx_status:
             tx.write({
                 'state': 'cancel',
-                'buckaroo_txnid': data.get('BRQ_TRANSACTIONS'),
+                'acquirer_reference': data.get('BRQ_TRANSACTIONS'),
             })
             return True
         else:
@@ -189,6 +201,6 @@ class TxBuckaroo(osv.Model):
             tx.write({
                 'state': 'error',
                 'state_message': error,
-                'buckaroo_txnid': data.get('BRQ_TRANSACTIONS'),
+                'acquirer_reference': data.get('BRQ_TRANSACTIONS'),
             })
             return False

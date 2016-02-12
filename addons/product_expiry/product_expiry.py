@@ -1,26 +1,9 @@
-##############################################################################
-#    
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2009 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.     
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
 
 import openerp
+from openerp import api, models
 from openerp.osv import fields, osv
 
 class stock_production_lot(osv.osv):
@@ -75,6 +58,19 @@ class stock_production_lot(osv.osv):
     }
 
 
+# Onchange added in new api to avoid having to change views
+class StockProductionLot(models.Model):
+    _inherit = 'stock.production.lot'
+
+    @api.onchange('product_id')
+    def _onchange_product(self):
+        defaults = self.with_context(
+            product_id=self.product_id.id).default_get(
+                ['life_date', 'use_date', 'removal_date', 'alert_date'])
+        for field, value in defaults.items():
+            setattr(self, field, value)
+
+
 class stock_quant(osv.osv):
     _inherit = 'stock.quant'
 
@@ -89,11 +85,12 @@ class stock_quant(osv.osv):
             }),
     }
 
-    def apply_removal_strategy(self, cr, uid, location, product, qty, domain, removal_strategy, context=None):
+    def apply_removal_strategy(self, cr, uid, qty, move, ops=False, domain=None, removal_strategy='fifo', context=None):
         if removal_strategy == 'fefo':
             order = 'removal_date, in_date, id'
-            return self._quants_get_order(cr, uid, location, product, qty, domain, order, context=context)
-        return super(stock_quant, self).apply_removal_strategy(cr, uid, location, product, qty, domain, removal_strategy, context=context)
+            return self._quants_get_order(cr, uid, qty, move, ops=ops, domain=domain, orderby=order, context=context)
+        return super(stock_quant, self).apply_removal_strategy(cr, uid, qty, move, ops=ops, domain=domain,
+                                                               removal_strategy=removal_strategy, context=context)
 
 
 class product_product(osv.osv):

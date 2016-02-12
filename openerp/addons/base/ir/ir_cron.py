@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-TODAY OpenERP S.A. <http://www.openerp.com>
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
 import threading
 import time
@@ -99,6 +81,14 @@ class ir_cron(osv.osv):
     _constraints = [
         (_check_args, 'Invalid arguments', ['args']),
     ]
+
+    def method_direct_trigger(self, cr, uid, ids, context=None):
+        if context is None:
+            context={}
+        cron_obj = self.browse(cr, uid, ids, context=context)
+        for cron in cron_obj:
+            self._callback(cr, uid, cron_obj.model, cron_obj.function, cron_obj.args, cron_obj.id)
+        return True
 
     def _handle_callback_exception(self, cr, uid, model_name, method_name, args, job_id, job_exception):
         """ Method called when an exception is raised by a job.

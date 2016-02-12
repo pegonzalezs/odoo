@@ -5,6 +5,7 @@ var core = require('web.core');
 var Dialog = require('web.Dialog');
 var formats = require('web.formats');
 var framework = require('web.framework');
+var Model = require('web.Model');
 var session = require('web.session');
 var SystrayMenu = require('web.SystrayMenu');
 var utils = require('web.utils');
@@ -83,22 +84,17 @@ if (core.debug) {
             }
         },
         get_metadata: function() {
-            var self = this;
-            var ids = this.view.get_selected_ids();
-            if (ids.length === 1) {
-                self.dataset.call('get_metadata', [ids]).done(function(result) {
-                    new Dialog(this, {
-                        title: _.str.sprintf(_t("Metadata (%s)"), self.dataset.model),
-                        size: 'medium',
-                        buttons: {
-                            Ok: function() { this.parents('.modal').modal('hide');}
-                        },
-                    }, QWeb.render('WebClient.DebugViewLog', {
+            var ds = this.dataset;
+            ds.call('get_metadata', [this.view.get_selected_ids()]).done(function(result) {
+                new Dialog(this, {
+                    title: _.str.sprintf(_t("Metadata (%s)"), ds.model),
+                    size: 'medium',
+                    $content: QWeb.render('WebClient.DebugViewLog', {
                         perm : result[0],
                         format : formats.format_value
-                    })).open();
-                });
-            }
+                    })
+                }).open();
+            });
         },
         toggle_layout_outline: function() {
             this.view.rendering_engine.toggle_layout_debugging();
@@ -131,12 +127,9 @@ if (core.debug) {
                     });
                 });
                 new Dialog(self, {
-                    title: _.str.sprintf(_t("Model %s fields"),
-                                         self.dataset.model),
-                    buttons: {
-                        Ok: function() { this.parents('.modal').modal('hide');}
-                    },
-                }, $root).open();
+                    title: _.str.sprintf(_t("Model %s fields"), self.dataset.model),
+                    $content: $root
+                }).open();
             });
         },
         fvg: function() {
@@ -156,15 +149,9 @@ if (core.debug) {
             });
         },
         translate: function() {
-            this.do_action({
-                name: _t("Technical Translation"),
-                res_model : 'ir.translation',
-                domain : [['type', '!=', 'object'], '|', ['name', '=', this.dataset.model], ['name', 'ilike', this.dataset.model + ',']],
-                views: [[false, 'list'], [false, 'form']],
-                type : 'ir.actions.act_window',
-                view_type : "list",
-                view_mode : "list"
-            });
+            new Model("ir.translation")
+                .call('get_technical_translations', [this.dataset.model])
+                .then(this.do_action);
         },
         edit: function(params, evt) {
             this.do_action({

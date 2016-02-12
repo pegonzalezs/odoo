@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2010 Tiny SPRL (<http://tiny.be>).
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU Affero General Public License as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU Affero General Public License for more details.
-#
-#    You should have received a copy of the GNU Affero General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from openerp import models, fields
 from openerp import tools
@@ -38,7 +20,7 @@ class report_event_registration(models.Model):
     seats_max = fields.Integer('Max Seats')
     nbevent = fields.Integer('Number of Events')
     nbregistration = fields.Integer('Number of Registrations')
-    event_type = fields.Many2one('event.type', 'Event Type')
+    event_type_id = fields.Many2one('event.type', 'Event Type')
     registration_state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Attended'), ('cancel', 'Cancelled')], 'Registration State', readonly=True, required=True)
     event_state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Done'), ('cancel', 'Cancelled')], 'Event State', readonly=True, required=True)
     user_id = fields.Many2one('res.users', 'Event Responsible', readonly=True)
@@ -64,7 +46,7 @@ class report_event_registration(models.Model):
                 CASE WHEN r.state IN ('draft') THEN count(r.event_id) ELSE 0 END AS draft_state,
                 CASE WHEN r.state IN ('open','done') THEN count(r.event_id) ELSE 0 END AS confirm_state,
                 CASE WHEN r.state IN ('cancel') THEN count(r.event_id) ELSE 0 END AS cancel_state,
-                e.type AS event_type,
+                e.event_type_id AS event_type_id,
                 e.seats_max AS seats_max,
                 e.state AS event_state,
                 r.state AS registration_state
@@ -76,7 +58,7 @@ class report_event_registration(models.Model):
                 event_id,
                 r.id,
                 registration_state,
-                event_type,
+                event_type_id,
                 e.id,
                 e.date_begin,
                 e.user_id,

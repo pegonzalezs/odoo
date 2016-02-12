@@ -76,6 +76,7 @@
     cursor: pointer;
     box-shadow: 0px 3px rgba(0,0,0,0.07);
     transition: background, background-color 300ms ease-in-out;
+    overflow: hidden;
 }
 .floor-map .table .table-cover {
     display: block;
@@ -240,7 +241,7 @@
     left: 50%;
     background: black;
     width: 20px;
-    margin-top: -10px;
+    margin-top: 1px;
     margin-left: -10px;
     height: 20px;
     line-height: 20px;
@@ -250,6 +251,30 @@
 }
 .floor-map .table .order-count.notify-printing {
     background: red;
+}
+.floor-map .table .order-count.notify-skipped {
+    background: blue;
+}
+
+.floor-map .empty-floor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    width: 400px;
+    height: 40px;
+    font-size: 18px;
+    text-align: center;
+    opacity: 0.6;
+}
+.floor-map .empty-floor i {
+    display: inline-block;
+    padding: 6px 7px 3px;
+    margin: 0px 3px;
+    background: rgba(255,255,255,0.5);
+    border-radius: 3px;
 }
 
 

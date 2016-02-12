@@ -1,23 +1,5 @@
 # -*- coding: utf-8 -*-
-##############################################################################
-#
-#    OpenERP, Open Source Management Solution
-#    Copyright (C) 2010-Today OpenERP SA (<http://www.openerp.com>)
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>
-#
-##############################################################################
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from openerp.osv import osv
 from openerp.osv import fields
@@ -93,7 +75,7 @@ class survey_mail_compose_message(osv.TransientModel):
                 else:
                     emails_checked.append(email)
         if error_message:
-            raise UserError(_("One email at least is incorrect: %s" % error_message))
+            raise UserError(_("One email at least is incorrect: %s") % error_message)
 
         emails_checked.sort()
         values = {'multi_email': '\n'.join(emails_checked)}
@@ -153,12 +135,14 @@ class survey_mail_compose_message(osv.TransientModel):
                 'body': wizard.body.replace("__URL__", url),
                 'body_html': wizard.body.replace("__URL__", url),
                 'parent_id': None,
-                'partner_ids': partner_id and [(4, partner_id)] or None,
-                'notified_partner_ids': partner_id and [(4, partner_id)] or None,
-                'attachment_ids': wizard.attachment_ids or None,
+                'attachment_ids': wizard.attachment_ids and [(6, 0, wizard.attachment_ids.ids)] or None,
                 'email_from': wizard.email_from or None,
-                'email_to': email,
+                'auto_delete': True,
             }
+            if partner_id:
+                values['recipient_ids'] = [(4, partner_id)]
+            else:
+                values['email_to'] = email
             mail_id = mail_mail_obj.create(cr, uid, values, context=context)
             mail_mail_obj.send(cr, uid, [mail_id], context=context)
 
@@ -180,7 +164,8 @@ class survey_mail_compose_message(osv.TransientModel):
                     'state': 'new',
                     'token': token,
                     'partner_id': partner_id,
-                    'email': email})
+                    'email': email},
+                    context=context)
                 return token
 
         for wizard in self.browse(cr, uid, ids, context=context):

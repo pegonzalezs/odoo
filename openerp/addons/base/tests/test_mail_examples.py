@@ -19,7 +19,7 @@ test12</font></div><div><font color="#1f1f1f" face="monospace" size="2"><br></fo
 <a href="javascript:alert('malicious code')">test link</a>
 """
 
-EDI_LIKE_HTML_SOURCE = """<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
+EDI_LIKE_HTML_SOURCE = """<div style="font-family: 'Lucida Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
     <p>Hello ${object.partner_id.name},</p>
     <p>A new invoice is available for you: </p>
     <p style="border-left: 1px solid #8e0000; margin-left: 30px;">
@@ -78,7 +78,7 @@ OERP_WEBSITE_HTML_1 = """
                 <img class="img-rounded img-responsive" src="/website/static/src/img/desert_thumb.jpg">
                 <h4 class="mt16">Enterprise Social Network</h4>
                 <p>Break down information silos. Share knowledge and best practices amongst all employees. Follow specific people or documents and join groups of interests to share expertise and documents.</p>
-                <p>Interact with your collegues in real time with live chat.</p>
+                <p>Interact with your collegues in real time with website live chat.</p>
             </div>
             <div class="col-md-4">
                 <img class="img-rounded img-responsive" src="/website/static/src/img/deers_thumb.jpg">
@@ -91,16 +91,16 @@ OERP_WEBSITE_HTML_1 = """
 
 OERP_WEBSITE_HTML_1_IN = [
     'Manage your company most important asset: People',
-    'img class="img-rounded img-responsive" src="/website/static/src/img/china_thumb.jpg"',
+    'src="/website/static/src/img/china_thumb.jpg"',
 ]
 OERP_WEBSITE_HTML_1_OUT = [
     'Break down information silos.',
     'Keep track of the vacation days accrued by each employee',
-    'img class="img-rounded img-responsive" src="/website/static/src/img/deers_thumb.jpg',
+    'src="/website/static/src/img/deers_thumb.jpg',
 ]
 
 OERP_WEBSITE_HTML_2 = """
-<div class="mt16 cke_widget_editable cke_widget_element oe_editable oe_dirty" data-oe-model="blog.post" data-oe-id="6" data-oe-field="content" data-oe-type="html" data-oe-translate="0" data-oe-expression="blog_post.content" data-cke-widget-data="{}" data-cke-widget-keep-attr="0" data-widget="oeref" contenteditable="true" data-cke-widget-editable="text">
+<div class="mt16 cke_widget_editable cke_widget_element o_editable o_dirty" data-oe-model="blog.post" data-oe-id="6" data-oe-field="content" data-oe-type="html" data-oe-expression="blog_post.content" data-cke-widget-data="{}" data-cke-widget-keep-attr="0" data-widget="oeref" contenteditable="true" data-cke-widget-editable="text">
     <section class="mt16 mb16">
         <div class="container">
             <div class="row">
@@ -205,7 +205,7 @@ OERP_WEBSITE_HTML_2_IN = [
 ]
 OERP_WEBSITE_HTML_2_OUT = [
     'Make every employee feel more connected',
-    'img class="img-responsive shadow" src="/website/static/src/img/text_image.png',
+    'src="/website/static/src/img/text_image.png',
 ]
 
 TEXT_1 = """I contact you about our meeting tomorrow. Here is the schedule I propose:
@@ -1116,7 +1116,7 @@ BUG3 = """<div class="oe_msg_body_long" style="/* display: none; */"><p>OpenERP 
 <p>Schedule your picking, packing, receptions and internal moves automatically with Odoo using
 your own routing rules. Define push and procurement rules to organize a warehouse or to manage
 product moves between several warehouses. Track in detail all stock moves, not only in your
-warehouse but wherever else it's taken as well (customers, suppliers or manufacturing
+warehouse but wherever else it's taken as well (customers, vendors or manufacturing
 locations).</p>
 </blockquote>
 </li>
@@ -1172,4 +1172,35 @@ BUG_3_IN = [
 ]
 BUG_3_OUT = [
     'New kanban view of documents'
+]
+
+REMOVE_CLASS = """
+<div style="FONT-SIZE: 12pt; FONT-FAMILY: 'Times New Roman'; COLOR: #000000">
+    <div>Hello</div>
+    <div>I have just installed Odoo 9 and I've got the following error:</div>
+    <div>&nbsp;</div>
+    <div class="openerp openerp_webclient_container oe_webclient">
+        <div class="oe_loading" style="DISPLAY: none">&nbsp;</div>
+    </div>
+    <div class="modal-backdrop in"></div>
+    <div role="dialog" tabindex="-1" aria-hidden="false" class="modal in" style="DISPLAY: block" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content openerp">
+                <div class="modal-header"> 
+                    <h4 class="modal-title">Odoo Error<span class="o_subtitle text-muted"></span></h4>
+                </div>
+                <div class="o_error_detail modal-body">
+                    <pre>An error occured in a modal and I will send you back the html to try opening one on your end</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+"""
+
+REMOVE_CLASS_IN = [
+    'An error occured in a modal and I will send you back the html to try opening one on your end'
+]
+REMOVE_CLASS_OUT = [
+    '<div class="modal-backdrop in">'
 ]
