@@ -952,7 +952,8 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
         this.columns = opts.columns;
         this.dataset = opts.dataset;
         this.records = opts.records;
-
+		this.lastChecked = null;
+		
         this.record_callbacks = {
             'remove': function (event, record) {
                 var id = record.get('id');
@@ -1012,6 +1013,19 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
             })
             .delegate('th.oe_list_record_selector', 'click', function (e) {
                 e.stopPropagation();
+                
+                var thisChkBox = $(this).children ("input").get(0)
+				
+               // Sup	port shift click ranges
+                if (self.lastChecked && e.shiftKey) {
+                    var $chkboxes = self.$current.find('th.oe_list_record_selector input')
+                    var start = $chkboxes.index(thisChkBox);
+                    var end = $chkboxes.index(self.lastChecked);
+                    $chkboxes.slice(Math.min(start, end), Math.max(start, end) + 1).prop('checked', self.lastChecked.checked);
+                }
+
+                self.lastChecked = thisChkBox
+                
                 var selection = self.get_selection();
                 var checked = $(e.currentTarget).find('input').prop('checked');
                 $(self).trigger(
