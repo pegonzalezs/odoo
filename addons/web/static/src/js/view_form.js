@@ -1150,7 +1150,11 @@ instance.web.FormView = instance.web.View.extend(instance.web.form.FieldManagerM
         return this.fields[field_name].get_value();
     },
     compute_domain: function(expression) {
-        return instance.web.form.compute_domain(expression, this.fields);
+        parent_fields = null;
+        if (this.dataset.parent_view) {
+            parent_fields = this.dataset.parent_view.get_fields_values();
+        }
+        return instance.web.form.compute_domain(expression, this.fields, parent_fields);
     },
     _build_view_fields_values: function() {
         var a_dataset = this.dataset;
@@ -1667,7 +1671,7 @@ instance.web.form.DefaultFieldManager = instance.web.Widget.extend({
     },
 });
 
-instance.web.form.compute_domain = function(expr, fields) {
+instance.web.form.compute_domain = function(expr, fields, parent_fields) {
     if (! (expr instanceof Array))
         return !! expr;
     var stack = [];
@@ -1692,15 +1696,30 @@ instance.web.form.compute_domain = function(expr, fields) {
             }
         }
 
-        var field = fields[ex[0]];
-        if (!field) {
-            throw new Error(_.str.sprintf(
-                _t("Unknown field %s in domain %s"),
-                ex[0], JSON.stringify(expr)));
-        }
-        var field_value = field.get_value ? field.get_value() : field.value;
-        var op = ex[1];
-        var val = ex[2];
+        var field_value = null;
+        var op = null;
+        var val = null;
+        splitted = ex[0].split('.')
+        if(parent_fields && splitted.length > 1 && _.str.trim(splitted[0]) === "parent"){
+            field_value = parent_fields[_.str.trim(splitted[1])];
+            if(field_value == undefined){
+                throw new Error(_.str.sprintf(
+                    _t("Unknown field %s of parent in domain %s"),
+                    ex[0], JSON.stringify(expr)));
+            }
+            op = ex[1];
+            val = ex[2];
+        }else{
+            var field = fields[ex[0]];
+            if (!field) {
+                throw new Error(_.str.sprintf(
+                    _t("Unknown field %s in domain %s"),
+                    ex[0], JSON.stringify(expr)));
+            }
+            field_value = field.get_value ? fields[ex[0]].get_value() : fields[ex[0]].value;
+            op = ex[1];
+            val = ex[2];
+         }
 
         switch (op.toLowerCase()) {
             case '=':
