@@ -53,16 +53,9 @@ can take the following attributes:
 ``attachment``
     python expression that defines the name of the report; the record is
     acessible as the variable ``object``
-
-.. warning::
-
-   The paper format cannot currently be declared via the ``<report>``
-   shortcut, it must be added afterwards using a ``<record>`` extension on the
-   report action itself::
-
-       <record id="<report_id>" model="ir.actions.report.xml">
-           <field name="paperformat_id" ref="<paperformat>"/>
-       </record>
+``paperformat``
+    external id of the paperformat you wish to use (defaults to the company's
+    paperformat if not specified)
 
 Example::
 
@@ -168,7 +161,7 @@ For example, let's look at the Sale Order report from the Sale module::
                     <div class="col-xs-6">
                         <strong t-if="doc.partner_shipping_id == doc.partner_invoice_id">Invoice and shipping address:</strong>
                         <strong t-if="doc.partner_shipping_id != doc.partner_invoice_id">Invoice address:</strong>
-                        <div t-field="doc.partner_invoice_id" t-field-options="{&quot;no_marker&quot;: true}"/>
+                        <div t-field="doc.partner_invoice_id" t-field-options="{&quot;no_marker&quot;: True}"/>
                     <...>
                 <div class="oe_structure"/>
             </div>

@@ -2,11 +2,6 @@
 <openerp>
     <data>
 
-        <menuitem id="base.menu_sale_config_sales" name="Configuration"
-            parent="base.menu_base_partner" sequence="100" groups="base.group_configuration"/>
-        <menuitem id="menu_product_pricelist_main" name="Pricelists" 
-            parent="base.menu_sale_config" groups="product.group_sale_pricelist" sequence="3"/>
-
         <record id="product_pricelist_item_tree_view" model="ir.ui.view">
             <field name="name">product.pricelist.item.tree</field>
             <field name="model">product.pricelist.item</field>
@@ -66,7 +61,8 @@
 
                         <label string="New Price ="/>
                         <div>
-                            <span attrs="{'invisible':[('base', 'not in', ('list_price','standard_price'))]}">Public Price  -  </span>
+                            <span attrs="{'invisible':[('base', '!=', 'list_price')]}">Public Price  -  </span>
+                            <span attrs="{'invisible':[('base', '!=', 'standard_price')]}">Cost  -  </span>
                             <span attrs="{'invisible':[('base', '!=', 'pricelist')]}">Other Pricelist  -  </span>
                         </div>
                         <label for="price_discount"/>
@@ -139,6 +135,11 @@
                                     <field name="date_start"/>
                                     <field name="date_end"/>
                                     <field name="price" string="Price"/>
+                                    <field name="base" invisible="1"/>
+                                    <field name="sequence" invisible="1"/>
+                                    <field name="price_discount" invisible="1"/>
+                                    <field name="applied_on" invisible="1"/>
+                                    <field name="compute_price" invisible="1"/>
                                 </tree>
                             </field>
                         </div>
@@ -168,8 +169,5 @@
             </field>
         </record>
 
-        <menuitem
-            action="product_pricelist_action2" id="menu_product_pricelist_action2"
-            parent="product.menu_product_pricelist_main" sequence="1" groups="product.group_sale_pricelist"/>
     </data>
 </openerp>

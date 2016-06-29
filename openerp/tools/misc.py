@@ -294,6 +294,14 @@ def reverse_enumerate(l):
     """
     return izip(xrange(len(l)-1, -1, -1), reversed(l))
 
+def partition(pred, elems):
+    """ Return a pair equivalent to:
+        ``filter(pred, elems), filter(lambda x: not pred(x), elems)` """
+    yes, nos = [], []
+    for elem in elems:
+        (yes if pred(elem) else nos).append(elem)
+    return yes, nos
+
 def topological_sort(elems):
     """ Return a list of elements sorted so that their dependencies are listed
     before them in the result.
@@ -502,6 +510,15 @@ def mod10r(number):
             report = codec[ (int(digit) + report) % 10 ]
     return result + str((10 - report) % 10)
 
+def str2bool(s, default=None):
+    s = ustr(s).lower()
+    y = 'y yes 1 true t on'.split()
+    n = 'n no 0 false f off'.split()
+    if s not in (y + n):
+        if default is None:
+            raise ValueError('Use 0/1/yes/no/true/false/on/off')
+        return bool(default)
+    return s in y
 
 def human_size(sz):
     """
@@ -967,14 +984,17 @@ def dumpstacks(sig=None, frame=None):
 
     # code from http://stackoverflow.com/questions/132058/getting-stack-trace-from-a-running-python-application#answer-2569696
     # modified for python 2.5 compatibility
-    threads_info = dict([(th.ident, {'name': th.name, 'uid': getattr(th, 'uid', 'n/a')})
-                        for th in threading.enumerate()])
+    threads_info = {th.ident: {'name': th.name,
+                               'uid': getattr(th, 'uid', 'n/a'),
+                               'dbname': getattr(th, 'dbname', 'n/a')}
+                    for th in threading.enumerate()}
     for threadId, stack in sys._current_frames().items():
-        thread_info = threads_info.get(threadId)
-        code.append("\n# Thread: %s (id:%s) (uid:%s)" %
-                    (thread_info and thread_info['name'] or 'n/a',
+        thread_info = threads_info.get(threadId, {})
+        code.append("\n# Thread: %s (id:%s) (db:%s) (uid:%s)" %
+                    (thread_info.get('name', 'n/a'),
                      threadId,
-                     thread_info and thread_info['uid'] or 'n/a'))
+                     thread_info.get('dbname', 'n/a'),
+                     thread_info.get('uid', 'n/a')))
         for line in extract_stack(stack):
             code.append(line)
 

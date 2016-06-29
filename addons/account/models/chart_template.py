@@ -320,8 +320,9 @@ class AccountChartTemplate(models.Model):
                     'account_id': account_ref.get(value['account_id'], False),
                 })
 
-        # Create Journals
-        self.generate_journals(account_ref, company)
+        # Create Journals - Only done for root chart template
+        if not self.parent_id:
+            self.generate_journals(account_ref, company)
 
         # generate properties function
         self.generate_properties(account_ref, company)
@@ -438,6 +439,7 @@ class AccountTaxTemplate(models.Model):
     analytic = fields.Boolean(string="Analytic Cost", help="If set, the amount computed by this tax will be assigned to the same analytic account as the invoice line (if any)")
     tag_ids = fields.Many2many('account.account.tag', string='Account tag', help="Optional tags you may want to assign for custom reporting")
     tax_group_id = fields.Many2one('account.tax.group', string="Tax Group")
+    tax_adjustment = fields.Boolean(default=False)
 
     _sql_constraints = [
         ('name_company_uniq', 'unique(name, company_id, type_tax_use)', 'Tax names must be unique !'),
@@ -469,6 +471,7 @@ class AccountTaxTemplate(models.Model):
             'include_base_amount': self.include_base_amount,
             'analytic': self.analytic,
             'tag_ids': [(6, 0, [t.id for t in self.tag_ids])],
+            'tax_adjustment': self.tax_adjustment,
         }
         if self.tax_group_id:
             val['tax_group_id'] = self.tax_group_id.id
@@ -611,7 +614,7 @@ class WizardMultiChartsAccounts(models.TransientModel):
             if self.chart_template_id.complete_tax_set:
             # default tax is given by the lowest sequence. For same sequence we will take the latest created as it will be the case for tax created while isntalling the generic chart of account
                 chart_ids = self._get_chart_parent_ids(self.chart_template_id)
-                base_tax_domain = [('chart_template_id', 'in', chart_ids)]
+                base_tax_domain = [('chart_template_id', 'parent_of', chart_ids)]
                 sale_tax_domain = base_tax_domain + [('type_tax_use', '=', 'sale')]
                 purchase_tax_domain = base_tax_domain + [('type_tax_use', '=', 'purchase')]
                 sale_tax = tax_templ_obj.search(sale_tax_domain, order="sequence, id desc", limit=1)

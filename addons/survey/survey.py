@@ -185,6 +185,7 @@ class survey_survey(osv.Model):
             help="This message will be displayed when survey is completed"),
         'quizz_mode': fields.boolean(string='Quiz mode'),
         'active': fields.boolean(string="Active"),
+        'is_closed': fields.related('stage_id', 'closed', type='boolean'),
     }
 
     def _default_stage(self, cr, uid, context=None):
@@ -485,8 +486,14 @@ class survey_survey(osv.Model):
             'url': self.read(cr, uid, ids, ['public_url'], context=context)[0]['public_url'] + "/phantom"
         }
 
-
-
+    def action_survey_user_input(self, cr, uid, ids, context=None):
+        action_rec = self.pool['ir.model.data'].xmlid_to_object(cr, uid, 'survey.action_survey_user_input', context=context)
+        action = action_rec.read()[0]
+        ctx = dict(context)
+        ctx.update({'search_default_survey_id': ids[0],
+                    'search_default_completed': 1})
+        action['context'] = ctx
+        return action
 
 class survey_page(osv.Model):
     '''A page for a survey.
@@ -597,7 +604,7 @@ class survey_question(osv.Model):
         'validation_max_float_value': fields.float('Maximum value'),
         'validation_min_date': fields.datetime('Minimum Date'),
         'validation_max_date': fields.datetime('Maximum Date'),
-        'validation_error_msg': fields.char('Error message',
+        'validation_error_msg': fields.char('Validation Error message',
                                             oldname='validation_valid_err_msg',
                                             translate=True),
 
@@ -621,7 +628,7 @@ class survey_question(osv.Model):
         'constr_error_msg': lambda s, cr, uid, c: _('This question requires an answer.'),
         'validation_error_msg': lambda s, cr, uid, c: _('The answer you entered has an invalid format.'),
         'validation_required': False,
-        'comments_message': lambda s, cr, uid, c: _('If other, precise:'),
+        'comments_message': lambda s, cr, uid, c: _('If other, please specify:'),
     }
 
     _sql_constraints = [
@@ -800,7 +807,7 @@ class survey_label(osv.Model):
     _columns = {
         'question_id': fields.many2one('survey.question', 'Question',
             ondelete='cascade'),
-        'question_id_2': fields.many2one('survey.question', 'Question',
+        'question_id_2': fields.many2one('survey.question', 'Question 2',
             ondelete='cascade'),
         'sequence': fields.integer('Label Sequence order'),
         'value': fields.char("Suggested value", translate=True,

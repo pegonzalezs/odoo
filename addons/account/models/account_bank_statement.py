@@ -86,7 +86,7 @@ class AccountBankStatement(models.Model):
     @api.one
     @api.depends('journal_id')
     def _compute_currency(self):
-        self.currency_id = self.journal_id.currency_id or self.env.user.company_id.currency_id
+        self.currency_id = self.journal_id.currency_id or self.company_id.currency_id
 
     @api.one
     @api.depends('line_ids.journal_entry_ids')
@@ -128,6 +128,7 @@ class AccountBankStatement(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(string='Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True)
+    reference = fields.Char(string='External Reference', states={'open': [('readonly', False)]}, copy=False, readonly=True, help="Used to hold the reference of the external mean that created this statement (name of imported file, reference of online synchronization...)")
     date = fields.Date(required=True, states={'confirm': [('readonly', True)]}, select=True, copy=False, default=fields.Date.context_today)
     date_done = fields.Datetime(string="Closed On")
     balance_start = fields.Monetary(string='Starting Balance', states={'confirm': [('readonly', True)]}, default=_default_opening_balance)
@@ -392,6 +393,20 @@ class AccountBankStatementLine(models.Model):
         if self.amount_currency != 0 and self.amount == 0:
             raise ValidationError(_('If "Amount Currency" is specified, then "Amount" must be as well.'))
 
+    @api.model
+    def create(self, vals):
+        line = super(AccountBankStatementLine, self).create(vals)
+        # The most awesome fix you will ever see is below.
+        # Explanation: during a 'create', the 'convert_to_cache' method is not called. Moreover, at
+        # that point 'journal_currency_id' is not yet known since it is a related field. It means
+        # that the 'amount' field will not be properly rounded. The line below triggers a write on
+        # the 'amount' field, which will trigger the 'convert_to_cache' method, and ultimately round
+        # the field correctly.
+        # This is obviously an awful workaround, but at the time of writing, the ORM does not
+        # provide a clean mechanism to fix the issue.
+        line.amount = line.amount
+        return line
+
     @api.multi
     def unlink(self):
         for line in self:
@@ -405,17 +420,29 @@ class AccountBankStatementLine(models.Model):
 
     @api.multi
     def button_cancel_reconciliation(self):
-        # TOCKECK : might not behave as expected in case of reconciliations (match statement line with already
-        # registered payment) or partial reconciliations : it will completely remove the existing payment.
-        move_recs = self.env['account.move']
+        moves_to_unbind = self.env['account.move']
+        moves_to_cancel = self.env['account.move']
+        payment_to_unreconcile = self.env['account.payment']
         for st_line in self:
-            move_recs = (move_recs | st_line.journal_entry_ids)
-        if move_recs:
-            for move in move_recs:
+            moves_to_unbind |= st_line.journal_entry_ids
+            for move in st_line.journal_entry_ids:
+                if any(line.payment_id for line in move.line_ids):
+                    for line in move.line_ids:
+                        payment_to_unreconcile |= line.payment_id
+                    continue
+                moves_to_cancel |= st_line.journal_entry_ids
+        if moves_to_unbind:
+            moves_to_unbind.write({'statement_line_id': False})
+            moves_to_unbind.line_ids.filtered(lambda x:x.statement_id == st_line.statement_id).write({'statement_id': False})
+
+        if moves_to_cancel:
+            for move in moves_to_cancel:
                 move.line_ids.remove_move_reconcile()
-            move_recs.write({'statement_line_id': False})
-            move_recs.button_cancel()
-            move_recs.unlink()
+            moves_to_cancel.button_cancel()
+            moves_to_cancel.unlink()
+
+        if payment_to_unreconcile:
+            payment_to_unreconcile.write({'state': 'posted'})
 
     ####################################################
     # Reconciliation interface methods
@@ -501,12 +528,12 @@ class AccountBankStatementLine(models.Model):
             :param additional_domain:
             :param overlook_partner:
         """
-        # Domain to fetch registered payments (use case where you encode the payment before you get the bank statement)
+        # Blue lines = payment on bank account not assigned to a statement yet
         reconciliation_aml_accounts = [self.journal_id.default_credit_account_id.id, self.journal_id.default_debit_account_id.id]
-        domain_reconciliation = ['&', ('statement_id', '=', False), ('account_id', 'in', reconciliation_aml_accounts)]
+        domain_reconciliation = ['&', '&', ('statement_id', '=', False), ('account_id', 'in', reconciliation_aml_accounts), ('payment_id','<>', False)]
 
-        # Domain to fetch unreconciled payables/receivables (use case where you close invoices/refunds by reconciling your bank statements)
-        domain_matching = [('reconciled', '=', False)]
+        # Black lines = unreconciled & (not linked to a payment or open balance created by statement
+        domain_matching = ['&', ('reconciled', '=', False), '|', ('payment_id','=',False), ('statement_id', '<>', False)]
         if self.partner_id.id or overlook_partner:
             domain_matching = expression.AND([domain_matching, [('account_id.internal_type', 'in', ['payable', 'receivable'])]])
         else:
@@ -548,7 +575,18 @@ class AccountBankStatementLine(models.Model):
                 else:
                     domain = [(f, '>', 0), (f, '<', amount)]
             elif comparator == '=':
-                domain = [(f, '=', float_round(amount, precision_digits=p))]
+                if f == 'amount_residual':
+                    domain = [
+                        '|', (f, '=', float_round(amount, precision_digits=p)),
+                        '&', ('account_id.internal_type', '=', 'liquidity'),
+                        '|', ('debit', '=', amount), ('credit', '=', amount),
+                    ]
+                else:
+                    domain = [
+                        '|', (f, '=', float_round(amount, precision_digits=p)),
+                        '&', ('account_id.internal_type', '=', 'liquidity'),
+                        ('amount_currency', '=', amount),
+                    ]
             else:
                 raise UserError(_("Programmation error : domain_maker_move_line_amount requires comparator '=' or '<'"))
             domain += [('currency_id', '=', c)]
@@ -697,8 +735,11 @@ class AccountBankStatementLine(models.Model):
             elif st_line_currency == company_currency:
                 total_amount = self.amount_currency
             else:
-                total_amount = statement_currency.with_context({'date': self.date}).compute(self.amount, company_currency)
-            ratio = total_amount / amount
+                total_amount = statement_currency.with_context({'date': self.date}).compute(self.amount, company_currency, round=False)
+            if float_compare(total_amount, amount, precision_digits=company_currency.rounding) == 0:
+                ratio = 1.0
+            else:
+                ratio = total_amount / amount
             # Then use it to adjust the statement.line field that correspond to the move.line amount_currency
             if statement_currency != company_currency:
                 amount_currency = self.amount * ratio
@@ -803,7 +844,9 @@ class AccountBankStatementLine(models.Model):
                 aml_dict['tax_ids'] = map(lambda id: (4, id, None), aml_dict['tax_ids'])
 
         # Fully reconciled moves are just linked to the bank statement
+        total = self.amount
         for aml_rec in payment_aml_rec:
+            total -= aml_rec.debit-aml_rec.credit
             aml_rec.write({'statement_id': self.statement_id.id})
             aml_rec.move_id.write({'statement_line_id': self.id})
             counterpart_moves = (counterpart_moves | aml_rec.move_id)
@@ -815,11 +858,38 @@ class AccountBankStatementLine(models.Model):
             st_line_currency_rate = self.currency_id and (self.amount_currency / self.amount) or False
 
             # Create the move
+            self.sequence = self.statement_id.line_ids.ids.index(self.id) + 1
             move_name = (self.statement_id.name or self.name) + "/" + str(self.sequence)
             move_vals = self._prepare_reconciliation_move(move_name)
             move = self.env['account.move'].create(move_vals)
-            move.post()
             counterpart_moves = (counterpart_moves | move)
+
+            # Create The payment
+            payment_id = False
+            if abs(total)>0.00001:
+                partner_id = self.partner_id and self.partner_id.id or False
+                partner_type = False
+                if partner_id:
+                    if total < 0:
+                        partner_type = 'supplier'
+                    else:
+                        partner_type = 'customer'
+
+                payment_methods = (total>0) and self.journal_id.inbound_payment_method_ids or self.journal_id.outbound_payment_method_ids
+                currency = self.journal_id.currency_id or self.company_id.currency_id
+                payment_id = self.env['account.payment'].create({
+                    'payment_method_id': payment_methods and payment_methods[0].id or False,
+                    'payment_type': total >0 and 'inbound' or 'outbound',
+                    'partner_id': self.partner_id and self.partner_id.id or False,
+                    'partner_type': partner_type,
+                    'journal_id': self.statement_id.journal_id.id,
+                    'payment_date': self.date,
+                    'state': 'reconciled',
+                    'currency_id': currency.id,
+                    'amount': abs(total),
+                    'communication': self.name or '',
+                    'name': self.statement_id.name,
+                }).id
 
             # Complete dicts to create both counterpart move lines and write-offs
             to_create = (counterpart_aml_dicts + new_aml_dicts)
@@ -849,13 +919,10 @@ class AccountBankStatementLine(models.Model):
                     aml_dict['amount_currency'] = prorata_factor * self.amount
                     aml_dict['currency_id'] = statement_currency.id
 
-            # Create the move line for the statement line using the total credit/debit of the counterpart
-            # This leaves out the amount already reconciled and avoids rounding errors from currency conversion
-            st_line_amount = sum(aml_dict['credit'] - aml_dict['debit'] for aml_dict in to_create)
-            aml_obj.with_context(check_move_validity=False).create(self._prepare_reconciliation_move_line(move, st_line_amount))
 
             # Create write-offs
             for aml_dict in new_aml_dicts:
+                aml_dict['payment_id'] = payment_id
                 aml_obj.with_context(check_move_validity=False).create(aml_dict)
 
             # Create counterpart move lines and reconcile them
@@ -863,13 +930,23 @@ class AccountBankStatementLine(models.Model):
                 if aml_dict['move_line'].partner_id.id:
                     aml_dict['partner_id'] = aml_dict['move_line'].partner_id.id
                 aml_dict['account_id'] = aml_dict['move_line'].account_id.id
+                aml_dict['payment_id'] = payment_id
 
                 counterpart_move_line = aml_dict.pop('move_line')
                 if counterpart_move_line.currency_id and counterpart_move_line.currency_id != company_currency and not aml_dict.get('currency_id'):
                     aml_dict['currency_id'] = counterpart_move_line.currency_id.id
                     aml_dict['amount_currency'] = company_currency.with_context(ctx).compute(aml_dict['debit'] - aml_dict['credit'], counterpart_move_line.currency_id)
                 new_aml = aml_obj.with_context(check_move_validity=False).create(aml_dict)
+
                 (new_aml | counterpart_move_line).reconcile()
 
+            # Create the move line for the statement line using the bank statement line as the remaining amount
+            # This leaves out the amount already reconciled and avoids rounding errors from currency conversion
+            st_line_amount = -sum([x.balance for x in move.line_ids])
+            aml_dict = self._prepare_reconciliation_move_line(move, st_line_amount)
+            aml_dict['payment_id'] = payment_id
+            aml_obj.with_context(check_move_validity=False).create(aml_dict)            
+
+            move.post()
         counterpart_moves.assert_balanced()
         return counterpart_moves

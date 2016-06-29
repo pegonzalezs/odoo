@@ -5,13 +5,14 @@
 # Translators:
 # Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>, 2016
 # Kari Lindgren <kari.lindgren@emsystems.fi>, 2015
+# Svante Suominen <svante.suominen@web-veistamo.fi>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-01-20 13:58+0000\n"
-"PO-Revision-Date: 2016-01-21 10:31+0000\n"
-"Last-Translator: Martin Trigaux\n"
+"PO-Revision-Date: 2016-06-21 06:46+0000\n"
+"Last-Translator: Jarmo Kortetjärvi <jarmo.kortetjarvi@gmail.com>\n"
 "Language-Team: Finnish (http://www.transifex.com/odoo/odoo-9/language/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -451,7 +452,7 @@ msgstr "Aktiivinen"
 #: code:addons/calendar/static/src/js/base_calendar.js:120
 #, python-format
 msgid "Add Favorite Calendar"
-msgstr ""
+msgstr "Lisää kalenteri"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_allday
@@ -779,12 +780,12 @@ msgstr "Seuraajat"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_channel_ids
 msgid "Followers (Channels)"
-msgstr ""
+msgstr "Seuraajat (kanavat)"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
+msgstr "Seuraajat (kumppanit)"
 
 #. module: calendar
 #: selection:calendar.event,byday:0
@@ -888,7 +889,7 @@ msgstr "Kutsuavustaja"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_is_follower
 msgid "Is Follower"
-msgstr ""
+msgstr "on seuraaja"
 
 #. module: calendar
 #: selection:calendar.event,byday:0
@@ -1067,12 +1068,12 @@ msgstr "Ilmoitus"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_needaction_counter
 msgid "Number of Actions"
-msgstr ""
+msgstr "Toimenpiteiden määrä"
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr ""
+msgstr "Toimenpiteitä vaativien viestien määrä"
 
 #. module: calendar
 #: selection:calendar.event,end_type:0
@@ -1171,7 +1172,7 @@ msgstr "Toistosääntä"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_alarm_ids
 msgid "Reminders"
-msgstr ""
+msgstr "Muistutukset"
 
 #. module: calendar
 #. openerp-web
@@ -1239,7 +1240,7 @@ msgstr ""
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Send mail"
-msgstr ""
+msgstr "Lähetä sähköpostia"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_show_as
@@ -1319,7 +1320,7 @@ msgstr "Sunnuntai"
 #. module: calendar
 #: sql_constraint:calendar.event.type:0
 msgid "Tag name already exists !"
-msgstr ""
+msgstr "Tunnisteen nimi on jo olemassa!"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_categ_ids
@@ -1406,7 +1407,7 @@ msgstr "Lukemattomia viestejä"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_unread_counter
 msgid "Unread Messages Counter"
-msgstr ""
+msgstr "Lukemattomien viestien laskuri"
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form

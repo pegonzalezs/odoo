@@ -34,7 +34,7 @@ class crm_opportunity_report(osv.Model):
         'company_id': fields.many2one('res.company', 'Company', readonly=True),
         'probability': fields.float('Probability',digits=(16,2),readonly=True, group_operator="avg"),
         'total_revenue': fields.float('Total Revenue',digits=(16,2),readonly=True),
-        'expected_revenue': fields.float('Expected Revenue', digits=(16,2),readonly=True),
+        'expected_revenue': fields.float('Probable Turnover', digits=(16,2),readonly=True),
         'stage_id': fields.many2one ('crm.stage', 'Stage', readonly=True, domain="['|', ('team_id', '=', False), ('team_id', '=', team_id)]"),
         'stage_name': fields.char('Stage Name', readonly=True),
         'partner_id': fields.many2one('res.partner', 'Partner' , readonly=True),
@@ -71,7 +71,9 @@ class crm_opportunity_report(osv.Model):
                     c.company_id,
                     c.priority,
                     c.team_id,
-                    activity.nbr_activities,
+                    (SELECT COUNT(*)
+                     FROM mail_message m
+                     WHERE m.model = 'crm.lead' and m.res_id = c.id) as nbr_activities,
                     c.active,
                     c.campaign_id,
                     c.source_id,
@@ -89,14 +91,7 @@ class crm_opportunity_report(osv.Model):
                     c.date_conversion as date_conversion
                 FROM
                     "crm_lead" c
-                LEFT JOIN (
-                    SELECT m.res_id, COUNT(*) nbr_activities
-                    FROM "mail_message" m
-                    WHERE m.model = 'crm.lead'
-                    GROUP BY m.res_id ) activity
-                ON
-                    (activity.res_id = c.id)
                 LEFT JOIN "crm_stage" stage
                 ON stage.id = c.stage_id
-                GROUP BY c.id, activity.nbr_activities, stage.name
+                GROUP BY c.id, stage.name
             )""")

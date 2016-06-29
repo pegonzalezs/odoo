@@ -8,16 +8,31 @@
             the base module in order to set new groups.
         -->
         <menuitem name="Sales"
-            id="base.menu_base_partner"
-            web_icon="sale,static/description/icon.png"
-            groups="base.group_sale_salesman,base.group_sale_manager" sequence="6"/>
+            id="sales_team.menu_base_partner"
+            web_icon="sale,static/description/icon.png"/>
 
         <menuitem
-            id= "base.menu_sales_config"
-            parent= "base.menu_sale_config"
+            id= "sales_team.menu_sales_config"
+            parent= "sales_team.menu_sale_config"
             sequence= "1"
             name= "Sales"
-            groups= "base.group_sale_manager,base.group_sale_salesman,account.group_account_manager,account.group_account_user"/>
+            groups= "sales_team.group_sale_manager,sales_team.group_sale_salesman,account.group_account_manager,account.group_account_user"/>
+
+        <menuitem id="sales_team.menu_product" name="Product Variants" parent="sales_team.menu_base_partner" sequence="9" groups="product.group_product_variant"/>
+        <menuitem id="sales_team.menu_sales" name="Sales" parent="sales_team.menu_base_partner" sequence="5"/>
+        <menuitem action="product.product_template_action" id="sales_team.menu_product_template_action" parent="sales_team.menu_sales" sequence="13" />
+        <menuitem id="sale.prod_config_main" name="Products" parent="sales_team.menu_sale_config" sequence="2"/>
+        <menuitem action="product.attribute_action" id="menu_attribute_action" parent="sale.prod_config_main" sequence="4" groups="product.group_product_variant"/>
+        <menuitem action="product.variants_action" id="menu_variants_action" parent="sale.prod_config_main" sequence="5" groups="product.group_product_variant"/>
+        <menuitem id="product.menu_products" action="product.product_normal_action_sell" parent="sales_team.menu_sales" groups="product.group_product_variant" sequence="99"/>
+        <menuitem action="product.product_category_action_form" groups="base.group_no_one" id="menu_product_category_action_form" parent="sale.prod_config_main" sequence="2"/>
+        <menuitem id="next_id_16" name="Units of Measure" parent="sale.prod_config_main" sequence="30" groups="product.group_uom"/>
+        <menuitem action="product.product_uom_form_action" id="menu_product_uom_form_action" parent="sale.prod_config_main" sequence="6" groups="product.group_uom"/>
+        <menuitem action="product.product_uom_categ_form_action" id="menu_product_uom_categ_form_action" parent="sale.prod_config_main" sequence="7" groups="base.group_no_one"/>
+        <menuitem id="sales_team.menu_sale_config_sales" name="Configuration" parent="sales_team.menu_base_partner" sequence="100"/>
+        <menuitem id="menu_product_pricelist_main" name="Pricelists" parent="sales_team.menu_sale_config" groups="product.group_sale_pricelist" sequence="3"/>
+        <menuitem action="product.product_pricelist_action2" id="menu_product_pricelist_action2" parent="menu_product_pricelist_main" sequence="1" groups="product.group_sale_pricelist"/>
+
 
         <record id="view_sale_order_calendar" model="ir.ui.view">
             <field name="name">sale.order.calendar</field>
@@ -130,7 +145,7 @@
             <field name="name">sale.order.form</field>
             <field name="model">sale.order</field>
             <field name="arch" type="xml">
-                <form string="Sales Order">
+                <form string="Sales Order" class="o_sale_order">
                 <header>
                     <button name="%(action_view_sale_advance_payment_inv)d" string="Create Invoice"
                         type="action" class="btn-primary"
@@ -140,15 +155,15 @@
                         attrs="{'invisible': ['|',('invoice_status', '!=', 'no'), ('state', '!=', 'sale')]}"/>
                     <button name="action_quotation_send" string="Send by Email" type="object" states="draft" class="btn-primary"/>
                     <button name="print_quotation" string="Print" type="object" states="draft" class="btn-primary"/>
-                    <button name="action_confirm" states="sent" string="Confirm Sale" class="btn-primary" type="object" context="{'show_sale': True}"/>
+                    <button name="action_confirm" states="sent" string="Confirm Sale" class="btn-primary o_sale_confirm" type="object" context="{'show_sale': True}"/>
                     <button name="action_confirm" states="draft" string="Confirm Sale" type="object" context="{'show_sale': True}"/>
                     <button name="print_quotation" string="Print" type="object" states="sent,sale"/>
                     <button name="action_quotation_send" string="Send by Email" type="object" states="sent,sale"/>
                     <button name="action_cancel" states="draft,sent,sale" type="object" string="Cancel"/>
                     <button name="action_draft" states="cancel" type="object" string="Set to Quotation"/>
-                    <button name="action_done" type="object" string="Set to Done" states="sale"
-                        help="If a sale order is done, you cannot modify it manually anymore. However, you will still be able to invoice or deliver. This is used to freeze the sale order."/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale,done"/>
+                    <button name="action_done" type="object" string="Lock" states="sale"
+                        help="If the sale is locked, you can not modify it anymore. However, you will still be able to invoice or deliver."/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,sent,sale"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -170,13 +185,13 @@
                             <field name="partner_id" domain="[('customer','=',True)]" context="{'search_default_customer':1, 'show_address': 1}" options='{"always_reload": True}'/>
                             <field name="partner_invoice_id" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice'}"/>
                             <field name="partner_shipping_id" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery'}"/>
-                            <field name="project_id" context="{'default_partner_id':partner_invoice_id, 'default_name':name}" groups="analytic.group_analytic_accounting"/>
                         </group>
                         <group>
-                            <field name="date_order" invisible="1"/>
+                            <field name="date_order" attrs="{'invisible': [('state', 'in', ['sale', 'done', 'cancel'])]}"/>
+                            <field name="validity_date" attrs="{'invisible': [('state', 'in', ['sale', 'done'])]}"/>
+                            <field name="confirmation_date" attrs="{'invisible': [('state', 'in', ['draft', 'sent', 'cancel'])]}"/>
                             <field name="pricelist_id" groups="product.group_sale_pricelist"/>
                             <field name="currency_id" invisible="1"/>
-                            <field name="validity_date"/>
                             <field name="payment_term_id" options="{'no_create': True}"/>
                         </group>
                     </group>
@@ -191,6 +206,7 @@
                                                 context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
                                                 attrs="{'readonly': ['|', ('qty_invoiced', '&gt;', 0), ('procurement_ids', '!=', [])]}"
                                                />
+                                            <field name="layout_category_id" groups="sale.group_sale_layout"/>
                                             <field name="invoice_status" invisible="1"/>
                                             <field name="qty_to_invoice" invisible="1"/>
                                             <field name="qty_delivered_updateable" invisible="1"/>
@@ -204,14 +220,12 @@
                                                 <field name="product_uom" groups="product.group_uom" class="oe_inline oe_no_button"
                                                     attrs="{'readonly': [('state', 'in', ('sale','done', 'cancel'))]}"/>
                                             </div>
-                                            <label for="qty_delivered" string="Delivered Quantity"
-                                                invisible="not context.get('show_sale')"/>
-                                            <div>
-                                                <field name="qty_delivered" invisible="not context.get('show_sale')"
-                                                    attrs="{'readonly': [('qty_delivered_updateable', '=', False)]}"/>
+                                            <label for="qty_delivered" string="Delivered Quantity" invisible="not context.get('show_sale')"/>
+                                            <div invisible="not context.get('show_sale')">
+                                                <field name="qty_delivered" attrs="{'readonly': [('qty_delivered_updateable', '=', False)]}"/>
                                             </div>
                                             <label for="qty_invoiced" string="Invoiced Quantity" invisible="not context.get('show_sale')"/>
-                                            <div>
+                                            <div invisible="not context.get('show_sale')">
                                                 <field name="qty_invoiced" invisible="not context.get('show_sale')"/>
                                             </div>
                                             <field name="price_unit"/>
@@ -226,6 +240,10 @@
                                             <label for="customer_lead"/>
                                             <div>
                                                 <field name="customer_lead" class="oe_inline"/> days
+                                            </div>
+                                            <label for="analytic_tag_ids"/>
+                                            <div>
+                                                <field name="analytic_tag_ids" widget="many2many_tags"/>
                                             </div>
                                         </group>
                                     </group>
@@ -243,6 +261,7 @@
                                         attrs="{'readonly': ['|', ('qty_invoiced', '&gt;', 0), ('procurement_ids', '!=', [])]}"
                                         context="{'partner_id':parent.partner_id, 'quantity':product_uom_qty, 'pricelist':parent.pricelist_id, 'uom':product_uom, 'company_id': parent.company_id}"
                                        />
+                                    <field name="layout_category_id" groups="sale.group_sale_layout"/>
                                     <field name="name"/>
                                     <field name="product_uom_qty"
                                         string="Ordered Qty"
@@ -257,12 +276,14 @@
                                         attrs="{'readonly': [('state', 'in', ('sale','done', 'cancel'))]}"
                                         context="{'company_id': parent.company_id}"
                                         groups="product.group_uom" options='{"no_open": True}'/>
+                                    <field name="analytic_tag_ids" groups="analytic.group_analytic_accounting" widget="many2many_tags"/>
                                     <field name="price_unit"
                                         attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"/>
                                     <field name="tax_id" widget="many2many_tags" domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
                                         attrs="{'readonly': [('qty_invoiced', '&gt;', 0)]}"/>
                                     <field name="discount" groups="sale.group_discount_per_so_line"/>
-                                    <field name="price_subtotal" widget="monetary"/>
+                                    <field name="price_subtotal" widget="monetary" groups="sale.group_show_price_subtotal"/>
+                                    <field name="price_total" widget="monetary" groups="sale.group_show_price_total"/>
                                     <field name="qty_delivered_updateable" invisible="1"/>
                                     <field name="procurement_ids" invisible="1"/>
                                     <field name="state" invisible="1"/>
@@ -315,6 +336,11 @@
                                     <field name="team_id" options="{'no_create': True}"/>
                                     <field name="client_order_ref"/>
                                     <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+                                    <field name="project_id" attrs="{'invisible':[('state','=','sale')]}" context="{'default_partner_id':partner_invoice_id, 'default_name':name}" groups="analytic.group_analytic_accounting"/>
+                                    <field name="related_project_id"
+                                           attrs="{'readonly': ['|',('project_id','!=',False),('invoice_count','!=',0),('state','=','sale')],'invisible':[('state','!=','sale')]}"
+                                           context="{'default_partner_id':partner_invoice_id, 'default_name':name}"
+                                           groups="analytic.group_analytic_accounting"/>
                                 </group>
                                 <group name="sale_pay" string="Invoicing">
                                     <field name="fiscal_position_id" options="{'no_create': True}"/>
@@ -342,7 +368,7 @@
             <field name="name">sale.order.form.editable.list</field>
             <field name="model">sale.order</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
-            <field name="groups_id" eval="[(4, ref('product.group_uos')), (4, ref('product.group_stock_packaging')), (4, ref('sale.group_mrp_properties'))]"/>
+            <field name="groups_id" eval="[(4, ref('product.group_stock_packaging')), (4, ref('sale.group_mrp_properties'))]"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree" position="attributes">
                     <attribute name="editable"/>
@@ -381,8 +407,9 @@
             <field name="arch" type="xml">
                 <xpath expr="//filter[@name='my_sale_orders_filter']" position="after">
                     <separator/>
-                    <filter string="Quotations" name="draft" domain="[('state','=','draft')]" help="Sales Order that haven't yet been confirmed"/>
-                    <filter string="Quotations Sent" name="sent" domain="[('state','=','sent')]" help="Sales Order that haven't yet been confirmed"/>
+                    <filter string="Quotations" name="draft" domain="[('state','=','draft')]"/>
+                    <filter string="Quotations Sent" name="sent" domain="[('state','=','sent')]"/>
+                    <filter string="Sales" name="sales" domain="[('state','in',('sale','done'))]"/>
                 </xpath>
             </field>
         </record>
@@ -425,8 +452,8 @@
         </record>
 
         <menuitem action="action_orders"
-            id="menu_sale_order" parent="base.menu_sales"
-            sequence="12" groups="base.group_sale_salesman,base.group_sale_manager"/>
+            id="menu_sale_order" parent="sales_team.menu_sales"
+            sequence="12" groups="sales_team.group_sale_salesman,sales_team.group_sale_manager"/>
 
         <record id="action_orders_to_invoice" model="ir.actions.act_window">
             <field name="name">Sales to Invoice</field>
@@ -447,7 +474,7 @@
             </field>
         </record>
         <menuitem name="Invoicing"
-            id="menu_sale_invoicing" parent="base.menu_base_partner"
+            id="menu_sale_invoicing" parent="sales_team.menu_base_partner"
             sequence="5"/>
         <menuitem action="action_orders_to_invoice"
             id="menu_sale_order_invoice" parent="sale.menu_sale_invoicing"
@@ -486,7 +513,6 @@
             <field name="view_type">form</field>
             <field name="view_id" ref="view_quotation_tree"/>
             <field name="view_mode">tree,kanban,form,calendar,pivot,graph</field>
-            <field name="domain">[('state','in',('draft','sent','cancel'))]</field>
             <field name="search_view_id" ref="sale_order_view_search_inherit_quotation"/>
             <field name="help" type="html">
               <p class="oe_view_nocontent_create">
@@ -502,7 +528,7 @@
         </record>
 
         <menuitem id="menu_sale_quotations"
-                action="action_quotations" parent="base.menu_sales"
+                action="action_quotations" parent="sales_team.menu_sales"
                 sequence="11"/>
 
         <record id="view_order_line_tree" model="ir.ui.view">
@@ -557,7 +583,7 @@
             <field name="name">product.product.sale.order</field>
             <field name="model">product.product</field>
             <field name="inherit_id" ref="product.product_normal_form_view"/>
-            <field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>
+            <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
             <field name="arch" type="xml">
                 <div name="button_box" position="inside">
                     <button class="oe_stat_button" name="%(action_product_sale_list)d"
@@ -565,7 +591,6 @@
                         <field string="Sales" name="sales_count" widget="statinfo" />
                     </button>
                 </div>
-
             </field>
         </record>
 
@@ -573,7 +598,7 @@
             <field name="name">product.template.sale.order.button</field>
             <field name="model">product.template</field>
             <field name="inherit_id" ref="product.product_template_only_form_view"/>
-            <field name="groups_id" eval="[(4, ref('base.group_sale_salesman'))]"/>
+            <field name="groups_id" eval="[(4, ref('sales_team.group_sale_salesman'))]"/>
             <field name="arch" type="xml">
                 <div name="button_box" position="inside">
                     <button class="oe_stat_button" name="action_view_sales"
@@ -581,6 +606,13 @@
                         <field string="Sales" name="sales_count" widget="statinfo" />
                     </button>
                 </div>
+                <group name="description" position="after">
+                    <group string="Warning when Selling this Product" colspan="2" groups="sale.group_warning_sale">
+                        <field name="sale_line_warn" nolabel="1"/>
+                        <field name="sale_line_warn_msg" colspan="3" nolabel="1"
+                                attrs="{'required':[('sale_line_warn','!=','no-message')],'readonly':[('sale_line_warn','=','no-message')]}"/>
+                    </group>
+                </group>
             </field>
         </record>
 
@@ -638,6 +670,25 @@
                 <data>
                     <xpath expr="//field[@name='user_id']" position="after">
                         <field name="team_id"/>
+                    </xpath>
+                    <xpath expr="//field[@name='partner_id']" position="after">
+                       <field name="partner_shipping_id" groups="sale.group_delivery_invoice_address"/>
+                   </xpath>
+                    <xpath expr="//page/field[@name='invoice_line_ids']/tree/field[@name='product_id']" position="after">
+                        <field name="layout_category_id" groups="sale.group_sale_layout"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="account_invoice_line_form">
+            <field name="name">account.invoice.line.form</field>
+            <field name="model">account.invoice.line</field>
+            <field name="inherit_id" ref="account.view_invoice_line_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//group/group/field[@name='product_id']" position="after">
+                        <field name="layout_category_id" groups="sale.group_sale_layout"/>
                     </xpath>
                 </data>
             </field>

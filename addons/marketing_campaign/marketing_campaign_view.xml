@@ -371,9 +371,9 @@
                 <field name="partner_id"/>
                 <field name="date"/>
                 <field name="state"/>
-                <button string="Cancel" states="todo" name="button_cancel" type="object" icon="terp-gtk-stop"/>
-                <button string="Preview" states="todo" name="preview" icon="gtk-zoom-fit" type="object"/>
-                <button string="Process" states="todo" name="process" type="object" icon="terp-gtk-go-back-rtl"/>
+                <button string="Cancel" states="todo" name="button_cancel" type="object" icon="fa-times-circle text-danger"/>
+                <button string="Preview" states="todo" name="preview" icon="fa-search-plus text-primary" type="object"/>
+                <button string="Process" states="todo" name="process" type="object" icon="fa-arrow-right text-success"/>
             </tree>
         </field>
     </record>
@@ -388,7 +388,7 @@
                 <button string="Reset" states="exception,cancelled" name="button_draft" type="object"/>
                 <button string="Cancel Workitem" states="todo,exception" name="button_cancel" type="object"/>
                 <field name="state" readonly="True" widget="statusbar" statusbar_visible="todo,done" statusbar_colors='{"exception":"red"}'/>
-                <button string="Preview" states="todo" name="preview" icon="gtk-zoom-fit" type="object"/>
+                <button string="Preview" states="todo" name="preview" icon="fa-search-plus fa-lg text-primary" type="object"/>
             </header>
             <sheet>
                 <group>
@@ -453,12 +453,5 @@
 
     <menuitem id="menu_action_marketing_campaign_workitem" parent="report_marketing_campaign" action="action_marketing_campaign_workitem" sequence="3"/>
 
-    </data>
-    <data noupdate="1">
-        <!-- After installation of the module, open the related menu -->
-        <record id="base.open_menu" model="ir.actions.todo">
-            <field name="action_id" ref="base.action_open_website"/>
-            <field name="state">open</field>
-        </record>
     </data>
 </openerp>

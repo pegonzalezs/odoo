@@ -128,6 +128,11 @@ class Discussion(models.Model):
     participants = fields.Many2many('res.users')
     messages = fields.One2many('test_new_api.message', 'discussion')
     message_concat = fields.Text(string='Message concatenate')
+    important_messages = fields.One2many('test_new_api.message', 'discussion',
+                                         domain=[('important', '=', True)])
+    emails = fields.One2many('test_new_api.emailmessage', 'discussion')
+    important_emails = fields.One2many('test_new_api.emailmessage', 'discussion',
+                                       domain=[('important', '=', True)])
 
     @api.onchange('moderator')
     def _onchange_moderator(self):
@@ -148,16 +153,17 @@ class Message(models.Model):
     display_name = fields.Char(string='Abstract', compute='_compute_display_name')
     size = fields.Integer(compute='_compute_size', search='_search_size')
     double_size = fields.Integer(compute='_compute_double_size')
-    discussion_name = fields.Char(related='discussion.name')
+    discussion_name = fields.Char(related='discussion.name', string="Discussion Name")
     author_partner = fields.Many2one(
         'res.partner', compute='_compute_author_partner',
         search='_search_author_partner')
+    important = fields.Boolean()
 
     @api.one
     @api.constrains('author', 'discussion')
     def _check_author(self):
         if self.discussion and self.author not in self.discussion.participants:
-            raise ValueError(_("Author must be among the discussion participants."))
+            raise ValidationError(_("Author must be among the discussion participants."))
 
     @api.one
     @api.depends('author.name', 'discussion.name')
@@ -207,6 +213,43 @@ class Message(models.Model):
         return [('author.partner_id', operator, value)]
 
 
+class EmailMessage(models.Model):
+    _name = 'test_new_api.emailmessage'
+    _inherits = {'test_new_api.message': 'message'}
+
+    message = fields.Many2one('test_new_api.message', 'Message',
+                              required=True, ondelete='cascade')
+    email_to = fields.Char('To')
+
+class Multi(models.Model):
+    """ Model for testing multiple onchange methods in cascade that modify a
+        one2many field several times.
+    """
+    _name = 'test_new_api.multi'
+
+    name = fields.Char(related='partner.name', readonly=True)
+    partner = fields.Many2one('res.partner')
+    lines = fields.One2many('test_new_api.multi.line', 'multi')
+
+    @api.onchange('name')
+    def _onchange_name(self):
+        for line in self.lines:
+            line.name = self.name
+
+    @api.onchange('partner')
+    def _onchange_partner(self):
+        for line in self.lines:
+            line.partner = self.partner
+
+
+class MultiLine(models.Model):
+    _name = 'test_new_api.multi.line'
+
+    multi = fields.Many2one('test_new_api.multi', ondelete='cascade')
+    name = fields.Char()
+    partner = fields.Many2one('res.partner')
+
+
 class MixedModel(models.Model):
     _name = 'test_new_api.mixed'
 
@@ -216,6 +259,13 @@ class MixedModel(models.Model):
     lang = fields.Selection(string='Language', selection='_get_lang')
     reference = fields.Reference(string='Related Document',
         selection='_reference_models')
+    comment1 = fields.Html(sanitize=False)
+    comment2 = fields.Html(sanitize=True, strip_classes=False)
+    comment3 = fields.Html(sanitize=True, strip_classes=True)
+    comment4 = fields.Html(sanitize=True, strip_style=True)
+
+    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.ref('base.EUR'))
+    amount = fields.Monetary()
 
     @api.one
     def _compute_now(self):
@@ -240,3 +290,25 @@ class BoolModel(models.Model):
     bool_true = fields.Boolean('b1', default=True)
     bool_false = fields.Boolean('b2', default=False)
     bool_undefined = fields.Boolean('b3')
+
+
+class Foo(models.Model):
+    _name = 'test_new_api.foo'
+
+    name = fields.Char()
+    value1 = fields.Integer()
+    value2 = fields.Integer()
+
+
+class Bar(models.Model):
+    _name = 'test_new_api.bar'
+
+    name = fields.Char()
+    foo = fields.Many2one('test_new_api.foo', compute='_compute_foo')
+    value1 = fields.Integer(related='foo.value1')
+    value2 = fields.Integer(related='foo.value2')
+
+    @api.depends('name')
+    def _compute_foo(self):
+        for bar in self:
+            bar.foo = self.env['test_new_api.foo'].search([('name', '=', bar.name)], limit=1)

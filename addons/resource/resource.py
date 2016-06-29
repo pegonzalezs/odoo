@@ -2,6 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime
+import functools
+from datetime import timedelta
 from dateutil import rrule
 from dateutil.relativedelta import relativedelta
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
@@ -330,14 +332,8 @@ class resource_calendar(osv.osv):
         working_intervals = []
         tz_info = fields.datetime.context_timestamp(cr, uid, work_dt, context=context).tzinfo
         for calendar_working_day in self.get_attendances_for_weekday(cr, uid, id, start_dt, context=context):
-            if context and context.get('no_round_hours'):
-                min_from = int((calendar_working_day.hour_from - int(calendar_working_day.hour_from)) * 60)
-                min_to = int((calendar_working_day.hour_to - int(calendar_working_day.hour_to)) * 60)
-                dt_f = work_dt.replace(hour=int(calendar_working_day.hour_from), minute=min_from)
-                dt_t = work_dt.replace(hour=int(calendar_working_day.hour_to), minute=min_to)
-            else:
-                dt_f = work_dt.replace(hour=int(calendar_working_day.hour_from))
-                dt_t = work_dt.replace(hour=int(calendar_working_day.hour_to))
+            dt_f = work_dt.replace(hour=0, minute=0, second=0) + timedelta(seconds=(calendar_working_day.hour_from * 3600))
+            dt_t = work_dt.replace(hour=0, minute=0, second=0) + timedelta(seconds=(calendar_working_day.hour_to * 3600))
 
             # adapt tz
             working_interval = (
@@ -691,6 +687,36 @@ class resource_resource(osv.osv):
             default.update(name=_('%s (copy)') % (self.browse(cr, uid, id, context=context).name))
         return super(resource_resource, self).copy(cr, uid, id, default, context)
 
+    def _is_work_day(self, date):
+        """ Whether the provided date is a work day for the subject resource.
+
+        :type date: datetime.date
+        :rtype: bool
+        """
+        return bool(next(self._iter_work_days(date, date), False))
+
+    def _iter_work_days(self, from_date, to_date):
+        """ Lists the current resource's work days between the two provided
+        dates (inclusive).
+
+        Work days are the company or service's open days (as defined by the
+        resource.calendar) minus the resource's own leaves.
+
+        :param datetime.date from_date: start of the interval to check for
+                                        work days (inclusive)
+        :param datetime.date to_date: end of the interval to check for work
+                                      days (inclusive)
+        :rtype: list(datetime.date)
+        """
+        working_intervals = self.calendar_id.get_working_intervals_of_day
+        # rrule coerces date inputs to datetimes (with time=0) and yields
+        # datetimes (with time=0 if freq >= daily)
+        for dt in rrule.rrule(rrule.DAILY, dtstart=from_date, until=to_date):
+            intervals = working_intervals(dt, compute_leaves=True, resource_id=self.id)
+
+            # FIXME: get_working_intervals is new-API mapped to return a list of lists of intervals
+            if intervals and intervals[0]:
+                yield dt.date()
 
 class resource_calendar_leaves(osv.osv):
     _name = "resource.calendar.leaves"

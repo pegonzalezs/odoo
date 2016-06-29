@@ -28,11 +28,6 @@
                         <li>Your Trial Balance (list of accounts and their balances).</li>
                         <li>Your outstanding invoices, payments, and undeposited funds.</li>
                     </ul>
-                    <p>
-                        If you'd like some assistance on any of the above, please do not hesitate 
-                        to contact our accounting experts by using the 
-                        <span class="fa fa-question-circle"/> icon on the top bar.
-                    </p>
                     <p>Enjoy your Odoo experience,</p>
                     <div class="mt32">
                         <img class="signature mb8" src="/web_planner/static/src/img/fabien_signature.png"/>
@@ -64,7 +59,7 @@
                         <th>Address</th>
                         <td  t-att-class="(not company_id.partner_id.street or not company_id.partner_id.zip) and 'danger'">
                             <span t-field="company_id.partner_id"
-                                t-field-options='{"widget": "contact", "fields": ["address"], "no_marker": true}'/>
+                                t-field-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
                         </td>
                         <td>
                             <a class="fa fa-arrow-right" t-attf-href="#{prepare_backend_url('base.action_res_company_form', 'form')}&amp;id=#{company_id.id}">

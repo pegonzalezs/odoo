@@ -129,9 +129,11 @@ class project(osv.osv):
 
     def _get_visibility_selection(self, cr, uid, context=None):
         """ Overriden in portal_project to offer more options """
-        return [('portal', _('Customer Project: visible in portal if the customer is a follower')),
-                ('employees', _('All Employees Project: all employees can access')),
-                ('followers', _('Private Project: followers only'))]
+        return [
+            ('employees', _('Visible by all employees')),
+            ('followers', _('On invitation only')),
+            ('portal', _('Shared with a customer'))
+        ]
 
     def attachment_tree_view(self, cr, uid, ids, context):
         task_ids = self.pool.get('project.task').search(cr, uid, [('project_id', 'in', ids)])
@@ -157,6 +159,33 @@ class project(osv.osv):
             'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, res_id)
         }
 
+    def activate_sample_project(self, cr, uid, context=None):
+        """ Unarchives the sample project 'project.project_project_data' and
+            reloads the project dashboard """
+        # Unarchive sample project
+        data_obj = self.pool.get('ir.model.data')
+        proj_id = data_obj.xmlid_to_res_id(cr, uid, 'project.project_project_data')
+        if proj_id:
+            self.browse(cr, uid, proj_id, context=context).write({'active': True})
+
+        # Change the help message on the action (no more activate project)
+        act_id = data_obj.xmlid_to_res_id(cr, uid, 'project.open_view_project_all')
+        action = None
+        if act_id:
+            act_window_obj =  self.pool.get('ir.actions.act_window')
+            act_window_obj.write(cr, SUPERUSER_ID, [act_id], {
+                "help": _('''<p class="oe_view_nocontent_create">Click to create a new project.</p>''')
+            }, context=context)
+            action = act_window_obj.read(cr, uid, [act_id])[0]
+        # Reload the dashboard
+        return action
+
+    def _get_favorite(self, cr, uid, ids, name, args, context=None):
+        return dict((project.id, uid in project.favorite_user_ids.ids) for project in self.browse(cr, uid, ids, context=context))
+
+    def _get_default_favorite_user_ids(self, cr, uid, context=None):
+        return [(6, 0, [uid])]
+
     # Lambda indirection method to avoid passing a copy of the overridable method when declaring the field
     _alias_models = lambda self, *args, **kwargs: self._get_alias_models(*args, **kwargs)
     _visibility_selection = lambda self, *args, **kwargs: self._get_visibility_selection(*args, **kwargs)
@@ -169,13 +198,18 @@ class project(osv.osv):
             help="Link this project to an analytic account if you need financial management on projects. "
                  "It enables you to connect projects with budgets, planning, cost and revenue analysis, timesheets on projects, etc.",
             ondelete="cascade", required=True, auto_join=True),
+        'favorite_user_ids': fields.many2many(
+            'res.users', 'project_favorite_user_rel', 'project_id', 'user_id',
+            string='Members'),
+        'is_favorite': fields.function(_get_favorite, type="boolean", string='Show Project on dashboard',
+            help="Whether this project should be displayed on the dashboard or not"),
         'label_tasks': fields.char('Use Tasks as', help="Gives label to tasks on project's kanban view."),
         'tasks': fields.one2many('project.task', 'project_id', "Task Activities"),
-        'resource_calendar_id': fields.many2one('resource.calendar', 'Working Time', help="Timetable working hours to adjust the gantt diagram report", states={'close':[('readonly',True)]} ),
-        'type_ids': fields.many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', 'Tasks Stages', states={'close':[('readonly',True)], 'cancelled':[('readonly',True)]}),
+        'resource_calendar_id': fields.many2one('resource.calendar', 'Working Time', help="Timetable working hours to adjust the gantt diagram report"),
+        'type_ids': fields.many2many('project.task.type', 'project_task_type_rel', 'project_id', 'type_id', 'Tasks Stages'),
         'task_count': fields.function(_task_count, type='integer', string="Tasks",),
         'task_needaction_count': fields.function(_task_needaction_count, type='integer', string="Tasks",),
-        'task_ids': fields.one2many('project.task', 'project_id',
+        'task_ids': fields.one2many('project.task', 'project_id', string='Tasks',
                                     domain=['|', ('stage_id.fold', '=', False), ('stage_id', '=', False)]),
         'color': fields.integer('Color Index'),
         'user_id': fields.many2one('res.users', 'Project Manager'),
@@ -184,7 +218,7 @@ class project(osv.osv):
                                          "with Tasks (or optionally Issues if the Issue Tracker module is installed)."),
         'alias_model': fields.selection(_alias_models, "Alias Model", select=True, required=True,
                                         help="The kind of document created when an email is received on this project's email alias"),
-        'privacy_visibility': fields.selection(_visibility_selection, 'Privacy / Visibility', required=True,
+        'privacy_visibility': fields.selection(_visibility_selection, 'Privacy', required=True,
             help="Holds visibility of the tasks or issues that belong to the current project:\n"
                     "- Portal : employees see everything;\n"
                     "   if portal is activated, portal users see the tasks or issues followed by\n"
@@ -192,12 +226,6 @@ class project(osv.osv):
                     "- Employees Only: employees see all tasks or issues\n"
                     "- Followers Only: employees see only the followed tasks or issues; if portal\n"
                     "   is activated, portal users see the followed tasks or issues."),
-        'state': fields.selection([('draft','New'),
-                                   ('open','In Progress'),
-                                   ('cancelled', 'Cancelled'),
-                                   ('pending','Pending'),
-                                   ('close','Closed')],
-                                  'Status', required=True, copy=False),
         'doc_count': fields.function(
             _get_attached_docs, string="Number of documents attached", type='integer'
         ),
@@ -208,9 +236,9 @@ class project(osv.osv):
     _order = "sequence, name, id"
     _defaults = {
         'active': True,
+        'favorite_user_ids': _get_default_favorite_user_ids,
         'type': 'contract',
         'label_tasks': 'Tasks',
-        'state': 'open',
         'sequence': 10,
         'user_id': lambda self,cr,uid,ctx: uid,
         'alias_model': 'project.task',
@@ -260,6 +288,8 @@ class project(osv.osv):
         if not default.get('name'):
             default.update(name=_("%s (copy)") % (proj.name))
         res = super(project, self).copy(cr, uid, id, default, context)
+        for follower in proj.message_follower_ids:
+            self.message_subscribe(cr, uid, res, partner_ids=[follower.partner_id.id], subtype_ids=[subtype.id for subtype in follower.subtype_ids])
         self.map_tasks(cr, uid, id, res, context=context)
         return res
 
@@ -278,7 +308,6 @@ class project(osv.osv):
             context.update({'copy':True})
             new_id = self.copy(cr, uid, proj.id, default = {
                                     'name':_("%s (copy)") % (proj.name),
-                                    'state':'open',
                                     'date_start':new_date_start,
                                     'date':new_date_end}, context=context)
             result.append(new_id)
@@ -331,6 +360,22 @@ class project(osv.osv):
             tasks.write({'active': vals['active']})
         return res
 
+    def toggle_favorite(self, cr, uid, ids, context=None):
+        favorite_project_ids = []
+        not_fav_project_ids = []
+        for project in self.browse(cr, uid, ids, context=context):
+            if uid in project.favorite_user_ids.ids:
+                favorite_project_ids.append(project.id)
+            else:
+                not_fav_project_ids.append(project.id)
+
+        # Project User has no write access for project.
+        self.write(cr, SUPERUSER_ID, not_fav_project_ids, {'favorite_user_ids': [(4, uid)]}, context=context)
+        self.write(cr, SUPERUSER_ID, favorite_project_ids, {'favorite_user_ids': [(3, uid)]}, context=context)
+
+    @api.multi
+    def close_dialog(self):
+        return {'type': 'ir.actions.act_window_close'}
 
 class task(osv.osv):
     _name = "project.task"
@@ -379,14 +424,6 @@ class task(osv.osv):
     _group_by_full = {
         'stage_id': _read_group_stage_ids,
     }
-
-    def onchange_remaining(self, cr, uid, ids, remaining=0.0, planned=0.0):
-        if remaining and not planned:
-            return {'value': {'planned_hours': remaining}}
-        return {}
-
-    def onchange_planned(self, cr, uid, ids, planned=0.0, effective=0.0):
-        return {'value': {'remaining_hours': planned - effective}}
 
     def onchange_project(self, cr, uid, id, project_id, context=None):
         if project_id:
@@ -452,7 +489,7 @@ class task(osv.osv):
         'remaining_hours': fields.float('Remaining Hours', digits=(16,2), help="Total remaining time, can be re-estimated periodically by the assignee of the task."),
         'user_id': fields.many2one('res.users', 'Assigned to', select=True, track_visibility='onchange'),
         'partner_id': fields.many2one('res.partner', 'Customer'),
-        'manager_id': fields.related('project_id', 'analytic_account_id', 'user_id', type='many2one', relation='res.users', string='Project Manager'),
+        'manager_id': fields.related('project_id', 'user_id', type='many2one', relation='res.users', string='Project Manager'),
         'company_id': fields.many2one('res.company', 'Company'),
         'id': fields.integer('ID', readonly=True),
         'color': fields.integer('Color Index'),
@@ -684,40 +721,6 @@ class task(osv.osv):
     def _get_total_hours(self):
         return self.remaining_hours
 
-    def _generate_task(self, cr, uid, tasks, ident=4, context=None):
-        context = context or {}
-        result = ""
-        ident = ' '*ident
-        company = self.pool["res.users"].browse(cr, uid, uid, context=context).company_id
-        duration_uom = {
-            'day(s)': 'd', 'days': 'd', 'day': 'd', 'd': 'd',
-            'month(s)': 'm', 'months': 'm', 'month': 'month', 'm': 'm',
-            'week(s)': 'w', 'weeks': 'w', 'week': 'w', 'w': 'w',
-            'hour(s)': 'H', 'hours': 'H', 'hour': 'H', 'h': 'H',
-        }.get(company.project_time_mode_id.name.lower(), "hour(s)")
-        for task in tasks:
-            if task.stage_id and task.stage_id.fold:
-                continue
-            result += '''
-%sdef Task_%s():
-%s  todo = \"%.2f%s\"
-%s  effort = \"%.2f%s\"''' % (ident, task.id, ident, task.remaining_hours, duration_uom, ident, task._get_total_hours(), duration_uom)
-            start = []
-            for t2 in task.parent_ids:
-                start.append("up.Task_%s.end" % (t2.id,))
-            if start:
-                result += '''
-%s  start = max(%s)
-''' % (ident,','.join(start))
-
-            if task.user_id:
-                result += '''
-%s  resource = %s
-''' % (ident, 'User_'+str(task.user_id.id))
-
-        result += "\n"
-        return result
-
     # ---------------------------------------------------
     # Mail gateway
     # ---------------------------------------------------
@@ -871,10 +874,10 @@ class account_analytic_account(osv.osv):
         return result
 
     _columns = {
-        'use_tasks': fields.boolean('Tasks', help="Check this box to manage internal activities through this project"),
+        'use_tasks': fields.boolean(string='Use Tasks', help="Check this box to manage internal activities through this project"),
         'company_uom_id': fields.related('company_id', 'project_time_mode_id', string="Company UOM", type='many2one', relation='product.uom'),
         'project_ids': fields.one2many('project.project', 'analytic_account_id', 'Projects'),
-        'project_count': fields.function(_compute_project_count, 'Project Count', type='integer')
+        'project_count': fields.function(_compute_project_count, string='Project Count', type='integer')
     }
 
     def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):

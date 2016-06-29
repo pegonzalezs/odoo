@@ -61,7 +61,7 @@ var ScreenWidget = PosBaseWidget.extend({
         var self = this;
         if (self.pos.scan_product(code)) {
             if (self.barcode_product_screen) {
-                self.gui.show_screen(self.barcode_product_screen);
+                self.gui.show_screen(self.barcode_product_screen, null, null, true);
             }
         } else {
             this.barcode_error_action(code);
@@ -131,6 +131,8 @@ var ScreenWidget = PosBaseWidget.extend({
         this.pos.barcode_reader.set_action_callback({
             'cashier': _.bind(self.barcode_cashier_action, self),
             'product': _.bind(self.barcode_product_action, self),
+            'weight': _.bind(self.barcode_product_action, self),
+            'price': _.bind(self.barcode_product_action, self),
             'client' : _.bind(self.barcode_client_action, self),
             'discount': _.bind(self.barcode_discount_action, self),
             'error'   : _.bind(self.barcode_error_action, self),
@@ -400,7 +402,21 @@ var ActionpadWidget = PosBaseWidget.extend({
         var self = this;
         this._super();
         this.$('.pay').click(function(){
-            self.gui.show_screen('payment');
+            var order = self.pos.get_order();
+            var has_valid_product_lot = _.every(order.orderlines.models, function(line){
+                return line.has_valid_product_lot();
+            });
+            if(!has_valid_product_lot){
+                self.gui.show_popup('confirm',{
+                    'title': _t('Empty Serial/Lot Number'),
+                    'body':  _t('One or more product(s) required serial/lot number.'),
+                    confirm: function(){
+                        self.gui.show_screen('payment');
+                    },
+                });
+            }else{
+                self.gui.show_screen('payment');
+            }
         });
         this.$('.set-customer').click(function(){
             self.gui.show_screen('clientlist');
@@ -437,6 +453,8 @@ var OrderWidget = PosBaseWidget.extend({
         this.pos.get_order().select_orderline(orderline);
         this.numpad_state.reset();
     },
+
+
     set_value: function(val) {
     	var order = this.pos.get_order();
     	if (order.get_selected_orderline()) {
@@ -493,6 +511,12 @@ var OrderWidget = PosBaseWidget.extend({
             el_node = el_node.childNodes[0];
             el_node.orderline = orderline;
             el_node.addEventListener('click',this.line_click_handler);
+        var el_lot_icon = el_node.querySelector('.line-lot-icon');
+        if(el_lot_icon){
+            el_lot_icon.addEventListener('click', (function() {
+                this.show_product_lot(orderline);
+            }.bind(this)));
+        }
 
         orderline.node = el_node;
         return el_node;
@@ -556,6 +580,11 @@ var OrderWidget = PosBaseWidget.extend({
 
         this.el.querySelector('.summary .total > .value').textContent = this.format_currency(total);
         this.el.querySelector('.summary .total .subentry .value').textContent = this.format_currency(taxes);
+    },
+    show_product_lot: function(orderline){
+        this.pos.get_order().select_orderline(orderline);
+        var order = this.pos.get_order();
+        order.display_lot_popup();
     },
 });
 
@@ -1023,7 +1052,9 @@ var ClientListScreenWidget = ScreenWidget.extend({
         if (this.editing_client) {
             this.$('.detail.barcode').val(code.code);
         } else if (this.pos.db.get_partner_by_barcode(code.code)) {
-            this.display_client_details('show',this.pos.db.get_partner_by_barcode(code.code));
+            var partner = this.pos.db.get_partner_by_barcode(code.code);
+            this.new_client = partner;
+            this.display_client_details('show', partner);
         }
     },
     perform_search: function(query, associate_result){
@@ -1070,8 +1101,18 @@ var ClientListScreenWidget = ScreenWidget.extend({
         }
     },
     save_changes: function(){
+        var self = this;
+        var order = this.pos.get_order();
         if( this.has_client_changed() ){
-            this.pos.get_order().set_client(this.new_client);
+            if ( this.new_client ) {
+                order.fiscal_position = _.find(this.pos.fiscal_positions, function (fp) {
+                    return fp.id === self.new_client.property_account_position_id[0];
+                });
+            } else {
+                order.fiscal_position = undefined;
+            }
+
+            order.set_client(this.new_client);
         }
     },
     has_client_changed: function(){
@@ -1380,8 +1421,6 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     print_xml: function() {
         var env = {
             widget:  this,
-            pos:     this.pos,
-            order:   this.pos.get_order(),
             receipt: this.pos.get_order().export_for_printing(),
             paymentlines: this.pos.get_order().get_paymentlines()
         };
@@ -1817,11 +1856,6 @@ var PaymentScreenWidget = ScreenWidget.extend({
             return;
         }
 
-        // get rid of payment lines with an amount of 0, because
-        // since accounting v9 we cannot have bank statement lines
-        // with an amount of 0
-        order.clean_empty_paymentlines();
-
         var plines = order.get_paymentlines();
         for (var i = 0; i < plines.length; i++) {
             if (plines[i].get_type() === 'bank' && plines[i].get_amount() < 0) {
@@ -1877,6 +1911,8 @@ var PaymentScreenWidget = ScreenWidget.extend({
                 this.pos.proxy.open_cashbox();
         }
 
+        order.initialize_validation_date();
+
         if (order.is_to_invoice()) {
             var invoiced = this.pos.push_and_invoice_order(order);
             this.invoicing = true;
@@ -1924,14 +1960,31 @@ gui.define_screen({name:'payment', widget: PaymentScreenWidget});
 
 var set_fiscal_position_button = ActionButtonWidget.extend({
     template: 'SetFiscalPositionButton',
+    init: function (parent, options) {
+        this._super(parent, options);
+
+        this.pos.get('orders').bind('add remove change', function () {
+            this.renderElement();
+        }, this);
+
+        this.pos.bind('change:selectedOrder', function () {
+            this.renderElement();
+        }, this);
+    },
     button_click: function () {
         var self = this;
-        var selection_list = _.map(self.pos.fiscal_positions, function (fiscal_position) {
+
+        var no_fiscal_position = [{
+            label: _t("None"),
+        }];
+        var fiscal_positions = _.map(self.pos.fiscal_positions, function (fiscal_position) {
             return {
                 label: fiscal_position.name,
                 item: fiscal_position
             };
         });
+
+        var selection_list = no_fiscal_position.concat(fiscal_positions);
         self.gui.show_popup('selection',{
             title: _t('Select tax'),
             list: selection_list,
@@ -1942,6 +1995,20 @@ var set_fiscal_position_button = ActionButtonWidget.extend({
             }
         });
     },
+    get_current_fiscal_position_name: function () {
+        var name = _t('Tax');
+        var order = this.pos.get_order();
+
+        if (order) {
+            var fiscal_position = order.fiscal_position;
+
+            if (fiscal_position) {
+                name = fiscal_position.display_name;
+            }
+        }
+
+        return name;
+    }
 });
 
 define_action_button({
@@ -1962,6 +2029,12 @@ return {
     NumpadWidget: NumpadWidget,
     ProductScreenWidget: ProductScreenWidget,
     ProductListWidget: ProductListWidget,
+    ClientListScreenWidget: ClientListScreenWidget,
+    ActionpadWidget: ActionpadWidget,
+    DomCache: DomCache,
+    ProductCategoriesWidget: ProductCategoriesWidget,
+    ScaleScreenWidget: ScaleScreenWidget,
+    set_fiscal_position_button: set_fiscal_position_button,
 };
 
 });

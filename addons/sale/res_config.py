@@ -41,14 +41,22 @@ class sale_configuration(osv.TransientModel):
             ], "Incoterms",
             implied_group='sale.group_display_incoterm',
             help="The printed reports will display the incoterms for the sale orders and the related invoices"),
+        'module_product_visible_discount': fields.selection([
+            (0, 'No discount policy on sale order line'),
+            (1, 'Allow discount policy on sale order line')
+            ], "Discount Policy"),
         'module_sale_margin': fields.selection([
             (0, 'Salespeople do not need to view margins when quoting'),
             (1, 'Display margins on quotations and sales orders')
             ], "Margins"),
-        'module_sale_layout': fields.selection([
+        'group_sale_layout': fields.selection([
             (0, 'Do not personalize sale orders and invoice reports'),
-            (1, 'Personnalize the sale orders and invoice report with separators, page-breaks or subtotals')
-            ], "Sale Reports Layout"),
+            (1, 'Personalize the sale orders and invoice report with categories, subtotals and page-breaks')
+            ], "Sale Reports Layout", implied_group='sale.group_sale_layout'),
+        'group_warning_sale': fields.selection([
+            (0, 'All the products and the customers can be used in sale orders'),
+            (1, 'An informative or blocking warning can be set on a product or a customer')
+            ], "Warning", implied_group='sale.group_warning_sale'),
         'module_website_quote': fields.selection([
             (0, 'Print quotes or send by email'),
             (1, 'Send online quotations based on templates (advanced)')
@@ -58,13 +66,18 @@ class sale_configuration(osv.TransientModel):
             (1, 'Display 3 fields on sales orders: customer, invoice address, delivery address')
             ], "Addresses", implied_group='sale.group_delivery_invoice_address'),
         'sale_pricelist_setting': fields.selection([('fixed', 'A single sale price per product'), ('percentage', 'Different prices per customer segment'), ('formula', 'Advanced pricing based on formula')], required=True,
-        help='Fix Price: all price manage from products sale price.\n'
-             'Different prices per Customer: you can assign price on buying of minimum quantity in products sale tab.\n'
-             'Advanced pricing based on formula: You can have all the rights on pricelist'),
+            help='Fix Price: all price manage from products sale price.\n'
+                 'Different prices per Customer: you can assign price on buying of minimum quantity in products sale tab.\n'
+                 'Advanced pricing based on formula: You can have all the rights on pricelist'),
+        'group_show_price_subtotal': fields.boolean("Show subtotal", implied_group='sale.group_show_price_subtotal', group='base.group_portal,base.group_user,base.group_public'),
+        'group_show_price_total': fields.boolean("Show total", implied_group='sale.group_show_price_total', group='base.group_portal,base.group_user,base.group_public'),
+        'sale_show_tax': fields.selection([
+            ('subtotal', 'Show line subtotals without taxes (B2B)'),
+            ('total', 'Show line subtotals with taxes included (B2C)')], "Tax Display",
+            required=True),
         'default_invoice_policy': fields.selection([
             ('order', 'Invoice ordered quantities'),
-            ('delivery', 'Invoice delivered quantities'),
-            ('cost', 'Invoice based on costs (time and material, expenses)')
+            ('delivery', 'Invoice delivered quantities')
             ], 'Default Invoicing', default_model='product.template'),
         'deposit_product_id_setting': fields.many2one('product.product', 'Deposit Product',\
             domain="[('type', '=', 'service')]",\
@@ -80,6 +93,7 @@ class sale_configuration(osv.TransientModel):
 
     _defaults = {
         'sale_pricelist_setting': 'fixed',
+        'sale_show_tax': 'subtotal',
         'default_invoice_policy': 'order',
     }
 
@@ -104,3 +118,20 @@ class sale_configuration(osv.TransientModel):
         if sale_pricelist_setting == 'formula':
             return {'value': {'group_pricelist_item': True, 'group_sale_pricelist': True, 'group_product_pricelist': False}}
         return {'value': {'group_pricelist_item': False, 'group_sale_pricelist': False, 'group_product_pricelist': False}}
+
+    def set_sale_tax_defaults(self, cr, uid, ids, context=None):
+        sale_tax = self.browse(cr, uid, ids, context=context).sale_show_tax
+        res = self.pool.get('ir.values').set_default(cr, SUPERUSER_ID, 'sale.config.settings', 'sale_show_tax', sale_tax)
+        return res
+
+    def onchange_sale_tax(self, cr, uid, ids, sale_show_tax, context=None):
+        res = {'value': dict(group_show_price_subtotal=False, group_show_price_total=False)}
+        res['value']['group_show_price_%s' % sale_show_tax] = True
+        return res
+class account_config_settings(osv.osv_memory):
+    _inherit = 'account.config.settings'
+    _columns = {
+        'group_analytic_account_for_sales': fields.boolean('Analytic accounting for sales',
+            implied_group='sale.group_analytic_accounting',
+            help="Allows you to specify an analytic account on sales orders."),
+    }

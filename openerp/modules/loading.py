@@ -104,7 +104,8 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
     loaded_modules = []
     registry = openerp.registry(cr.dbname)
     migrations = openerp.modules.migration.MigrationManager(cr, graph)
-    _logger.info('loading %d modules...', len(graph))
+    module_count = len(graph)
+    _logger.info('loading %d modules...', module_count)
 
     registry.clear_manual_fields()
 
@@ -112,13 +113,14 @@ def load_module_graph(cr, graph, status=None, perform_checks=True, skip_modules=
     t0 = time.time()
     t0_sql = openerp.sql_db.sql_counter
 
-    for index, package in enumerate(graph):
+    for index, package in enumerate(graph, 1):
         module_name = package.name
         module_id = package.id
 
         if skip_modules and module_name in skip_modules:
             continue
 
+        _logger.debug('loading module %s (%d/%d)', module_name, index, module_count)
         migrations.migrate_module(package, 'pre')
         load_openerp_module(package.name)
 
@@ -416,7 +418,10 @@ def load_modules(db, force_demo=False, status=None, update_module=False):
         t0 = time.time()
         t0_sql = openerp.sql_db.sql_counter
         if openerp.tools.config['test_enable']:
-            cr.execute("SELECT name FROM ir_module_module WHERE state='installed'")
+            if update_module:
+                cr.execute("SELECT name FROM ir_module_module WHERE state='installed' and name = ANY(%s)", (processed_modules,))
+            else:
+                cr.execute("SELECT name FROM ir_module_module WHERE state='installed'")
             for module_name in cr.fetchall():
                 report.record_result(openerp.modules.module.run_unit_tests(module_name[0], cr.dbname, position=runs_post_install))
             _logger.log(25, "All post-tested in %.2fs, %s queries", time.time() - t0, openerp.sql_db.sql_counter - t0_sql)

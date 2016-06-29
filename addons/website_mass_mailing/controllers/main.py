@@ -1,31 +1,32 @@
 # -*- coding: utf-8 -*-
 
 from openerp import http, SUPERUSER_ID
+from openerp.addons.mass_mailing.controllers.main import MassMailController
 from openerp.http import request
 
 
-class MassMailController(http.Controller):
+class MassMailController(MassMailController):
 
     @http.route(['/mail/mailing/<int:mailing_id>/unsubscribe'], type='http', website=True, auth='public')
     def mailing(self, mailing_id, email=None, res_id=None, **post):
         mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
         if mailing.exists():
             if mailing.mailing_model == 'mail.mass_mailing.contact':
-                contacts = request.env['mail.mass_mailing.contact'].sudo().search([('email', 'ilike', email)])
+                contacts = request.env['mail.mass_mailing.contact'].sudo().search([('email', '=', email)])
                 return request.website.render('website_mass_mailing.page_unsubscribe', {
                     'contacts': contacts,
                     'email': email,
                     'mailing_id': mailing_id})
             else:
-                mailing.update_opt_out(mailing_id, email, [res_id], True)
+                super(MassMailController, self).mailing(mailing_id, email=email, res_id=res_id, **post)
                 return request.website.render('website_mass_mailing.page_unsubscribed')
 
     @http.route(['/mail/mailing/unsubscribe'], type='json', auth='none')
     def unsubscribe(self, mailing_id, opt_in_ids, opt_out_ids, email):
         mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
         if mailing.exists():
-            mailing.update_opt_out(mailing_id, email, opt_in_ids, False)
-            mailing.update_opt_out(mailing_id, email, opt_out_ids, True)
+            mailing.update_opt_out(email, opt_in_ids, False)
+            mailing.update_opt_out(email, opt_out_ids, True)
 
     @http.route('/website_mass_mailing/is_subscriber', type='json', website=True, auth="public")
     def is_subscriber(self, list_id, **post):
@@ -48,15 +49,17 @@ class MassMailController(http.Controller):
 
     @http.route('/website_mass_mailing/subscribe', type='json', website=True, auth="public")
     def subscribe(self, list_id, email, **post):
-        cr, uid, context = request.cr, request.uid, request.context
-        Contacts = request.registry['mail.mass_mailing.contact']
+        Contacts = request.env['mail.mass_mailing.contact'].sudo()
+        parsed_email = Contacts.get_name_email(email)[1]
 
-        contact_ids = Contacts.search_read(cr, SUPERUSER_ID, [('list_id', '=', int(list_id)), ('email', '=', email)], ['opt_out'], context=context)
+        contact_ids = Contacts.search_read(
+            [('list_id', '=', int(list_id)), ('email', '=', parsed_email)],
+            ['opt_out'])
         if not contact_ids:
-            Contacts.add_to_list(cr, SUPERUSER_ID, email, int(list_id), context=context)
+            Contacts.add_to_list(email, int(list_id))
         else:
             if contact_ids[0]['opt_out']:
-                Contacts.write(cr, SUPERUSER_ID, [contact_ids[0]['id']], {'opt_out': False}, context=context)
+                contact_ids[0].write({'opt_out': False})
         # add email to session
         request.session['mass_mailing_email'] = email
         return True

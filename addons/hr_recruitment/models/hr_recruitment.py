@@ -182,8 +182,8 @@ class Applicant(models.Model):
         for record in self:
             record.attachment_number = attach_data.get(record.id, 0)
 
-    @api.model
-    def _read_group_stage_ids(self, ids, domain, read_group_order=None, access_rights_uid=None):
+    @api.multi
+    def _read_group_stage_ids(self, domain, read_group_order=None, access_rights_uid=None):
         access_rights_uid = access_rights_uid or self.env.uid
         Stage = self.env['hr.recruitment.stage']
         order = Stage._order
@@ -351,6 +351,7 @@ class Applicant(models.Model):
         action = attachment_action.read()[0]
         action['context'] = {'default_res_model': self._name, 'default_res_id': self.ids[0]}
         action['domain'] = str(['&', ('res_model', '=', self._name), ('res_id', 'in', self.ids)])
+        action['search_view_id'] = (self.env.ref('hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment').id, )
         return action
 
     @api.multi
@@ -396,13 +397,17 @@ class Applicant(models.Model):
             through message_process.
             This override updates the document according to the email.
         """
+        # remove default author when going through the mail gateway. Indeed we
+        # do not want to explicitly set user_id to False; however we do not
+        # want the gateway user to be responsible if no other responsible is
+        # found.
+        self = self.with_context(default_user_id=False)
         val = msg.get('from').split('<')[0]
         defaults = {
             'name': msg.get('subject') or _("No Subject"),
             'partner_name': val,
             'email_from': msg.get('from'),
             'email_cc': msg.get('cc'),
-            'user_id': False,
             'partner_id': msg.get('author_id', False),
         }
         if msg.get('priority'):
@@ -460,6 +465,7 @@ class applicant_category(models.Model):
     _description = "Category of applicant"
 
     name = fields.Char("Name", required=True)
+    color = fields.Integer(string='Color Index')
 
     _sql_constraints = [
             ('name_uniq', 'unique (name)', "Tag name already exists !"),

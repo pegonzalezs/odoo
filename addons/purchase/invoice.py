@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from openerp import api, fields, models
+from openerp import api, fields, models, _
 from openerp.tools.float_utils import float_compare
 
 
@@ -49,7 +49,7 @@ class AccountInvoice(models.Model):
                 qty = line.qty_received - line.qty_invoiced
             if float_compare(qty, 0.0, precision_rounding=line.product_uom.rounding) <= 0:
                 qty = 0.0
-            taxes = line.taxes_id or line.product_id.supplier_taxes_id
+            taxes = line.taxes_id
             invoice_line_tax_ids = self.purchase_id.fiscal_position_id.map_tax(taxes)
             data = {
                 'purchase_line_id': line.id,
@@ -58,10 +58,11 @@ class AccountInvoice(models.Model):
                 'uom_id': line.product_uom.id,
                 'product_id': line.product_id.id,
                 'account_id': self.env['account.invoice.line'].with_context({'journal_id': self.journal_id.id, 'type': 'in_invoice'})._default_account(),
-                'price_unit': line.order_id.currency_id.compute(line.price_unit, self.currency_id),
+                'price_unit': line.order_id.currency_id.compute(line.price_unit, self.currency_id, round=False),
                 'quantity': qty,
                 'discount': 0.0,
                 'account_analytic_id': line.account_analytic_id.id,
+                'analytic_tag_ids': line.analytic_tag_ids.ids,
                 'invoice_line_tax_ids': invoice_line_tax_ids.ids
             }
             account = new_lines.get_invoice_line_account('in_invoice', line.product_id, self.purchase_id.fiscal_position_id, self.env.user.company_id)
@@ -79,7 +80,7 @@ class AccountInvoice(models.Model):
     def _onchange_currency_id(self):
         if self.currency_id:
             for line in self.invoice_line_ids.filtered(lambda r: r.purchase_line_id):
-                line.price_unit = line.purchase_id.currency_id.compute(line.purchase_line_id.price_unit, self.currency_id)
+                line.price_unit = line.purchase_id.currency_id.compute(line.purchase_line_id.price_unit, self.currency_id, round=False)
 
     @api.onchange('invoice_line_ids')
     def _onchange_origin(self):
@@ -126,9 +127,14 @@ class AccountInvoice(models.Model):
                     if i_line.product_id.cost_method != 'standard' and i_line.purchase_line_id:
                         #for average/fifo/lifo costing method, fetch real cost price from incomming moves
                         stock_move_obj = self.env['stock.move']
-                        valuation_stock_move = stock_move_obj.search([('purchase_line_id', '=', i_line.purchase_line_id.id)], limit=1)
+                        valuation_stock_move = stock_move_obj.search([('purchase_line_id', '=', i_line.purchase_line_id.id), ('state', '=', 'done')])
                         if valuation_stock_move:
-                            valuation_price_unit = valuation_stock_move[0].price_unit
+                            valuation_price_unit_total = 0
+                            valuation_total_qty = 0
+                            for val_stock_move in valuation_stock_move:
+                                valuation_price_unit_total += val_stock_move.price_unit * val_stock_move.product_qty
+                                valuation_total_qty += val_stock_move.product_qty
+                            valuation_price_unit = valuation_price_unit_total / valuation_total_qty
                     if inv.currency_id.id != company_currency.id:
                             valuation_price_unit = company_currency.with_context(date=inv.date_invoice).compute(valuation_price_unit, inv.currency_id)
                     if valuation_price_unit != i_line.price_unit and line['price_unit'] == i_line.price_unit and acc:
@@ -153,6 +159,26 @@ class AccountInvoice(models.Model):
             return diff_res
         return []
 
+    @api.model
+    def create(self, vals):
+        invoice = super(AccountInvoice, self).create(vals)
+        purchase = invoice.invoice_line_ids.mapped('purchase_line_id.order_id')
+        if purchase and not invoice.refund_invoice_id:
+            message = _("This vendor bill has been created from: %s") % (",".join(["<a href=# data-oe-model=purchase.order data-oe-id="+str(order.id)+">"+order.name+"</a>" for order in purchase]))
+            invoice.message_post(body=message)
+        return invoice
+
+    @api.multi
+    def write(self, vals):
+        purchase_old = self.invoice_line_ids.mapped('purchase_line_id.order_id')
+        invoice = super(AccountInvoice, self).write(vals)
+        purchase_new = self.invoice_line_ids.mapped('purchase_line_id.order_id')
+        #To get all po reference when updating invoice line or adding purchase order reference from vendor bill.
+        purchase = (purchase_old | purchase_new) - (purchase_old & purchase_new)
+        if purchase:
+            message = _("This vendor bill has been modified from: %s") % (",".join(["<a href=# data-oe-model=purchase.order data-oe-id="+str(order.id)+">"+order.name+"</a>" for order in purchase]))
+            self.message_post(body=message)
+        return invoice
 
 class AccountInvoiceLine(models.Model):
     """ Override AccountInvoice_line to add the link to the purchase order line it is related to"""

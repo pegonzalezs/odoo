@@ -4,6 +4,7 @@ import base64
 import datetime
 import dateutil
 import email
+import json
 import lxml
 from lxml import etree
 import logging
@@ -12,6 +13,8 @@ import re
 import socket
 import time
 import xmlrpclib
+
+from collections import namedtuple
 from email.message import Message
 from email.utils import formataddr
 from werkzeug import url_encode
@@ -81,6 +84,7 @@ class MailThread(models.AbstractModel):
     _mail_flat_thread = True  # flatten the discussino history
     _mail_post_access = 'write'  # access required on the document to post on it
     _mail_mass_mailing = False  # enable mass mailing on this model
+    _Attachment = namedtuple('Attachment', ('fname', 'content', 'info'))
 
     message_is_follower = fields.Boolean(
         'Is Follower', compute='_compute_is_follower', search='_search_is_follower')
@@ -371,13 +375,6 @@ class MailThread(models.AbstractModel):
                 options = eval(node.get('options', '{}'))
                 is_employee = self.env.user.has_group('base.group_user')
                 options['display_log_button'] = is_employee
-                if is_employee:
-                    Subtype = self.env['mail.message.subtype'].sudo()
-                    # fetch internal subtypes
-                    internal_subtypes = Subtype.search_read([
-                        ('res_model', 'in', [False, self._name]),
-                        ('internal', '=', True)], ['name', 'description', 'sequence'])
-                    options['internal_subtypes'] = internal_subtypes
                 # emoji list
                 options['emoji_list'] = self.env['mail.shortcode'].search([('shortcode_type', '=', 'image')]).read(['source', 'description', 'substitution'])
                 # save options on the node
@@ -598,7 +595,7 @@ class MailThread(models.AbstractModel):
             link = '/mail/workflow?%s' % url_encode(params)
         elif link_type == 'method':
             method = kwargs.pop('method')
-            params = dict(base_params, method=method, params=kwargs)
+            params = dict(base_params, method=method, params=json.dumps(kwargs))
             link = '/mail/method?%s' % url_encode(params)
         elif link_type == 'new':
             params = dict(base_params, action_id=kwargs.get('action_id'))
@@ -744,8 +741,11 @@ class MailThread(models.AbstractModel):
                     ('alias_parent_model_id.model', '=', model_name),
                     ('alias_parent_thread_id', 'in', res_ids),
                     ('alias_name', '!=', False)])
-                aliases.update(
-                    dict((alias.alias_parent_thread_id, '%s@%s' % (alias.alias_name, alias_domain)) for alias in mail_aliases))
+                # take only first found alias for each thread_id, to match
+                # order (1 found -> limit=1 for each res_id)
+                for alias in mail_aliases:
+                    if alias.alias_parent_thread_id not in aliases:
+                        aliases[alias.alias_parent_thread_id] = '%s@%s' % (alias.alias_name, alias_domain)
                 doc_names.update(
                     dict((ng_res[0], ng_res[1])
                          for ng_res in self.env[model_name].sudo().browse(aliases.keys()).name_get()))
@@ -836,15 +836,20 @@ class MailThread(models.AbstractModel):
         record_set = None
 
         def _create_bounce_email():
-            self.env['mail.mail'].create({
+            bounce_to = decode_header(message, 'Return-Path') or email_from
+            bounce_mail_values = {
                 'body_html': '<div><p>Hello,</p>'
                              '<p>The following email sent to %s cannot be accepted because this is '
                              'a private email address. Only allowed people can contact us at this address.</p></div>'
                              '<blockquote>%s</blockquote>' % (message.get('to'), message_dict.get('body')),
                 'subject': 'Re: %s' % message.get('subject'),
-                'email_to': message.get('from'),
+                'email_to': bounce_to,
                 'auto_delete': True,
-            }).send()
+            }
+            bounce_from = self.env['ir.mail_server']._get_default_bounce_address()
+            if bounce_from:
+                bounce_mail_values['email_from'] = 'MAILER-DAEMON <%s>' % bounce_from
+            self.env['mail.mail'].create(bounce_mail_values).send()
 
         def _warn(message):
             _logger.info('Routing mail with Message-Id %s: route %s: %s',
@@ -1293,8 +1298,8 @@ class MailThread(models.AbstractModel):
         """ Perform some cleaning / postprocess in the body and attachments
         extracted from the email. Note that this processing is specific to the
         mail module, and should not contain security or generic html cleaning.
-        Indeed those aspects should be covered by html_email_clean and
-        html_sanitize methods located in tools. """
+        Indeed those aspects should be covered by the html_sanitize method
+        located in tools. """
         root = lxml.html.fromstring(body)
         postprocessed = False
         to_remove = []
@@ -1303,6 +1308,13 @@ class MailThread(models.AbstractModel):
                 postprocessed = True
                 if node.getparent() is not None:
                     to_remove.append(node)
+            if node.tag == 'img' and node.get('src', '').startswith('cid:'):
+                cid = node.get('src').split(':', 1)[1]
+                related_attachment = [attach for attach in attachments if len(attach) == 2 and attach[2] == cid]
+                if related_attachment:
+                    node.set('data-filename', related_attachment[0])
+                    postprocessed = True
+
         for node in to_remove:
             node.getparent().remove(node)
         if postprocessed:
@@ -1314,7 +1326,7 @@ class MailThread(models.AbstractModel):
         attachments = []
         body = u''
         if save_original:
-            attachments.append(('original_email.eml', message.as_string()))
+            attachments.append(self._Attachment('original_email.eml', message.as_string(), {}))
 
         # Be careful, content-type may contain tricky content like in the
         # following example so test the MIME type with startswith()
@@ -1344,19 +1356,25 @@ class MailThread(models.AbstractModel):
                 # original get_filename is not able to decode iso-8859-1 (for instance).
                 # therefore, iso encoded attachements are not able to be decoded properly with get_filename
                 # code here partially copy the original get_filename method, but handle more encoding
-                filename=part.get_param('filename', None, 'content-disposition')
+                filename = part.get_param('filename', None, 'content-disposition')
                 if not filename:
-                    filename=part.get_param('name', None)
+                    filename = part.get_param('name', None)
                 if filename:
                     if isinstance(filename, tuple):
                         # RFC2231
-                        filename=email.utils.collapse_rfc2231_value(filename).strip()
+                        filename = email.utils.collapse_rfc2231_value(filename).strip()
                     else:
-                        filename=decode(filename)
+                        filename = decode(filename)
                 encoding = part.get_content_charset()  # None if attachment
+
+                # 0) Inline Attachments -> attachments, with a third part in the tuple to match cid / attachment
+                if filename and part.get('content-id'):
+                    inner_cid = part.get('content-id').strip('><')
+                    attachments.append(self._Attachment(filename, part.get_payload(decode=True), {'cid': inner_cid}))
+                    continue
                 # 1) Explicit Attachments -> attachments
                 if filename or part.get('content-disposition', '').strip().startswith('attachment'):
-                    attachments.append((filename or 'attachment', part.get_payload(decode=True)))
+                    attachments.append(self._Attachment(filename or 'attachment', part.get_payload(decode=True), {}))
                     continue
                 # 2) text/plain -> <pre/>
                 if part.get_content_type() == 'text/plain' and (not alternative or not body):
@@ -1374,7 +1392,7 @@ class MailThread(models.AbstractModel):
                         body = tools.append_content_to_html(body, html, plaintext=False)
                 # 4) Anything else -> attachment
                 else:
-                    attachments.append((filename or 'attachment', part.get_payload(decode=True)))
+                    attachments.append(self._Attachment(filename or 'attachment', part.get_payload(decode=True), {}))
 
         body, attachments = self._message_extract_payload_postprocess(message, body, attachments)
         return body, attachments
@@ -1601,7 +1619,6 @@ class MailThread(models.AbstractModel):
                 ]).write({'author_id': partner_info['partner_id']})
         return result
 
-    @api.model
     def _message_preprocess_attachments(self, attachments, attachment_ids, attach_model, attach_res_id):
         """ Preprocess attachments for mail_thread.message_post() or mail_mail.create().
 
@@ -1611,17 +1628,30 @@ class MailThread(models.AbstractModel):
         :param str attach_model: the model of the attachments parent record
         :param integer attach_res_id: the id of the attachments parent record
         """
+        return self._message_post_process_attachments(attachments, attachment_ids, {'model': attach_model, 'res_id': attach_res_id})
+
+    def _message_post_process_attachments(self, attachments, attachment_ids, message_data):
+        IrAttachment, parameter_attachments = self.env['ir.attachment'], self.env['ir.attachment']
         m2m_attachment_ids = []
+        cid_mapping = {}
         if attachment_ids:
             filtered_attachment_ids = self.env['ir.attachment'].sudo().search([
                 ('res_model', '=', 'mail.compose.message'),
                 ('create_uid', '=', self._uid),
                 ('id', 'in', attachment_ids)])
             if filtered_attachment_ids:
-                filtered_attachment_ids.write({'res_model': attach_model, 'res_id': attach_res_id})
+                filtered_attachment_ids.write({'res_model': message_data['model'], 'res_id': message_data['res_id']})
             m2m_attachment_ids += [(4, id) for id in attachment_ids]
         # Handle attachments parameter, that is a dictionary of attachments
-        for name, content in attachments:
+        for attachment in attachments:
+            if len(attachment) == 2:
+                name, content = attachment
+            elif len(attachment) == 3:
+                name, content, info = attachment
+                if info and info.get('cid'):
+                    cid_mapping[info['cid']] = name
+            else:
+                continue
             if isinstance(content, unicode):
                 content = content.encode('utf-8')
             data_attach = {
@@ -1629,10 +1659,26 @@ class MailThread(models.AbstractModel):
                 'datas': base64.b64encode(str(content)),
                 'datas_fname': name,
                 'description': name,
-                'res_model': attach_model,
-                'res_id': attach_res_id,
+                'res_model': message_data['model'],
+                'res_id': message_data['res_id'],
             }
-            m2m_attachment_ids.append((0, 0, data_attach))
+            parameter_attachments |= IrAttachment.create(data_attach)
+        m2m_attachment_ids += [(4, attach.id) for attach in parameter_attachments]
+
+        if cid_mapping and message_data.get('body'):
+            root = lxml.html.fromstring(tools.ustr(message_data['body']))
+            postprocessed = False
+            for node in root.iter('img'):
+                if node.get('src', '').startswith('cid:'):
+                    fname = cid_mapping.get(node.get('src').split('cid:')[1], node.get('data-filename', ''))
+                    attachment = parameter_attachments.filtered(lambda attachment: attachment.name == fname)
+                    if attachment:
+                        node.set('src', '/web/image/%s' % attachment.ids[0])
+                        postprocessed = True
+            if postprocessed:
+                body = lxml.html.tostring(root, pretty_print=False, encoding='UTF-8')
+                message_data['body'] = body
+
         return m2m_attachment_ids
 
     @api.multi
@@ -1706,11 +1752,6 @@ class MailThread(models.AbstractModel):
             private_followers -= set([author_id])
             partner_ids |= private_followers
 
-        # 3. Attachments
-        #   - HACK TDE FIXME: Chatter: attachments linked to the document (not done JS-side), load the message
-        attachment_ids = self._message_preprocess_attachments(
-            attachments, kwargs.pop('attachment_ids', []), model, self.ids and self.ids[0] or None)
-
         # 4: mail.message.subtype
         subtype_id = kwargs.get('subtype_id', False)
         if not subtype_id:
@@ -1724,7 +1765,7 @@ class MailThread(models.AbstractModel):
             partner_to_subscribe = partner_ids
             if self._context.get('mail_post_autofollow_partner_ids'):
                 partner_to_subscribe = filter(lambda item: item in self._context.get('mail_post_autofollow_partner_ids'), partner_ids)
-            self.message_subscribe(list(partner_to_subscribe))
+            self.message_subscribe(list(partner_to_subscribe), force=False)
 
         # _mail_flat_thread: automatically set free messages to the first posted message
         MailMessage = self.env['mail.message']
@@ -1754,10 +1795,14 @@ class MailThread(models.AbstractModel):
             'subject': subject or False,
             'message_type': message_type,
             'parent_id': parent_id,
-            'attachment_ids': attachment_ids,
             'subtype_id': subtype_id,
             'partner_ids': [(4, pid) for pid in partner_ids],
         })
+
+        # 3. Attachments
+        #   - HACK TDE FIXME: Chatter: attachments linked to the document (not done JS-side), load the message
+        attachment_ids = self._message_post_process_attachments(attachments, kwargs.pop('attachment_ids', []), values)
+        values['attachment_ids'] = attachment_ids
 
         # Avoid warnings about non-existing fields
         for x in ('from', 'to', 'cc'):
@@ -1776,7 +1821,7 @@ class MailThread(models.AbstractModel):
                 # done with SUPERUSER_ID, because on some models users can post only with read access, not necessarily write access
                 self.sudo().write({'message_last_post': fields.Datetime.now()})
         if new_message.author_id and model and self.ids and message_type != 'notification' and not self._context.get('mail_create_nosubscribe'):
-            self.message_subscribe([new_message.author_id.id])
+            self.message_subscribe([new_message.author_id.id], force=False)
         return new_message
 
     @api.multi
@@ -1843,10 +1888,7 @@ class MailThread(models.AbstractModel):
             provided, subscribe uid instead. """
         if user_ids is None:
             user_ids = [self._uid]
-        result = self.message_subscribe(self.env['res.users'].browse(user_ids).mapped('partner_id').ids, subtype_ids=subtype_ids)
-        if user_ids and result:
-            self.pool['ir.ui.menu'].clear_caches()
-        return result
+        return self.message_subscribe(self.env['res.users'].browse(user_ids).mapped('partner_id').ids, subtype_ids=subtype_ids)
 
     @api.multi
     def message_subscribe(self, partner_ids=None, channel_ids=None, subtype_ids=None, force=True):
@@ -1875,7 +1917,7 @@ class MailThread(models.AbstractModel):
         gen, part = self.env['mail.followers']._add_follower_command(self._name, self.ids, partner_data, channel_data, force=force)
         self.sudo().write({'message_follower_ids': gen})
         for record in self.filtered(lambda self: self.id in part):
-            record.write(part[record.id])
+            record.write({'message_follower_ids': part[record.id]})
 
         self.invalidate_cache()
         return True
@@ -1887,10 +1929,7 @@ class MailThread(models.AbstractModel):
         if user_ids is None:
             user_ids = [self._uid]
         partner_ids = [user.partner_id.id for user in self.env['res.users'].browse(user_ids)]
-        result = self.message_unsubscribe(partner_ids)
-        if partner_ids and result:
-            self.pool['ir.ui.menu'].clear_caches()
-        return result
+        return self.message_unsubscribe(partner_ids)
 
     @api.multi
     def message_unsubscribe(self, partner_ids=None, channel_ids=None):

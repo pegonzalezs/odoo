@@ -44,7 +44,7 @@ class project_issue(osv.Model):
         # lame hack to allow reverting search, should just work in the trivial case
         if read_group_order == 'stage_id desc':
             order = "%s desc" % order
-        # retrieve team_id from the context, add them to already fetched columns (ids)
+        # retrieve project_id from the context, add them to already fetched columns (ids)
         if 'default_project_id' in context:
             search_domain = ['|', ('project_ids', '=', context['default_project_id']), ('id', 'in', ids)]
         else:
@@ -120,7 +120,7 @@ class project_issue(osv.Model):
         if project_id:
             project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
             if project and project.partner_id:
-                return {'value': {'partner_id': project.partner_id.id}}
+                return {'value': {'partner_id': project.partner_id.id, 'email_from': project.partner_id.email}}
         return {}
 
     _columns = {
@@ -130,11 +130,9 @@ class project_issue(osv.Model):
         'create_date': fields.datetime('Creation Date', readonly=True, select=True),
         'write_date': fields.datetime('Update Date', readonly=True),
         'days_since_creation': fields.function(_compute_day, string='Days since creation date', \
-                                               multi='compute_day', type="integer", help="Difference in days between creation date and current date"),
+                                               multi='compute_day', type="integer", help="Difference in days between creation date and current date",
+                                               groups='base.group_user'),
         'date_deadline': fields.date('Deadline'),
-        'team_id': fields.many2one('crm.team', 'Sales Team', oldname='section_id',\
-                        select=True, help='Sales team to which Case belongs to.\
-                             Define Responsible user and Email account for mail gateway.'),
         'partner_id': fields.many2one('res.partner', 'Contact', select=1),
         'company_id': fields.many2one('res.company', 'Company'),
         'description': fields.text('Private Note'),
@@ -164,19 +162,24 @@ class project_issue(osv.Model):
             help="You can link this issue to an existing task or directly create a new one from here"),
         'day_open': fields.function(_compute_day, string='Days to Assign',
                                     multi='compute_day', type="float",
-                                    store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_open'], 10)}),
+                                    store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_open'], 10)},
+                                    groups='base.group_user'),
         'day_close': fields.function(_compute_day, string='Days to Close',
                                      multi='compute_day', type="float",
-                                     store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_closed'], 10)}),
+                                     store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_closed'], 10)},
+                                     groups='base.group_user'),
         'user_id': fields.many2one('res.users', 'Assigned to', required=False, select=1, track_visibility='onchange'),
         'working_hours_open': fields.function(_compute_day, string='Working Hours to assign the Issue',
                                               multi='compute_day', type="float",
-                                              store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_open'], 10)}),
+                                              store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_open'], 10)},
+                                              groups='base.group_user'),
         'working_hours_close': fields.function(_compute_day, string='Working Hours to close the Issue',
                                                multi='compute_day', type="float",
-                                               store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_closed'], 10)}),
+                                               store={'project.issue': (lambda self, cr, uid, ids, c={}: ids, ['date_closed'], 10)},
+                                               groups='base.group_user'),
         'inactivity_days': fields.function(_compute_day, string='Days since last action',
-                                           multi='compute_day', type="integer", help="Difference in days between last action and current date"),
+                                           multi='compute_day', type="integer", help="Difference in days between last action and current date",
+                                           groups='base.group_user'),
         'color': fields.integer('Color Index'),
         'user_email': fields.related('user_id', 'email', type='char', string='User Email', readonly=True),
         'date_action_last': fields.datetime('Last Action', readonly=1),
@@ -188,7 +191,6 @@ class project_issue(osv.Model):
 
     _defaults = {
         'active': 1,
-        'team_id': lambda s, cr, uid, c: s.pool['crm.team']._get_default_team_id(cr, uid, context=c),
         'stage_id': lambda s, cr, uid, c: s._get_default_stage_id(cr, uid, c),
         'company_id': lambda s, cr, uid, c: s.pool['res.users']._get_company(cr, uid, context=c),
         'priority': '0',
@@ -269,28 +271,28 @@ class project_issue(osv.Model):
             return {'value': {'date_closed': fields.datetime.now()}}
         return {'value': {'date_closed': False}}
 
-    def stage_find(self, cr, uid, cases, team_id, domain=[], order='sequence', context=None):
+    def stage_find(self, cr, uid, cases, project_id, domain=[], order='sequence', context=None):
         """ Override of the base.stage method
             Parameter of the stage search taken from the issue:
             - type: stage type must be the same or 'both'
-            - team_id: if set, stages must belong to this team or
+            - project_id: if set, stages must belong to this project or
               be a default case
         """
         if isinstance(cases, (int, long)):
             cases = self.browse(cr, uid, cases, context=context)
-        # collect all team_ids
-        team_ids = []
-        if team_id:
-            team_ids.append(team_id)
+        # collect all project_ids
+        project_ids = []
+        if project_id:
+            project_ids.append(project_id)
         for task in cases:
             if task.project_id:
-                team_ids.append(task.project_id.id)
-        # OR all team_ids and OR with case_default
+                project_ids.append(task.project_id.id)
+        # OR all project_ids and OR with case_default
         search_domain = []
-        if team_ids:
-            search_domain += [('|')] * (len(team_ids)-1)
-            for team_id in team_ids:
-                search_domain.append(('project_ids', '=', team_id))
+        if project_ids:
+            search_domain += [('|')] * (len(project_ids) - 1)
+            for project_id in project_ids:
+                search_domain.append(('project_ids', '=', project_id))
         search_domain += list(domain)
         # perform search, return the first found
         stage_ids = self.pool.get('project.task.type').search(cr, uid, search_domain, order=order, context=context)
@@ -330,12 +332,17 @@ class project_issue(osv.Model):
         recipients. Indeed those will have specific action in their notification
         emails: creating tasks, assigning it. """
         group_project_user = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, 'project.group_project_user')
+        group_user = self.pool['ir.model.data'].xmlid_to_res_id(cr, uid, 'base.group_user')
         for recipient in recipients:
             if recipient.id in done_ids:
                 continue
             if recipient.user_ids and group_project_user in recipient.user_ids[0].groups_id.ids:
                 group_data['group_project_user'] |= recipient
-                done_ids.add(recipient.id)
+            elif not recipient.user_ids:
+                group_data['partner'] |= recipient
+            else:
+                group_data['user'] |= recipient
+            done_ids.add(recipient.id)
         return super(project_issue, self)._notification_group_recipients(cr, uid, ids, message, recipients, done_ids, group_data, context=context)
 
     def _notification_get_recipient_groups(self, cr, uid, ids, message, recipients, context=None):
@@ -389,6 +396,12 @@ class project_issue(osv.Model):
             through message_process.
             This override updates the document according to the email.
         """
+        # remove default author when going through the mail gateway. Indeed we
+        # do not want to explicitly set user_id to False; however we do not
+        # want the gateway user to be responsible if no other responsible is
+        # found.
+        create_context = dict(context or {})
+        create_context['default_user_id'] = False
         if custom_values is None:
             custom_values = {}
         context = dict(context or {}, state_to='draft')
@@ -397,11 +410,10 @@ class project_issue(osv.Model):
             'email_from': msg.get('from'),
             'email_cc': msg.get('cc'),
             'partner_id': msg.get('author_id', False),
-            'user_id': False,
         }
         defaults.update(custom_values)
 
-        res_id = super(project_issue, self).message_new(cr, uid, msg, custom_values=defaults, context=context)
+        res_id = super(project_issue, self).message_new(cr, uid, msg, custom_values=defaults, context=create_context)
         email_list = self.email_split(cr, uid, [res_id], msg, context=context)
         partner_ids = filter(None, self._find_partner_from_emails(cr, uid, [res_id], email_list, force_create=False, context=context))
         self.message_subscribe(cr, uid, [res_id], partner_ids, context=context)
@@ -458,7 +470,7 @@ class project(osv.Model):
     def _issue_count(self, cr, uid, ids, field_name, arg, context=None):
         Issue = self.pool['project.issue']
         return {
-            project_id: Issue.search_count(cr,uid, [('project_id', '=', project_id), ('stage_id.fold', '=', False)], context=context)
+            project_id: Issue.search_count(cr,uid, [('project_id', '=', project_id), '|', ('stage_id.fold', '=', False), ('stage_id', '=', False)], context=context)
             for project_id in ids
         }
 
@@ -472,7 +484,7 @@ class project(osv.Model):
     _columns = {
         'issue_count': fields.function(_issue_count, type='integer', string="Issues",),
         'issue_ids': fields.one2many('project.issue', 'project_id', string="Issues",
-                                    domain=[('stage_id.fold', '=', False)]),
+                                    domain=['|', ('stage_id.fold', '=', False), ('stage_id', '=', False)]),
         'issue_needaction_count': fields.function(_issue_needaction_count, type='integer', string="Issues",),
     }
 
@@ -491,7 +503,7 @@ class account_analytic_account(osv.Model):
     _description = 'Analytic Account'
 
     _columns = {
-        'use_issues': fields.boolean('Issues', help="Check this box to manage customer activities through this project"),
+        'use_issues': fields.boolean('Use Issues', help="Check this box to manage customer activities through this project"),
     }
 
     def on_change_template(self, cr, uid, ids, template_id, date_start=False, context=None):
@@ -554,9 +566,10 @@ class project_project(osv.Model):
 class res_partner(osv.osv):
     def _issue_count(self, cr, uid, ids, field_name, arg, context=None):
         Issue = self.pool['project.issue']
+        partners = {id: self.search(cr, uid, [('id', 'child_of', ids)]) for id in ids}
         return {
-            partner_id: Issue.search_count(cr,uid, [('partner_id', '=', partner_id)])
-            for partner_id in ids
+            partner_id: Issue.search_count(cr, uid, [('partner_id', 'in', partners[partner_id])])
+            for partner_id in partners.keys()
         }
 
     """ Inherits partner and adds Issue information in the partner form """

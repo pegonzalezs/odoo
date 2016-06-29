@@ -11,8 +11,11 @@ the ORM does, in fact.
 from contextlib import contextmanager
 from functools import wraps
 import logging
+import time
 import urlparse
 import uuid
+
+import psycopg2
 import psycopg2.extras
 import psycopg2.extensions
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT, ISOLATION_LEVEL_READ_COMMITTED, ISOLATION_LEVEL_REPEATABLE_READ
@@ -45,7 +48,6 @@ psycopg2.extensions.register_type(psycopg2.extensions.new_type((700, 701, 1700,)
 
 import tools
 from tools.func import frame_codeinfo
-from datetime import datetime as mdt
 from datetime import timedelta
 import threading
 from inspect import currentframe
@@ -203,23 +205,17 @@ class Cursor(object):
 
     @check
     def execute(self, query, params=None, log_exceptions=None):
-        if '%d' in query or '%f' in query:
-            _logger.info("SQL queries cannot contain %%d or %%f anymore. Use only %%s:\n%s" % query, 
-                exc_info=_logger.isEnabledFor(logging.DEBUG))
         if params and not isinstance(params, (tuple, list, dict)):
-            _logger.info("SQL query parameters should be a tuple, list or dict; got %r", params)
+            # psycopg2's TypeError is not clear if you mess up the params
             raise ValueError("SQL query parameters should be a tuple, list or dict; got %r" % (params,))
 
         if self.sql_log:
-            now = mdt.now()
+            now = time.time()
+            _logger.debug("query: %s", query)
 
         try:
             params = params or None
             res = self._obj.execute(query, params)
-        except psycopg2.ProgrammingError, pe:
-            if self._default_log_exceptions if log_exceptions is None else log_exceptions:
-                _logger.info("Programming error: %s, in query %s", pe, query)
-            raise
         except Exception:
             if self._default_log_exceptions if log_exceptions is None else log_exceptions:
                 _logger.info("bad query: %s", self._obj.query or query)
@@ -230,10 +226,8 @@ class Cursor(object):
 
         # advanced stats only if sql_log is enabled
         if self.sql_log:
-            delay = mdt.now() - now
-            delay = delay.seconds * 1E6 + delay.microseconds
+            delay = (time.time() - now) * 1E6
 
-            _logger.debug("query: %s", self._obj.query)
             res_from = re_from.match(query.lower())
             if res_from:
                 self.sql_from_log.setdefault(res_from.group(1), [0, 0])
@@ -246,10 +240,10 @@ class Cursor(object):
                 self.sql_into_log[res_into.group(1)][1] += delay
         return res
 
-    def split_for_in_conditions(self, ids):
+    def split_for_in_conditions(self, ids, size=None):
         """Split a list of identifiers into one or more smaller tuples
            safe for IN conditions, after uniquifying them."""
-        return tools.misc.split_every(self.IN_MAX, ids)
+        return tools.misc.split_every(size or self.IN_MAX, ids)
 
     def print_log(self):
         global sql_counter
@@ -527,7 +521,11 @@ class ConnectionPool(object):
         _logger.debug(('%r ' + msg), self, *args)
 
     @locked
-    def borrow(self, dsn):
+    def borrow(self, connection_info):
+        """
+        :param dict connection_info: dict of psql connection keywords
+        :rtype: PsycoConnection
+        """
         # free dead and leaked connections
         for i, (cnx, _) in tools.reverse_enumerate(self._connections):
             if cnx.closed:
@@ -541,7 +539,7 @@ class ConnectionPool(object):
                 _logger.info('%r: Free leaked connection to %r', self, cnx.dsn)
 
         for i, (cnx, used) in enumerate(self._connections):
-            if not used and cnx._original_dsn == dsn:
+            if not used and cnx._original_dsn == connection_info:
                 try:
                     cnx.reset()
                 except psycopg2.OperationalError:
@@ -570,11 +568,13 @@ class ConnectionPool(object):
                 raise PoolError('The Connection Pool Is Full')
 
         try:
-            result = psycopg2.connect(dsn=dsn, connection_factory=PsycoConnection)
+            result = psycopg2.connect(
+                connection_factory=PsycoConnection,
+                **connection_info)
         except psycopg2.Error:
             _logger.info('Connection to the database failed')
             raise
-        result._original_dsn = dsn
+        result._original_dsn = connection_info
         self._connections.append((result, True))
         self._debug('Create new connection')
         return result
@@ -639,8 +639,17 @@ class Connection(object):
         except Exception:
             return False
 
-def dsn(db_or_uri):
-    """parse the given `db_or_uri` and return a 2-tuple (dbname, uri)"""
+def connection_info_for(db_or_uri):
+    """ parse the given `db_or_uri` and return a 2-tuple (dbname, connection_params)
+
+    Connection params are either a dictionary with a single key ``dsn``
+    containing a connection URI, or a dictionary containing connection
+    parameter keywords which psycopg2 can build a key/value connection string
+    (dsn) from
+
+    :param str db_or_uri: database name or postgres dsn
+    :rtype: (str, dict)
+    """
     if db_or_uri.startswith(('postgresql://', 'postgres://')):
         # extract db from uri
         us = urlparse.urlsplit(db_or_uri)
@@ -650,15 +659,15 @@ def dsn(db_or_uri):
             db_name = us.username
         else:
             db_name = us.hostname
-        return db_name, db_or_uri
+        return db_name, {'dsn': db_or_uri}
 
-    _dsn = ''
+    connection_info = {'database': db_or_uri}
     for p in ('host', 'port', 'user', 'password'):
         cfg = tools.config['db_' + p]
         if cfg:
-            _dsn += '%s=%s ' % (p, cfg)
+            connection_info[p] = cfg
 
-    return db_or_uri, '%sdbname=%s' % (_dsn, db_or_uri)
+    return db_or_uri, connection_info
 
 _Pool = None
 
@@ -667,16 +676,16 @@ def db_connect(to, allow_uri=False):
     if _Pool is None:
         _Pool = ConnectionPool(int(tools.config['db_maxconn']))
 
-    db, uri = dsn(to)
+    db, info = connection_info_for(to)
     if not allow_uri and db != to:
         raise ValueError('URI connections not allowed')
-    return Connection(_Pool, db, uri)
+    return Connection(_Pool, db, info)
 
 def close_db(db_name):
     """ You might want to call openerp.modules.registry.RegistryManager.delete(db_name) along this function."""
     global _Pool
     if _Pool:
-        _Pool.close_all(dsn(db_name)[1])
+        _Pool.close_all(connection_info_for(db_name)[1])
 
 def close_all():
     global _Pool

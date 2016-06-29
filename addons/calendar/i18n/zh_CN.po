@@ -5,16 +5,18 @@
 # Translators:
 # fausthuang, 2015
 # fausthuang, 2015
+# Jeffery Chenn <jeffery9@gmail.com>, 2016
 # liulixia <liu.lixia@elico-corp.com>, 2015
+# Ma XiaoXiao <junmaing@gmail.com>, 2016
 # Rona Lin <ssauapw@qq.com>, 2015
-# 珠海-老天 <liangjia@qq.com>, 2016
+# liAnGjiA <liangjia@qq.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-01-20 13:58+0000\n"
-"PO-Revision-Date: 2016-01-21 10:31+0000\n"
-"Last-Translator: Martin Trigaux\n"
+"PO-Revision-Date: 2016-06-22 13:11+0000\n"
+"Last-Translator: Jeffery Chenn <jeffery9@gmail.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/odoo/odoo-9/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -408,13 +410,13 @@ msgstr "%s at (%s To %s) (%s)"
 #: code:addons/calendar/calendar.py:263
 #, python-format
 msgid "%s has accepted invitation"
-msgstr ""
+msgstr "%s接受了邀请"
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:278
 #, python-format
 msgid "%s has declined invitation"
-msgstr ""
+msgstr "%s拒绝了邀请"
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -470,7 +472,7 @@ msgstr "全天，%s"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_duration
 msgid "Amount"
-msgstr "总额"
+msgstr "金额"
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1090
@@ -510,7 +512,7 @@ msgstr "出席"
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "Availability"
-msgstr "有效"
+msgstr "可用"
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1715
@@ -544,7 +546,7 @@ msgstr "日历警报"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:43
 #, python-format
 msgid "Calendar Invitation"
-msgstr ""
+msgstr "日程邀请"
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -583,7 +585,7 @@ msgstr "联系人"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_create_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type_create_uid
 msgid "Created by"
-msgstr "创建于"
+msgstr "创建者"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_create_date
@@ -592,7 +594,7 @@ msgstr "创建于"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_create_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type_create_date
 msgid "Created on"
-msgstr "创建于"
+msgstr "创建时间"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_display_start
@@ -669,7 +671,7 @@ msgstr "你真的要从你的喜好中删除这个过滤器吗？"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_duration
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Duration"
-msgstr "持续时间"
+msgstr "时长"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_duration_minutes
@@ -911,7 +913,7 @@ msgstr "最后消息日期"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event___last_update
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type___last_update
 msgid "Last Modified on"
-msgstr "最后修改日"
+msgstr "最后修改时间"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_write_uid
@@ -920,7 +922,7 @@ msgstr "最后修改日"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type_write_uid
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_write_uid
 msgid "Last Updated by"
-msgstr "最后更新"
+msgstr "最后更新者"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_write_date
@@ -929,7 +931,7 @@ msgstr "最后更新"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type_write_date
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_write_date
 msgid "Last Updated on"
-msgstr "最后更新"
+msgstr "最后更新时间"
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_res_partner_calendar_last_notif_ack
@@ -944,7 +946,7 @@ msgstr "让事件在该时间间隔自动重复"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_location
 msgid "Location"
-msgstr "位置"
+msgstr "地点"
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_location
@@ -1060,7 +1062,7 @@ msgstr "待处理"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:36
 #, python-format
 msgid "No I'm not going."
-msgstr ""
+msgstr "我不会去。"
 
 #. module: calendar
 #: selection:calendar.alarm,type:0
@@ -1227,7 +1229,7 @@ msgstr "周六"
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_search
 msgid "Search Meetings"
-msgstr "查找会议"
+msgstr "搜索会议"
 
 #. module: calendar
 #: selection:calendar.event,byday:0
@@ -1340,7 +1342,7 @@ msgid ""
 "The calendar is shared between employees and fully integrated with\n"
 "            other applications such as the employee holidays or the business\n"
 "            opportunities."
-msgstr "日历允许员工之间共享，并可以与其它应用程序整合,\n            如：员工休假或商机。"
+msgstr "日历允许员工之间共享，并可以与其它应用程序整合,  如：员工假期或商业机会。"
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1382
@@ -1463,21 +1465,21 @@ msgstr "工作日"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:48
 #, python-format
 msgid "When"
-msgstr ""
+msgstr "时间"
 
 #. module: calendar
 #. openerp-web
 #: code:addons/calendar/static/src/xml/base_calendar.xml:52
 #, python-format
 msgid "Where"
-msgstr ""
+msgstr "地点"
 
 #. module: calendar
 #. openerp-web
 #: code:addons/calendar/static/src/xml/base_calendar.xml:56
 #, python-format
 msgid "Who"
-msgstr ""
+msgstr "人物"
 
 #. module: calendar
 #: selection:calendar.event,rrule_type:0
@@ -1489,7 +1491,7 @@ msgstr "年"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:35
 #, python-format
 msgid "Yes I'm going."
-msgstr ""
+msgstr "我会去。"
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:106

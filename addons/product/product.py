@@ -86,7 +86,7 @@ class product_uom(osv.osv):
         'rounding': fields.float('Rounding Precision', digits=0, required=True,
             help="The computed quantity will be a multiple of this value. "\
                  "Use 1.0 for a Unit of Measure that cannot be further split, such as a piece."),
-        'active': fields.boolean('Active', help="By unchecking the active field you can disable a unit of measure without deleting it."),
+        'active': fields.boolean('Active', help="Uncheck the active field to disable a unit of measure without deleting it."),
         'uom_type': fields.selection([('bigger','Bigger than the reference Unit of Measure'),
                                       ('reference','Reference Unit of Measure for this category'),
                                       ('smaller','Smaller than the reference Unit of Measure')],'Type', required=1),
@@ -104,6 +104,7 @@ class product_uom(osv.osv):
         ('factor_gt_zero', 'CHECK (factor!=0)', 'The conversion ratio for a unit of measure cannot be 0!')
     ]
 
+    @api.cr_uid
     def _compute_qty(self, cr, uid, from_uom_id, qty, to_uom_id=False, round=True, rounding_method='UP'):
         if not from_uom_id or not qty or not to_uom_id:
             return qty
@@ -197,6 +198,13 @@ class product_category(osv.osv):
         res = self.name_get(cr, uid, ids, context=context)
         return dict(res)
 
+    def _compute_product_count(self, cr, uid, ids, field_name, arg, context=None):
+        res = {}
+        prod_templates = self.pool['product.template'].read_group(cr, uid, [('categ_id', 'in', ids)], ['categ_id'], ['categ_id'], context=context)
+        for prod_template in prod_templates:
+            res[prod_template['categ_id'][0]] = prod_template['categ_id_count']
+        return res
+
     _name = "product.category"
     _description = "Product Category"
     _columns = {
@@ -204,10 +212,10 @@ class product_category(osv.osv):
         'complete_name': fields.function(_name_get_fnc, type="char", string='Name'),
         'parent_id': fields.many2one('product.category','Parent Category', select=True, ondelete='cascade'),
         'child_id': fields.one2many('product.category', 'parent_id', string='Child Categories'),
-        'sequence': fields.integer('Sequence', select=True, help="Gives the sequence order when displaying a list of product categories."),
         'type': fields.selection([('view','View'), ('normal','Normal')], 'Category Type', help="A category of the view type is a virtual category that can be used as the parent of another category to create a hierarchical structure."),
         'parent_left': fields.integer('Left Parent', select=1),
         'parent_right': fields.integer('Right Parent', select=1),
+        'product_count': fields.function(_compute_product_count, type="integer", help="The number of products under this category (Does not consider the children categories)"),
     }
 
 
@@ -217,7 +225,7 @@ class product_category(osv.osv):
 
     _parent_name = "parent_id"
     _parent_store = True
-    _parent_order = 'sequence, name'
+    _parent_order = 'name'
     _order = 'parent_left'
 
     _constraints = [
@@ -261,7 +269,7 @@ class produce_price_history(osv.osv):
 class product_attribute(osv.osv):
     _name = "product.attribute"
     _description = "Product Attribute"
-    _order = 'sequence,id'
+    _order = 'sequence, name'
     _columns = {
         'name': fields.char('Name', translate=True, required=True),
         'value_ids': fields.one2many('product.attribute.value', 'attribute_id', 'Values', copy=True),
@@ -350,8 +358,10 @@ class product_attribute_line(osv.osv):
     }
 
     def _check_valid_attribute(self, cr, uid, ids, context=None):
-        obj_pal = self.browse(cr, uid, ids[0], context=context)
-        return obj_pal.value_ids <= obj_pal.attribute_id.value_ids
+        for obj_pal in self.browse(cr, uid, ids, context=context):
+            if not (obj_pal.value_ids <= obj_pal.attribute_id.value_ids):
+                return False
+        return True
 
     _constraints = [
         (_check_valid_attribute, 'Error ! You cannot use this attribute with the following value.', ['attribute_id'])
@@ -422,6 +432,7 @@ class product_template(osv.osv):
         return product.write({'list_price': value})
 
     def _product_currency(self, cr, uid, ids, name, arg, context=None):
+        uid = SUPERUSER_ID
         try:
             main_company = self.pool['ir.model.data'].get_object(cr, uid, 'base', 'main_company')
         except ValueError:
@@ -484,7 +495,11 @@ class product_template(osv.osv):
             help="A description of the Product that you want to communicate to your customers. "
                  "This description will be copied to every Sale Order, Delivery Order and Customer Invoice/Refund"),
         'type': fields.selection(_get_product_template_type_wrapper, 'Product Type', required=True,
-            help="A consumable is a product for which you don't manage stock, a service is a non-material product provided by a company or an individual."),
+            help='A stockable product is a product for which you manage stock. The "Inventory" app has to be installed.\n'
+                 'A consumable product, on the other hand, is a product for which stock is not managed.\n'
+                 'A service is a non-material product you provide.\n'
+                 'A digital content is a non-material product you sell online. The files attached to the products are the one that are sold on '
+                 'the e-commerce such as e-books, music, pictures,... The "Digital Product" module has to be installed.'),
         'rental': fields.boolean('Can be Rent'),
         'categ_id': fields.many2one('product.category','Internal Category', required=True, change_default=True, domain="[('type','=','normal')]" ,help="Select category for the current product"),
         'price': fields.function(_product_template_price, fnct_inv=_set_product_template_price, type='float', string='Price', digits_compute=dp.get_precision('Product Price')),
@@ -534,30 +549,14 @@ class product_template(osv.osv):
     # image: all image fields are base64 encoded and PIL-supported
     image = openerp.fields.Binary("Image", attachment=True,
         help="This field holds the image used as image for the product, limited to 1024x1024px.")
-    image_medium = openerp.fields.Binary("Medium-sized image",
-        compute='_compute_images', inverse='_inverse_image_medium', store=True, attachment=True,
+    image_medium = openerp.fields.Binary("Medium-sized image", attachment=True,
         help="Medium-sized image of the product. It is automatically "\
              "resized as a 128x128px image, with aspect ratio preserved, "\
              "only when the image exceeds one of those sizes. Use this field in form views or some kanban views.")
-    image_small = openerp.fields.Binary("Small-sized image",
-        compute='_compute_images', inverse='_inverse_image_small', store=True, attachment=True,
+    image_small = openerp.fields.Binary("Small-sized image", attachment=True,
         help="Small-sized image of the product. It is automatically "\
              "resized as a 64x64px image, with aspect ratio preserved. "\
              "Use this field anywhere a small image is required.")
-
-    @api.depends('image')
-    def _compute_images(self):
-        for rec in self:
-            rec.image_medium = tools.image_resize_image_medium(rec.image, avoid_if_small=True)
-            rec.image_small = tools.image_resize_image_small(rec.image)
-
-    def _inverse_image_medium(self):
-        for rec in self:
-            rec.image = tools.image_resize_image_big(rec.image_medium)
-
-    def _inverse_image_small(self):
-        for rec in self:
-            rec.image = tools.image_resize_image_big(rec.image_small)
 
     def _price_get(self, cr, uid, products, ptype='list_price', context=None):
         if context is None:
@@ -642,7 +641,7 @@ class product_template(osv.osv):
             for variant_id in variant_alone:
                 product_ids = []
                 for product_id in tmpl_id.product_variant_ids:
-                    if variant_id.id not in map(int, product_id.attribute_value_ids):
+                    if not variant_id.attribute_id <= product_id.mapped('attribute_value_ids').mapped('attribute_id'):
                         product_ids.append(product_id.id)
                 product_obj.write(cr, uid, product_ids, {'attribute_value_ids': [(4, variant_id.id)]}, context=ctx)
 
@@ -684,6 +683,7 @@ class product_template(osv.osv):
 
     def create(self, cr, uid, vals, context=None):
         ''' Store the initial standard price in order to be able to retrieve the cost of a product template for a given date'''
+        tools.image_resize_images(vals)
         product_template_id = super(product_template, self).create(cr, uid, vals, context=context)
         if not context or "create_product_product" not in context:
             self.create_variant_ids(cr, uid, [product_template_id], context=context)
@@ -707,6 +707,7 @@ class product_template(osv.osv):
         return product_template_id
 
     def write(self, cr, uid, ids, vals, context=None):
+        tools.image_resize_images(vals)
         res = super(product_template, self).write(cr, uid, ids, vals, context=context)
         if 'attribute_line_ids' in vals or vals.get('active'):
             self.create_variant_ids(cr, uid, ids, context=context)
@@ -722,8 +723,9 @@ class product_template(osv.osv):
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
-        template = self.browse(cr, uid, id, context=context)
-        default['name'] = _("%s (copy)") % (template['name'])
+        if 'name' not in default:
+            template = self.browse(cr, uid, id, context=context)
+            default['name'] = _("%s (copy)") % (template['name'])
         return super(product_template, self).copy(cr, uid, id, default=default, context=context)
 
     _defaults = {
@@ -788,7 +790,7 @@ class product_product(osv.osv):
     _description = "Product"
     _inherits = {'product.template': 'product_tmpl_id'}
     _inherit = ['mail.thread']
-    _order = 'default_code,name_template'
+    _order = 'default_code'
 
     def _product_price(self, cr, uid, ids, name, arg, context=None):
         plobj = self.pool.get('product.pricelist')
@@ -892,10 +894,6 @@ class product_product(osv.osv):
     def _is_product_variant_impl(self, cr, uid, ids, name, arg, context=None):
         return dict.fromkeys(ids, True)
 
-    def _get_name_template_ids(self, cr, uid, ids, context=None):
-        template_ids = self.pool.get('product.product').search(cr, uid, [('product_tmpl_id', 'in', ids)])
-        return list(set(template_ids))
-
     def _get_image_variant(self, cr, uid, ids, name, args, context=None):
         result = dict.fromkeys(ids, False)
         for obj in self.browse(cr, uid, ids, context=context):
@@ -952,6 +950,14 @@ class product_product(osv.osv):
             break
         return res
 
+    def _get_pricelist_items(self, cr, uid, ids, field_name, args, context=None):
+        res = {}
+        for prod in self.browse(cr, uid, ids, context=context):
+            item_ids = self.pool['product.pricelist.item'].search(cr, uid, ['|', ('product_id', '=', prod.id), ('product_tmpl_id', '=', prod.product_tmpl_id.id)], context=context)
+            res[prod.id] = item_ids
+        return res
+
+
     _columns = {
         'price': fields.function(_product_price, fnct_inv=_set_product_lst_price, type='float', string='Price', digits_compute=dp.get_precision('Product Price')),
         'price_extra': fields.function(_get_price_extra, type='float', string='Variant Extra Price', help="This is the sum of the extra price of all attributes", digits_compute=dp.get_precision('Product Price')),
@@ -962,10 +968,6 @@ class product_product(osv.osv):
         'active': fields.boolean('Active', help="If unchecked, it will allow you to hide the product without removing it."),
         'product_tmpl_id': fields.many2one('product.template', 'Product Template', required=True, ondelete="cascade", select=True, auto_join=True),
         'barcode': fields.char('Barcode', help="International Article Number used for product identification.", oldname='ean13', copy=False),
-        'name_template': fields.related('product_tmpl_id', 'name', string="Template Name", type='char', store={
-            'product.template': (_get_name_template_ids, ['name'], 10),
-            'product.product': (lambda self, cr, uid, ids, c=None: ids, [], 10),
-        }, select=True),
         'attribute_value_ids': fields.many2many('product.attribute.value', id1='prod_id', id2='att_id', string='Attributes', ondelete='restrict'),
         'is_product_variant': fields.function( _is_product_variant_impl, type='boolean', string='Is a product variant'),
         # image: all image fields are base64 encoded and PIL-supported
@@ -988,6 +990,7 @@ class product_product(osv.osv):
                                           groups="base.group_user", string="Cost"),
         'volume': fields.float('Volume', help="The volume in m3."),
         'weight': fields.float('Weight', digits_compute=dp.get_precision('Stock Weight'), help="The weight of the contents in Kg, not including any packaging, etc."),
+        'pricelist_item_ids': fields.function(_get_pricelist_items, type='many2many', relation='product.pricelist.item', string='Pricelist Items'),
     }
 
     _defaults = {
@@ -1242,8 +1245,8 @@ class product_packaging(osv.osv):
         'name' : fields.char('Packaging Type', required=True),
         'sequence': fields.integer('Sequence', help="The first in the sequence is the default one."),
         'product_tmpl_id': fields.many2one('product.template', string='Product'),
-        'qty' : fields.float('Quantity by Package',
-            help="The total number of products you can put by pallet or box."),
+        'qty' : fields.float('Quantity per Package',
+            help="The total number of products you can have per pallet or box."),
     }
     _defaults = {
         'sequence' : 1,

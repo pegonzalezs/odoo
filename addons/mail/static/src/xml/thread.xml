@@ -12,14 +12,14 @@
         <t t-if="options.display_empty_channel">
             <t t-call="mail.EmptyChannel" />
         </t>
-        <t t-if="options.display_no_match">
+        <div t-if="options.display_no_match" class="o_mail_no_content">
             <div class="o_thread_title">No matches found</div>
             <div>No message matches your search. Try to change your search filters.</div>
-        </t>
+        </div>
     </t>
 
     <!-- When a channel is empty-->
-    <div t-name="mail.EmptyChannel">
+    <div t-name="mail.EmptyChannel" class="o_mail_no_content">
         <t t-if="options.channel_id==='channel_inbox'">
             <div class="o_thread_title">Congratulations, your inbox is empty</div>
             <div>New messages appear here.</div>
@@ -87,9 +87,7 @@
                         <t t-esc="message.displayed_author"/>
                     </strong>
 
-                    <small t-att-title="message.date">
-                        - <t t-esc="message.hour"/>
-                    </small>
+                    - <small class="o_mail_timestamp" t-att-title="message.date"><t t-esc="message.hour"/></small>
                     <t t-if="message.model &amp;&amp; (message.model != 'mail.channel') &amp;&amp; options.display_document_link">
                         on <a t-att-href="message.url" t-att-data-oe-model="message.model" t-att-data-oe-id="message.res_id"><t t-esc="message.record_name"/></a>
                     </t>
@@ -100,12 +98,12 @@
                         <i t-if="options.display_stars &amp;&amp; !message.is_system_notification"
                             t-att-class="'fa fa-lg o_thread_message_star ' + (message.is_starred ? 'fa-star' : 'fa-star-o')"
                             t-att-data-message-id="message.id" title="Mark as Todo"/>
-                        <i t-if="message.is_needaction &amp;&amp; options.display_needactions"
-                           class="fa fa-check o_thread_message_needaction"
-                           t-att-data-message-id="message.id" title="Mark as Read"/>
                        <i t-if="message.record_name &amp;&amp; message.model != 'mail.channel' &amp;&amp; options.display_reply_icon"
                            class="fa fa-reply o_thread_message_reply"
                            t-att-data-message-id="message.id" title="Reply"/>
+                        <i t-if="message.is_needaction &amp;&amp; options.display_needactions"
+                           class="fa fa-check o_thread_message_needaction"
+                           t-att-data-message-id="message.id" title="Mark as Read"/>
                     </span>
                 </p>
                 <t t-if="message.tracking_value_ids &amp;&amp; message.tracking_value_ids.length &gt; 0">
@@ -116,17 +114,7 @@
                 </t>
                 <p t-if="options.display_subject &amp;&amp; message.display_subject" class="o_mail_subject">Subject: <t t-esc="message.subject"/></p>
                 <t t-if="!(message.tracking_value_ids &amp;&amp; message.tracking_value_ids.length &gt; 0)">
-                    <t t-if="options.shorten_messages &amp;&amp; message.body_short">
-                        <div class="o_mail_body_short">
-                            <t t-raw="message.body_short"/>
-                        </div>
-                        <div class="o_mail_body_long">
-                            <t t-raw="message.body"/>
-                        </div>
-                    </t>
-                    <t t-if="!options.shorten_messages || !message.body_short">
-                        <div><t t-raw="message.body"/></div>
-                    </t>
+                    <t t-raw="message.body"/>
                 </t>
                 <t t-foreach="message.attachment_ids" t-as="attachment">
                     <t t-call="mail.Attachment"/>
@@ -150,10 +138,10 @@
                 <li>
                     <t t-esc="value.changed_field"/>:
                     <t t-if="value.old_value">
-                        <span> <t t-esc="value.old_value"/> </span>
+                        <span> <t t-esc="value.old_value || ((value.field_type !== 'boolean') and '')"/> </span>
                         <span class="fa fa-long-arrow-right"/>
                     </t>
-                    <span> <t t-esc="value.new_value"/> </span>
+                    <span> <t t-esc="value.new_value || ((value.field_type !== 'boolean') and '')"/> </span>
                 </li>
             </t>
         </ul>
