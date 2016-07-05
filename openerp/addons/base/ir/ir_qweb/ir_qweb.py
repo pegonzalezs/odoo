@@ -157,8 +157,7 @@ class IrQWeb(models.AbstractModel, QWeb):
 
     @tools.ormcache('xmlid', 'options.get("lang", "en_US")')
     def _get_asset_content(self, xmlid, options):
-        options = dict(self.env.context)
-        options.update(options,
+        options = dict(options,
             inherit_branding=False, inherit_branding_auto=False,
             edit_translations=False, translatable=False,
             rendering_bundle=True)
@@ -238,7 +237,6 @@ class IrQWeb(models.AbstractModel, QWeb):
         return (attributes, content, inherit_branding or translate)
 
     # formating methods
-
     def _format_func_monetary(self, value, display_currency=None, from_currency=None):
         env = display_currency.env
         precision = int(round(math.log10(display_currency.rounding)))
@@ -254,8 +252,12 @@ class IrQWeb(models.AbstractModel, QWeb):
             formatted_amount, pre=pre, post=post
         ).format(symbol=display_currency.symbol,)
 
-    # compile expression add safe_eval
+    def _format_func_htmlcontact(self, value, options, values=None):
+        return self.pool['ir.qweb.field.contact'].record_to_html(
+            self.env.cr, self.env.uid, dict(contact=value), 'contact', dict(options or {}), context=self.env.context
+        )
 
+    # compile expression add safe_eval
     def _compile_expr(self, expr):
         """ Compiles a purported Python expression to ast, verifies that it's safe
         (according to safe_eval's semantics) and alter its variable references to

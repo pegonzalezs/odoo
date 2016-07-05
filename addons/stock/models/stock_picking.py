@@ -8,7 +8,7 @@ import time
 from odoo import api, fields, models, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.float_utils import float_compare
-from odoo.addons.procurement import procurement
+from odoo.addons.procurement.models import procurement
 from odoo.exceptions import UserError
 
 
@@ -227,6 +227,8 @@ class Picking(models.Model):
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
     move_lines = fields.One2many('stock.move', 'picking_id', string="Stock Moves", copy=True)
+    has_scrap_move = fields.Boolean(
+        'Has Scrap Moves', compute='_has_scrap_move')
     picking_type_id = fields.Many2one(
         'stock.picking.type', 'Picking Type',
         required=True,
@@ -340,6 +342,11 @@ class Picking(models.Model):
     @api.one
     def _set_min_date(self):
         self.move_lines.write({'date_expected': self.min_date})
+
+    @api.one
+    def _has_scrap_move(self):
+        # TDE FIXME: better implementation
+        self.has_scrap_move = bool(self.env['stock.move'].search_count([('picking_id', '=', self.id), ('scrapped', '=', True)]))
 
     @api.one
     def _compute_quant_reserved_exist(self):
@@ -873,7 +880,7 @@ class Picking(models.Model):
 
             # TDE FIXME: do_only_split does not seem used anymore
             if todo_moves and not self.env.context.get('do_only_split'):
-                todo_moves.with_context(mail_notrack=True).action_done()
+                todo_moves.action_done()
             elif self.env.context.get('do_only_split'):
                 picking = picking.with_context(split=todo_moves.ids)
 
@@ -995,3 +1002,25 @@ class Picking(models.Model):
             else:
                 raise UserError(_('Please process some quantities to put in the pack first!'))
         return package
+
+    @api.multi
+    def button_scrap(self):
+        self.ensure_one()
+        return {
+            'name': _('Scrap'),
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'stock.scrap',
+            'view_id': self.env.ref('stock.stock_scrap_form_view2').id,
+            'type': 'ir.actions.act_window',
+            'context': {'default_picking_id': self.id, 'product_ids': self.pack_operation_product_ids.mapped('product_id').ids},
+            'target': 'new',
+        }
+
+    @api.multi
+    def action_see_move_scrap(self):
+        self.ensure_one()
+        action = self.env.ref('stock.action_stock_scrap').read()[0]
+        scraps = self.env['stock.scrap'].search([('picking_id', '=', self.id)])
+        action['domain'] = [('id', 'in', scraps.ids)]
+        return action

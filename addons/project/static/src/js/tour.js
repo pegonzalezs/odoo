@@ -6,9 +6,7 @@ var tour = require('web_tour.tour');
 
 var _t = core._t;
 
-tour.register('project_tour', {
-    'skip_enabled': true,
-}, [{
+tour.register('project_tour', [{
     trigger: '.o_app[data-menu-xmlid="base.menu_main_pm"], .oe_menu_toggler[data-menu-xmlid="base.menu_main_pm"]',
     content: _t('Want a better way to <b>manage your projects</b>? <i>It starts here.</i>'),
     position: 'bottom',
@@ -47,17 +45,42 @@ tour.register('project_tour', {
     position: "bottom"
 }, {
     trigger: ".o_kanban_record",
-    content: _t("Open a task by clicking on the card"),
+    extra_trigger: '.o_kanban_project_tasks',
+    content: _t("Click on a card to get the details of the task."),
     position: "bottom"
 }, {
-    trigger: ".o_form_sheet .o_group:first",
-    content: 'Assign the task to one of your colleague to collaborate',
-    position: "left"
+    trigger: ".o_form_button_edit:visible",
+    extra_trigger: '.o_form_project_tasks',
+    content: _t('Click on this button to modify the task.'),
+    position: "bottom"
+}, {
+    trigger: ".o_form_field.o_task_user_field",
+    extra_trigger: '.o_form_project_tasks.o_form_editable',
+    content: _t('<b>Assign the task</b> to someone. <i>You can create and invite a new user on the fly.</i>'),
+    position: "bottom"
+}, {
+    trigger: ".o_form_button_save",
+    extra_trigger: '.o_form_project_tasks.o_form_editable',
+    content: _t('<b>Click the save button</b> to apply your changes to the task.'),
+    position: "bottom"
 }, {
     trigger: ".breadcrumb li:not(.active):last",
     extra_trigger: '.o_form_project_tasks',
     content: _t("Click on layers in the path to easily <b>return to tasks</b>."),
     position: "bottom"
+}, {
+    trigger: ".o_main_navbar .o_menu_toggle",
+    content: _t('Click the <i>Home icon</i> to navigate across apps.'),
+    edition: "enterprise",
+    position: "bottom"
+}, {
+    trigger: '.o_app[data-menu-xmlid="base.menu_administration"], .oe_menu_toggler[data-menu-xmlid="base.menu_administration"]',
+    content: _t("Configuration options are available in the Settings app."),
+    position: "bottom"
+}, {
+    trigger: ".o_web_settings_dashboard textarea#user_emails",
+    content: _t("<b>Invite collegues</b> via email.<br/><i>Enter one email per line.</i>"),
+    position: "right"
 }]);
 
 });
