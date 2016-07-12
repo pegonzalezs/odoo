@@ -33,18 +33,20 @@ class sale_order_line(osv.osv):
             currency_id = item.pricelist_id.currency_id
 
         product = product_obj.browse(cr, uid, product_id, context=context)
+        product_currency = (product.company_id and product.company_id.currency_id) or self.pool['res.users'].browse(cr, uid, uid).company_id.currency_id
         if not currency_id:
-            currency_id = product.company_id.currency_id
+            currency_id = product_currency
             cur_factor = 1.0
         else:
-            if currency_id.id == product.company_id.currency_id.id:
+            if currency_id.id == product_currency.id:
                 cur_factor = 1.0
             else:
-                cur_factor = self.pool['res.currency']._get_conversion_rate(cr, uid, product.company_id.currency_id, currency_id, context=context)
+                cur_factor = self.pool['res.currency']._get_conversion_rate(cr, uid, product_currency, currency_id, context=context)
 
-        if uom and uom != product.uom_id.id:
+        product_uom = context and context.get('uom') or product.uom_id.id
+        if uom and uom != product_uom:
             # the unit price is in a different uom
-            uom_factor = self.pool['product.uom']._compute_price(cr, uid, uom, 1.0, product.uom_id.id)
+            uom_factor = self.pool['product.uom']._compute_price(cr, uid, product.uom_id.id, 1.0, uom)
         else:
             uom_factor = 1.0
 

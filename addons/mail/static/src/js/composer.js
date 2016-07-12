@@ -226,10 +226,11 @@ var MentionManager = Widget.extend({
                 for (var i=0; i<matches.length; i++) {
                     var match = matches[i];
                     var end_index = match.index + match[0].length;
+                    var selection_id = self.get_selection_id(match, selection);
                     // put back white spaces instead of non-breaking spaces in mention's name
                     var match_name = match[0].substring(1).replace(new RegExp(NON_BREAKING_SPACE, 'g'), ' ');
-                    var href = base_href + _.str.sprintf("#model=%s&id=%s", listener.model, selection[i].id);
-                    var processed_text = _.str.sprintf(mention_link, href, listener.redirect_classname, selection[i].id, listener.model, listener.delimiter, match_name);
+                    var href = base_href + _.str.sprintf("#model=%s&id=%s", listener.model, selection_id);
+                    var processed_text = _.str.sprintf(mention_link, href, listener.redirect_classname, selection_id, listener.model, listener.delimiter, match_name);
                     var subtext = s.substring(start_index, end_index).replace(match[0], processed_text);
                     substrings.push(subtext);
                     start_index = end_index;
@@ -239,6 +240,10 @@ var MentionManager = Widget.extend({
             }
         });
         return s;
+    },
+
+    get_selection_id: function (match, selection) {
+        return _.findWhere(selection, {'name': match[0].slice(1)}).id;
     },
 
     reset_selections: function () {
@@ -338,7 +343,7 @@ var BasicComposer = Widget.extend({
             input_min_height: 28,
             mention_fetch_limit: 8,
             mention_partners_restricted: false, // set to true to only suggest prefetched partners
-            send_text: _('Send'),
+            send_text: _t('Send'),
             default_body: '',
             default_mention_selections: {},
         });
@@ -614,7 +619,7 @@ var BasicComposer = Widget.extend({
             // filter prefetched partners with the given search string
             var suggestions = [];
             var limit = self.options.mention_fetch_limit;
-            var search_regexp = new RegExp(self.unaccent(search), 'i');
+            var search_regexp = new RegExp(_.str.escapeRegExp(self.unaccent(search)), 'i');
             _.each(prefetched_partners, function (partners) {
                 if (limit > 0) {
                     var filtered_partners = _.filter(partners, function (partner) {

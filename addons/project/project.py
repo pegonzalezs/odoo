@@ -256,6 +256,8 @@ class project(osv.osv):
         if not default.get('name'):
             default.update(name=_("%s (copy)") % (proj.name))
         res = super(project, self).copy(cr, uid, id, default, context)
+        for follower in proj.message_follower_ids:
+            self.message_subscribe(cr, uid, res, partner_ids=[follower.partner_id.id], subtype_ids=[subtype.id for subtype in follower.subtype_ids])
         self.map_tasks(cr, uid, id, res, context=context)
         return res
 
@@ -456,7 +458,7 @@ class task(osv.osv):
         'remaining_hours': fields.float('Remaining Hours', digits=(16,2), help="Total remaining time, can be re-estimated periodically by the assignee of the task."),
         'user_id': fields.many2one('res.users', 'Assigned to', select=True, track_visibility='onchange'),
         'partner_id': fields.many2one('res.partner', 'Customer'),
-        'manager_id': fields.related('project_id', 'analytic_account_id', 'user_id', type='many2one', relation='res.users', string='Project Manager'),
+        'manager_id': fields.related('project_id', 'user_id', type='many2one', relation='res.users', string='Project Manager'),
         'company_id': fields.many2one('res.company', 'Company'),
         'id': fields.integer('ID', readonly=True),
         'color': fields.integer('Color Index'),

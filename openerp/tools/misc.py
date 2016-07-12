@@ -457,6 +457,7 @@ ALL_LANGUAGES = {
         'cs_CZ': u'Czech / Čeština',
         'da_DK': u'Danish / Dansk',
         'de_DE': u'German / Deutsch',
+        'de_CH': u'German (CH) / Deutsch (CH)',
         'el_GR': u'Greek / Ελληνικά',
         'en_AU': u'English (AU)',
         'en_GB': u'English (UK)',
@@ -503,6 +504,7 @@ ALL_LANGUAGES = {
         'lv_LV': u'Latvian / latviešu valoda',
         'mk_MK': u'Macedonian / македонски јазик',
         'mn_MN': u'Mongolian / монгол',
+        'my_MM': u'Burmese / မြန်မာဘာသာ',
         'nb_NO': u'Norwegian Bokmål / Norsk bokmål',
         'nl_NL': u'Dutch / Nederlands',
         'nl_BE': u'Dutch (BE) / Nederlands (BE)',
@@ -564,6 +566,15 @@ def mod10r(number):
             report = codec[ (int(digit) + report) % 10 ]
     return result + str((10 - report) % 10)
 
+def str2bool(s, default=None):
+    s = ustr(s).lower()
+    y = 'y yes 1 true t on'.split()
+    n = 'n no 0 false f off'.split()
+    if s not in (y + n):
+        if default is None:
+            raise ValueError('Use 0/1/yes/no/true/false/on/off')
+        return bool(default)
+    return s in y
 
 def human_size(sz):
     """

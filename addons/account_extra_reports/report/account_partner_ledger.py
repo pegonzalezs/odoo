@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 import time
 from openerp import api, models
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT
 
 
 class ReportPartnerLedger(models.AbstractModel):
@@ -26,12 +28,16 @@ class ReportPartnerLedger(models.AbstractModel):
         self.env.cr.execute(query, tuple(params))
         res = self.env.cr.dictfetchall()
         sum = 0.0
+        lang_code = self.env.context.get('lang') or 'en_US'
+        lang = self.env['res.lang']
+        lang_id = lang._lang_get(lang_code)
+        date_format = lang.browse(lang_id).date_format
         for r in res:
+            r['date'] = datetime.strptime(r['date'], DEFAULT_SERVER_DATE_FORMAT).strftime(date_format)
             r['displayed_name'] = '-'.join(
-                r['move_name'] not in ['', '/'] and [r['move_name']] or [] +
-                r['ref'] not in ['', '/'] and [r['ref']] or [] +
-                r['name'] not in ['', '/'] and [r['name']] or []
-                )
+                r[field_name] for field_name in ('move_name', 'ref', 'name')
+                if r[field_name] not in (None, '', '/')
+            )
             sum += r['debit'] - r['credit']
             r['progress'] = sum
             full_account.append(r)

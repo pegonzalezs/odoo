@@ -4,13 +4,15 @@
 # 
 # Translators:
 # Arek Smagacz <arek.smagacz@gmail.com>, 2015
+# Piotr Szlązak <szlazakpiotr@gmail.com>, 2016
+# Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-10-09 09:18+0000\n"
-"PO-Revision-Date: 2015-11-23 21:24+0000\n"
-"Last-Translator: Arek Smagacz <arek.smagacz@gmail.com>\n"
+"PO-Revision-Date: 2016-06-08 12:08+0000\n"
+"Last-Translator: Piotr Szlązak <szlazakpiotr@gmail.com>\n"
 "Language-Team: Polish (http://www.transifex.com/odoo/odoo-9/language/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -51,7 +53,7 @@ msgstr ""
 msgid ""
 "<br/>\n"
 "                                <small>(don't forget to apply the changes)</small>"
-msgstr ""
+msgstr "<br/>\n                                <small>(nie zapomnij aby uzupełnić zmiany)</small>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
@@ -65,27 +67,27 @@ msgstr ""
 msgid ""
 "<br/>\n"
 "                                <strong>Payment Status:</strong>"
-msgstr ""
+msgstr "<br/>\n                                <strong>Status zapłaty:</strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.order_state_message
 msgid "<i class=\"fa fa-cog\"/> Configure Transfer Details"
-msgstr ""
+msgstr "<i class=\"fa fa-cog\"/> Konfiguruj transfer szczegółów"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
 msgid "<i class=\"fa fa-comment-o\"/> Website Live Chat on"
-msgstr ""
+msgstr "<i class=\"fa fa-comment-o\"/> Czat na stronie"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
 msgid "<i class=\"fa fa-envelope-o\"/> Email Our Website Expert"
-msgstr ""
+msgstr "<i class=\"fa fa-envelope-o\"/> Email naszego eksperta od strony"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<i class=\"fa fa-print\"/> Print"
-msgstr ""
+msgstr "<i class=\"fa fa-print\"/> Drukuj"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.header
@@ -97,7 +99,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.total
 msgid "<span class=\"col-xs-6 text-right h4\">Total:</span>"
-msgstr ""
+msgstr "<span class=\"col-xs-6 text-right h4\">Suma:</span>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.total
@@ -114,22 +116,22 @@ msgstr ""
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.payment
 msgid "<span class=\"fa fa-arrow-right\"/> Change Address"
-msgstr ""
+msgstr "<span class=\"fa fa-arrow-right\"/> Zmień adres"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.checkout
 msgid "<span class=\"fa fa-arrow-right\"/> change"
-msgstr ""
+msgstr "<span class=\"fa fa-arrow-right\"/> zmień"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
 msgid "<span class=\"fa fa-comment-o\"/> Website Live Chat on"
-msgstr ""
+msgstr "<span class=\"fa fa-comment-o\"/> Czat na stronie"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
 msgid "<span class=\"fa fa-envelope-o\"/> Email Our Website Expert"
-msgstr ""
+msgstr "<span class=\"fa fa-envelope-o\"/> Mail naszego eksperta od strony"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
@@ -262,7 +264,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.suggested_products_list
 msgid "<strong>Add to Cart</strong>"
-msgstr ""
+msgstr "<strong>Dodaj do koszyka</strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
@@ -341,28 +343,28 @@ msgstr ""
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
 msgid "<strong>Name</strong> of your product"
-msgstr ""
+msgstr "<strong>Nazwa</strong> twojego produktu"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
 msgid "<strong>Need help to import your products?</strong>"
-msgstr ""
+msgstr "<strong>Potrzebujesz pomocy przy imporcie produktów?</strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<strong>Order Details:</strong>"
-msgstr ""
+msgstr "<strong>Szczegóły zamówienia<strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.confirmation
 #: model:ir.ui.view,arch_db:website_sale.report_shop_saleorder_document
 msgid "<strong>Payment Method:</strong>"
-msgstr ""
+msgstr "<strong>Metoda płatności:</strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<strong>Payment information:</strong>"
-msgstr ""
+msgstr "<strong>Informacje płatności:</strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
@@ -445,7 +447,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<strong>Total:</strong>"
-msgstr ""
+msgstr "<strong>Suma:</strong>"
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.website_planner
@@ -1154,7 +1156,7 @@ msgstr "Ostatnio modyfikowano"
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_res_partner_last_website_so_id
 msgid "Last Online Sale Order"
-msgstr ""
+msgstr "Ostatnie zamówienie sprzedaży online"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category_write_uid
@@ -1874,7 +1876,7 @@ msgstr ""
 #: model:ir.model.fields,help:website_sale.field_product_product_website_url
 #: model:ir.model.fields,help:website_sale.field_product_template_website_url
 msgid "The full URL to access the document through the website."
-msgstr ""
+msgstr "Pełny adres URL dostępu do dokumentu przez stronę."
 
 #. module: website_sale
 #: model:ir.ui.view,arch_db:website_sale.order_state_message
@@ -2001,7 +2003,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_sale.field_product_product_website_published
 #: model:ir.model.fields,field_description:website_sale.field_product_template_website_published
 msgid "Visible in Website"
-msgstr ""
+msgstr "Widoczny na stronie"
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_rating_rating_website_published
