@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Manami Hashi <manami@roomsfor.hk>, 2016
+# Martin Trigaux, 2016
 # 高木正勝 <masakatsu.takagi@pro-spire.co.jp>, 2016
 # Yoshi Tashiro <tashiro@roomsfor.hk>, 2015-2016
 # 高木正勝 <masakatsu.takagi@pro-spire.co.jp>, 2016
@@ -12,8 +13,8 @@ msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-10-09 09:18+0000\n"
-"PO-Revision-Date: 2016-07-22 08:38+0000\n"
-"Last-Translator: 高木正勝 <masakatsu.takagi@pro-spire.co.jp>\n"
+"PO-Revision-Date: 2016-08-20 12:48+0000\n"
+"Last-Translator: Yoshi Tashiro <tashiro@roomsfor.hk>\n"
 "Language-Team: Japanese (http://www.transifex.com/odoo/odoo-9/language/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2284,7 +2285,7 @@ msgid ""
 "\n"
 "Online Events\n"
 "        "
-msgstr ""
+msgstr "\nオンラインイベント\n        "
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_blog
@@ -4452,22 +4453,22 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not create menu."
-msgstr ""
+msgstr "- このモジュールはメニューを追加しません。"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not create report."
-msgstr ""
+msgstr "- このモジュールはレポートを追加しません。"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not create views."
-msgstr ""
+msgstr "- このモジュールはビューを追加しません。"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not depends on any other module."
-msgstr ""
+msgstr "- このモジュールは他のモジュールに依存しません。"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.res_lang_form
@@ -4694,7 +4695,7 @@ msgid ""
 "default in order to customize the view of the menu that users will be able "
 "to see. Whether they can have a read, write, create and delete access right "
 "can be managed from here."
-msgstr "グループはシステムの特定のアプリケーションとタスクにアクセスと権利を与えるためユーザに割り当てられる機能エリアのセットです。ユーザが見ることのできるメニューのビューをカスタマイズするために、カスタムグループを作成したり、デフォルトで存在するグループを編集できます。\r\n彼らが読み込み、書き込み、作成、削除のアクセス権限を持つかどうかをここから管理することができます。"
+msgstr "グループはシステムの特定のアプリケーションとタスクにアクセスと権利を与えるためユーザに割り当てられる機能エリアのセットです。ユーザが見ることのできるメニューのビューをカスタマイズするために、カスタムグループを作成したり、デフォルトで存在するグループを編集できます。\n彼らが読み込み、書き込み、作成、削除のアクセス権限を持つかどうかをここから管理することができます。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hw_posbox_homepage
@@ -5207,7 +5208,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_administration
 msgid "Administration"
-msgstr "アドミニストレーション"
+msgstr "管理"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_country_state_name
@@ -7371,7 +7372,7 @@ msgstr "与信限度"
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_mercury
 msgid "Credit card support for Point Of Sale"
-msgstr ""
+msgstr "POSでのクレジットカード利用"
 
 #. module: base
 #: model:res.country,name:base.hr
@@ -7463,12 +7464,12 @@ msgstr "現在のウィンドウ"
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Current Year with Century: %(year)s"
-msgstr "世紀を持つ現在の年：%(year)s"
+msgstr "世紀を含む現在年: %(year)s"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Current Year without Century: %(y)s"
-msgstr "世紀なしの現在年： %(y)s"
+msgstr "世紀なしの現在年: %(y)s"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_model_fields_search
@@ -7647,7 +7648,7 @@ msgstr "作成日"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_date_format
 msgid "Date Format"
-msgstr "日付の書式"
+msgstr "日付書式"
 
 #. module: base
 #: selection:ir.property,type:0
@@ -7667,12 +7668,12 @@ msgstr "日"
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Day of the Week (0:Monday): %(weekday)s"
-msgstr ""
+msgstr "曜日 (0:月曜日): %(weekday)s"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Day of the Year: %(doy)s"
-msgstr ""
+msgstr "年の通算日: %(doy)s"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
@@ -7715,7 +7716,7 @@ msgstr "小数精度設定"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_decimal_point
 msgid "Decimal Separator"
-msgstr "10進数のセパレータ"
+msgstr "小数区切り"
 
 #. module: base
 #: selection:ir.values,key:0
@@ -7766,7 +7767,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "Defined Reports"
-msgstr "定義レポート"
+msgstr "定義されたレポート"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_constraint_definition
@@ -7915,7 +7916,7 @@ msgstr "電子署名"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_direction
 msgid "Direction"
-msgstr ""
+msgstr "方向"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
@@ -8216,12 +8217,12 @@ msgstr "翻訳を編集"
 #. module: base
 #: model:res.groups,name:base.group_website_publisher
 msgid "Editor"
-msgstr ""
+msgstr "エディタ"
 
 #. module: base
 #: model:res.groups,name:base.group_website_designer
 msgid "Editor and Designer"
-msgstr ""
+msgstr "エディタ兼デザイナ"
 
 #. module: base
 #: model:res.country,name:base.eg
@@ -8297,7 +8298,7 @@ msgstr "従業員"
 #. module: base
 #: model:res.groups,name:base.group_light_multi_company
 msgid "Enable Light Multi Company"
-msgstr ""
+msgstr "簡易複数会社有効化"
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -8329,7 +8330,7 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_equipment_manager
 msgid "Equipment Manager"
-msgstr "設備管理"
+msgstr "機器マネジャ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_equipment
@@ -8408,7 +8409,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_event_management
 msgid "Events"
-msgstr ""
+msgstr "イベント"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event
@@ -8418,7 +8419,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_sale
 msgid "Events Sales"
-msgstr ""
+msgstr "イベント販売"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -8447,7 +8448,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.res_lang_form
 msgid "Examples"
-msgstr ""
+msgstr "例"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -8462,7 +8463,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_expense
 msgid "Expense Tracker"
-msgstr ""
+msgstr "経費精算"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_expense
@@ -8586,7 +8587,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_usability
 #: model:ir.ui.view,arch_db:base.user_groups_view
 msgid "Extra Rights"
-msgstr ""
+msgstr "追加権限"
 
 #. module: base
 #: model:res.country,name:base.fk
@@ -8816,7 +8817,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_account_accountant
 msgid "Financial and Analytic Accounting"
-msgstr ""
+msgstr "財務会計と分析会計"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -9020,7 +9021,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_date_range_date_from
 msgid "From"
-msgstr ""
+msgstr "開始日"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_access_view_search
@@ -9238,7 +9239,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_account
 msgid "Google Users"
-msgstr ""
+msgstr "Googleユーザ"
 
 #. module: base
 #: selection:ir.actions.act_window.view,view_mode:0
@@ -9585,7 +9586,7 @@ msgstr "教皇庁 (バチカン市国)"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users_action_id
 msgid "Home Action"
-msgstr ""
+msgstr "ホームアクション"
 
 #. module: base
 #: model:res.country,name:base.hn
@@ -9610,12 +9611,12 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Hour 00->12: %(h12)s"
-msgstr ""
+msgstr "時刻 00->12: %(h12)s"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Hour 00->24: %(h24)s"
-msgstr ""
+msgstr "時刻 00->24: %(h24)s"
 
 #. module: base
 #: selection:ir.cron,interval_type:0
@@ -9638,7 +9639,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources
 msgid "Human Resources"
-msgstr ""
+msgstr "人材"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_hu
@@ -9788,7 +9789,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_language_import_code
 msgid "ISO Code"
-msgstr ""
+msgstr "ISOコード"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_base_language_import_code
@@ -9798,7 +9799,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_iso_code
 msgid "ISO code"
-msgstr ""
+msgstr "ISOコード"
 
 #. module: base
 #: model:res.partner.category,name:base.res_partner_category_7
@@ -9981,7 +9982,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_implementation
 msgid "Implementation"
-msgstr "導入作業済"
+msgstr "付番方針"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_import_crm
@@ -10181,7 +10182,7 @@ msgstr "インストール済"
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "Installed Features"
-msgstr ""
+msgstr "インストール済機能"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module_latest_version
@@ -10262,7 +10263,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_search
 msgid "Internal Users"
-msgstr ""
+msgstr "内部ユーザ"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_partner_form
@@ -10277,7 +10278,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron_interval_type
 msgid "Interval Unit"
-msgstr ""
+msgstr "周期"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_report_intrastat
@@ -10388,7 +10389,7 @@ msgstr "在庫管理"
 #: model:ir.module.category,name:base.module_category_inventory_management
 #: model:ir.module.module,shortdesc:base.module_stock
 msgid "Inventory Management"
-msgstr ""
+msgstr "在庫管理"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_account
@@ -10409,7 +10410,7 @@ msgstr "請求先"
 #: model:ir.module.module,shortdesc:base.module_account
 #: model:ir.ui.menu,name:base.menu_invoiced
 msgid "Invoicing"
-msgstr ""
+msgstr "請求"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_account_voucher
@@ -10472,7 +10473,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_issue
 msgid "Issue Tracking"
-msgstr ""
+msgstr "課題追跡"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_issue
@@ -11030,7 +11031,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays
 msgid "Leave Management"
-msgstr ""
+msgstr "休暇管理"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays_gantt
@@ -11055,12 +11056,12 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Legend (for prefix, suffix)"
-msgstr ""
+msgstr "凡例 (プレフィクス、サフィックス用)"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.res_lang_form
 msgid "Legends for supported Date and Time Formats"
-msgstr ""
+msgstr "利用可能な日付・時刻書式の凡例"
 
 #. module: base
 #: model:res.country,name:base.ls
@@ -11161,7 +11162,7 @@ msgstr "翻訳読込"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_code
 msgid "Locale Code"
-msgstr ""
+msgstr "ロケールコード"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_localization
@@ -11215,7 +11216,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_lunch
 msgid "Lunch"
-msgstr ""
+msgstr "ランチ"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_lunch
@@ -11376,7 +11377,7 @@ msgstr ""
 #: model:res.groups,name:base.group_sale_manager
 #: model:res.groups,name:base.group_survey_manager
 msgid "Manager"
-msgstr ""
+msgstr "マネジャ"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_managing_vehicles_and_contracts
@@ -11487,17 +11488,17 @@ msgstr "マルティニーク (フランス領)"
 #. module: base
 #: model:ir.module.category,name:base.module_category_mass_mailing
 msgid "Mass Mailing"
-msgstr ""
+msgstr "メール一括配信"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing
 msgid "Mass Mailing Campaigns"
-msgstr ""
+msgstr "メール一括配信キャンペーン"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing_themes
 msgid "Mass Mailing Themes"
-msgstr ""
+msgstr "メール一括配信テーマ"
 
 #. module: base
 #: model:res.country,name:base.mr
@@ -11573,7 +11574,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_form
 msgid "Menus Customization"
-msgstr ""
+msgstr "メニューカスタマイズ"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_mercury
@@ -11588,7 +11589,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_form
 msgid "Messaging and Social"
-msgstr ""
+msgstr "メッセージおよびソーシャル"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron_function
@@ -11618,12 +11619,12 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Minute: %(min)s"
-msgstr ""
+msgstr "分: %(min)s"
 
 #. module: base
 #: selection:ir.cron,interval_type:0
 msgid "Minutes"
-msgstr ""
+msgstr "分"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_partner_form
@@ -11806,18 +11807,18 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_model_data_search
 #: model:ir.ui.view,arch_db:base.view_module_filter
 msgid "Module"
-msgstr ""
+msgstr "モジュール"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_module_category_form
 #: model:ir.ui.view,arch_db:base.view_module_category_tree
 msgid "Module Category"
-msgstr ""
+msgstr "モジュールカテゴリ"
 
 #. module: base
 #: model:ir.actions.server,name:base.action_server_module_immediate_install
 msgid "Module Immediate Install"
-msgstr ""
+msgstr "モジュール即時インストール"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module_shortdesc
@@ -11838,17 +11839,17 @@ msgstr "モジュール更新結果"
 #. module: base
 #: model:ir.model,name:base.model_base_module_upgrade
 msgid "Module Upgrade"
-msgstr ""
+msgstr "モジュールアップグレード"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_view_base_module_upgrade_install
 msgid "Module Upgrade Install"
-msgstr ""
+msgstr "モジュールアップグレードインストール"
 
 #. module: base
 #: model:ir.model,name:base.model_ir_module_module_dependency
 msgid "Module dependency"
-msgstr ""
+msgstr "モジュール依存"
 
 #. module: base
 #: code:addons/convert.py:914
@@ -11866,7 +11867,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category_module_ids
 msgid "Modules"
-msgstr ""
+msgstr "モジュール"
 
 #. module: base
 #: model:res.country,name:base.md
@@ -11901,7 +11902,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Month: %(month)s"
-msgstr ""
+msgstr "月: %(month)s"
 
 #. module: base
 #: selection:ir.cron,interval_type:0
@@ -11949,12 +11950,12 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_users_form
 #: model:res.groups,name:base.group_multi_company
 msgid "Multi Companies"
-msgstr ""
+msgstr "複数会社"
 
 #. module: base
 #: model:res.groups,name:base.group_multi_currency
 msgid "Multi Currencies"
-msgstr ""
+msgstr "多通貨"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_multilang
@@ -12113,13 +12114,13 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_sequence_number_next
 #: model:ir.model.fields,field_description:base.field_ir_sequence_number_next_actual
 msgid "Next Number"
-msgstr ""
+msgstr "次の番号"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence_date_range_number_next
 #: model:ir.model.fields,help:base.field_ir_sequence_number_next
 msgid "Next number of this sequence"
-msgstr ""
+msgstr "この付番定義の次の番号"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence_date_range_number_next_actual
@@ -12163,7 +12164,7 @@ msgstr ""
 #. module: base
 #: selection:ir.sequence,implementation:0
 msgid "No gap"
-msgstr ""
+msgstr "ギャップなし"
 
 #. module: base
 #: code:addons/base/module/wizard/base_update_translations.py:22
@@ -12193,7 +12194,7 @@ msgstr ""
 #. module: base
 #: selection:ir.mail_server,smtp_encryption:0
 msgid "None"
-msgstr ""
+msgstr "なし"
 
 #. module: base
 #: model:res.country,name:base.nf
@@ -12327,7 +12328,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_im_odoo_support
 msgid "Odoo Live Support"
-msgstr ""
+msgstr "Odooライブサポート"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_settings_dashboard
@@ -12378,7 +12379,7 @@ msgstr "オフィス用品"
 #. module: base
 #: model:res.groups,name:base.group_hr_user
 msgid "Officer"
-msgstr ""
+msgstr "オフィサー"
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment_ogone
@@ -12436,7 +12437,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_event
 msgid "Online Events"
-msgstr ""
+msgstr "オンラインイベント"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_hr_recruitment
@@ -12571,13 +12572,13 @@ msgstr ""
 #: code:addons/base/res/res_users.py:771 code:addons/base/res/res_users.py:933
 #, python-format
 msgid "Other"
-msgstr ""
+msgstr "その他"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_extra
 #: model:ir.ui.view,arch_db:base.user_groups_view
 msgid "Other Extra Rights"
-msgstr ""
+msgstr "その他追加権限"
 
 #. module: base
 #: selection:ir.module.module,license:0
@@ -13048,12 +13049,12 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_point_of_sale
 #: model:ir.module.module,shortdesc:base.module_point_of_sale
 msgid "Point of Sale"
-msgstr ""
+msgstr "POS"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_discount
 msgid "Point of Sale Discounts"
-msgstr ""
+msgstr "POS値引"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_reprint
@@ -13090,22 +13091,22 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_portal
 #: model:res.groups,name:base.group_portal
 msgid "Portal"
-msgstr ""
+msgstr "ポータル"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_portal_gamification
 msgid "Portal Gamification"
-msgstr ""
+msgstr "ゲーミフィケーションポータル"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_portal_sale
 msgid "Portal Sale"
-msgstr ""
+msgstr "販売ポータル"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_portal_stock
 msgid "Portal Stock"
-msgstr ""
+msgstr "在庫ポータル"
 
 #. module: base
 #: model:res.groups,comment:base.group_portal
@@ -13167,7 +13168,7 @@ msgstr "個人設定"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_prefix
 msgid "Prefix"
-msgstr ""
+msgstr "プレフィクス"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence_prefix
@@ -13359,7 +13360,7 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_public
 msgid "Public"
-msgstr ""
+msgstr "パブリック"
 
 #. module: base
 #: model:res.groups,comment:base.group_public
@@ -13401,7 +13402,7 @@ msgstr "購買"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase
 msgid "Purchase Management"
-msgstr ""
+msgstr "購買管理"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase
@@ -13597,7 +13598,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment
 msgid "Recruitment Process"
-msgstr ""
+msgstr "採用プロセス"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_subscription
@@ -13786,7 +13787,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_reporting
 msgid "Reporting"
-msgstr ""
+msgstr "レポーティング"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_action_report_xml
@@ -14125,7 +14126,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale
 msgid "Sales Management"
-msgstr ""
+msgstr "販売管理"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_sales_team
@@ -14193,7 +14194,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Save"
-msgstr ""
+msgstr "保存"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_attachment
@@ -14243,17 +14244,17 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_search_view_id
 msgid "Search View Ref."
-msgstr ""
+msgstr "検索ビュー参照"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_module_filter
 msgid "Search modules"
-msgstr ""
+msgstr "モジュール検索"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Second: %(sec)s"
-msgstr ""
+msgstr "秒: %(sec)s"
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_security
@@ -14270,12 +14271,12 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_sale_salesman
 msgid "See Own Leads"
-msgstr ""
+msgstr "自分のリードを参照可"
 
 #. module: base
 #: model:res.groups,name:base.group_sale_salesman_all_leads
 msgid "See all Leads"
-msgstr ""
+msgstr "全てのリードを参照可"
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:306
@@ -14393,7 +14394,7 @@ msgstr "セネガル"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_grouping
 msgid "Separator Format"
-msgstr ""
+msgstr "区切り書式"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_sequence
@@ -14410,17 +14411,17 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_sequence_search
 #: model:ir.ui.view,arch_db:base.view_view_tree
 msgid "Sequence"
-msgstr "順序"
+msgstr "付番"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_code
 msgid "Sequence Code"
-msgstr ""
+msgstr "付番コード"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_padding
 msgid "Sequence Size"
-msgstr ""
+msgstr "付番サイズ"
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_sequence_form
@@ -14529,7 +14530,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_sale_general_settings
 #: model:res.groups,name:base.group_system
 msgid "Settings"
-msgstr "設定"
+msgstr "管理設定"
 
 #. module: base
 #: model:res.country,name:base.sc
@@ -14655,7 +14656,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides
 msgid "Slides"
-msgstr ""
+msgstr "スライド"
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -14943,7 +14944,7 @@ msgstr "ステージ"
 #. module: base
 #: selection:ir.sequence,implementation:0
 msgid "Standard"
-msgstr ""
+msgstr "スタンダード"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_base_module_upgrade_install
@@ -14962,7 +14963,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_res_bank_form
 #, python-format
 msgid "State"
-msgstr ""
+msgstr "状態"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country_state_code
@@ -14995,13 +14996,13 @@ msgstr "ステータス"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_number_increment
 msgid "Step"
-msgstr ""
+msgstr "ステップ"
 
 #. module: base
 #: code:addons/base/ir/ir_sequence.py:20 code:addons/base/ir/ir_sequence.py:43
 #, python-format
 msgid "Step must not be zero."
-msgstr ""
+msgstr "ステップはゼロ以外にしてください。"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_note_pad
@@ -15090,7 +15091,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_contract
 msgid "Subscription Management"
-msgstr ""
+msgstr "サブスクリプション管理"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_contract
@@ -15115,7 +15116,7 @@ msgstr "スーダン"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_suffix
 msgid "Suffix"
-msgstr ""
+msgstr "サフィックス"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_sequence_suffix
@@ -15151,7 +15152,7 @@ msgstr "スリナム"
 #: model:ir.module.category,name:base.module_category_survey
 #: model:ir.module.module,shortdesc:base.module_survey
 msgid "Survey"
-msgstr ""
+msgstr "調査"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_survey_crm
@@ -15830,7 +15831,7 @@ msgstr ""
 #. module: base
 #: model:res.groups,comment:base.group_equipment_manager
 msgid "The user will be able to manage equipments."
-msgstr "ユーザーは設備管理を利用可能になります"
+msgstr "ユーザは機器を管理できるようになります。"
 
 #. module: base
 #: code:addons/models.py:6160
@@ -15939,12 +15940,12 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_thousands_sep
 msgid "Thousands Separator"
-msgstr ""
+msgstr "千単位区切り"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_time_format
 msgid "Time Format"
-msgstr ""
+msgstr "時刻書式"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_timesheet
@@ -15998,7 +15999,7 @@ msgstr "敬称"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_date_range_date_to
 msgid "To"
-msgstr ""
+msgstr "終了日"
 
 #. module: base
 #: selection:ir.actions.todo,state:0
@@ -16114,7 +16115,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_lang_translatable
 #: model:ir.ui.view,arch_db:base.res_lang_search
 msgid "Translatable"
-msgstr ""
+msgstr "翻訳可"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_model_fields_search
@@ -16511,12 +16512,12 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_base_module_update
 msgid "Update Module"
-msgstr ""
+msgstr "モジュール更新"
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_base_module_update
 msgid "Update Module List"
-msgstr ""
+msgstr "モジュールリスト更新"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_use_write
@@ -16547,7 +16548,7 @@ msgstr "更新情報"
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "Upgrade"
-msgstr ""
+msgstr "アップグレード"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment_url
@@ -16589,7 +16590,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_use_date_range
 msgid "Use subsequences per date_range"
-msgstr ""
+msgstr "日付範囲毎に枝番をつける"
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_gamification
@@ -16648,7 +16649,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_users_search
 #: model:res.groups,name:base.group_survey_user
 msgid "User"
-msgstr ""
+msgstr "ユーザ"
 
 #. module: base
 #: model:ir.ui.menu,name:base.next_id_2
@@ -16855,7 +16856,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_view_id
 msgid "View Ref."
-msgstr ""
+msgstr "ビュー参照"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_view_type
@@ -16944,7 +16945,7 @@ msgstr "ワリス・フテュナ諸島"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode
 msgid "Warehouse Management Barcode Scanning"
-msgstr ""
+msgstr "倉庫管理バーコードスキャン"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_picking_wave
@@ -17083,7 +17084,7 @@ msgstr "ウェブサイトリンクトラッカー"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_im_livechat
 msgid "Website Live Chat"
-msgstr ""
+msgstr "ウェブサイトライブチャット"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_im_livechat
@@ -17118,7 +17119,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_portal
 msgid "Website Portal"
-msgstr ""
+msgstr "ウェブサイトポータル"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_portal_sale
@@ -17159,7 +17160,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
 msgid "Week of the Year: %(woy)s"
-msgstr ""
+msgstr "年の通算週: %(woy)s"
 
 #. module: base
 #: selection:ir.cron,interval_type:0
@@ -17219,7 +17220,7 @@ msgstr ""
 msgid ""
 "When subsequences per date range are used, you can prefix variables with 'range_'\n"
 "                                to use the beginning of the range instead of the current date, e.g. %(range_year)s instead of %(year)s."
-msgstr ""
+msgstr "日付範囲毎の枝番を使用する場合、プレフィクスに「range_xxx」と設定することで、現在日ではなく範囲開始日を基に付番できます。例: 「%(year)s」の代わりに「%(range_year)s」を設定。"
 
 #. module: base
 #: model:ir.model.fields,help:base.field_wkf_transition_signal
