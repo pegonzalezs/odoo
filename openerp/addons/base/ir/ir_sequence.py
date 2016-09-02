@@ -99,7 +99,7 @@ class IrSequence(models.Model):
     suffix = fields.Char(help="Suffix value of the record for the sequence")
     number_next = fields.Integer(string='Next Number', required=True, default=1, help="Next number of this sequence")
     number_next_actual = fields.Integer(compute='_get_number_next_actual', inverse='_set_number_next_actual',
-                                        required=True, string='Next Number', default=1,
+                                        string='Next Number',
                                         help="Next number that will be used. This number can be incremented "
                                         "frequently so the displayed value might already be obsolete")
     number_increment = fields.Integer(string='Step', required=True, default=1,
@@ -111,23 +111,6 @@ class IrSequence(models.Model):
                                  default=lambda s: s.env['res.company']._company_default_get('ir.sequence'))
     use_date_range = fields.Boolean(string='Use subsequences per date_range')
     date_range_ids = fields.One2many('ir.sequence.date_range', 'sequence_id', string='Subsequences')
-
-    @api.model_cr
-    def init(self):
-        return  # Don't do the following index yet.
-
-        # CONSTRAINT/UNIQUE INDEX on (code, company_id)
-        # /!\ The unique constraint 'unique_name_company_id' is not sufficient, because SQL92
-        # only support field names in constraint definitions, and we need a function here:
-        # we need to special-case company_id to treat all NULL company_id as equal, otherwise
-        # we would allow duplicate (code, NULL) ir_sequences.
-        self._cr.execute("""
-            SELECT indexname FROM pg_indexes WHERE indexname =
-            'ir_sequence_unique_code_company_id_idx'""")
-        if not self._cr.fetchone():
-            self._cr.execute("""
-                CREATE UNIQUE INDEX ir_sequence_unique_code_company_id_idx
-                ON ir_sequence (code, (COALESCE(company_id,-1)))""")
 
     @api.model
     def create(self, values):
@@ -327,7 +310,7 @@ class IrSequenceDateRange(models.Model):
     sequence_id = fields.Many2one("ir.sequence", string='Main Sequence', required=True, ondelete='cascade')
     number_next = fields.Integer(string='Next Number', required=True, default=1, help="Next number of this sequence")
     number_next_actual = fields.Integer(compute='_get_number_next_actual', inverse='_set_number_next_actual',
-                                        required=True, string='Next Number', default=1,
+                                        string='Next Number',
                                         help="Next number that will be used. This number can be incremented "
                                              "frequently so the displayed value might already be obsolete")
 

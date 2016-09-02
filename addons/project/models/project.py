@@ -3,15 +3,15 @@
 
 from lxml import etree
 
-from odoo import api, fields, models, tools, SUPERUSER_ID, _
-from openerp.tools.safe_eval import safe_eval as eval
-from openerp.exceptions import UserError, ValidationError
+from odoo import api, fields, models, tools, _
+from odoo.exceptions import UserError, ValidationError
+from odoo.tools.safe_eval import safe_eval
 
 
 class ProjectTaskType(models.Model):
     _name = 'project.task.type'
     _description = 'Task Stage'
-    _order = 'sequence'
+    _order = 'sequence, id'
 
     def _get_mail_template_id_domain(self):
         return [('model', '=', 'project.task')]
@@ -104,14 +104,6 @@ class Project(models.Model):
         """ Overriden in project_issue to offer more options """
         return [('project.task', "Tasks")]
 
-    def _get_visibility_selection(self):
-        """ Overriden in portal_project to offer more options """
-        return [
-            ('employees', _('Visible by all employees')),
-            ('followers', _('On invitation only')),
-            ('portal', _('Shared with a customer'))
-        ]
-
     @api.multi
     def attachment_tree_view(self):
         self.ensure_one()
@@ -145,6 +137,11 @@ class Project(models.Model):
         if project:
             project.write({'active': True})
 
+        cover_image = self.env.ref('project.msg_task_data_14_attach', False)
+        cover_task = self.env.ref('project.project_task_data_14', False)
+        if cover_image and cover_task:
+            cover_task.write({'displayed_image_id': cover_image.id})
+
         # Change the help message on the action (no more activate project)
         action = self.env.ref('project.open_view_project_all', False)
         action_data = None
@@ -171,7 +168,6 @@ class Project(models.Model):
 
     # Lambda indirection method to avoid passing a copy of the overridable method when declaring the field
     _alias_models = lambda self: self._get_alias_models()
-    _visibility_selection = lambda self: self._get_visibility_selection()
 
     active = fields.Boolean(default=True,
         help="If the active field is set to False, it will allow you to hide the project without removing it.")
@@ -203,15 +199,19 @@ class Project(models.Model):
              "with Tasks (or optionally Issues if the Issue Tracker module is installed).")
     alias_model = fields.Selection(_alias_models, string="Alias Model", index=True, required=True, default='project.task',
         help="The kind of document created when an email is received on this project's email alias")
-    privacy_visibility = fields.Selection(_visibility_selection, string='Privacy', required=True,
+    privacy_visibility = fields.Selection([
+            ('followers', _('On invitation only')),
+            ('employees', _('Visible by all employees')),
+            ('portal', _('Visible by following customers')),
+        ],
+        string='Privacy', required=True,
         default='employees',
         help="Holds visibility of the tasks or issues that belong to the current project:\n"
-                "- Portal : employees see everything;\n"
-                "   if portal is activated, portal users see the tasks or issues followed by\n"
-                "   them or by someone of their company\n"
-                "- Employees Only: employees see all tasks or issues\n"
-                "- Followers Only: employees see only the followed tasks or issues; if portal\n"
-                "   is activated, portal users see the followed tasks or issues.")
+                "- On invitation only: Employees may only see the followed project, tasks or issues\n"
+                "- Visible by all employees: Employees may see all project, tasks or issues\n"
+                "- Visible by following customers: employees see everything;\n"
+                "   if website is activated, portal users may see project, tasks or issues followed by\n"
+                "   them or by someone of their company\n")
     doc_count = fields.Integer(compute='_compute_attached_docs_count', string="Number of documents attached")
     date_start = fields.Date(string='Start Date')
     date = fields.Date(string='Expiration Date', index=True, track_visibility='onchange')
@@ -491,19 +491,6 @@ class Task(models.Model):
         # perform search, return the first found
         return self.env['project.task.type'].search(search_domain, order=order, limit=1).id
 
-    def _store_history(self):
-        for task in self:
-            self.env['project.task.history'].create({
-                'task_id': task.id,
-                'remaining_hours': task.remaining_hours,
-                'planned_hours': task.planned_hours,
-                'kanban_state': task.kanban_state,
-                'type_id': task.stage_id.id,
-                'user_id': task.user_id.id
-
-            })
-        return True
-
     # ------------------------------------------------
     # CRUD overrides
     # ------------------------------------------------
@@ -520,7 +507,6 @@ class Task(models.Model):
         if vals.get('user_id'):
             vals['date_assign'] = fields.Datetime.now()
         task = super(Task, self.with_context(context)).create(vals)
-        task._store_history()
         return task
 
     @api.multi
@@ -538,8 +524,6 @@ class Task(models.Model):
 
         result = super(Task, self).write(vals)
 
-        if any(item in vals for item in ['stage_id', 'remaining_hours', 'user_id', 'kanban_state']):
-            self._store_history()
         return result
 
     # ---------------------------------------------------
@@ -675,7 +659,7 @@ class Task(models.Model):
         headers = {}
         if res.get('headers'):
             try:
-                headers.update(eval(res['headers']))
+                headers.update(safe_eval(res['headers']))
             except Exception:
                 pass
         if self.project_id:
@@ -774,47 +758,6 @@ class AccountAnalyticAccount(models.Model):
         else:
             result = {'type': 'ir.actions.act_window_close'}
         return result
-
-
-class ProjectTaskHistory(models.Model):
-    """
-    Tasks History, used for cumulative flow charts (Lean/Agile)
-    """
-    _name = 'project.task.history'
-    _description = 'History of Tasks'
-    _rec_name = 'task_id'
-    _log_access = False
-
-    @api.depends('date', 'task_id', 'type_id', 'type_id.fold')
-    def _compute_end_date(self):
-        for history in self:
-            if history.type_id and history.type_id.fold:
-                history.end_date = history.date
-                continue
-            self.env.cr.execute('''select
-                    date
-                from
-                    project_task_history
-                where
-                    task_id=%s and
-                    id>%s
-                order by id limit 1''', (history.task_id.id, history.id))
-            res = self.env.cr.fetchone()
-            history.end_date = res and res[0] or False
-
-    task_id = fields.Many2one('project.task', string='Task', ondelete='cascade', required=True, index=True)
-    type_id = fields.Many2one('project.task.type', string='Stage')
-    kanban_state = fields.Selection([
-            ('normal', 'Normal'),
-            ('blocked', 'Blocked'),
-            ('done', 'Ready for next stage')
-        ], string='Kanban State')
-    date = fields.Date(string='Date', index=True, default=fields.Date.context_today)
-    end_date = fields.Date(string='End Date', compute='_compute_end_date', store=True)
-    remaining_hours = fields.Float(string='Remaining Time', digits=(16, 2))
-    planned_hours = fields.Float(string='Planned Time', digits=(16, 2))
-    user_id = fields.Many2one('res.users', string='Responsible')
-
 
 class ProjectTags(models.Model):
     """ Tags of project's tasks (or issues) """

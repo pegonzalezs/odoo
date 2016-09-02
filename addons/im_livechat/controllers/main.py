@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from openerp import http, _
-from openerp.http import request
-from openerp.addons.base.ir.ir_qweb import AssetsBundle
-from openerp.addons.web.controllers.main import binary_content
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import base64
+
+from odoo import http, _
+from odoo.http import request
+from odoo.addons.base.ir.ir_qweb import AssetsBundle
+from odoo.addons.web.controllers.main import binary_content
 
 
 class LivechatController(http.Controller):
@@ -12,7 +15,7 @@ class LivechatController(http.Controller):
     def livechat_lib(self, ext, **kwargs):
         # _get_asset return the bundle html code (script and link list) but we want to use the attachment content
         xmlid = 'im_livechat.external_lib'
-        files, remains = request.registry["ir.qweb"]._get_asset_content(request.cr, request.uid, xmlid, request.context)
+        files, remains = request.env["ir.qweb"]._get_asset_content(xmlid, options=request.context)
         asset = AssetsBundle(xmlid, files, remains)
 
         mock_attachment = getattr(asset, ext)()
@@ -87,6 +90,7 @@ class LivechatController(http.Controller):
             # limit the creation : only ONE rating per session
             values = {
                 'rating': rate,
+                'consumed': True
             }
             if not channel.rating_ids:
                 values.update({

@@ -95,11 +95,8 @@ website.TopBarCustomize = Widget.extend({
         return ajax.jsonRpc('/web/dataset/call_kw', 'call', {
             model: 'ir.ui.view',
             method: 'toggle',
-            args: [],
-            kwargs: {
-                ids: [parseInt(view_id, 10)],
-                context: base.get_context(),
-            }
+            args: [[parseInt(view_id, 10)]],
+            kwargs: {context: base.get_context()}
         }).then(function () {
             window.location.reload();
         });
@@ -163,11 +160,11 @@ widget.LinkDialog.include({
         }
         return this._super();
     },
-    get_data_buy_url: function (def, $e, isNewWindow, label, classes) {
+    get_data_buy_url: function (def, $e, isNewWindow, label, classes, test) {
         var val = $e.val();
         if (val && val.length && $e.hasClass('page')) {
             var data = $e.select2('data');
-            if (!data.create) {
+            if (!data.create || test) {
                 def.resolve(data.id, isNewWindow, label || data.text, classes);
             } else {
                 // Create the page, get the URL back
@@ -178,7 +175,7 @@ widget.LinkDialog.include({
                     });
             }
         } else {
-            def.resolve(val, isNewWindow, label, classes);
+            return this._super.apply(this, arguments);
         }
     },
     changed: function (e) {
@@ -220,7 +217,9 @@ base.ready().then(function () {
     if (location.search.indexOf("enable_editor") < 0 && $(".editor_enable").length === 0) {
         var $wrap = $("#wrapwrap.homepage #wrap");
         if ($wrap.length && $wrap.html().trim() === "") {
-            $wrap.html(qweb.render("website.homepage_editor_welcome_message"));
+            var $welcome_message = $(qweb.render("website.homepage_editor_welcome_message"));
+            $welcome_message.css("height", $wrap.parent("main").height() - ($wrap.outerHeight(true) - $wrap.height()));
+            $wrap.empty().append($welcome_message);
         }
     }
 });

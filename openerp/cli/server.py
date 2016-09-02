@@ -95,7 +95,7 @@ def export_translation():
     fileformat = os.path.splitext(config["translate_out"])[-1][1:].lower()
 
     with open(config["translate_out"], "w") as buf:
-        registry = openerp.modules.registry.RegistryManager.new(dbname)
+        registry = openerp.modules.registry.Registry.new(dbname)
         with openerp.api.Environment.manage():
             with registry.cursor() as cr:
                 openerp.tools.trans_export(config["language"],
@@ -108,7 +108,7 @@ def import_translation():
     context = {'overwrite': config["overwrite_existing_translations"]}
     dbname = config['db_name']
 
-    registry = openerp.modules.registry.RegistryManager.new(dbname)
+    registry = openerp.modules.registry.Registry.new(dbname)
     with openerp.api.Environment.manage():
         with registry.cursor() as cr:
             openerp.tools.trans_load(
@@ -128,11 +128,14 @@ def main(args):
     # bit overkill, but better safe than sorry I guess
     csv.field_size_limit(500 * 1024 * 1024)
 
-    if config["db_name"]:
-        try:
-            openerp.service.db._create_empty_database(config["db_name"])
-        except openerp.service.db.DatabaseExists:
-            pass
+    preload = []
+    if config['db_name']:
+        preload = config['db_name'].split(',')
+        for db_name in preload:
+            try:
+                openerp.service.db._create_empty_database(db_name)
+            except openerp.service.db.DatabaseExists:
+                pass
 
     if config["translate_out"]:
         export_translation()
@@ -146,10 +149,6 @@ def main(args):
     # signaling mecanism for registries loaded with -d
     if config['workers']:
         openerp.multi_process = True
-
-    preload = []
-    if config['db_name']:
-        preload = config['db_name'].split(',')
 
     stop = config["stop_after_init"]
 

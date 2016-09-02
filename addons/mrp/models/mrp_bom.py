@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class MrpBom(models.Model):
@@ -36,7 +36,7 @@ class MrpBom(models.Model):
     bom_line_ids = fields.One2many('mrp.bom.line', 'bom_id', 'BoM Lines', copy=True)
     product_qty = fields.Float(
         'Quantity', default=1.0,
-        digits_compute=dp.get_precision('Unit of Measure'), required=True)
+        digits=dp.get_precision('Unit of Measure'), required=True)
     product_uom_id = fields.Many2one(
         'product.uom', 'Product Unit of Measure',
         default=_get_default_product_uom_id, oldname='product_uom', required=True,
@@ -59,6 +59,12 @@ class MrpBom(models.Model):
         'res.company', 'Company',
         default=lambda self: self.env['res.company']._company_default_get('mrp.bom'),
         required=True)
+
+    @api.constrains('product_id', 'product_tmpl_id', 'bom_line_ids')
+    def _check_product_recursion(self):
+        for bom in self:
+            if bom.bom_line_ids.filtered(lambda x: x.product_id.product_tmpl_id == bom.product_tmpl_id):
+                raise ValidationError(_('BoM line product %s should not be same as BoM product.') % bom.display_name)
 
     @api.onchange('product_uom_id')
     def onchange_product_uom_id(self):
@@ -107,7 +113,7 @@ class MrpBom(models.Model):
     def explode(self, product, quantity, picking_type=False):
         boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity})]
         lines_done = []
-        templates_done = self.env['product.template']
+        templates_done = product.product_tmpl_id
 
         bom_lines = [(bom_line, product, quantity) for bom_line in self.bom_line_ids]
         while bom_lines:
@@ -117,13 +123,13 @@ class MrpBom(models.Model):
             if current_line._skip_bom_line(current_product):
                 continue
             if current_line.product_id.product_tmpl_id in templates_done:
-                raise UserError(_('Recursion error !'))
+                raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
 
             line_quantity = current_qty * current_line.product_qty / current_line.bom_id.product_qty
 
             bom = self._bom_find(product=current_line.product_id, picking_type=picking_type or self.picking_type_id, company_id=self.company_id.id)
             if bom.type == 'phantom':
-                converted_line_quantity = self.env['product.uom']._compute_qty_obj(current_line.product_uom_id, line_quantity, bom.product_uom_id)
+                converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity, bom.product_uom_id)
                 bom_lines = [(line, current_line.product_id, line_quantity) for line in bom.bom_line_ids] + bom_lines
                 templates_done |= current_line.product_id.product_tmpl_id
                 boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity}))
@@ -145,7 +151,7 @@ class MrpBomLine(models.Model):
         'product.product', 'Product', required=True)
     product_qty = fields.Float(
         'Product Quantity', default=1.0,
-        digits_compute=dp.get_precision('Product Unit of Measure'), required=True)
+        digits=dp.get_precision('Product Unit of Measure'), required=True)
     product_uom_id = fields.Many2one(
         'product.uom', 'Product Unit of Measure',
         default=_get_default_product_uom_id,
@@ -254,9 +260,9 @@ class MrpBomLine(models.Model):
             'view_mode': 'kanban,tree,form',
             'view_type': 'form',
             'help': _('''<p class="oe_view_nocontent_create">
-                        Documents are attached to the tasks and issues of your project.</p><p>
-                        Send messages or log internal notes with attachments to link
-                        documents to your project.
+                        Click to upload files to your product.
+                    </p><p>
+                        Use this feature to store any files, like drawings or specifications.
                     </p>'''),
             'limit': 80,
             'context': "{'default_res_model': '%s','default_res_id': %d}" % ('product.product', self.product_id.id)

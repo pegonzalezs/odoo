@@ -41,24 +41,24 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
     try:
         db = openerp.sql_db.db_connect(db_name)
         with closing(db.cursor()) as cr:
-            # TODO this should be removed as it is done by RegistryManager.new().
+            # TODO this should be removed as it is done by Registry.new().
             openerp.modules.db.initialize(cr)
             openerp.tools.config['load_language'] = lang
             cr.commit()
 
-        registry = openerp.modules.registry.RegistryManager.new(
-            db_name, demo, None, update_module=True)
+        registry = openerp.modules.registry.Registry.new(db_name, demo, None, update_module=True)
 
         with closing(db.cursor()) as cr:
+            env = openerp.api.Environment(cr, SUPERUSER_ID, {})
+
             if lang:
-                modobj = registry['ir.module.module']
-                mids = modobj.search(cr, SUPERUSER_ID, [('state', '=', 'installed')])
-                modobj.update_translations(cr, SUPERUSER_ID, mids, lang)
+                modules = env['ir.module.module'].search([('state', '=', 'installed')])
+                modules.update_translations(lang)
 
             if country_code:
-                countries = registry['res.country'].search_read(cr, SUPERUSER_ID, [('code', 'ilike', country_code)], fields=['id'])
+                countries = env['res.country'].search_read([('code', 'ilike', country_code)], fields=['id'])
                 if countries:
-                    registry['res.company'].write(cr, SUPERUSER_ID, 1, {'country_id': countries[0]['id']})
+                    env['res.company'].browse(1).country_id = countries[0]
 
             # update admin's password and lang and login
             values = {'password': user_password, 'lang': lang}
@@ -67,7 +67,7 @@ def _initialize_db(id, db_name, demo, lang, user_password, login='admin', countr
                 emails = openerp.tools.email_split(login)
                 if emails:
                     values['email'] = emails[0]
-            registry['res.users'].write(cr, SUPERUSER_ID, [SUPERUSER_ID], values)
+            env.user.write(values)
 
             cr.execute('SELECT login, password FROM res_users ORDER BY login')
             cr.commit()
@@ -102,10 +102,11 @@ def exp_duplicate_database(db_original_name, db_name):
         _drop_conn(cr, db_original_name)
         cr.execute("""CREATE DATABASE "%s" ENCODING 'unicode' TEMPLATE "%s" """ % (db_name, db_original_name))
 
-    registry = openerp.modules.registry.RegistryManager.new(db_name)
+    registry = openerp.modules.registry.Registry.new(db_name)
     with registry.cursor() as cr:
         # if it's a copy of a database, force generation of a new dbuuid
-        registry['ir.config_parameter'].init(cr, force=True)
+        env = openerp.api.Environment(cr, SUPERUSER_ID, {})
+        env['ir.config_parameter'].init(force=True)
 
     from_fs = openerp.tools.config.filestore(db_original_name)
     to_fs = openerp.tools.config.filestore(db_name)
@@ -132,7 +133,7 @@ def _drop_conn(cr, db_name):
 def exp_drop(db_name):
     if db_name not in list_dbs(True):
         return False
-    openerp.modules.registry.RegistryManager.delete(db_name)
+    openerp.modules.registry.Registry.delete(db_name)
     openerp.sql_db.close_db(db_name)
 
     db = openerp.sql_db.db_connect('postgres')
@@ -254,13 +255,14 @@ def restore_db(db, dump_file, copy=False):
         if openerp.tools.exec_pg_command(pg_cmd, *pg_args):
             raise Exception("Couldn't restore database")
 
-        registry = openerp.modules.registry.RegistryManager.new(db)
+        registry = openerp.modules.registry.Registry.new(db)
         with registry.cursor() as cr:
+            env = openerp.api.Environment(cr, SUPERUSER_ID, {})
             if copy:
                 # if it's a copy of a database, force generation of a new dbuuid
-                registry['ir.config_parameter'].init(cr, force=True)
+                env['ir.config_parameter'].init(force=True)
             if filestore_path:
-                filestore_dest = registry['ir.attachment']._filestore(cr, SUPERUSER_ID)
+                filestore_dest = env['ir.attachment']._filestore()
                 shutil.move(filestore_path, filestore_dest)
 
             if openerp.tools.config['unaccent']:
@@ -273,7 +275,7 @@ def restore_db(db, dump_file, copy=False):
     _logger.info('RESTORE DB: %s', db)
 
 def exp_rename(old_name, new_name):
-    openerp.modules.registry.RegistryManager.delete(old_name)
+    openerp.modules.registry.Registry.delete(old_name)
     openerp.sql_db.close_db(old_name)
 
     db = openerp.sql_db.db_connect('postgres')
@@ -302,7 +304,7 @@ def exp_migrate_databases(databases):
     for db in databases:
         _logger.info('migrate database %s', db)
         openerp.tools.config['update']['base'] = True
-        openerp.modules.registry.RegistryManager.new(db, force_demo=False, update_module=True)
+        openerp.modules.registry.Registry.new(db, force_demo=False, update_module=True)
     return True
 
 #----------------------------------------------------------

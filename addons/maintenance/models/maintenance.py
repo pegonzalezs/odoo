@@ -247,7 +247,7 @@ class MaintenanceRequest(models.Model):
 
     owner_user_id = fields.Many2one('res.users', string='Created by', default=lambda s: s.env.uid)
     category_id = fields.Many2one('maintenance.equipment.category', related='equipment_id.category_id', string='Category', store=True, readonly=True)
-    equipment_id = fields.Many2one('maintenance.equipment', string='Equipment', select=True)
+    equipment_id = fields.Many2one('maintenance.equipment', string='Equipment', index=True)
     technician_user_id = fields.Many2one('res.users', string='Owner', track_visibility='onchange', oldname='user_id')
     stage_id = fields.Many2one('maintenance.stage', string='Stage', track_visibility='onchange', default=_default_stage)
     priority = fields.Selection([('0', 'Very Low'), ('1', 'Low'), ('2', 'Normal'), ('3', 'High')], string='Priority')
@@ -356,7 +356,7 @@ class MaintenanceTeam(models.Model):
     todo_request_count_block = fields.Integer(compute='_compute_todo_requests')
 
     @api.one
-    @api.depends('todo_request_ids.stage_id.done')
+    @api.depends('request_ids.stage_id.done')
     def _compute_todo_requests(self):
         self.todo_request_ids = self.request_ids.filtered(lambda e: e.stage_id.done==False)
         self.todo_request_count = len(self.todo_request_ids)

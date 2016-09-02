@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from lxml import etree
 import cgi
 import logging
-import lxml.html
 import lxml.html.clean as clean
 import random
 import re
 import socket
 import threading
 import time
+
+from email.header import decode_header
 from email.utils import getaddresses, formataddr
+from lxml import etree
 
 import openerp
 from openerp.loglevels import ustr
-from openerp.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
@@ -50,6 +50,9 @@ class _Cleaner(clean.Cleaner):
         # tables
         'border-collapse', 'border-spacing', 'caption-side', 'empty-cells', 'table-layout']
 
+    strip_classes = False
+    sanitize_style = False
+
     def __call__(self, doc):
         # perform quote detection before cleaning and class removal
         for el in doc.iter():
@@ -57,8 +60,13 @@ class _Cleaner(clean.Cleaner):
 
         super(_Cleaner, self).__call__(doc)
 
+        # if we keep attributes but still remove classes
+        if not getattr(self, 'safe_attrs_only', False) and self.strip_classes:
+            for el in doc.iter():
+                self.strip_class(el)
+
         # if we keep style attribute, sanitize them
-        if not self.style:
+        if not self.style and self.sanitize_style:
             for el in doc.iter():
                 self.parse_style(el)
 
@@ -123,6 +131,10 @@ class _Cleaner(clean.Cleaner):
         if el.getparent() is not None and (el.getparent().get('data-o-mail-quote') or el.getparent().get('data-o-mail-quote-container')) and not el.getparent().get('data-o-mail-quote-node'):
             el.set('data-o-mail-quote', '1')
 
+    def strip_class(self, el):
+        if el.attrib.get('class'):
+            del el.attrib['class']
+
     def parse_style(self, el):
         attributes = el.attrib
         styling = attributes.get('style')
@@ -143,7 +155,7 @@ class _Cleaner(clean.Cleaner):
         return super(_Cleaner, self).allow_element(el)
 
 
-def html_sanitize(src, silent=True, strict=False, strip_style=False, strip_classes=False):
+def html_sanitize(src, silent=True, sanitize_tags=True, sanitize_attributes=False, sanitize_style=False, strip_style=False, strip_classes=False):
     if not src:
         return src
     src = ustr(src, errors='replace')
@@ -164,35 +176,38 @@ def html_sanitize(src, silent=True, strict=False, strip_style=False, strip_class
 
     kwargs = {
         'page_structure': True,
-        'style': strip_style,       # True = remove style tags/attrs
-        'forms': True,              # remove form tags
+        'style': strip_style,              # True = remove style tags/attrs
+        'sanitize_style': sanitize_style,  # True = sanitize styling
+        'forms': True,                     # True = remove form tags
         'remove_unknown_tags': False,
-        'allow_tags': allowed_tags,
         'comments': False,
         'processing_instructions': False
     }
-    if etree.LXML_VERSION >= (2, 3, 1):
-        # kill_tags attribute has been added in version 2.3.1
+    if sanitize_tags:
+        kwargs['allow_tags'] = allowed_tags
+        if etree.LXML_VERSION >= (2, 3, 1):
+            # kill_tags attribute has been added in version 2.3.1
+            kwargs.update({
+                'kill_tags': tags_to_kill,
+                'remove_tags': tags_to_remove,
+            })
+        else:
+            kwargs['remove_tags'] = tags_to_kill + tags_to_remove
+
+    if sanitize_attributes and etree.LXML_VERSION >= (3, 1, 0):  # lxml < 3.1.0 does not allow to specify safe_attrs. We keep all attributes in order to keep "style"
+        if strip_classes:
+            current_safe_attrs = safe_attrs - frozenset(['class'])
+        else:
+            current_safe_attrs = safe_attrs
         kwargs.update({
-            'kill_tags': tags_to_kill,
-            'remove_tags': tags_to_remove,
+            'safe_attrs_only': True,
+            'safe_attrs': current_safe_attrs,
         })
     else:
-        kwargs['remove_tags'] = tags_to_kill + tags_to_remove
-
-    if strict:
-        if etree.LXML_VERSION >= (3, 1, 0):
-            # lxml < 3.1.0 does not allow to specify safe_attrs. We keep all attributes in order to keep "style"
-            if strip_classes:
-                current_safe_attrs = safe_attrs - frozenset(['class'])
-            else:
-                current_safe_attrs = safe_attrs
-            kwargs.update({
-                'safe_attrs_only': True,
-                'safe_attrs': current_safe_attrs,
-            })
-    else:
-        kwargs['safe_attrs_only'] = False    # keep oe-data attributes + style
+        kwargs.update({
+            'safe_attrs_only': False,  # keep oe-data attributes + style
+            'strip_classes': strip_classes,  # remove classes, even when keeping other attributes
+        })
 
     try:
         # some corner cases make the parser crash (such as <SCRIPT/XSS SRC=\"http://ha.ckers.org/xss.js\"></SCRIPT> in test_mail)
@@ -205,6 +220,7 @@ def html_sanitize(src, silent=True, strict=False, strip_style=False, strip_class
         cleaned = cleaned.replace('%20', ' ')
         cleaned = cleaned.replace('%5B', '[')
         cleaned = cleaned.replace('%5D', ']')
+        cleaned = cleaned.replace('%7C', '|')
         cleaned = cleaned.replace('&lt;%', '<%')
         cleaned = cleaned.replace('%&gt;', '%>')
     except etree.ParserError, e:
@@ -387,13 +403,16 @@ email_re = re.compile(r"""([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63})""",
 # matches a string containing only one email
 single_email_re = re.compile(r"""^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$""", re.VERBOSE)
 
-res_re = re.compile(r"\[([0-9]+)\]", re.UNICODE)
+# update command in emails body
 command_re = re.compile("^Set-([a-z]+) *: *(.+)$", re.I + re.UNICODE)
 
 # Updated in 7.0 to match the model name as well
 # Typical form of references is <timestamp-openerp-record_id-model_name@domain>
 # group(1) = the record ID ; group(2) = the model (if any) ; group(3) = the domain
 reference_re = re.compile("<.*-open(?:object|erp)-(\\d+)(?:-([\w.]+))?[^>]*@([^>]*)>", re.UNICODE)
+discussion_re = re.compile("<.*-open(?:object|erp)-private[^>]*@([^>]*)>", re.UNICODE)
+
+mail_header_msgid_re = re.compile('<[^<>]+>')
 
 
 def generate_tracking_message_id(res_id):
@@ -471,3 +490,34 @@ def email_split_and_format(text):
                 # is strictly required in RFC2822's `addr-spec`.
                 if addr[1]
                 if '@' in addr[1]]
+
+def email_references(references):
+    ref_match, model, thread_id, hostname, is_private = False, False, False, False, False
+    if references:
+        ref_match = reference_re.search(references)
+    if ref_match:
+        model = ref_match.group(2)
+        thread_id = int(ref_match.group(1))
+        hostname = ref_match.group(3)
+    else:
+        ref_match = discussion_re.search(references)
+        if ref_match:
+            is_private = True
+    return (ref_match, model, thread_id, hostname, is_private)
+
+# was mail_message.decode()
+def decode_smtp_header(smtp_header):
+    """Returns unicode() string conversion of the given encoded smtp header
+    text. email.header decode_header method return a decoded string and its
+    charset for each decoded par of the header. This method unicodes the
+    decoded header and join them in a complete string. """
+    if smtp_header:
+        text = decode_header(smtp_header.replace('\r', ''))
+        # The joining space will not be needed as of Python 3.3
+        # See https://hg.python.org/cpython/rev/8c03fe231877
+        return ' '.join([ustr(x[0], x[1]) for x in text])
+    return u''
+
+# was mail_thread.decode_header()
+def decode_message_header(message, header, separator=' '):
+    return separator.join(map(decode_smtp_header, filter(None, message.get_all(header, []))))

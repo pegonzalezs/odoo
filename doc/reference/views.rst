@@ -509,12 +509,6 @@ The states are shown following the order used in the field (the list in a
 selection field, etc). States that are always visible are specified with the
 attribute ``statusbar_visible``.
 
-``statusbar_colors``
-    can be used to give a custom color to specific states.
-
-    .. deprecated:: 9.0
-
-
 ::
 
     <field name="state" widget="statusbar"
@@ -1047,7 +1041,7 @@ take the following attributes:
   .. warning::
       The dictionnary definition must use double-quotes, ``{'user_id': 100}`` is
       not a valid value
-``consolidation_label``
+``string``
   string to display next to the consolidation value, if not specified, the label
   of the consolidation field will be used
 ``fold_last_level``

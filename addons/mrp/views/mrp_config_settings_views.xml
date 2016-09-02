@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
+<odoo>
     <data>
         <record id="view_mrp_config" model="ir.ui.view">
             <field name="name">mrp settings</field>
@@ -16,6 +16,7 @@
                         <field name="group_mrp_routings" widget="radio"/>
                     </group>
                     <group string="Extra Features">
+                        <field name="module_mrp_mps" widget="upgrade_radio"/>
                         <field name="module_mrp_plm" widget="upgrade_radio"/>
                         <field name="module_mrp_maintenance" widget="upgrade_radio"/>
                         <field name="module_quality_mrp" widget="upgrade_radio"/>
@@ -34,4 +35,4 @@
         <menuitem id="base.menu_mrp_config" name="Settings" parent="menu_mrp_configuration"
             sequence="0" action="action_mrp_configuration" groups="base.group_system"/>
     </data>
-</openerp>
+</odoo>

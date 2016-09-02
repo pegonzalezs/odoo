@@ -10,7 +10,6 @@ var framework = require('web.framework');
 var Model = require('web.Model');
 var session = require('web.session');
 var SystrayMenu = require('web.SystrayMenu');
-var Tour = require('web.Tour');
 var utils = require('web.utils');
 var ViewManager = require('web.ViewManager');
 var WebClient = require('web.WebClient');
@@ -49,7 +48,7 @@ var DebugManager = Widget.extend({
         }
     },
     start: function () {
-        core.bus.on('action_pushed', this, this.update);
+        core.bus.on('current_action_updated', this, this.update.bind(this, 'action'));
         core.bus.on('rpc:result', this, function (req, resp) {
             this._debug_events(resp.debug);
         });
@@ -158,19 +157,6 @@ var DebugManager = Widget.extend({
                 manager: this,
             }));
         return $.when();
-    },
-    start_tour: function() {
-        var dialog = new Dialog(this, {
-            title: 'Tours',
-            $content: QWeb.render('WebClient.DebugManager.ToursDialog', {
-                tours: Tour.tours
-            }),
-        }).open();
-
-        dialog.$('.o_start_tour').on('click', function(e) {
-            e.preventDefault();
-            odoo.__DEBUG__.services['web.Tour'].run($(e.target).data('id'));
-        });
     },
     select_view: function () {
         var self = this;
@@ -341,7 +327,7 @@ DebugManager.include({
         if (!this._active_view.controller.get_selected_ids().length) {
             console.warn(_t("No metadata available"));
             return
-        }        
+        }
         ds.call('get_metadata', [this._active_view.controller.get_selected_ids()]).done(function(result) {
             new Dialog(this, {
                 title: _.str.sprintf(_t("Metadata (%s)"), ds.model),
@@ -664,12 +650,20 @@ if (core.debug) {
         start: function() {
             var self = this;
             return this._super().then(function () {
-                // Override push_action so that it triggers an event each time a new action is pushed
+                // Override push_action and select_action so that it triggers
+                // an event each time a new action is pushed.
                 // The DebugManager listens to this event to keep itself up-to-date
                 var push_action = self.action_manager.push_action;
                 self.action_manager.push_action = function(widget, descr) {
                     return push_action.apply(self.action_manager, arguments).then(function () {
-                        core.bus.trigger('action_pushed', 'action', descr, widget);
+                        core.bus.trigger('current_action_updated', descr, widget);
+                    });
+                };
+                var select_action = self.action_manager.select_action;
+                self.action_manager.select_action = function() {
+                    return select_action.apply(self.action_manager, arguments).then(function () {
+                        var action = self.action_manager.get_inner_action();
+                        core.bus.trigger('current_action_updated', action.action_descr, action.widget);
                     });
                 };
             });

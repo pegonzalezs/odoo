@@ -284,20 +284,23 @@ odoo.define('web_editor.snippets.options', function (require) {
             var self = this;
             var $colors = this.$el.find(".colorpicker button");
             $colors
-                .mouseenter(function () {
+                .mouseenter(function (e) {
                     self.$target.removeClass(self.classes).addClass('bg-' + $(this).data("color"));
+                    self.$target.trigger("background-color-event", e.type);
                 })
-                .mouseleave(function () {
+                .mouseleave(function (e) {
                     self.$target.removeClass(self.classes);
                     var $selected = $colors.filter(".selected");
                     if ($selected.length) {
                         self.$target.addClass('bg-' + $selected.data("color"));
                     }
+                    self.$target.trigger("background-color-event", e.type);
                 })
-                .click(function () {
+                .click(function (e) {
                     $colors.removeClass("selected");
                     $(this).addClass("selected");
                     self.$target.closest(".o_editable").trigger("content_changed");
+                    self.$target.trigger("background-color-event", e.type);
                 });
 
             this.$el.find('.note-color-reset').on('click', function () {
@@ -311,6 +314,15 @@ odoo.define('web_editor.snippets.options', function (require) {
      * The background option is designed to change the background image of a snippet.
      */
     registry.background = SnippetOption.extend({
+        start: function () {
+            var res = this._super.apply(this, arguments);
+            this.$target.off(".background-option")
+                        .on("background-color-event.background-option", (function (e, type) {
+                            this.$el.find("li:first > a").trigger(type);
+                        }).bind(this));
+            return res;
+        },
+
         background: function (type, value, $li) {
             if (value && value.length) {
                 this.$target.css("background-image", "url(" + value + ")");
@@ -322,7 +334,7 @@ odoo.define('web_editor.snippets.options', function (require) {
         },
         select_class: function (type, value, $li) {
             this.background(type, '', $li);
-            this._super.apply(this, arguments);
+            this._super(type, value ? (value + " oe_img_bg") : value, $li);
         },
         choose_image: function (type, value, $li) {
             if(type !== "click") {
@@ -390,7 +402,7 @@ odoo.define('web_editor.snippets.options', function (require) {
             this.bg_siz = self.$target.css('background-size').split(' ');
 
             this.modal = new Dialog(null, {
-                title: _t("Background Image Options"),
+                title: _t("Background Image Sizing"),
                 $content: $(qweb.render('web_editor.dialog.background_position')),
                 buttons: [
                     {text: _t("Ok"), classes: "btn-primary", close: true, click: _.bind(this.save, this)},

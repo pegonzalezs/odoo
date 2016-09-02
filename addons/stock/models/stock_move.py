@@ -43,14 +43,14 @@ class StockMove(models.Model):
         'product.product', 'Product',
         domain=[('type', 'in', ['product', 'consu'])], index=True, required=True,
         states={'done': [('readonly', True)]})
-    ordered_qty = fields.Float('Ordered Quantity', digits_compute=dp.get_precision('Product Unit of Measure'))
+    ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     product_qty = fields.Float(
         'Real Quantity', compute='_compute_product_qty', inverse='_set_product_qty',
         digits=0, store=True,
         help='Quantity in the default UoM of the product')
     product_uom_qty = fields.Float(
         'Quantity',
-        digits_compute=dp.get_precision('Product Unit of Measure'),
+        digits=dp.get_precision('Product Unit of Measure'),
         default=1.0, required=True, states={'done': [('readonly', True)]},
         help="This is the quantity of products from an inventory "
              "point of view. For moves in the state 'done', this is the "
@@ -156,7 +156,7 @@ class StockMove(models.Model):
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
     def _compute_product_qty(self):
         if self.product_uom:
-            self.product_qty = self.env['product.uom']._compute_qty_obj(self.product_uom, self.product_uom_qty, self.product_id.uom_id)
+            self.product_qty = self.product_uom._compute_quantity(self.product_uom_qty, self.product_id.uom_id)
 
     def _set_product_qty(self):
         """ The meaning of product_qty field changed lately and is now a functional field computing the quantity
@@ -195,7 +195,6 @@ class StockMove(models.Model):
     @api.multi
     def _compute_string_qty_information(self):
         StockConfig = self.env['stock.config.settings']
-        UOM = self.env['product.uom']
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         void_moves = self.filtered(lambda move: move.state in ('draft', 'done', 'cancel') or move.location_id.usage != 'internal')
         other_moves = self - void_moves
@@ -203,7 +202,7 @@ class StockMove(models.Model):
             move.string_availability_info = ''  # 'not applicable' or 'n/a' could work too
         for move in other_moves:
             total_available = min(move.product_qty, move.reserved_availability + move.availability)
-            total_available = UOM._compute_qty_obj(move.product_id.uom_id, total_available, move.product_uom, round=False)
+            total_available = move.product_id.uom_id._compute_quantity(total_available, move.product_uom, round=False)
             total_available = float_round(total_available, precision_digits=precision)
             info = str(total_available)
             # look in the settings if we need to display the UoM name or not
@@ -213,7 +212,7 @@ class StockMove(models.Model):
             if move.reserved_availability:
                 if move.reserved_availability != total_available:
                     # some of the available quantity is assigned and some are available but not reserved
-                    reserved_available = UOM._compute_qty_obj(move.product_id.uom_id, move.reserved_availability, move.product_uom, round=False)
+                    reserved_available = move.product_id.uom_id._compute_quantity(move.reserved_availability, move.product_uom, round=False)
                     reserved_available = float_round(reserved_available, precision_digits=precision)
                     info += _(' (%s reserved)') % str(reserved_available)
                 else:
@@ -226,10 +225,11 @@ class StockMove(models.Model):
         if any(move.product_id.uom_id.category_id.id != move.product_uom.category_id.id for move in self):
             raise UserError(_('You try to move a product using a UoM that is not compatible with the UoM of the product moved. Please use an UoM in the same UoM category.'))
 
-    def init(self, cr):
-        cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('stock_move_product_location_index',))
-        if not cr.fetchone():
-            cr.execute('CREATE INDEX stock_move_product_location_index ON stock_move (product_id, location_id, location_dest_id, company_id, state)')
+    @api.model_cr
+    def init(self):
+        self._cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('stock_move_product_location_index',))
+        if not self._cr.fetchone():
+            self._cr.execute('CREATE INDEX stock_move_product_location_index ON stock_move (product_id, location_id, location_dest_id, company_id, state)')
 
     @api.multi
     def name_get(self):
@@ -356,9 +356,10 @@ class StockMove(models.Model):
         if any(move.state in ('done', 'cancel') for move in self):
             raise UserError(_('Cannot unreserve a done move'))
         self.quants_unreserve()
-        waiting = self.filtered(lambda move: move.get_ancestors())
-        waiting.write({'state': 'waiting'})
-        (self - waiting).write({'state': 'confirmed'})
+        if not self.env.context.get('no_state_change'):
+            waiting = self.filtered(lambda move: move.get_ancestors())
+            waiting.write({'state': 'waiting'})
+            (self - waiting).write({'state': 'confirmed'})
 
     def _push_apply(self):
         # TDE CLEANME: I am quite sure I already saw this code somewhere ... in routing ??
@@ -615,7 +616,7 @@ class StockMove(models.Model):
                 lot_qty = {}
                 rounding = ops.product_id.uom_id.rounding
                 for pack_lot in ops.pack_lot_ids:
-                    lot_qty[pack_lot.lot_id.id] = Uom._compute_qty_obj(ops.product_uom_id, pack_lot.qty, ops.product_id.uom_id)
+                    lot_qty[pack_lot.lot_id.id] = ops.product_uom_id._compute_quantity(pack_lot.qty, ops.product_id.uom_id)
                 for record in ops.linked_move_operation_ids:
                     move_qty = record.qty
                     move = record.move_id
@@ -630,7 +631,7 @@ class StockMove(models.Model):
 
         for move in moves_to_do:
             # then if the move isn't totally assigned, try to find quants without any specific domain
-            if move.state != 'assigned':
+            if move.state != 'assigned' and not self.env.context.get('reserve_only_ops'):
                 qty_already_assigned = move.reserved_availability
                 qty = move.product_qty - qty_already_assigned
                 quants = Quant.quants_get_preferred_domain(qty, move, domain=main_domain[move.id], preferred_domain_list=[])
@@ -775,6 +776,8 @@ class StockMove(models.Model):
         remaining_move_qty = {}
 
         for move in self:
+            if move.picking_id:
+                pickings |= move.picking_id
             remaining_move_qty[move.id] = move.product_qty
             for link in move.linked_move_operation_ids:
                 operations |= link.operation_id
@@ -791,8 +794,7 @@ class StockMove(models.Model):
             entire_pack = not operation.product_id and True or False
 
             # compute quantities for each lot + check quantities match
-            lot_quantities = dict((pack_lot.lot_id.id, Uom._compute_qty_obj(
-                operation.product_uom_id, pack_lot.qty, operation.product_id.uom_id)
+            lot_quantities = dict((pack_lot.lot_id.id, operation.product_uom_id._compute_quantity(pack_lot.qty, operation.product_id.uom_id)
             ) for pack_lot in operation.pack_lot_ids)
             if operation.pack_lot_ids and float_compare(sum(lot_quantities.values()), operation.product_qty, precision_rounding=operation.product_uom_id.rounding) != 0.0:
                 raise UserError(_('You have a difference between the quantity on the operation and the quantities specified for the lots. '))
@@ -918,7 +920,7 @@ class StockMove(models.Model):
             return self.id
 
         # HALF-UP rounding as only rounding errors will be because of propagation of error from default UoM
-        uom_qty = self.env['product.uom']._compute_qty_obj(self.product_id.uom_id, qty, self.product_uom, rounding_method='HALF-UP')
+        uom_qty = self.product_id.uom_id._compute_quantity(qty, self.product_uom, rounding_method='HALF-UP')
         defaults = {
             'product_uom_qty': uom_qty,
             'procure_method': 'make_to_stock',

@@ -30,7 +30,7 @@ _logger = logging.getLogger(__name__)
 # almost everywhere, which is ok because it supposedly comes
 # from trusted data, but at least we make it obvious now.
 unsafe_eval = eval
-from .safe_eval import safe_eval as eval
+from .safe_eval import safe_eval
 
 class ParseError(Exception):
     def __init__(self, msg, text, filename, lineno):
@@ -102,8 +102,8 @@ def _eval_xml(self, node, env):
             ids = env[f_model].search(q).ids
             if f_use != 'id':
                 ids = map(lambda x: x[f_use], env[f_model].browse(ids).read([f_use]))
-            _cols = env[f_model]._columns
-            if (f_name in _cols) and _cols[f_name]._type=='many2many':
+            _fields = env[f_model]._fields
+            if (f_name in _fields) and _fields[f_name].type == 'many2many':
                 return ids
             f_val = False
             if len(ids):
@@ -188,11 +188,10 @@ def _eval_xml(self, node, env):
             return_val = _eval_xml(self, n, env)
             if return_val is not None:
                 args.append(return_val)
-        model = env[node.get('model', '')]._model
+        model = env[node.get('model', '')]
         method = node.get('name')
         # this one still depends on the old API
-        res = getattr(model, method)(env.cr, env.uid, *args)
-        return res
+        return openerp.api.call_kw(model, method, args, {})
     elif node.tag == "test":
         return node.text
 
@@ -293,14 +292,14 @@ form: module.record_id""" % (xml_id,)
             if rec.get(field):
                 res[dest] = rec.get(field).encode('utf8')
         if rec.get('auto'):
-            res['auto'] = eval(rec.get('auto','False'))
+            res['auto'] = safe_eval(rec.get('auto','False'))
         if rec.get('sxw'):
             sxw_content = file_open(rec.get('sxw')).read()
             res['report_sxw_content'] = sxw_content
         if rec.get('header'):
-            res['header'] = eval(rec.get('header','False'))
+            res['header'] = safe_eval(rec.get('header','False'))
 
-        res['multi'] = rec.get('multi') and eval(rec.get('multi','False'))
+        res['multi'] = rec.get('multi') and safe_eval(rec.get('multi','False'))
 
         xml_id = rec.get('id','').encode('utf8')
         self._test_xml_id(xml_id)
@@ -324,12 +323,12 @@ form: module.record_id""" % (xml_id,)
         id = self.env['ir.model.data']._update("ir.actions.report.xml", self.module, res, xml_id, noupdate=self.isnoupdate(data_node), mode=self.mode)
         self.idref[xml_id] = int(id)
 
-        if not rec.get('menu') or eval(rec.get('menu','False')):
+        if not rec.get('menu') or safe_eval(rec.get('menu','False')):
             keyword = str(rec.get('keyword', 'client_print_multi'))
             value = 'ir.actions.report.xml,'+str(id)
             action = self.env['ir.values'].set_action(res['name'], keyword, res['model'], value)
             self.env['ir.actions.report.xml'].browse(id).write({'ir_values_id': action.id})
-        elif self.mode=='update' and eval(rec.get('menu','False'))==False:
+        elif self.mode=='update' and safe_eval(rec.get('menu','False'))==False:
             # Special check for report having attribute menu=False on update
             value = 'ir.actions.report.xml,'+str(id)
             self._remove_ir_values(res['name'], value, res['model'])
@@ -435,16 +434,20 @@ form: module.record_id""" % (xml_id,)
         if rec.get('target'):
             res['target'] = rec.get('target','')
         if rec.get('multi'):
-            res['multi'] = eval(rec.get('multi', 'False'))
+            res['multi'] = safe_eval(rec.get('multi', 'False'))
         id = self.env['ir.model.data']._update('ir.actions.act_window', self.module, res, xml_id, noupdate=self.isnoupdate(data_node), mode=self.mode)
         self.idref[xml_id] = int(id)
 
         if src_model:
             #keyword = 'client_action_relate'
+            res_id = False
+            model = src_model
+            if isinstance(model, (list, tuple)):
+                model, res_id = model
             keyword = rec.get('key2','').encode('utf-8') or 'client_action_relate'
             value = 'ir.actions.act_window,'+str(id)
             replace = rec.get('replace','') or True
-            self.env['ir.model.data'].ir_set('action', keyword, xml_id, [src_model], value, replace=replace, isobject=True, xml_id=xml_id)
+            self.env['ir.values'].set_action(xml_id, action_slot=keyword, model=model, action=value, res_id=res_id)
         # TODO add remove ir.model.data
 
     def _tag_ir_set(self, rec, data_node=None, mode=None):
@@ -460,7 +463,15 @@ form: module.record_id""" % (xml_id,)
             f_name = field.get("name",'').encode('utf-8')
             f_val = _eval_xml(self, field, self.env)
             res[f_name] = f_val
-        self.env['ir.model.data'].ir_set(res['key'], res['key2'], res['name'], res['models'], res['value'], replace=res.get('replace',True), isobject=res.get('isobject', False), meta=res.get('meta',None))
+        ir_values = self.env['ir.values']
+        for model in res['models']:
+            res_id = False
+            if isinstance(model, (list, tuple)):
+                model, res_id = model
+            if res['key'] == 'default':
+                ir_values.set_default(model, field_name=res['name'], value=res['value'], condition=res['key2'])
+            elif res['key'] == 'action':
+                ir_values.set_action(res['name'], action_slot=res['key2'], model=model, action=res['value'], res_id=res_id)
 
     def _tag_workflow(self, rec, data_node=None, mode=None):
         if self.isnoupdate(data_node) and self.mode != 'init':
@@ -838,11 +849,7 @@ def convert_file(cr, module, filename, idref, mode='update', noupdate=False, kin
         fp.close()
 
 def convert_sql_import(cr, fp):
-    queries = fp.read().split(';')
-    for query in queries:
-        new_query = ' '.join(query.split())
-        if new_query:
-            cr.execute(new_query)
+    cr.execute(fp.read())
 
 def convert_csv_import(cr, module, fname, csvcontent, idref=None, mode='init',
         noupdate=False):

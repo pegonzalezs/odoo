@@ -31,9 +31,9 @@ class PackOperation(models.Model):
         help='The stock operation where the packing has been made')
     product_id = fields.Many2one('product.product', 'Product', ondelete="cascade")
     product_uom_id = fields.Many2one('product.uom', 'Unit of Measure')
-    product_qty = fields.Float('To Do', default=0.0, digits_compute=dp.get_precision('Product Unit of Measure'), required=True)
-    ordered_qty = fields.Float('Ordered Quantity', digits_compute=dp.get_precision('Product Unit of Measure'))
-    qty_done = fields.Float('Done', default=0.0, digits_compute=dp.get_precision('Product Unit of Measure'))
+    product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
+    ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
+    qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'))
     # TDE FIXME: what what what what ??
     is_done = fields.Boolean(compute='_compute_is_done', inverse='_set_is_done', string='Done', oldname='processed_boolean')
     package_id = fields.Many2one('stock.quant.package', 'Source Package')
@@ -107,7 +107,7 @@ class PackOperation(models.Model):
         else:
             qty = self.product_qty
             if self.product_uom_id:
-                qty = self.env['product.uom']._compute_qty_obj(self.product_uom_id, self.product_qty, self.product_id.uom_id)
+                qty = self.product_uom_id._compute_quantity(self.product_qty, self.product_id.uom_id)
             for record in self.linked_move_operation_ids:
                 qty -= record.qty
             self.remaining_qty = float_round(qty, precision_rounding=self.product_id.uom_id.rounding)
@@ -184,10 +184,12 @@ class PackOperation(models.Model):
     @api.multi
     def action_split_lots(self):
         action_ctx = dict(self.env.context)
+        # If it's a returned stock move, we do not want to create a lot
+        returned_move = self.linked_move_operation_ids.mapped('move_id').mapped('origin_returned_move_id')
         picking_type = self.picking_id.picking_type_id
         action_ctx.update({
             'serial': self.product_id.tracking == 'serial',
-            'only_create': picking_type.use_create_lots and not picking_type.use_existing_lots,
+            'only_create': picking_type.use_create_lots and not picking_type.use_existing_lots and not returned_move,
             'create_lots': picking_type.use_create_lots,
             'state_done': self.picking_id.state == 'done',
             'show_reserved': any([lot for lot in self.pack_lot_ids if lot.qty_todo > 0.0])})

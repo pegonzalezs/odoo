@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from openerp.tests import common
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from odoo.tests import common
 
 class test_inherits(common.TransactionCase):
 
@@ -30,20 +32,17 @@ class test_inherits(common.TransactionCase):
         field = mother._fields['name']
         self.assertTrue(field.required)
         self.assertEqual(field.default(mother), "Bar")
-        self.assertEqual(mother._defaults.get('name'), "Bar")
         self.assertEqual(mother.default_get(['name']), {'name': "Bar"})
 
         # the field daughter.name must have required=False and "Baz" as default
         field = daughter._fields['name']
         self.assertFalse(field.required)
         self.assertEqual(field.default(daughter), "Baz")
-        self.assertEqual(daughter._defaults.get('name'), "Baz")
         self.assertEqual(daughter.default_get(['name']), {'name': "Baz"})
 
         # the field mother.state must have no default value
         field = mother._fields['state']
         self.assertFalse(field.default)
-        self.assertNotIn('state', mother._defaults)
         self.assertEqual(mother.default_get(['state']), {})
 
         # the field daughter.template_id should have
@@ -68,8 +67,6 @@ class test_inherits(common.TransactionCase):
         # the extra values are added, both in the field and the column
         self.assertEqual(mother._fields['state'].selection,
                          [('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')])
-        self.assertEqual(mother._columns['state'].selection,
-                         [('a', 'A'), ('b', 'B'), ('c', 'C'), ('d', 'D')])
 
     def test_50_search_one2many(self):
         """ check search on one2many field based on inherited many2one field. """
@@ -86,12 +83,13 @@ class test_inherits(common.TransactionCase):
 
 class test_override_property(common.TransactionCase):
 
-    def test_override_with_function_field(self):
+    def test_override_with_normal_field(self):
         """ test overriding a property field by a function field """
         record = self.env['test.inherit.property'].create({'name': "Stuff"})
         # record.property_foo is not a property field
-        self.assertEqual(record.property_foo, 42)
+        self.assertFalse(record.property_foo)
         self.assertFalse(type(record).property_foo.company_dependent)
+        self.assertTrue(type(record).property_foo.store)
 
     def test_override_with_computed_field(self):
         """ test overriding a property field by a computed field """

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import pytz
+import datetime
 import logging
 
 from collections import defaultdict
@@ -203,16 +205,12 @@ class Users(models.Model):
     groups_id = fields.Many2many('res.groups', 'res_groups_users_rel', 'uid', 'gid', string='Groups', default=_default_groups)
     log_ids = fields.One2many('res.users.log', 'create_uid', string='User log entries')
     login_date = fields.Datetime(related='log_ids.create_date', string='Latest connection')
-    share = fields.Boolean(compute='_compute_share', string='Share User', store=True,
+    share = fields.Boolean(compute='_compute_share', compute_sudo=True, string='Share User', store=True,
          help="External user with limited access, created only for the purpose of sharing data.")
     companies_count = fields.Integer(compute='_compute_companies_count', string="Number of Companies", default=_companies_count)
-    
-    @api.v7
-    def _get_company(self, cr, uid, context=None, uid2=False):
-        user = self.browse(cr, uid, uid2 or uid, context=context)
-        return Users._get_company(user).id
+    tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
 
-    @api.v8
+    @api.model
     def _get_company(self):
         return self.env.user.company_id
 
@@ -262,6 +260,11 @@ class Users(models.Model):
         for user in self:
             user.companies_count = companies_count
 
+    @api.depends('tz')
+    def _compute_tz_offset(self):
+        for user in self:
+            user.tz_offset = datetime.datetime.now(pytz.timezone(user.tz or 'GMT')).strftime('%z')
+
     @api.onchange('login')
     def on_change_login(self):
         if self.login and tools.single_email_re.match(self.login):
@@ -281,12 +284,7 @@ class Users(models.Model):
         if any(user.company_ids and user.company_id not in user.company_ids for user in self):
             raise ValidationError(_('The chosen company is not in the allowed companies for this user'))
 
-    @api.v7
-    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
-        result = Users.read(self.browse(cr, uid, ids, context), fields, load=load)
-        return result if isinstance(ids, list) else (bool(result) and result[0])
-
-    @api.v8
+    @api.multi
     def read(self, fields=None, load='_classic_read'):
         if fields and self == self.env.user:
             for key in fields:
@@ -448,23 +446,26 @@ class Users(models.Model):
         # extra records will be deleted by the periodical garbage collection
         self.env['res.users.log'].create({}) # populated by defaults
 
-    def _login(self, db, login, password):
+    @classmethod
+    def _login(cls, db, login, password):
         if not password:
             return False
         user_id = False
         try:
-            with self.pool.cursor() as cr:
-                res = self.search(cr, SUPERUSER_ID, [('login','=',login)])
-                if res:
-                    user_id = res[0]
-                    self.check_credentials(cr, user_id, password)
-                    self._update_last_login(cr, user_id)
+            with cls.pool.cursor() as cr:
+                self = api.Environment(cr, SUPERUSER_ID, {})[cls._name]
+                user = self.search([('login', '=', login)])
+                if user:
+                    user_id = user.id
+                    user.sudo(user_id).check_credentials(password)
+                    user.sudo(user_id)._update_last_login()
         except AccessDenied:
             _logger.info("Login failed for db:%s login:%s", db, login)
             user_id = False
         return user_id
 
-    def authenticate(self, db, login, password, user_agent_env):
+    @classmethod
+    def authenticate(cls, db, login, password, user_agent_env):
         """Verifies and returns the user ID corresponding to the given
           ``login`` and ``password`` combination, or False if there was
           no matching user.
@@ -474,33 +475,35 @@ class Users(models.Model):
            :param dict user_agent_env: environment dictionary describing any
                relevant environment attributes
         """
-        uid = self._login(db, login, password)
+        uid = cls._login(db, login, password)
         if uid == SUPERUSER_ID:
             # Successfully logged in as admin!
             # Attempt to guess the web base url...
             if user_agent_env and user_agent_env.get('base_location'):
                 try:
-                    with self.pool.cursor() as cr:
+                    with cls.pool.cursor() as cr:
                         base = user_agent_env['base_location']
-                        ICP = self.pool['ir.config_parameter']
-                        if not ICP.get_param(cr, uid, 'web.base.url.freeze'):
-                            ICP.set_param(cr, uid, 'web.base.url', base)
+                        ICP = api.Environment(cr, uid, {})['ir.config_parameter']
+                        if not ICP.get_param('web.base.url.freeze'):
+                            ICP.set_param('web.base.url', base)
                 except Exception:
                     _logger.exception("Failed to update web.base.url configuration parameter")
         return uid
 
-    def check(self, db, uid, passwd):
+    @classmethod
+    def check(cls, db, uid, passwd):
         """Verifies that the given (uid, password) is authorized for the database ``db`` and
            raise an exception if it is not."""
         if not passwd:
             # empty passwords disallowed for obvious security reasons
             raise AccessDenied()
-        if self.__uid_cache[db].get(uid) == passwd:
+        if cls.__uid_cache[db].get(uid) == passwd:
             return
-        cr = self.pool.cursor()
+        cr = cls.pool.cursor()
         try:
-            self.check_credentials(cr, uid, passwd)
-            self.__uid_cache[db][uid] = passwd
+            self = api.Environment(cr, uid, {})[cls._name]
+            self.check_credentials(passwd)
+            cls.__uid_cache[db][uid] = passwd
         finally:
             cr.close()
 
@@ -535,11 +538,7 @@ class Users(models.Model):
             'target': 'new',
         }
 
-    @api.v7
-    def has_group(self, cr, uid, group_ext_id):
-        return self._has_group(cr, uid, group_ext_id)
-
-    @api.v8
+    @api.model
     def has_group(self, group_ext_id):
         # use singleton's id if called on a non-empty recordset, otherwise
         # context uid
@@ -569,7 +568,12 @@ class Users(models.Model):
     @api.multi
     def _is_admin(self):
         self.ensure_one()
-        return self.id == SUPERUSER_ID or self.has_group('base.group_erp_manager')
+        return self._is_superuser() or self.has_group('base.group_erp_manager')
+
+    @api.multi
+    def _is_superuser(self):
+        self.ensure_one()
+        return self.id == SUPERUSER_ID
 
     @api.model
     def get_company_currency_id(self):
@@ -678,8 +682,7 @@ class GroupsView(models.Model):
     @api.multi
     def write(self, values):
         res = super(GroupsView, self).write(values)
-        if 'category_id' in values:
-            self._update_user_groups_view()
+        self._update_user_groups_view()
         # ir_values.get_actions() depends on action records
         self.env['ir.values'].clear_caches()
         return res
@@ -835,12 +838,7 @@ class UsersView(models.Model):
         self._add_reified_groups(group_fields, values)
         return values
 
-    @api.v7
-    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
-        result = UsersView.read(self.browse(cr, uid, ids, context), fields, load=load)
-        return result if isinstance(ids, list) else (bool(result) and result[0])
-
-    @api.v8
+    @api.multi
     def read(self, fields=None, load='_classic_read'):
         # determine whether reified groups fields are required, and which ones
         fields1 = fields or self.fields_get().keys()

@@ -12,7 +12,7 @@ import odoo
 from odoo import api, fields, models, tools, workflow, _
 from odoo.exceptions import MissingError, UserError, ValidationError
 from odoo.report.report_sxw import report_sxw, report_rml
-from odoo.tools.safe_eval import safe_eval as eval, test_python_expr
+from odoo.tools.safe_eval import safe_eval, test_python_expr
 
 _logger = logging.getLogger(__name__)
 
@@ -227,9 +227,9 @@ class IrActionsReportXml(models.Model):
             # yml tests originally written for RML reports.
             if tools.config['test_enable'] and not tools.config['test_report_directory']:
                 # Only generate the pdf when a destination folder has been provided.
-                return self.pool['report'].get_html(self._cr, self._uid, res_ids, report, data=data, context=self._context), 'html'
+                return self.env['report'].get_html(res_ids, report, data=data), 'html'
             else:
-                return self.pool['report'].get_pdf(self._cr, self._uid, res_ids, report, data=data, context=self._context), 'pdf'
+                return self.env['report'].get_pdf(res_ids, report, data=data), 'pdf'
         else:
             return report.create(self._cr, self._uid, res_ids, data, context=self._context)
 
@@ -310,12 +310,7 @@ class IrActionsActWindow(models.Model):
     search_view = fields.Text(compute='_compute_search_view')
     multi = fields.Boolean(string='Restrict to lists', help="If checked and the action is bound to a model, it will only appear in the More menu on list views")
 
-    @api.v7
-    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
-        result = IrActionsActWindow.read(self.browse(cr, uid, ids, context), fields, load=load)
-        return result if isinstance(ids, list) else (bool(result) and result[0])
-
-    @api.v8
+    @api.multi
     def read(self, fields=None, load='_classic_read'):
         """ call the method get_empty_list_help of the model and set the window action help message
         """
@@ -795,7 +790,7 @@ class IrActionsServer(models.Model):
 
     @api.model
     def run_action_code_multi(self, action, eval_context=None):
-        eval(action.code.strip(), eval_context, mode="exec", nocopy=True)  # nocopy allows to return 'action'
+        safe_eval(action.code.strip(), eval_context, mode="exec", nocopy=True)  # nocopy allows to return 'action'
         if 'action' in eval_context:
             return eval_context['action']
 
@@ -848,7 +843,7 @@ class IrActionsServer(models.Model):
             ref_id = action.ref_object.id
         elif action.use_write == 'expression':
             model = action.crud_model_id.model
-            ref = eval(action.write_expression, eval_context)
+            ref = safe_eval(action.write_expression, eval_context)
             if isinstance(ref, models.BaseModel):
                 ref_id = ref.id
             else:
@@ -897,7 +892,7 @@ class IrActionsServer(models.Model):
 
         :param action: the current server action
         :type action: browse record
-        :returns: dict -- evaluation context given to (safe_)eval """
+        :returns: dict -- evaluation context given to (safe_)safe_eval """
         def log(message, level="info"):
             self._cr.execute("""
                 INSERT INTO ir_logging(create_date, create_uid, type, dbname, name, level, message, path, line, func)
@@ -924,7 +919,6 @@ class IrActionsServer(models.Model):
             'object': obj,
             'obj': obj,
             # Deprecated use env or model instead
-            'self': model._model,
             'pool': self.pool,
             'cr': self._cr,
             'context': self._context,
@@ -961,7 +955,7 @@ class IrActionsServer(models.Model):
                 # Void (aka False) conditions are considered as True
                 condition = True
             if hasattr(self, 'run_action_%s_multi' % action.state):
-                expr = eval(str(condition), eval_context)
+                expr = safe_eval(str(condition), eval_context)
                 if not expr:
                     continue
                 # call the multi method
@@ -976,13 +970,21 @@ class IrActionsServer(models.Model):
                     # run context dedicated to a particular active_id
                     run_self = self.with_context(active_ids=[active_id], active_id=active_id)
                     eval_context["context"] = run_self._context
-                    expr = eval(str(condition), eval_context)
+                    expr = safe_eval(str(condition), eval_context)
                     if not expr:
                         continue
                     # call the single method related to the action: run_action_<STATE>
                     func = getattr(run_self, 'run_action_%s' % action.state)
                     res = func(action, eval_context=eval_context)
         return res
+
+    @api.model
+    def _run_actions(self, ids):
+        """
+            Run server actions with given ids.
+            Allow crons to run specific server actions
+        """
+        return self.browse(ids).run()
 
 
 class IrServerObjectLines(models.Model):
@@ -1004,7 +1006,7 @@ class IrServerObjectLines(models.Model):
         for line in self:
             expr = line.value
             if line.type == 'equation':
-                expr = eval(line.value, eval_context)
+                expr = safe_eval(line.value, eval_context)
             elif line.col1.ttype in ['many2one', 'integer']:
                 try:
                     expr = int(line.value)
@@ -1077,7 +1079,7 @@ class IrActionsTodo(models.Model):
         result.setdefault('context', '{}')
 
         # Open a specific record when res_id is provided in the context
-        ctx = eval(result['context'], {'user': self.env.user})
+        ctx = safe_eval(result['context'], {'user': self.env.user})
         if ctx.get('res_id'):
             result['res_id'] = ctx.pop('res_id')
 
@@ -1141,11 +1143,11 @@ class IrActionsActClient(models.Model):
                                 "the view tag")
     params_store = fields.Binary(string='Params storage', readonly=True)
 
-    @api.depends('params')
+    @api.depends('params_store')
     def _compute_params(self):
         self_bin = self.with_context(bin_size=False, bin_size_params_store=False)
         for record, record_bin in zip(self, self_bin):
-            record.params = record_bin.params_store and eval(record_bin.params_store, {'uid': self._uid})
+            record.params = record_bin.params_store and safe_eval(record_bin.params_store, {'uid': self._uid})
 
     def _inverse_params(self):
         for record in self:

@@ -436,9 +436,9 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
             ('state', 'in', ['to install', 'installed', 'to upgrade'])])
 
         if modules and not field_value:
-            dep_ids = modules.downstream_dependencies()
-            dep_name = (ModuleSudo.browse(dep_ids) + modules).mapped('shortdesc')
-            message = '\n'.join(dep_name)
+            deps = modules.sudo().downstream_dependencies()
+            dep_names = (deps | modules).mapped('shortdesc')
+            message = '\n'.join(dep_names)
             return {
                 'warning': {
                     'title': _('Warning!'),
@@ -512,7 +512,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
     @api.multi
     def execute(self):
         self.ensure_one()
-        if not self.env.user._is_admin():
+        if not self.env.user._is_superuser() and not self.env.user.has_group('base.group_system'):
             raise AccessError(_("Only administrators can change the settings"))
 
         self = self.with_context(active_test=False)
@@ -554,10 +554,12 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         if action:
             return action
 
-        # After the uninstall/install calls, the self.pool is no longer valid.
-        # So we reach into the RegistryManager directly.
-        ResConfig = registry(self._cr.dbname)['res.config']
-        config = ResConfig.browse(self._cr, self._uid, [], self._context).next() or {}
+        if to_install or to_uninstall_modules:
+            # After the uninstall/install calls, the registry and environments
+            # are no longer valid. So we reset the environment.
+            self.env.reset()
+            self = self.env()[self._name]
+        config = self.env['res.config'].next() or {}
         if config.get('type') not in ('ir.actions.act_window_close',):
             return config
 
@@ -609,12 +611,7 @@ class ResConfigSettings(models.TransientModel, ResConfigModuleInstallationMixin)
         model_name, field_name = full_field_name.rsplit('.', 1)
         return self.env[model_name].fields_get([field_name])[field_name]['string']
 
-    @api.v7
-    def get_config_warning(self, cr, msg, context=None):
-        recs = self.browse(cr, SUPERUSER_ID, [], context)
-        return ResConfigSettings.get_config_warning(recs, msg)
-
-    @api.v8
+    @api.model_cr_context
     def get_config_warning(self, msg):
         """
         Helper: return a Warning exception with the given message where the %(field:xxx)s

@@ -3,7 +3,7 @@
 
 
 {
-    'name': 'MRP',
+    'name': 'Manufacturing',
     'version': '2.0',
     'website': 'https://www.odoo.com/page/manufacturing',
     'category': 'Manufacturing',
@@ -63,7 +63,8 @@ Dashboard / Reports for MRP will include:
         'report/mrp_report_views_main.xml',
         'report/mrp_report_views.xml',
         'report/mrp_production_templates.xml',
-        'report/mrp_bom_templates.xml',
+        'report/mrp_bom_structure_report_templates.xml',
+        'report/mrp_bom_cost_report_templates.xml',
     ],
     'demo': [
         'data/mrp_demo.xml',

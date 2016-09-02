@@ -3,10 +3,10 @@
 from operator import itemgetter
 import time
 
-from openerp import api, fields, models, _
-from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
-from openerp.exceptions import ValidationError
-from openerp.addons.base.res.res_partner import WARNING_MESSAGE, WARNING_HELP
+from odoo import api, fields, models, _
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.exceptions import ValidationError
+from odoo.addons.base.res.res_partner import WARNING_MESSAGE, WARNING_HELP
 
 class AccountFiscalPosition(models.Model):
     _name = 'account.fiscal.position'
@@ -44,25 +44,7 @@ class AccountFiscalPosition(models.Model):
             raise ValidationError(_('Invalid "Zip Range", please configure it properly.'))
         return True
 
-    @api.v7
-    def map_tax(self, cr, uid, fposition_id, taxes, product=None, partner=None, context=None):
-        if not taxes:
-            return []
-        if not fposition_id:
-            return map(lambda x: x.id, taxes)
-        result = set()
-        for t in taxes:
-            ok = False
-            for tax in fposition_id.tax_ids:
-                if tax.tax_src_id.id == t.id:
-                    if tax.tax_dest_id:
-                        result.add(tax.tax_dest_id.id)
-                    ok = True
-            if not ok:
-                result.add(t.id)
-        return list(result)
-
-    @api.v8     # noqa
+    @api.model     # noqa
     def map_tax(self, taxes, product=None, partner=None):
         result = self.env['account.tax'].browse()
         for tax in taxes:
@@ -72,29 +54,18 @@ class AccountFiscalPosition(models.Model):
                     tax_count += 1
                     if t.tax_dest_id:
                         result |= t.tax_dest_id
-                    break
             if not tax_count:
                 result |= tax
         return result
 
-    @api.v7
-    def map_account(self, cr, uid, fposition_id, account_id, context=None):
-        if not fposition_id:
-            return account_id
-        for pos in fposition_id.account_ids:
-            if pos.account_src_id.id == account_id:
-                account_id = pos.account_dest_id.id
-                break
-        return account_id
-
-    @api.v8
+    @api.model
     def map_account(self, account):
         for pos in self.account_ids:
             if pos.account_src_id == account:
                 return pos.account_dest_id
         return account
 
-    @api.v8
+    @api.model
     def map_accounts(self, accounts):
         """ Receive a dictionary having accounts in values and try to replace those accounts accordingly to the fiscal position.
         """
@@ -339,7 +310,7 @@ class ResPartner(models.Model):
             else:
                 domain += [('partner_id', 'in', self.ids)]
         #adding the overdue lines
-        overdue_domain = ['|', '&', ('date_maturity', '!=', False), ('date_maturity', '<=', date), '&', ('date_maturity', '=', False), ('date', '<=', date)]
+        overdue_domain = ['|', '&', ('date_maturity', '!=', False), ('date_maturity', '<', date), '&', ('date_maturity', '=', False), ('date', '<', date)]
         if overdue_only:
             domain += overdue_domain
         return domain
@@ -393,7 +364,7 @@ class ResPartner(models.Model):
 
     @api.multi
     def mark_as_reconciled(self):
-        self.env['account_partial_reconcile'].check_access_right('write')
+        self.env['account.partial.reconcile'].check_access_rights('write')
         return self.sudo().write({'last_time_entries_checked': time.strftime(DEFAULT_SERVER_DATETIME_FORMAT)})
 
     @api.one
@@ -430,10 +401,10 @@ class ResPartner(models.Model):
         string="Fiscal Position",
         help="The fiscal position will determine taxes and accounts used for the partner.", oldname="property_account_position")
     property_payment_term_id = fields.Many2one('account.payment.term', company_dependent=True,
-        string ='Customer Payment Term',
+        string='Customer Payment Terms',
         help="This payment term will be used instead of the default one for sale orders and customer invoices", oldname="property_payment_term")
     property_supplier_payment_term_id = fields.Many2one('account.payment.term', company_dependent=True,
-         string ='Vendor Payment Term',
+         string='Vendor Payment Terms',
          help="This payment term will be used instead of the default one for purchase orders and vendor bills", oldname="property_supplier_payment_term")
     ref_company_ids = fields.One2many('res.company', 'partner_id',
         string='Companies that refers to partner', oldname="ref_companies")

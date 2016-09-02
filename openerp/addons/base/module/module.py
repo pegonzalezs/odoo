@@ -210,11 +210,15 @@ class Module(models.Model):
             module.reports_by_module = "\n".join(sorted(map(attrgetter('name'), browse('ir.actions.report.xml'))))
             module.menus_by_module = "\n".join(sorted(map(attrgetter('complete_name'), browse('ir.ui.menu'))))
 
-    @api.depends('name')
+    @api.depends('icon')
     def _get_icon_image(self):
         for module in self:
             module.icon_image = ''
-            path = modules.get_module_resource(module.name, 'static', 'description', 'icon.png')
+            if module.icon:
+                path_parts = module.icon.split('/')
+                path = modules.get_module_resource(path_parts[1], *path_parts[2:])
+            else:
+                path = modules.get_module_icon(module.name)
             if path:
                 with tools.file_open(path, 'rb') as image_file:
                     module.icon_image = image_file.read().encode('base64')
@@ -476,7 +480,7 @@ class Module(models.Model):
 
         self._cr.commit()
         api.Environment.reset()
-        modules.registry.RegistryManager.new(self._cr.dbname, update_module=True)
+        modules.registry.Registry.new(self._cr.dbname, update_module=True)
 
         self._cr.commit()
         env = api.Environment(self._cr, self._uid, self._context)
@@ -544,7 +548,7 @@ class Module(models.Model):
         for module in todo:
             for dep in module.dependencies_id:
                 if dep.state == 'unknown':
-                    raise UserError(_('You try to upgrade a module that depends on the module: %s.\nBut this module is not available in your system.') % (dep.name,))
+                    raise UserError(_('You try to upgrade the module %s that depends on the module: %s.\nBut this module is not available in your system.') % (module.name, dep.name,))
                 if dep.state == 'uninstalled':
                     to_install += self.search([('name', '=', dep.name)]).ids
 

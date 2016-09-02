@@ -14,9 +14,7 @@ class StockMoveConsume(models.TransientModel):
         'product.product', 'Product',
         index=True, required=True)
     product_qty = fields.Float(
-        'Quantity',
-        digits_compute=dp.get_precision('Product Unit of Measure'),
-        required=True)
+        'Quantity', digits=dp.get_precision('Product Unit of Measure'), required=True)
     product_uom = fields.Many2one(
         'product.uom', 'Product Unit of Measure',
         required=True)
@@ -42,13 +40,12 @@ class StockMoveConsume(models.TransientModel):
 
     @api.multi
     def do_move_consume(self):
-        UoM = self.env['product.uom']
         Production = self.env['mrp.production']
 
         move = self.env['stock.move'].browse(self._context['active_id'])
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         for wizard in self:
-            qty = UoM._compute_qty(wizard.product_uom.id, wizard.product_qty, wizard.product_id.uom_id.id)
+            qty = wizard.product_uom._compute_quantity(wizard.product_qty, wizard.product_id.uom_id)
             remaining_qty = move.product_qty - qty
             # check for product quantity is less than previously planned
             if float_compare(remaining_qty, 0, precision_digits=precision) >= 0:

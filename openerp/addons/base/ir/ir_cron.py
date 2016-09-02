@@ -11,7 +11,7 @@ from dateutil.relativedelta import relativedelta
 import odoo
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools.safe_eval import safe_eval as eval
+from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ BASE_VERSION = odoo.modules.load_information_from_description_file('base')['vers
 
 
 def str2tuple(s):
-    return eval('tuple(%s)' % (s or ''))
+    return safe_eval('tuple(%s)' % (s or ''))
 
 _intervalTypes = {
     'work_days': lambda interval: relativedelta(days=interval),
@@ -105,7 +105,10 @@ class ir_cron(models.Model):
         """
         try:
             args = str2tuple(args)
-            odoo.modules.registry.RegistryManager.check_registry_signaling(self._cr.dbname)
+            if self.pool != self.pool.check_signaling():
+                # the registry has changed, reload self in the new registry
+                self.env.reset()
+                self = self.env()[self._name]
             if model_name in self.env:
                 model = self.env[model_name]
                 if hasattr(model, method_name):
@@ -117,7 +120,7 @@ class ir_cron(models.Model):
                     if _logger.isEnabledFor(logging.DEBUG):
                         end_time = time.time()
                         _logger.debug('%.3fs (%s, %s)', end_time - start_time, model_name, method_name)
-                    odoo.modules.registry.RegistryManager.signal_caches_change(self._cr.dbname)
+                    self.pool.signal_caches_change()
                 else:
                     _logger.warning("Method '%s.%s' does not exist.", model_name, method_name)
             else:
@@ -125,7 +128,8 @@ class ir_cron(models.Model):
         except Exception, e:
             self._handle_callback_exception(model_name, method_name, args, job_id, e)
 
-    def _process_job(self, job_cr, job, cron_cr):
+    @classmethod
+    def _process_job(cls, job_cr, job, cron_cr):
         """ Run a given job taking care of the repetition.
 
         :param job_cr: cursor to use to execute the job, safe to commit/rollback
@@ -135,7 +139,7 @@ class ir_cron(models.Model):
         """
         try:
             with api.Environment.manage():
-                cron = api.Environment(job_cr, job['user_id'], {})[self._name]
+                cron = api.Environment(job_cr, job['user_id'], {})[cls._name]
                 # Use the user's timezone to compare and compute datetimes,
                 # otherwise unexpected results may appear. For instance, adding
                 # 1 month in UTC to July 1st at midnight in GMT+2 gives July 30

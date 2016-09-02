@@ -5,8 +5,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, SUPERUSER_ID, tools,  _
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.modules import init_models
-from odoo.modules.registry import RegistryManager
+from odoo.modules.registry import Registry
 from odoo.tools.safe_eval import safe_eval
 
 _logger = logging.getLogger(__name__)
@@ -43,7 +42,8 @@ class IrModel(models.Model):
     name = fields.Char(string='Model Description', translate=True, required=True)
     model = fields.Char(default='x_', required=True, index=True)
     info = fields.Text(string='Information')
-    field_id = fields.One2many('ir.model.fields', 'model_id', string='Fields', required=True, copy=True)
+    field_id = fields.One2many('ir.model.fields', 'model_id', string='Fields', required=True, copy=True,
+        default=lambda self: [(0, 0, {'name': 'x_name', 'field_description': 'Name', 'ttype': 'char'})])
     inherited_model_ids = fields.Many2many('ir.model', compute='_inherited_models', string="Inherited models",
                                            help="The list of models that extends the current model.")
     state = fields.Selection([('manual', 'Custom Object'), ('base', 'Base Object')], string='Type', default='manual', readonly=True)
@@ -122,8 +122,8 @@ class IrModel(models.Model):
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             self._cr.commit()  # must be committed before reloading registry in new cursor
             api.Environment.reset()
-            RegistryManager.new(self._cr.dbname)
-            RegistryManager.signal_registry_change(self._cr.dbname)
+            registry = Registry.new(self._cr.dbname)
+            registry.signal_registry_change()
 
         return res
 
@@ -150,10 +150,18 @@ class IrModel(models.Model):
             # setup models; this automatically adds model in registry
             self.pool.setup_models(self._cr, partial=(not self.pool.ready))
             # update database schema
-            model = self.pool[vals['model']]
-            init_models([model], self._cr, dict(self._context, update_custom_fields=True))
-            RegistryManager.signal_registry_change(self._cr.dbname)
+            self.pool.init_models(self._cr, [vals['model']], dict(self._context, update_custom_fields=True))
+            self.pool.signal_registry_change()
         return res
+
+    @api.model
+    def name_create(self, name):
+        """ Infer the model from the name. E.g.: 'My New Model' should become 'x_my_new_model'. """
+        vals = {
+            'name': name,
+            'model': 'x_' + '_'.join(name.lower().split(' ')),
+        }
+        return self.create(vals).name_get()[0]
 
     @api.model
     def _instanciate(self, model_data):
@@ -320,7 +328,8 @@ class IrModelFields(models.Model):
     @api.one
     @api.constrains('relation_table')
     def _check_relation_table(self):
-        models.check_pg_name(self.relation_table)
+        if self.relation_table:
+            models.check_pg_name(self.relation_table)
 
     @api.model
     def _custom_many2many_names(self, model_name, comodel_name):
@@ -397,6 +406,9 @@ class IrModelFields(models.Model):
 
     @api.multi
     def unlink(self):
+        if not self:
+            return True
+
         # Prevent manual deletion of module columns
         if not self._context.get(MODULE_UNINSTALL_FLAG) and \
                 any(field.state != 'manual' for field in self):
@@ -410,8 +422,8 @@ class IrModelFields(models.Model):
         if not self._context.get(MODULE_UNINSTALL_FLAG):
             self._cr.commit()
             api.Environment.reset()
-            RegistryManager.new(self._cr.dbname)
-            RegistryManager.signal_registry_change(self._cr.dbname)
+            registry = Registry.new(self._cr.dbname)
+            registry.signal_registry_change()
 
         return res
 
@@ -444,9 +456,8 @@ class IrModelFields(models.Model):
                 # setup models; this re-initializes model in registry
                 self.pool.setup_models(self._cr, partial=(not self.pool.ready))
                 # update database schema
-                model = self.pool[vals['model']]
-                init_models([model], self._cr, dict(self._context, update_custom_fields=True))
-                RegistryManager.signal_registry_change(self._cr.dbname)
+                self.pool.init_models(self._cr, [vals['model']], dict(self._context, update_custom_fields=True))
+                self.pool.signal_registry_change()
 
         return res
 
@@ -527,11 +538,10 @@ class IrModelFields(models.Model):
 
         if patched_models:
             # update the database schema of the models to patch
-            models = [self.pool[name] for name in patched_models]
-            init_models(models, self._cr, dict(self._context, update_custom_fields=True))
+            self.pool.init_models(self._cr, patched_models, dict(self._context, update_custom_fields=True))
 
         if column_rename or patched_models:
-            RegistryManager.signal_registry_change(self._cr.dbname)
+            self.pool.signal_registry_change()
 
         return res
 
@@ -569,12 +579,11 @@ class IrModelConstraint(models.Model):
 
         ids_set = set(self.ids)
         for data in self.sorted(key='id', reverse=True):
-            if data.model.model not in self.env:
-                continue
-            model = self.env[data.model.model]
             name = tools.ustr(data.name)
-            if not model:
-                continue
+            if data.model.model in self.env:
+                table = self.env[data.model.model]._table    
+            else:
+                table = data.model.model.replace('.', '_')
             typ = data.type
 
             # double-check we are really going to delete all the owners of this schema element
@@ -588,18 +597,18 @@ class IrModelConstraint(models.Model):
                 # test if FK exists on this table (it could be on a related m2m table, in which case we ignore it)
                 self._cr.execute("""SELECT 1 from pg_constraint cs JOIN pg_class cl ON (cs.conrelid = cl.oid)
                                     WHERE cs.contype=%s and cs.conname=%s and cl.relname=%s""",
-                                 ('f', name, model._table))
+                                 ('f', name, table))
                 if self._cr.fetchone():
-                    self._cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (model._table, name),)
+                    self._cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (table, name),)
                     _logger.info('Dropped FK CONSTRAINT %s@%s', name, data.model.model)
 
             if typ == 'u':
                 # test if constraint exists
                 self._cr.execute("""SELECT 1 from pg_constraint cs JOIN pg_class cl ON (cs.conrelid = cl.oid)
                                     WHERE cs.contype=%s and cs.conname=%s and cl.relname=%s""",
-                                 ('u', name, model._table))
+                                 ('u', name, table))
                 if self._cr.fetchone():
-                    self._cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (model._table, name),)
+                    self._cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (table, name),)
                     _logger.info('Dropped CONSTRAINT %s@%s', name, data.model.model)
 
         self.unlink()
@@ -783,16 +792,15 @@ class IrModelAccess(models.Model):
 
         return bool(r)
 
-    __cache_clearing_methods = []
+    __cache_clearing_methods = set()
 
-    def register_cache_clearing_method(self, model, method):
-        self.__cache_clearing_methods.append((model, method))
+    @classmethod
+    def register_cache_clearing_method(cls, model, method):
+        cls.__cache_clearing_methods.add((model, method))
 
-    def unregister_cache_clearing_method(self, model, method):
-        try:
-            self.__cache_clearing_methods.remove((model, method))
-        except ValueError:
-            pass
+    @classmethod
+    def unregister_cache_clearing_method(cls, model, method):
+        cls.__cache_clearing_methods.discard((model, method))
 
     @api.model_cr
     def call_cache_clearing_methods(self):
@@ -983,14 +991,6 @@ class IrModelData(models.Model):
                 pass
         return False
 
-    def clear_caches(self):
-        """ Clears all orm caches on the object's methods
-
-        :returns: itself
-        """
-        self.xmlid_lookup.clear_cache(self)
-        return self
-
     @api.multi
     def unlink(self):
         """ Regular unlink method, but make sure to clear the caches. """
@@ -1096,12 +1096,6 @@ class IrModelData(models.Model):
                 self.loads[(module, parent_xml_id)] = (parent_model, record[parent_field].id)
 
         return record.id
-
-    @api.model
-    def ir_set(self, key, key2, name, models, value, replace=True, isobject=False, meta=None, xml_id=False):
-        ir_values = self.env['ir.values']
-        ir_values.set(key, key2, name, models, value, replace, isobject, meta)
-        return True
 
     @api.model
     def _module_data_uninstall(self, modules_to_remove):

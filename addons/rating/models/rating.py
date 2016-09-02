@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import uuid
-from odoo import api, fields, models
-from openerp import tools
 
+from odoo import api, fields, models, tools
 
 
 class Rating(models.Model):
@@ -31,7 +31,7 @@ class Rating(models.Model):
     res_id = fields.Integer(string='Document ID', required=True, help="Identifier of the rated object", index=True)
     rated_partner_id = fields.Many2one('res.partner', string="Rated Partner", help="Owner of the rated resource")
     partner_id = fields.Many2one('res.partner', string='Customer', help="Author of the rating")
-    rating = fields.Float(string="Rating", group_operator="avg", default=0, help="Rating value")
+    rating = fields.Float(string="Rating", group_operator="avg", default=0, help="Rating value: 0=Unhappy, 10=Happy")
     feedback = fields.Text('Feedback reason', help="Reason of the rating")
     message_id = fields.Many2one('mail.message', string="Linked message", help="Associated message when posting a review. Mainly used in website addons.", index=True)
     access_token = fields.Char('Security Token', default=new_access_token, help="Access token to set the rating of the value")
@@ -47,12 +47,13 @@ class Rating(models.Model):
                 'consumed': False,
             })
 
+
 class RatingMixin(models.AbstractModel):
     _name = 'rating.mixin'
     _description = "Rating Mixin"
 
     rating_ids = fields.One2many('rating.rating', 'res_id', string='Rating', domain=lambda self: [('res_model', '=', self._name)])
-    rating_last_value = fields.Float('Last Value', related='rating_ids.rating', store=True)
+    rating_last_value = fields.Float('Rating Last Value', related='rating_ids.rating', store=True)
     rating_count = fields.Integer('Rating count', compute="_compute_rating_count")
 
     @api.multi

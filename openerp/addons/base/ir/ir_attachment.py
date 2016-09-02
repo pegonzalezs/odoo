@@ -188,12 +188,11 @@ class IrAttachment(models.Model):
 
     def _check_contents(self, values):
         mimetype = values['mimetype'] = self._compute_mimetype(values)
-        needs_escape = 'htm' in mimetype or '/ht' in mimetype # hta, html, xhtml, etc.
-        if needs_escape and not self.env.user._is_admin():
-            if 'datas' in values:
-                values['datas'] = html_escape(values['datas'].decode('base64')).encode('base64')
-            else:
-                values['mimetype'] = 'text/plain'
+        xml_like = 'ht' in mimetype or 'xml' in mimetype # hta, html, xhtml, etc.
+        force_text = (xml_like and (not self.env.user._is_admin() or
+            self.env.context.get('attachments_mime_plainxml')))
+        if force_text:
+            values['mimetype'] = 'text/plain'
         return values
 
     @api.model
@@ -235,7 +234,7 @@ class IrAttachment(models.Model):
     file_size = fields.Integer('File Size', readonly=True)
     checksum = fields.Char("Checksum/SHA1", size=40, index=True, readonly=True)
     mimetype = fields.Char('Mime Type', readonly=True)
-    index_content = fields.Text('Indexed Content', readonly=True, _prefetch=False)
+    index_content = fields.Text('Indexed Content', readonly=True, prefetch=False)
 
     @api.model_cr_context
     def _auto_init(self):
@@ -342,12 +341,7 @@ class IrAttachment(models.Model):
         result = [id for id in orig_ids if id in ids]
         return len(result) if count else list(result)
 
-    @api.v7
-    def read(self, cr, uid, ids, fields=None, context=None, load='_classic_read'):
-        result = IrAttachment.read(self.browse(cr, uid, ids, context), fields, load=load)
-        return result if isinstance(ids, list) else (bool(result) and result[0])
-
-    @api.v8
+    @api.multi
     def read(self, fields=None, load='_classic_read'):
         self.check('read')
         return super(IrAttachment, self).read(fields, load=load)

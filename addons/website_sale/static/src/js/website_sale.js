@@ -232,10 +232,24 @@ odoo.define('website_sale.website_sale', function (require) {
         }
 
         function update_product_image(event_source, product_id) {
-            var $img = $(event_source).closest('tr.js_product, .oe_website_sale').find('span[data-oe-model^="product."][data-oe-type="image"] img:first, img.product_detail_img');
-            $img.attr("src", "/web/image/product.product/" + product_id + "/image");
-            $img.parent().attr('data-oe-model', 'product.product').attr('data-oe-id', product_id)
-                .data('oe-model', 'product.product').data('oe-id', product_id);
+            if ($('#o-carousel-product').length) {
+                var $img = $(event_source).closest('tr.js_product, .oe_website_sale').find('img.js_variant_img');
+                $img.attr("src", "/web/image/product.product/" + product_id + "/image");
+                $img.parent().attr('data-oe-model', 'product.product').attr('data-oe-id', product_id)
+                    .data('oe-model', 'product.product').data('oe-id', product_id);
+                
+                $img = $(event_source).closest('tr.js_product, .oe_website_sale').find('img.js_variant_img_small');
+                if ($img) { // if only one, thumbnails are not displayed
+                    $img.attr("src", "/web/image/product.product/" + product_id + "/image/90x90");
+                    $('.carousel').carousel(0);
+                }
+            }
+            else {
+                var $img = $(event_source).closest('tr.js_product, .oe_website_sale').find('span[data-oe-model^="product."][data-oe-type="image"] img:first, img.product_detail_img');
+                $img.attr("src", "/web/image/product.product/" + product_id + "/image");
+                $img.parent().attr('data-oe-model', 'product.product').attr('data-oe-id', product_id)
+                    .data('oe-model', 'product.product').data('oe-id', product_id);
+            }
         }
 
         $(oe_website_sale).on('change', 'input.js_product_change', function () {
@@ -283,7 +297,7 @@ odoo.define('website_sale.website_sale', function (require) {
                 var id = +$input.val();
                 var values = [id];
 
-                $parent.find("ul:not(:has(input.js_variant_change[value='" + id + "'])) input.js_variant_change:checked, select").each(function () {
+                $parent.find("ul:not(:has(input.js_variant_change[value='" + id + "'])) input.js_variant_change:checked, select.js_variant_change").each(function () {
                     values.push(+$(this).val());
                 });
 
@@ -316,6 +330,7 @@ odoo.define('website_sale.website_sale', function (require) {
         });
 
         $('.oe_cart').on('click', '.js_change_shipping', function() {
+          if (!$('body.editor_enable').length) { //allow to edit button text with editor
             var $old = $('.all_shipping').find('.panel.border_primary');
             $old.find('.btn-ship').toggle();
             $old.addClass('js_change_shipping');
@@ -328,13 +343,29 @@ odoo.define('website_sale.website_sale', function (require) {
 
             var $form = $(this).parent('div.one_kanban').find('form.hide');
             $.post($form.attr('action'), $form.serialize()+'&xhr=1');
+          }
         });
         $('.oe_cart').on('click', '.js_edit_address', function() {
             $(this).parent('div.one_kanban').find('form.hide').attr('action', '/shop/address').submit();
         });
         $('.oe_cart').on('click', '.js_delete_product', function(e) {
+            e.preventDefault();
             $(this).closest('tr').find('.js_quantity').val(0).trigger('change');
         });
+
+        if ($('.oe_website_sale .dropdown_sorty_by').length) {
+            // this method allow to keep current get param from the action, with new search query
+            $('.oe_website_sale .o_website_sale_search').on('submit', function (event) {
+                var $this = $(this);
+                if (!event.isDefaultPrevented() && !$this.is(".disabled")) {
+                    event.preventDefault();
+                    var oldurl = $this.attr('action');
+                    oldurl += (oldurl.indexOf("?")===-1) ? "?" : "";
+                    var search = $this.find('input.search-query');
+                    window.location = oldurl + '&' + search.attr('name') + '=' + encodeURIComponent(search.val());
+                }
+            });
+        }
 
         if ($(".checkout_autoformat").length) {
             $(oe_website_sale).on('change', "select[name='country_id']", function () {

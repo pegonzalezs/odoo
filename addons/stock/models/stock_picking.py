@@ -424,7 +424,8 @@ class Picking(models.Model):
 
     @api.multi
     def unlink(self):
-        self.mapped('move_lines').action_cancel().unlink()
+        self.mapped('move_lines').action_cancel()
+        self.mapped('move_lines').unlink() # Checks if moves are not done
         return super(Picking, self).unlink()
 
     # Actions
@@ -556,7 +557,7 @@ class Picking(models.Model):
             uom = product_to_uom[mapping.product.id]
             val_dict = {
                 'picking_id': self.id,
-                'product_qty': Uom._compute_qty_obj(mapping.product.uom_id, qty, uom),
+                'product_qty': mapping.product.uom_id._compute_quantity(qty, uom),
                 'product_id': mapping.product.id,
                 'package_id': mapping.package.id,
                 'owner_id': mapping.owner.id,
@@ -685,7 +686,7 @@ class Picking(models.Model):
         for ops in operations:
             lot_qty = {}
             for packlot in ops.pack_lot_ids:
-                lot_qty[packlot.lot_id.id] = Uom._compute_qty_obj(ops.product_uom_id, packlot.qty, ops.product_id.uom_id)
+                lot_qty[packlot.lot_id.id] = ops.product_uom_id._compute_quantity(packlot.qty, ops.product_id.uom_id)
             # for each operation, create the links with the stock move by seeking on the matching reserved quants,
             # and deffer the operation if there is some ambiguity on the move to select
             if ops.package_id and not ops.product_id and (not done_qtys or ops.qty_done):
@@ -703,7 +704,7 @@ class Picking(models.Model):
             elif ops.product_id.id:
                 # Check moves with same product
                 product_qty = ops.qty_done if done_qtys else ops.product_qty
-                qty_to_assign = Uom._compute_qty_obj(ops.product_uom_id, product_qty, ops.product_id.uom_id)
+                qty_to_assign = ops.product_uom_id._compute_quantity(product_qty, ops.product_id.uom_id)
                 precision_rounding = ops.product_id.uom_id.rounding
                 for move_dict in prod2move_ids.get(ops.product_id.id, []):
                     move = move_dict['move']
@@ -765,6 +766,8 @@ class Picking(models.Model):
             self.action_assign()
         else:
             moves = self.env['stock.move'].browse(move_ids)
+            if self.env.context.get('no_state_change'):
+                moves = moves.filtered(lambda m: m.reserved_quant_ids)
             moves.do_unreserve()
             moves.action_assign(no_prepare=True)
 
@@ -853,6 +856,13 @@ class Picking(models.Model):
             if not all_op_processed:
                 todo_moves |= picking._create_extra_moves()
 
+            if need_rereserve or not all_op_processed:
+                moves_reassign = any(x.origin_returned_move_id or x.move_orig_ids for x in picking.move_lines if x.state not in ['done', 'cancel'])
+                if moves_reassign and picking.location_id.usage not in ("supplier", "production", "inventory"):
+                    # unnecessary to assign other quants than those involved with pack operations as they will be unreserved anyways.
+                    picking.with_context(reserve_only_ops=True, no_state_change=True).rereserve_quants(move_ids=todo_moves.ids)
+                picking.do_recompute_remaining_quantities()
+
             # split move lines if needed
             for move in picking.move_lines:
                 rounding = move.product_id.uom_id.rounding
@@ -872,11 +882,6 @@ class Picking(models.Model):
                     todo_moves |= move
                     # Assign move as it was assigned before
                     toassign_moves |= new_move
-
-            if need_rereserve or not all_op_processed:
-                if picking.location_id.usage not in ("supplier", "production", "inventory"):
-                    picking.rereserve_quants(move_ids=todo_moves.ids)
-                picking.do_recompute_remaining_quantities()
 
             # TDE FIXME: do_only_split does not seem used anymore
             if todo_moves and not self.env.context.get('do_only_split'):
@@ -924,7 +929,7 @@ class Picking(models.Model):
             if op.product_uom_id.factor > product.uom_id.factor:  # If the pack operation's is a smaller unit
                 uom_id = op.product_uom_id.id
                 # HALF-UP rounding as only rounding errors will be because of propagation of error from default UoM
-                qty = Uom._compute_qty_obj(product.uom_id, remaining_qty, op.product_uom_id, rounding_method='HALF-UP')
+                qty = product.uom_id._compute_quantity(remaining_qty, op.product_uom_id, rounding_method='HALF-UP')
         picking = op.picking_id
         ref = product.default_code
         name = '[' + ref + ']' + ' ' + product.name if ref else product.name
@@ -943,7 +948,7 @@ class Picking(models.Model):
             'product_uom_qty': qty,
             'name': _('Extra Move: ') + name,
             'state': 'draft',
-            'restrict_partner_id': op.owner_id,
+            'restrict_partner_id': op.owner_id.id,
             'group_id': picking.group_id.id,
         }
 

@@ -22,7 +22,7 @@ Dialog = Dialog.extend({
         options = options || {};
         this._super(parent, _.extend({}, {
             buttons: [
-                {text: options.save_text || _t("Save"), classes: "btn-primary o_save_button", close: true, click: this.save},
+                {text: options.save_text || _t("Save"), classes: "btn-primary o_save_button", click: this.save},
                 {text: _t("Discard"), close: true}
             ]
         }, options));
@@ -216,7 +216,7 @@ var MediaDialog = Dialog.extend({
             }
         },0);
 
-        this.close();
+        this._super.apply(this, arguments);
     },
     searchTimer: null,
     search: function () {
@@ -260,6 +260,9 @@ var ImageDialog = Widget.extend({
         'change input.url': "change_input",
         'keyup input.url': "change_input",
         'click .existing-attachments [data-src]': 'select_existing',
+        'dblclick .existing-attachments [data-src]': function () {
+            this.getParent().save();
+        },
         'click .o_existing_attachment_remove': 'try_remove',
         'keydown.dismiss.bs.modal': function () {},
     }),
@@ -305,7 +308,7 @@ var ImageDialog = Widget.extend({
     },
     push: function (attachment) {
         if (this.options.select_images) {
-            var img = _.select(this.images, function (v) { return v.id == attachment.id;});
+            var img = _.select(this.images, function (v) { return v.id === attachment.id; });
             if (img.length) {
                 this.images.splice(this.images.indexOf(img[0]),1);
             }
@@ -622,6 +625,9 @@ var fontIconsDialog = Widget.extend({
             this.$('#fa-icon').val(e.target.getAttribute('data-id'));
             $(".font-icons-icon").removeClass("o_selected");
             $(e.target).addClass("o_selected");
+        },
+        'dblclick .font-icons-icon': function () {
+            this.getParent().save();
         },
         'keydown.dismiss.bs.modal': function () {},
     }),
@@ -1064,17 +1070,17 @@ var LinkDialog = Dialog.extend({
         var isNewWindow = this.$('input.window-new').prop('checked');
 
         if ($e.hasClass('email-address') && $e.val().indexOf("@") !== -1) {
-            self.get_data_buy_mail(def, $e, isNewWindow, label, classes);
+            self.get_data_buy_mail(def, $e, isNewWindow, label, classes, test);
         } else {
-            self.get_data_buy_url(def, $e, isNewWindow, label, classes);
+            self.get_data_buy_url(def, $e, isNewWindow, label, classes, test);
         }
         return def;
     },
-    get_data_buy_mail: function (def, $e, isNewWindow, label, classes) {
+    get_data_buy_mail: function (def, $e, isNewWindow, label, classes, test) {
         var val = $e.val();
         def.resolve(val.indexOf("mailto:") === 0 ? val : 'mailto:' + val, isNewWindow, label, classes);
     },
-    get_data_buy_url: function (def, $e, isNewWindow, label, classes) {
+    get_data_buy_url: function (def, $e, isNewWindow, label, classes, test) {
         def.resolve($e.val(), isNewWindow, label, classes);
     },
     save: function () {

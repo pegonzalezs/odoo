@@ -70,7 +70,7 @@ class PartnerCategory(models.Model):
     _parent_store = True
     _parent_order = 'name'
 
-    name = fields.Char(string='Category Name', required=True, translate=True)
+    name = fields.Char(string='Tag Name', required=True, translate=True)
     color = fields.Integer(string='Color Index')
     parent_id = fields.Many2one('res.partner.category', string='Parent Category', index=True, ondelete='cascade')
     child_ids = fields.One2many('res.partner.category', 'parent_id', string='Child Tags')
@@ -200,6 +200,10 @@ class Partner(models.Model, FormatAddress):
     company_id = fields.Many2one('res.company', 'Company', index=True, default=_default_company)
     color = fields.Integer(string='Color Index', default=0)
     user_ids = fields.One2many('res.users', 'partner_id', string='Users', auto_join=True)
+    partner_share = fields.Boolean(
+        'Share Partner', compute='_compute_partner_share', store=True,
+        help="Either customer (no user), either shared user. Indicated the current partner is a customer without "
+             "access or with a limited access created for sharing data.")
     contact_address = fields.Char(compute='_compute_contact_address', string='Complete Address')
 
     # technical field used for managing commercial fields
@@ -220,6 +224,8 @@ class Partner(models.Model, FormatAddress):
         help="Small-sized image of this contact. It is automatically "\
              "resized as a 64x64px image, with aspect ratio preserved. "\
              "Use this field anywhere a small image is required.")
+    # hack to allow using plain browse record in qweb views, and used in ir.qweb.field.contact
+    self = fields.Many2one(comodel_name=_name, compute='_compute_get_ids')
 
     _sql_constraints = [
         ('check_name', "CHECK( (type='contact' AND name IS NOT NULL) or (type!='contact') )", 'Contacts require a name.'),
@@ -237,10 +243,19 @@ class Partner(models.Model, FormatAddress):
         for partner in self:
             partner.tz_offset = datetime.datetime.now(pytz.timezone(partner.tz or 'GMT')).strftime('%z')
 
+    @api.depends('user_ids.share')
+    def _compute_partner_share(self):
+        for partner in self:
+            partner.partner_share = not partner.user_ids or any(user.share for user in partner.user_ids)
+
     @api.depends(lambda self: self._display_address_depends())
     def _compute_contact_address(self):
         for partner in self:
             partner.contact_address = partner._display_address()
+
+    @api.one
+    def _compute_get_ids(self):
+        self.self = self.id
 
     @api.depends('is_company', 'parent_id.commercial_partner_id')
     def _compute_commercial_partner(self):
@@ -263,7 +278,7 @@ class Partner(models.Model, FormatAddress):
 
         colorize, img_path, image = False, False, False
 
-        if partner_type in ['contact', 'other'] and parent_id:
+        if partner_type in ['other'] and parent_id:
             parent_image = self.browse(parent_id).image
             image = parent_image and parent_image.decode('base64') or None
 
@@ -349,11 +364,7 @@ class Partner(models.Model, FormatAddress):
     def onchange_company_type(self):
         self.is_company = (self.company_type == 'company')
 
-    @api.v7
-    def _update_fields_values(self, cr, uid, partner, fields, context=None):
-        return Partner._update_fields_values(partner, fields)
-
-    @api.v8
+    @api.multi
     def _update_fields_values(self, fields):
         """ Returns dict of write() values for synchronizing ``fields`` """
         values = {}
@@ -389,11 +400,7 @@ class Partner(models.Model, FormatAddress):
         extended by inheriting classes. """
         return ['vat', 'credit_limit']
 
-    @api.v7
-    def _commercial_sync_from_company(self, cr, uid, partner, context=None):
-        return Partner._commercial_sync_from_company(partner)
-
-    @api.v8
+    @api.multi
     def _commercial_sync_from_company(self):
         """ Handle sync of commercial fields when a new parent commercial entity is set,
         as if they were related fields """
@@ -402,11 +409,7 @@ class Partner(models.Model, FormatAddress):
             sync_vals = commercial_partner._update_fields_values(self._commercial_fields())
             self.write(sync_vals)
 
-    @api.v7
-    def _commercial_sync_to_children(self, cr, uid, partner, context=None):
-        return Partner._commercial_sync_to_children(partner)
-
-    @api.v8
+    @api.multi
     def _commercial_sync_to_children(self):
         """ Handle sync of commercial fields to descendants """
         commercial_partner = self.commercial_partner_id
@@ -416,11 +419,7 @@ class Partner(models.Model, FormatAddress):
             child._commercial_sync_to_children()
         return sync_children.write(sync_vals)
 
-    @api.v7
-    def _fields_sync(self, cr, uid, partner, values, context=None):
-        return Partner._fields_sync(partner, values)
-
-    @api.v8
+    @api.multi
     def _fields_sync(self, values):
         """ Sync commercial fields and address fields from company and to children after create/update,
         just as if those were all modeled as fields.related to the parent """
@@ -447,11 +446,7 @@ class Partner(models.Model, FormatAddress):
                 contacts = self.child_ids.filtered(lambda c: c.type == 'contact')
                 contacts.update_address(values)
 
-    @api.v7
-    def _handle_first_contact_creation(self, cr, uid, partner, context=None):
-        return Partner._handle_first_contact_creation(partner)
-
-    @api.v8
+    @api.multi
     def _handle_first_contact_creation(self):
         """ On creation of first contact for a company (or root) that has no address, assume contact address
         was meant to be company address """
@@ -558,11 +553,11 @@ class Partner(models.Model, FormatAddress):
         for partner in self:
             name = partner.name or ''
 
-            if partner.commercial_company_name:
+            if partner.company_name or partner.parent_id:
                 if not name and partner.type in ['invoice', 'delivery', 'other']:
                     name = dict(self.fields_get(['type'])['type']['selection'])[partner.type]
                 if not partner.is_company:
-                    name = "%s, %s" % (partner.commercial_company_name, name)
+                    name = "%s, %s" % (partner.commercial_company_name or partner.parent_id.name, name)
             if self._context.get('show_address_only'):
                 name = partner._display_address(without_company=True)
             if self._context.get('show_address'):
@@ -747,11 +742,7 @@ class Partner(models.Model, FormatAddress):
         ''' Return the main partner '''
         return self.env.ref('base.main_partner')
 
-    @api.v7
-    def _display_address(self, cr, uid, address, without_company=False, context=None):
-        return self.browse(cr, uid, address.id, context=context)._display_address(without_company=without_company)
-
-    @api.v8
+    @api.multi
     def _display_address(self, without_company=False):
 
         '''
