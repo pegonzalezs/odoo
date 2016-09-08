@@ -27,6 +27,7 @@ Miscellaneous tools used by OpenERP.
 """
 
 from functools import wraps
+import cPickle
 import cProfile
 import subprocess
 import logging
@@ -36,6 +37,7 @@ import sys
 import threading
 import time
 import zipfile
+from cStringIO import StringIO
 from collections import defaultdict
 from datetime import datetime
 from itertools import islice, izip, groupby
@@ -437,11 +439,12 @@ ALL_LANGUAGES = {
         'am_ET': u'Amharic / አምሃርኛ',
         'ar_SY': u'Arabic / الْعَرَبيّة',
         'bg_BG': u'Bulgarian / български език',
-        'bs_BA': u'Bosnian / bosanski jezik',
+        'bs_BS': u'Bosnian / bosanski jezik',
         'ca_ES': u'Catalan / Català',
         'cs_CZ': u'Czech / Čeština',
         'da_DK': u'Danish / Dansk',
         'de_DE': u'German / Deutsch',
+        'de_CH': u'German (CH) / Deutsch (CH)',
         'el_GR': u'Greek / Ελληνικά',
         'en_CA': u'English (CA)',
         'en_GB': u'English (UK)',
@@ -486,7 +489,6 @@ ALL_LANGUAGES = {
         'lo_LA': u'Lao / ພາສາລາວ',
         'lt_LT': u'Lithuanian / Lietuvių kalba',
         'lv_LV': u'Latvian / latviešu valoda',
-        'mk_MK': u'Macedonian / македонски јазик',
         'ml_IN': u'Malayalam / മലയാളം',
         'mn_MN': u'Mongolian / монгол',
         'nb_NO': u'Norwegian Bokmål / Norsk bokmål',
@@ -1095,5 +1097,22 @@ def stripped_sys_argv(*strip_args):
             or (i >= 1 and (args[i - 1] in strip_args) and takes_value[args[i - 1]])
 
     return [x for i, x in enumerate(args) if not strip(args, i)]
+
+class Pickle(object):
+    @classmethod
+    def load(cls, stream):
+        unpickler = cPickle.Unpickler(stream)
+        # pickle builtins: str/unicode, int/long, float, bool, tuple, list, dict, None
+        unpickler.find_global = None
+        return unpickler.load()
+
+    @classmethod
+    def loads(cls, text):
+        return cls.load(StringIO(text))
+
+    dumps = cPickle.dumps
+    dump = cPickle.dump
+
+pickle = Pickle
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

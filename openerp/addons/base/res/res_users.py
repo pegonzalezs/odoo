@@ -359,7 +359,7 @@ class res_users(osv.osv):
         if not context:
             context={}
         ids = []
-        if name and operator in ['=', 'ilike']:
+        if name:
             ids = self.search(cr, user, [('login','=',name)]+ args, limit=limit, context=context)
         if not ids:
             ids = self.search(cr, user, [('name',operator,name)]+ args, limit=limit, context=context)
@@ -373,12 +373,6 @@ class res_users(osv.osv):
         if 'login' not in default:
             default['login'] = _("%s (copy)") % user2copy['login']
         return super(res_users, self).copy(cr, uid, id, default, context)
-
-    def copy_data(self, cr, uid, ids, default=None, context=None):
-        if default is None:
-            default = {}
-        default.update({'login_date': False})
-        return super(res_users, self).copy_data(cr, uid, ids, default, context=context)
 
     @tools.ormcache(skiparg=2)
     def context_get(self, cr, uid, context=None):
@@ -442,9 +436,7 @@ class res_users(osv.osv):
                 # prevent/delay login in that case. It will also have been logged
                 # as a SQL error, if anyone cares.
                 try:
-                    # NO KEY introduced in PostgreSQL 9.3 http://www.postgresql.org/docs/9.3/static/release-9-3.html#AEN115299
-                    update_clause = 'NO KEY UPDATE' if cr._cnx.server_version >= 90300 else 'UPDATE'
-                    cr.execute("SELECT id FROM res_users WHERE id=%%s FOR %s NOWAIT" % update_clause, (user_id,), log_exceptions=False)
+                    cr.execute("SELECT id FROM res_users WHERE id=%s FOR UPDATE NOWAIT", (user_id,), log_exceptions=False)
                     cr.execute("UPDATE res_users SET login_date = now() AT TIME ZONE 'UTC' WHERE id=%s", (user_id,))
                 except Exception:
                     _logger.debug("Failed to update last_login for db:%s login:%s", db, login, exc_info=True)
@@ -713,10 +705,6 @@ class groups_view(osv.osv):
     def update_user_groups_view(self, cr, uid, context=None):
         # the view with id 'base.user_groups_view' inherits the user form view,
         # and introduces the reified group fields
-        if not context or context.get('install_mode'):
-            # use installation/admin language for translatable names in the view
-            context = dict(context or {})
-            context.update(self.pool['res.users'].context_get(cr, uid))
         view = self.get_user_groups_view(cr, uid, context)
         if view:
             xml1, xml2 = [], []
@@ -866,8 +854,6 @@ class users_view(osv.osv):
     def fields_get(self, cr, uid, allfields=None, context=None, write_access=True):
         res = super(users_view, self).fields_get(cr, uid, allfields, context, write_access)
         # add reified groups fields
-        if uid != SUPERUSER_ID and not self.pool['res.users'].has_group(cr, uid, 'base.group_erp_manager'):
-            return res
         for app, kind, gs in self.pool.get('res.groups').get_groups_by_application(cr, uid, context):
             if kind == 'selection':
                 # selection group field
