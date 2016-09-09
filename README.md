@@ -3,6 +3,13 @@
 [![Help](http://img.shields.io/badge/9.0-help-8f8f8f.svg?style=flat)](https://www.odoo.com/forum/help-1)
 [![Nightly Builds](http://img.shields.io/badge/9.0-nightly-8f8f8f.svg?style=flat)](http://nightly.odoo.com/)
 
+This branch: 9.0.Fernuni
+------------------------
+It is similar to the base 9.0 branch but with the following patches (required by sett_hr):
+ - https://svn.brain-tec.ch/patches/90/90--sett_hr--make_uid_available_in_views.patch
+ - https://svn.brain-tec.ch/patches/90/90--sett_hr--send_readonly_field_values_to_server.patch
+ - https://svn.brain-tec.ch/patches/90/90--sett_hr--set_attribute_depends_without_bt_swissdec.patch
+
 Odoo
 ----
 

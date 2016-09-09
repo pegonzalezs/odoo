@@ -1,0 +1,29 @@
+=== modified file 'openerp/osv/orm.py'
+--- openerp/osv/orm.py	2015-07-27 07:56:29.120300025 +0200
++++ openerp/osv/orm.py	2015-07-27 07:58:12.324304948 +0200
+@@ -52,7 +52,10 @@
+ # For non-tree views, the context shouldn't be given.
+ def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False):
+     if node.get('attrs'):
+-        modifiers.update(eval(node.get('attrs')))
++        if 'uid' in context and 'uid' in node.get('attrs'):	
++            modifiers.update(eval(node.get('attrs'),  context ))
++        else:
++            modifiers.update(eval(node.get('attrs'), {'context': context or {}}))
+ 
+     if node.get('states'):
+         if 'invisible' in modifiers and isinstance(modifiers['invisible'], list):
+
+=== modified file 'openerp/addons/base/ir/ir_ui_view.py'         
+--- openerp/addons/base/ir/ir_ui_view.py	2015-07-27 07:57:01.208301556 +0200
++++ openerp/addons/base/ir/ir_ui_view.py	2015-07-27 08:50:22.508454275 +0200
+@@ -575,6 +575,9 @@
+         """
+         if context is None:
+             context = {}
++        if not context.get('uid', False):
++            context = dict(context)
++            context.update(uid=user)
+         result = False
+         fields = {}
+         children = True
