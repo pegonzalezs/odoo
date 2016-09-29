@@ -23,6 +23,7 @@ var session = require('web.session');
 var FieldMany2One = core.form_widget_registry.get('many2one');
 var FieldChar = core.form_widget_registry.get('char');
 var FieldFloat = core.form_widget_registry.get('float');
+var FieldBoolean = core.form_widget_registry.get('boolean');
 
 var _t = core._t;
 var QWeb = core.qweb;
@@ -159,6 +160,20 @@ var abstractReconciliation = Widget.extend(ControlPanelMixin, {
                     domain: [['account_type', '=', 'normal']],
                 },
             },
+            book_taxes_back: {
+                id: "book_taxes_back",
+                index: 25,
+                corresponding_property: "book_taxes_back",
+                label: _t("Book taxes back"),
+                required: true,
+                readonly: true,
+                tabindex: 15,
+                constructor: FieldBoolean,
+                field_properties: {
+                    string: _t("Book taxes back"),
+                    type: "boolean",
+                },
+            },
         };
     },
 
@@ -216,7 +231,8 @@ var abstractReconciliation = Widget.extend(ControlPanelMixin, {
                         amount_type: datum.amount_type,
                         amount: datum.amount,
                         tax_id: datum.tax_id,
-                        analytic_account_id: datum.analytic_account_id
+                        analytic_account_id: datum.analytic_account_id,
+                        book_taxes_back: datum.book_taxes_back
                     }]
                 };
                 if (datum.has_second_line) {
@@ -227,7 +243,8 @@ var abstractReconciliation = Widget.extend(ControlPanelMixin, {
                         amount_type: datum.second_amount_type,
                         amount: datum.second_amount,
                         tax_id: datum.second_tax_id,
-                        analytic_account_id: datum.second_analytic_account_id
+                        analytic_account_id: datum.second_analytic_account_id,
+                        book_taxes_back: datum.second_book_taxes_back
                     });
                 }
                 self.presets[datum.id] = preset;
@@ -988,42 +1005,142 @@ var abstractReconciliationLine = Widget.extend({
         var line_created_being_edited = self.get("line_created_being_edited");
         line_created_being_edited[0][elt.corresponding_property] = val.newValue;
 
+        // set taxes readonly if book_taxes_back is set
+
+        var book_taxes_back = self.book_taxes_back_field.get("value");
+        if (book_taxes_back) {
+            self.tax_id_field.$el.parent().parent().hide()
+            // self.analytic_account_id_field.$el.parent().parent().hide()
+        }
+        else {
+            self.tax_id_field.$el.parent().parent().show()
+            // self.analytic_account_id_field.$el.parent().parent().show()
+        }
+
+        if (elt === self.book_taxes_back_field)
+            if (!book_taxes_back)
+                self.tax_id_field.set("value", null);
+
         // Specific cases
+        var account_id = false;
         if (elt === self.account_id_field)
             line_created_being_edited[0].account_num = self.map_account_id_code[elt.get("value")];
+            account_id = self.account_id_field.get("value");
 
+        var amount = self.amount_field.get("value");
         // Update tax line
         var deferred_tax = new $.Deferred();
-        if (elt === self.tax_id_field || elt === self.amount_field) {
-            var amount = self.amount_field.get("value");
-            var tax_id = self.tax_id_field.get("value");
-            if (amount && tax_id) {
+        if (book_taxes_back) {
+            if (amount && account_id) {
                 deferred_tax = self.model_tax
-                    .call("compute_all", [[tax_id], amount, self.get("currency_id")])
-                    .then(function(data){
-                        line_created_being_edited.length = 1; // remove tax lines
-                        line_created_being_edited[0].amount_before_tax = amount;
-                        line_created_being_edited[0].amount = data.total_excluded;
-                        $.each(data.taxes, function(index, tax) {
-                            var tax_account_id = (amount > 0 ? tax.account_id : tax.refund_account_id);
-                            tax_account_id = tax_account_id !== false ? tax_account_id : line_created_being_edited[0].account_id;
-                            line_created_being_edited.push({
-                                id: line_created_being_edited[0].id,
-                                account_id: tax_account_id,
-                                account_num: self.map_account_id_code[tax_account_id],
-                                label: tax.name,
-                                amount: tax.amount,
-                                no_remove_action: true,
-                                is_tax_line: true
+                    .call("compute_all_book_taxes_back", [amount, self.get("currency_id"), self.get("mv_lines_selected"), self.st_line, line_created_being_edited, line_created_being_edited[0]])
+                    .then(function (data) {
+                            line_created_being_edited.length = 1; // remove tax lines
+                            line_created_being_edited[0].amount_before_tax = data.base;
+                            line_created_being_edited[0].amount = data.total_excluded;
+                            line_created_being_edited[0].amount_included = data.total_included;
+                            line_created_being_edited[0].account_id = data.account_id;
+                            line_created_being_edited[0].account_num = self.map_account_id_code[data.account_id];
+                            line_created_being_edited[0].tax_id = data.tax_id;
+                            $.each(data.netto_lines, function (index, netto_line) {
+                                line_created_being_edited.push({
+                                    amount_before_tax: netto_line.base,
+                                    amount: netto_line.total_excluded,
+                                    account_id: netto_line.account_id,
+                                    amount_included: netto_line.total_included,
+                                    account_num: self.map_account_id_code[netto_line.account_id],
+                                    id: line_created_being_edited[0].id,
+                                    label: netto_line.name,
+                                    no_remove_action: true,
+                                    is_tax_line: false,
+                                    tax_id: netto_line.tax_id,
+                                });
                             });
-                        });
-                    }
-                );
+
+                            $.each(data.taxes, function (index, tax) {
+                                if (tax.id) {
+                                    var tax_account_id = (amount > 0 ? tax.account_id : tax.refund_account_id);
+                                    tax_account_id = tax_account_id !== false ? tax_account_id : line_created_being_edited[0].account_id;
+                                    line_created_being_edited.push({
+                                        id: line_created_being_edited[0].id,
+                                        account_id: tax_account_id,
+                                        account_num: self.map_account_id_code[tax_account_id],
+                                        label: tax.name,
+                                        amount: tax.amount,
+                                        no_remove_action: true,
+                                        is_tax_line: true
+                                    });
+
+                                } else {
+                                    // TODO jool: the whole else part needs to be reviewed
+                                    //var tax_account_id = (amount > 0 ? tax.account_collected_id : tax.account_paid_id);
+                                    //tax_account_id = tax_account_id !== false ? tax_account_id: line_created_being_edited[0].account_id;
+                                    var amount_with_tax = tax.total_line_created_being_edited;
+                                    //var amount = (tax.total.toFixed(3) === tax.amount.toFixed(3) ? tax.amount : tax.total);
+                                    line_created_being_edited[current_line_cursor] = {
+                                        id: line_created_being_edited[0].id,
+                                        account_id: line_created_being_edited[0].account_id,
+                                        account_num: line_created_being_edited[0].account_num,
+                                        book_taxes_back: line_created_being_edited[0].book_taxes_back,
+                                        label: line_created_being_edited[0].label,
+                                        amount: tax.amount_netto_new,
+                                        amount_str: tax.amount_netto_new_string,
+                                        no_remove_action: true,
+                                        currency_id: line_created_being_edited[0].currency_id,
+                                        tax_id: tax.tax_id,
+                                        price_include: tax.price_include,
+                                        is_tax_line: false,
+                                        amount_with_tax: amount_with_tax,
+                                        partner_id: tax.partner_id,
+                                        //amount: amount,
+                                    };
+                                    // current_line_cursor = current_line_cursor + 1;
+                                }
+                            });
+                        }
+                    );
+            // } else {
+            //     line_created_being_edited.length = 1; // remove tax lines
+            //     deferred_tax.resolve();
             } else {
-                line_created_being_edited.length = 1; // remove tax lines
                 deferred_tax.resolve();
             }
-        } else { deferred_tax.resolve(); }
+        } else {
+            if (elt === self.tax_id_field || elt === self.amount_field) {
+                var tax_id = self.tax_id_field.get("value");
+                if (amount && tax_id) {
+                    deferred_tax = self.model_tax
+                        .call("compute_all", [[tax_id], amount, self.get("currency_id")])
+                        .then(function (data) {
+                                line_created_being_edited.length = 1; // remove tax lines
+                                line_created_being_edited[0].amount_before_tax = amount;
+                                line_created_being_edited[0].amount = data.total_excluded;
+                                $.each(data.taxes, function (index, tax) {
+                                    var tax_account_id = (amount > 0 ? tax.account_id : tax.refund_account_id);
+                                    tax_account_id = tax_account_id !== false ? tax_account_id : line_created_being_edited[0].account_id;
+                                    line_created_being_edited.push({
+                                        id: line_created_being_edited[0].id,
+                                        account_id: tax_account_id,
+                                        account_num: self.map_account_id_code[tax_account_id],
+                                        label: tax.name,
+                                        amount: tax.amount,
+                                        no_remove_action: true,
+                                        is_tax_line: true
+                                    });
+                                });
+                            }
+                        );
+                } else {
+                    line_created_being_edited.length = 1; // remove tax lines
+                    deferred_tax.resolve();
+                }
+            } else {
+                line_created_being_edited.length = 1; // remove tax lines
+                line_created_being_edited[0].amount_before_tax = amount;
+                line_created_being_edited[0].amount = amount;
+                deferred_tax.resolve();
+            }
+        }
 
         return deferred_tax.then(function() {
             self.set("line_created_being_edited", line_created_being_edited);
@@ -1070,6 +1187,8 @@ var abstractReconciliationLine = Widget.extend({
             dict['debit'] = (amount < 0 ? -1 * amount : 0);
             if (line.tax_id) dict['tax_ids'] = [line.tax_id];
             if (line.analytic_account_id) dict['analytic_account_id'] = line.analytic_account_id;
+            if (line.book_taxes_back) dict['book_taxes_back'] = line.book_taxes_back;
+            if (line.amount_included) dict['amount_included'] = line.amount_included;
             return dict;
         });
     },
@@ -1295,7 +1414,7 @@ var bankStatementReconciliation = abstractReconciliation.extend({
         var ids = _.collect(reconciliations, function(o) { return o.line_id });
         var data = _.collect(reconciliations, function(o) { return o.prepareDataForPersisting() });
         var deferred_animation = self.$(".reconciliation_lines_container, .show_more_container").fadeOut(self.aestetic_animation_speed);
-        var deferred_rpc = self.model_bank_statement_line.call("process_reconciliations", [ids, data]);
+        var deferred_rpc = self.model_bank_statement_line.call("process_reconciliations_bt", [ids, data]);
         return $.when(deferred_animation, deferred_rpc)
             .done(function() {
                 // Remove children
@@ -1899,6 +2018,8 @@ var bankStatementReconciliationLine = abstractReconciliationLine.extend({
                 displayValidState(false, _t("Validate"));
                 createOpenBalance(_t("Open balance"));
             }
+        } else {
+            createOpenBalance(_t("Create Write-off"));
         }
 
         // Show or hide partial reconciliation
@@ -2095,7 +2216,7 @@ var bankStatementReconciliationLine = abstractReconciliationLine.extend({
         var self = this;
         if (! this.is_consistent) return;
         self.$(".button_ok").attr("disabled", "disabled");
-        this.model_bank_statement_line.call("process_reconciliations", [[this.line_id], [this.prepareDataForPersisting()]]).done(function() {
+        this.model_bank_statement_line.call("process_reconciliations_bt", [[this.line_id], [this.prepareDataForPersisting()]]).done(function() {
             self.bowOut(self.animation_speed, true);
         }).always(function() {
             self.$(".button_ok").removeAttr("disabled");
