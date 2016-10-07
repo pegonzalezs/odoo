@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-01-13 09:40+0000\n"
-"PO-Revision-Date: 2016-02-05 15:30+0000\n"
+"PO-Revision-Date: 2016-09-10 10:39+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/odoo/odoo-9/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
@@ -55,16 +55,6 @@ msgstr " (%s 已保留)"
 #, python-format
 msgid " (reserved)"
 msgstr " (已保留)"
-
-#. module: stock
-#: code:addons/stock/stock.py:3182
-#, python-format
-msgid ""
-"You cannot have two inventory adjustements in state 'in Progess' with the "
-"same product(%s), same location(%s), same package, same owner and same lot. "
-"Please first validate the first inventory adjustement with this product "
-"before creating another one."
-msgstr ""
 
 #. module: stock
 #: code:addons/stock/stock.py:3482
@@ -165,7 +155,7 @@ msgstr ""
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
 msgid ", if accounting or purchase is installed"
-msgstr ""
+msgstr "，如果會計或採購模組已安裝"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -263,7 +253,7 @@ msgid ""
 "                                        <strong>Import a file</strong><br/>\n"
 "                                        <span class=\"small\">Recommended if &gt;100 products</span>\n"
 "                                    </span>"
-msgstr ""
+msgstr "<span class=\"panel-title\">\n                                        <span class=\"fa\" data-icon=\"&#57408;\"/>\n                                        <strong>匯入檔案</strong><br/>\n                                        <span class=\"small\">當多於 100 個產品時建議使用</span>\n                                    </span>"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -293,7 +283,7 @@ msgid ""
 "                                        <strong> Create manually</strong><br/>\n"
 "                                        <span class=\"small\">Recommended if &lt;100 products</span>\n"
 "                                    </span>"
-msgstr ""
+msgstr "<span class=\"panel-title\">\n<span class=\"fa\" data-icon=\"&#57440;\"/>\n<strong>手動建立</strong><br/>\n<span class=\"small\">如果&lt;100 件產品則建議</span>\n</span>"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -647,7 +637,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:stock.field_stock_picking_message_needaction
 #: model:ir.model.fields,field_description:stock.field_stock_production_lot_message_needaction
 msgid "Action Needed"
-msgstr ""
+msgstr "待處理"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_report_stock_lines_date_active
@@ -1884,7 +1874,7 @@ msgstr "派送區"
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_display_name
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint_display_name
 msgid "Display Name"
-msgstr ""
+msgstr "顯示名稱"
 
 #. module: stock
 #: model:ir.actions.act_window,help:stock.action_stock_line_date
@@ -2514,14 +2504,6 @@ msgstr ""
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
-msgid ""
-"If you need help, do not hesitate to contact our experts\n"
-"                        using the <span class=\"fa fa-question-circle\"/> button on\n"
-"                        the top bar."
-msgstr ""
-
-#. module: stock
-#: model:ir.ui.view,arch_db:stock.inventory_planner
 msgid "If you want to do it yourself:"
 msgstr ""
 
@@ -2965,7 +2947,7 @@ msgstr "最後訊息日期"
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse___last_update
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint___last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "最後修改:"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_make_procurement_write_uid

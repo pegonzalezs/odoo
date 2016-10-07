@@ -178,6 +178,11 @@ msgid "City"
 msgstr ""
 
 #. module: hr
+#: model:web.tip,description:hr.hr_tip_2
+msgid "Click here to change the recruitment goal!"
+msgstr ""
+
+#. module: hr
 #: model:ir.actions.act_window,help:hr.act_employee_from_department
 #: model:ir.actions.act_window,help:hr.open_view_employee_list_my
 msgid "Click to add a new employee."
@@ -416,16 +421,12 @@ msgid "Employees Tags"
 msgstr ""
 
 #. module: hr
-#: code:addons/hr/hr.py:299
 #: constraint:hr.department:0
-#, python-format
 msgid "Error! You cannot create recursive departments."
 msgstr ""
 
 #. module: hr
-#: code:addons/hr/hr.py:269
 #: constraint:hr.employee:0
-#, python-format
 msgid "Error! You cannot create recursive hierarchy of Employee(s)."
 msgstr ""
 
@@ -719,6 +720,11 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_hr_employee_category___last_update
 #: model:ir.model.fields,field_description:hr.field_hr_job___last_update
 msgid "Last Modified on"
+msgstr ""
+
+#. module: hr
+#: model:ir.model.fields,field_description:hr.field_res_users_last_website_so_id
+msgid "Last Online Sale Order"
 msgstr ""
 
 #. module: hr
@@ -1143,6 +1149,11 @@ msgstr ""
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_child_ids
 msgid "Subordinates"
+msgstr ""
+
+#. module: hr
+#: model:ir.model.fields,field_description:hr.field_res_users_subscription_count
+msgid "Subscriptions"
 msgstr ""
 
 #. module: hr

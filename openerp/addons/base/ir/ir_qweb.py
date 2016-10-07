@@ -442,7 +442,7 @@ class QWeb(orm.AbstractModel):
             init_lang = d.context.get('lang', 'en_US')
             lang = template_attributes['lang']
             d.context['lang'] = self.eval(lang, d) or lang
-            if not self.pool['res.lang'].search(d.cr, d.uid, [('code', '=', lang)], count=True, context=d.context):
+            if not self.pool['res.lang'].search(d.cr, d.uid, [('code', '=', d.context['lang'])], count=True, context=d.context):
                 _logger.info("'%s' is not a valid language code, is an empty field or is not installed, falling back to en_US", lang)
 
         d[0] = self.render_element(element, template_attributes, generated_attributes, d)
@@ -763,6 +763,12 @@ class DateTimeConverter(osv.AbstractModel):
 
         return babel.dates.format_datetime(value, format=pattern, locale=locale)
 
+    def record_to_html(self, cr, uid, field_name, record, options, context=None):
+        field = field = record._fields[field_name]
+        value = record[field_name]
+        return self.value_to_html(
+            cr, uid, value, field, options=options, context=dict(context, **record.env.context))
+
 class TextConverter(osv.AbstractModel):
     _name = 'ir.qweb.field.text'
     _inherit = 'ir.qweb.field'
@@ -881,7 +887,7 @@ class MonetaryConverter(osv.AbstractModel):
         lang = self.pool['res.lang']
         formatted_amount = lang.format(cr, uid, [lang_code],
             fmt, Currency.round(cr, uid, display_currency, from_amount),
-            grouping=True, monetary=True)
+            grouping=True, monetary=True).replace(r' ', u'\N{NO-BREAK SPACE}')
 
         pre = post = u''
         if display_currency.position == 'before':
@@ -893,7 +899,7 @@ class MonetaryConverter(osv.AbstractModel):
             formatted_amount,
             pre=pre, post=post,
         ).format(
-            symbol=display_currency.symbol,
+            symbol=display_currency.symbol or '',
         ))
 
     def display_currency(self, cr, uid, currency, options):
@@ -936,7 +942,12 @@ class DurationConverter(osv.AbstractModel):
         factor = units[options['unit']]
 
         sections = []
+
         r = value * factor
+        if options.get('round') in units:
+            round_to = units[options['round']]
+            r = round(r / round_to) * round_to
+
         for unit, secs_per_unit in TIMEDELTA_UNITS:
             v, r = divmod(r, secs_per_unit)
             if not v: continue
@@ -1043,7 +1054,7 @@ class QwebWidgetMonetary(osv.AbstractModel):
         lang_code = qwebcontext.context.get('lang') or 'en_US'
         formatted_amount = self.pool['res.lang'].format(
             qwebcontext.cr, qwebcontext.uid, [lang_code], fmt, inner, grouping=True, monetary=True
-        )
+        ).replace(r' ', u'\N{NO-BREAK SPACE}')
         pre = post = u''
         if display.position == 'before':
             pre = u'{symbol}\N{NO-BREAK SPACE}'
@@ -1339,21 +1350,30 @@ class AssetsBundle(object):
         uid = openerp.SUPERUSER_ID
         preprocessed = True
         for atype in (SassStylesheetAsset, LessStylesheetAsset):
-            assets = [asset for asset in self.stylesheets if isinstance(asset, atype)]
+            outdated = False
+            assets = dict((asset.html_url, asset) for asset in self.stylesheets if isinstance(asset, atype))
             if assets:
-                assets_domain = [('name', 'in', [asset.html_url % asset.url for asset in assets])]
+                assets_domain = [('url', 'in', assets.keys())]
                 ira_ids = self.registry['ir.attachment'].search(self.cr, uid, assets_domain)
-                if len(ira_ids) != len(assets):
+                ira_records = self.registry['ir.attachment'].browse(self.cr, uid, ira_ids)
+                for ira_record in ira_records:
+                    asset = assets[ira_record.url]
+                    if asset.last_modified > Datetime.from_string(ira_record['__last_update']):
+                        outdated = True
+                        break
+                    if asset._content is None:
+                        asset._content = ira_record.datas and ira_record.datas.decode('base64').decode('utf8') or ''
+                        if not asset._content and ira_record.file_size > 0:
+                            asset._content = None # file missing, force recompile
+
+                if any(asset._content is None for asset in assets.itervalues()):
+                    outdated = True
+
+                if outdated:
+                    if ira_ids:
+                        self.registry['ir.attachment'].unlink(self.cr, uid, ira_ids)
                     preprocessed = False
-                else:
-                    ira_records = self.registry['ir.attachment'].browse(self.cr, uid, ira_ids)
-                    for ira_record in ira_records:
-                        stylesheet = next(stylesheet for stylesheet in self.stylesheets if stylesheet.html_url % stylesheet.url == ira_record.url)
-                        if stylesheet.last_modified > Datetime.from_string(ira_record['__last_update']):
-                            self.registry['ir.attachment'].unlink(self.cr, self.uid, ira_ids)
-                            preprocessed = False
-                            break
-                        stylesheet._content = ira_record.datas and ira_record.datas.decode('base64').decode('utf8')
+
         return preprocessed
 
     def preprocess_css(self, debug=False):
@@ -1382,7 +1402,7 @@ class AssetsBundle(object):
                         try:
                             ira = self.registry['ir.attachment']
                             fname = os.path.basename(asset.url)
-                            url = asset.html_url % asset.url
+                            url = asset.html_url
                             with self.cr.savepoint():
                                 ira.create(self.cr, openerp.SUPERUSER_ID, dict(
                                     datas=asset.content.encode('utf8').encode('base64'),
@@ -1446,13 +1466,14 @@ class AssetsBundle(object):
         return error
 
 class WebAsset(object):
-    html_url = '%s'
+    html_url_format = '%s'
 
     def __init__(self, bundle, inline=None, url=None):
         self.id = str(uuid.uuid4())
         self.bundle = bundle
         self.inline = inline
         self.url = url
+        self.html_url_args = url
         self.cr = bundle.cr
         self.uid = bundle.uid
         self.registry = bundle.registry
@@ -1464,6 +1485,10 @@ class WebAsset(object):
         self.name = "%s defined in bundle '%s'" % (name, bundle.xmlid)
         if not inline and not url:
             raise Exception("An asset should either be inlined or url linked")
+
+    @property
+    def html_url(self):
+        return self.html_url_format % self.html_url_args
 
     def stat(self):
         if not (self.inline or self._filename or self._ir_attach):
@@ -1543,7 +1568,7 @@ class JavascriptAsset(WebAsset):
 
     def to_html(self):
         if self.url:
-            return '<script type="text/javascript" src="%s"></script>' % (self.html_url % self.url)
+            return '<script type="text/javascript" src="%s"></script>' % (self.html_url)
         else:
             return '<script type="text/javascript" charset="utf-8">%s</script>' % self.with_header()
 
@@ -1603,17 +1628,18 @@ class StylesheetAsset(WebAsset):
     def to_html(self):
         media = (' media="%s"' % werkzeug.utils.escape(self.media)) if self.media else ''
         if self.url:
-            href = self.html_url % self.url
+            href = self.html_url
             return '<link rel="stylesheet" href="%s" type="text/css"%s/>' % (href, media)
         else:
             return '<style type="text/css"%s>%s</style>' % (media, self.with_header())
 
 class PreprocessedCSS(StylesheetAsset):
-    html_url = '%s.css'
     rx_import = None
 
-    def minify(self):
-        return self.with_header()
+    def __init__(self, *args, **kw):
+        super(PreprocessedCSS, self).__init__(*args, **kw)
+        self.html_url_format = '%%s/%s/%%s.css' % self.bundle.xmlid
+        self.html_url_args = tuple(self.url.rsplit('/', 1))
 
     def get_source(self):
         content = self.inline or self._fetch_content()
@@ -1664,7 +1690,7 @@ class LessStylesheetAsset(PreprocessedCSS):
         except IOError:
             lessc = 'lessc'
         lesspath = get_resource_path('web', 'static', 'lib', 'bootstrap', 'less')
-        return [lessc, '-', '--clean-css', '--no-js', '--no-color', '--include-path=%s' % lesspath]
+        return [lessc, '-', '--no-js', '--no-color', '--include-path=%s' % lesspath]
 
 def rjsmin(script):
     """ Minify js with a clever regex.

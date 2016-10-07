@@ -328,6 +328,26 @@ class ir_model_fields(osv.osv):
             self.readonly = True
             self.copy = False
 
+    @api.constrains('depends')
+    def _check_depends(self):
+        """ Check whether all fields in dependencies are valid. """
+        for record in self:
+            if not record.depends:
+                continue
+            for seq in record.depends.split(","):
+                if not seq.strip():
+                    raise UserError(_("Empty dependency in %r") % (record.depends))
+                model = self.env[record.model]
+                names = seq.strip().split(".")
+                last = len(names) - 1
+                for index, name in enumerate(names):
+                    field = model._fields.get(name)
+                    if field is None:
+                        raise UserError(_("Unknown field %r in dependency %r") % (name, seq.strip()))
+                    if index < last and not field.relational:
+                        raise UserError(_("Non-relational field %r in dependency %r") % (name, seq.strip()))
+                    model = model[name]
+
     @api.onchange('compute')
     def _onchange_compute(self):
         if self.compute:
@@ -597,7 +617,10 @@ class ir_model_constraint(Model):
         ids.reverse()
         for data in self.browse(cr, uid, ids, context):
             model = data.model.model
-            model_obj = self.pool[model]
+            if model in self.pool:
+                table = self.pool[model]._table
+            else:
+                table = model.replace('.', '_')
             name = openerp.tools.ustr(data.name)
             typ = data.type
 
@@ -611,17 +634,17 @@ class ir_model_constraint(Model):
             if typ == 'f':
                 # test if FK exists on this table (it could be on a related m2m table, in which case we ignore it)
                 cr.execute("""SELECT 1 from pg_constraint cs JOIN pg_class cl ON (cs.conrelid = cl.oid)
-                              WHERE cs.contype=%s and cs.conname=%s and cl.relname=%s""", ('f', name, model_obj._table))
+                              WHERE cs.contype=%s and cs.conname=%s and cl.relname=%s""", ('f', name, table))
                 if cr.fetchone():
-                    cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (model_obj._table, name),)
+                    cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (table, name),)
                     _logger.info('Dropped FK CONSTRAINT %s@%s', name, model)
 
             if typ == 'u':
                 # test if constraint exists
                 cr.execute("""SELECT 1 from pg_constraint cs JOIN pg_class cl ON (cs.conrelid = cl.oid)
-                              WHERE cs.contype=%s and cs.conname=%s and cl.relname=%s""", ('u', name, model_obj._table))
+                              WHERE cs.contype=%s and cs.conname=%s and cl.relname=%s""", ('u', name, table))
                 if cr.fetchone():
-                    cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (model_obj._table, name),)
+                    cr.execute('ALTER TABLE "%s" DROP CONSTRAINT "%s"' % (table, name),)
                     _logger.info('Dropped CONSTRAINT %s@%s', name, model)
 
         self.unlink(cr, uid, ids, context)
@@ -930,13 +953,14 @@ class ir_model_data(osv.osv):
         type(self).loads = self.pool.model_data_reference_ids
 
     def _auto_init(self, cr, context=None):
-        super(ir_model_data, self)._auto_init(cr, context)
+        res = super(ir_model_data, self)._auto_init(cr, context)
         cr.execute("SELECT indexname FROM pg_indexes WHERE indexname = 'ir_model_data_module_name_uniq_index'")
         if not cr.fetchone():
             cr.execute('CREATE UNIQUE INDEX ir_model_data_module_name_uniq_index ON ir_model_data (module, name)')
         cr.execute("SELECT indexname FROM pg_indexes WHERE indexname = 'ir_model_data_model_res_id_index'")
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_model_data_model_res_id_index ON ir_model_data (model, res_id)')
+        return res
 
     # NEW V8 API
     @tools.ormcache('xmlid')
@@ -969,7 +993,7 @@ class ir_model_data(osv.osv):
 
     def xmlid_to_object(self, cr, uid, xmlid, raise_if_not_found=False, context=None):
         """ Return a browse_record
-        if not found and raise_if_not_found is True return None
+        if not found and raise_if_not_found is False return None
         """ 
         t = self.xmlid_to_res_model_res_id(cr, uid, xmlid, raise_if_not_found)
         res_model, res_id = t
@@ -1214,7 +1238,7 @@ class ir_model_data(osv.osv):
                         _logger.info('Deleting orphan external_ids %s', external_ids)
                         self.unlink(cr, uid, external_ids)
                         continue
-                    if field.name in openerp.models.LOG_ACCESS_COLUMNS and self.pool[field.model]._log_access:
+                    if field.name in openerp.models.LOG_ACCESS_COLUMNS and field.model in self.pool and self.pool[field.model]._log_access:
                         continue
                     if field.name == 'id':
                         continue

@@ -8,14 +8,15 @@
 # Antonio Trueba, 2015
 # Carlos rodriguez <carlosalbertor436@gmail.com>, 2016
 # Glen Sojo <glen.sojo@clearcorp.co.cr>, 2016
-# Jesus Alan Ramos Rodriguez <alan.ramos@jarsa.com.mx>, 2016
+# Jesús Alan Ramos Rodríguez <alan.ramos@jarsa.com.mx>, 2016
+# RGB Consulting <odoo@rgbconsulting.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-10-09 09:18+0000\n"
-"PO-Revision-Date: 2016-01-31 16:59+0000\n"
-"Last-Translator: Jesus Alan Ramos Rodriguez <alan.ramos@jarsa.com.mx>\n"
+"PO-Revision-Date: 2016-09-06 07:35+0000\n"
+"Last-Translator: RGB Consulting <odoo@rgbconsulting.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/odoo/odoo-9/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -415,7 +416,7 @@ msgstr "Puede ser comprado"
 msgid ""
 "Can not cancel a procurement related to a purchase order. Please cancel the "
 "purchase order first."
-msgstr "No se puede cancelar un abastecimiento relacionado a relacionado a una orden de compra. Primero cancele la orden de compra."
+msgstr "No se puede cancelar un abastecimiento relacionado a una orden de compra. Primero cancele la orden de compra."
 
 #. module: purchase
 #: code:addons/purchase/stock.py:59
@@ -448,28 +449,33 @@ msgstr "Haga clic aquí para registrar una factura de proveedor."
 #. module: purchase
 #: model:ir.actions.act_window,help:purchase.action_invoice_pending
 msgid "Click to create a draft invoice."
-msgstr "Haga click para crear un borrador de factura."
+msgstr "Haga clic para crear un borrador de factura."
 
 #. module: purchase
 #: model:ir.actions.act_window,help:purchase.purchase_form_action
 msgid ""
 "Click to create a quotation that will be converted into a purchase order."
-msgstr "Haga click para crear un presupuesto que se convertirá en un pedido de compra."
+msgstr "Haga clic para crear un presupuesto que se convertirá en un pedido de compra."
 
 #. module: purchase
 #: model:ir.actions.act_window,help:purchase.purchase_rfq
 msgid "Click to create a request for quotation."
-msgstr "Haga click para crear una solicitud de presupuesto."
+msgstr "Haga clic para crear una solicitud de presupuesto."
 
 #. module: purchase
 #: model:ir.actions.act_window,help:purchase.product_normal_action_puchased
 msgid "Click to define a new product."
-msgstr "Haga click para definir un nuevo producto."
+msgstr "Haga clic para definir un nuevo producto."
+
+#. module: purchase
+#: model:web.tip,description:purchase.purchase_tip_1
+msgid "Click to mark products as received."
+msgstr "Haga clic para marcar los productos como recibidos."
 
 #. module: purchase
 #: model:ir.actions.act_window,help:purchase.purchase_open_invoice
 msgid "Click to record a vendor bill related to this purchase."
-msgstr "Click para registrar una factura de proveedor relativa a esta compra."
+msgstr "Clic para registrar una factura de proveedor relativa a esta compra."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_commercial_partner_id
@@ -601,6 +607,11 @@ msgid "Description"
 msgstr "Descripción"
 
 #. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_purchase_order_default_location_dest_id_usage
+msgid "Destination Location Type"
+msgstr "Tipo de ubicación de destino"
+
+#. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_config_settings_display_name
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_display_name
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_display_name
@@ -688,6 +699,11 @@ msgid "Get 2 levels of approvals to confirm a purchase order"
 msgstr "Requerir dos niveles de aprobación para confirmar un pedido de compra"
 
 #. module: purchase
+#: model:web.tip,description:purchase.purchase_tip_3
+msgid "Get all the shipments related to this order."
+msgstr "Obtener todos los envíos relacionados con esta pedido."
+
+#. module: purchase
 #: model:ir.ui.view,arch_db:purchase.purchase_order_line_search
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
@@ -706,6 +722,13 @@ msgstr "Ocultar líneas canceladas"
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_id
 msgid "ID"
 msgstr "ID (identificación)"
+
+#. module: purchase
+#: model:web.tip,description:purchase.purchase_tip_2
+msgid ""
+"If a product has been broken or damaged during the transport, you can scrap "
+"it with this button."
+msgstr "Si un producto ha sido roto o dañado durante el transporte, se puede desechar con este botón."
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -1145,6 +1168,11 @@ msgid "Provide a double validation mechanism for purchases"
 msgstr "Ofrecer un mecanismo de doble validación para compras"
 
 #. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_mail_mail_website_published
+msgid "Published"
+msgstr "Publicado"
+
+#. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_procurement_management
 msgid "Purchase"
 msgstr "Compra"
@@ -1507,6 +1535,11 @@ msgid "Taxes"
 msgstr "Impuestos"
 
 #. module: purchase
+#: model:ir.model.fields,help:purchase.field_purchase_order_default_location_dest_id_usage
+msgid "Technical field used to display the Drop Ship Address"
+msgstr "Campo técnico utilizado para mostrar la dirección de envió directo"
+
+#. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_notes
 msgid "Terms and Conditions"
 msgstr "Términos y condiciones"
@@ -1733,6 +1766,11 @@ msgid ""
 msgstr "Las facturas de proveedor pueden ser pre-generadas basadas en la orden de\ncompra o recibos. Esto le permite controlar las facturas\nque recibe de su proveedor de acuerdo con el documento\nborrador en Odoo."
 
 #. module: purchase
+#: model:ir.model.fields,help:purchase.field_mail_mail_website_published
+msgid "Visible on the website as a comment"
+msgstr "Visible en el sitio web como un comentario"
+
+#. module: purchase
 #: selection:purchase.order,invoice_status:0
 msgid "Waiting Invoices"
 msgstr "Facturas en espera"
@@ -1778,7 +1816,13 @@ msgid ""
 "You must define a product for everything you purchase, whether\n"
 "            it's a physical product, a consumable or services you buy to\n"
 "            subcontractants."
-msgstr "Debe definir un producto para todo lo compre, ya sea un producto\nfísico, un consumible o servicios que usted subcontrate."
+msgstr "Debe definir un producto para todo lo que compre, ya sea un producto\nfísico, un consumible o servicios que usted subcontrate."
+
+#. module: purchase
+#: code:addons/purchase/purchase.py:335
+#, python-format
+msgid "You must set a Vendor Location for this partner %s"
+msgstr "Debe asignar una localización para este socio %s"
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_account_config_settings
@@ -1789,3 +1833,8 @@ msgstr "Parámetros de configuración contable"
 #: model:ir.model,name:purchase.model_purchase_config_settings
 msgid "purchase.config.settings"
 msgstr "Parámetros de configuración de compra"
+
+#. module: purchase
+#: model:ir.model.fields,field_description:purchase.field_mail_mail_description
+msgid "unknown"
+msgstr "desconocido"

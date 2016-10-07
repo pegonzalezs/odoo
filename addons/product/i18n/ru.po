@@ -4,15 +4,17 @@
 # 
 # Translators:
 # Denis Trepalin <zekarious@gmail.com>, 2015
+# dzord dzord <ekenpad@gmail.com>, 2016
 # Gennady Marchenko <gennadym@gmail.com>, 2016
-# SV <svilij@yahoo.com>, 2015
+# Sergey Vilizhanin <sv@grimmette.ru>, 2015
+# Viktor Pogrebniak <vp@aifil.ru>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-29 10:26+0000\n"
-"PO-Revision-Date: 2016-01-23 22:41+0000\n"
-"Last-Translator: Gennady Marchenko <gennadym@gmail.com>\n"
+"PO-Revision-Date: 2016-08-19 16:19+0000\n"
+"Last-Translator: Viktor Pogrebniak <vp@aifil.ru>\n"
 "Language-Team: Russian (http://www.transifex.com/odoo/odoo-9/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -23,7 +25,7 @@ msgstr ""
 #. module: product
 #: selection:product.pricelist.item,applied_on:0
 msgid " Product Category"
-msgstr "Категория продукта"
+msgstr "Категория товара"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product_product_variant_count
@@ -198,7 +200,7 @@ msgstr "Категория типа представления - это вирт
 msgid ""
 "A consumable is a product for which you don't manage stock, a service is a "
 "non-material product provided by a company or an individual."
-msgstr "Расходуемый это продукт, для которого вы не управляете складскими запасами, услуга является нематериальный продукт предоставляется компанией или индивидом."
+msgstr "Потребляемый - это вид продукта, для которого не ведётся учёт остатков на складе, а услуга - это нематериальный продукт, предлагаемый компанией или отдельным человеком."
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product_description_sale
@@ -687,7 +689,7 @@ msgstr "Компьютеры"
 #: code:addons/product/product.py:460
 #, python-format
 msgid "Consumable"
-msgstr "Расходуемый"
+msgstr "Потребляемый"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_uom_category_id
@@ -1479,7 +1481,7 @@ msgstr "Внутренняя категория"
 #: model:ir.model.fields,field_description:product.field_product_product_default_code
 #: model:ir.model.fields,field_description:product.field_product_template_default_code
 msgid "Internal Reference"
-msgstr "Внутренняя ссылка"
+msgstr "Внутренний артикул"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_product_barcode
@@ -1501,7 +1503,7 @@ msgstr "Подписчик"
 #: model:ir.model.fields,field_description:product.field_product_product_is_product_variant
 #: model:ir.model.fields,field_description:product.field_product_template_is_product_variant
 msgid "Is a product variant"
-msgstr ""
+msgstr "Вариант продукта"
 
 #. module: product
 #: model:product.product,website_description:product.product_product_7
@@ -1672,7 +1674,7 @@ msgstr "Управление упаковкой товаров"
 #: model:ir.model.fields,field_description:product.field_base_config_settings_group_product_variant
 #: model:res.groups,name:product.group_product_variant
 msgid "Manage Product Variants"
-msgstr "Управление Вариантами Продукта"
+msgstr "Управление вариантами продукта"
 
 #. module: product
 #: model:res.groups,name:product.group_mrp_properties
@@ -1897,7 +1899,7 @@ msgstr "Упаковка"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_packaging_name
 msgid "Packaging Type"
-msgstr "Тип Упаковки"
+msgstr "Тип упаковки"
 
 #. module: product
 #: model:ir.actions.act_window,name:product.action_packaging_view
@@ -2006,7 +2008,7 @@ msgstr "Экстра-цена"
 msgid ""
 "Price Extra: Extra price for the variant with this attribute value on sale "
 "price. eg. 200 price extra, 1000 + 200 = 1200."
-msgstr "Дополнительная цена: Дополнительная цена за вариант с этим значением атрибута по отпускной цене. например, дополнительная цена 200, 1000 + 200 = 1200."
+msgstr "Добавочная стоимость: дополнительная цена за вариант с этим значением атрибута по отпускной цене. Например, если добавочная стоимость 200, 1000 + 200 = 1200."
 
 #. module: product
 #: model:ir.actions.act_window,name:product.action_product_price_list
@@ -2062,7 +2064,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:product.product_pricelist_view
 #: model:ir.ui.view,arch_db:product.product_template_form_view
 msgid "Pricelist Items"
-msgstr "Элемент Прайслиста"
+msgstr "Позиции прайс-листа"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_pricelist_name
@@ -2084,7 +2086,7 @@ msgstr "Прайс-листы"
 #. module: product
 #: model:res.groups,name:product.group_product_pricelist
 msgid "Pricelists On Product"
-msgstr "Прайс-листы на Продукты"
+msgstr "Прайс-листы на продукт"
 
 #. module: product
 #: model:ir.ui.view,arch_db:product.view_partner_property_form
@@ -2855,7 +2857,7 @@ msgstr "Объём в метрах куб."
 #: model:ir.model.fields,help:product.field_product_product_weight
 #: model:ir.model.fields,help:product.field_product_template_weight
 msgid "The weight of the contents in Kg, not including any packaging, etc."
-msgstr ""
+msgstr "Вес содержимого в кг, не включая упаковку, и пр."
 
 #. module: product
 #: model:product.product,website_description:product.product_product_4
@@ -3307,14 +3309,14 @@ msgid ""
 "You must define a product for everything you sell, whether it's\n"
 "                a physical product, a consumable or a service you offer to\n"
 "                customers."
-msgstr ""
+msgstr "Вы должны создать продукт для каждой продаваемой позиции независимо от того, является ли она товаром, расходным материалом или услугой."
 
 #. module: product
 #: model:ir.actions.act_window,help:product.product_template_action
 msgid ""
 "You must define a product for everything you sell, whether it's a physical "
 "product, a consumable or a service you offer to  customers."
-msgstr ""
+msgstr "Вы должны создать продукт для каждой продаваемой позиции независимо от того, является ли она товаром, расходным материалом или услугой."
 
 #. module: product
 #: model:product.product,website_description:product.product_product_11

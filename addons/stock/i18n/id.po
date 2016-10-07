@@ -3,14 +3,16 @@
 # * stock
 # 
 # Translators:
+# firman firman <firman.olxbpn@gmail.com>, 2016
 # Martin Trigaux, 2015-2016
+# Rizky Fajar Ryanda <rizky.rikuverse@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-01-13 09:40+0000\n"
-"PO-Revision-Date: 2016-01-30 10:36+0000\n"
-"Last-Translator: Martin Trigaux\n"
+"PO-Revision-Date: 2016-09-09 04:04+0000\n"
+"Last-Translator: Rizky Fajar Ryanda <rizky.rikuverse@gmail.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/odoo/odoo-9/language/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -55,16 +57,6 @@ msgstr "(%s dicadangkan)"
 #, python-format
 msgid " (reserved)"
 msgstr "Disimpan"
-
-#. module: stock
-#: code:addons/stock/stock.py:3182
-#, python-format
-msgid ""
-"You cannot have two inventory adjustements in state 'in Progess' with the "
-"same product(%s), same location(%s), same package, same owner and same lot. "
-"Please first validate the first inventory adjustement with this product "
-"before creating another one."
-msgstr ""
 
 #. module: stock
 #: code:addons/stock/stock.py:3482
@@ -283,7 +275,7 @@ msgid ""
 "                                        <strong> Create manually</strong><br/>\n"
 "                                        <span class=\"small\">&lt; 50 vendors</span>\n"
 "                                    </span>"
-msgstr "<span class=\"panel-title\">\n                                        <span class=\"fa\" data-icon=\"&#57440;\"></span>\n                                        <strong>Membuat manual</strong><br/>\n                                        <span class=\"small\">< 50 vendor</span>\n                                    </span>"
+msgstr "<span class=\"panel-title\">\n                                        <span class=\"fa\" data-icon=\"&#57440;\"></span>\n                                        <strong>Membuat manual</strong><br/>\n                                        <span class=\"small\">&lt; 50 vendor</span>\n                                    </span>"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -293,7 +285,7 @@ msgid ""
 "                                        <strong> Create manually</strong><br/>\n"
 "                                        <span class=\"small\">Recommended if &lt;100 products</span>\n"
 "                                    </span>"
-msgstr "<span class=\"panel-title\">\n                                        <span class=\"fa\" data-icon=\"&#57440;\"></span>\n                                        <strong>Membuat manual</strong><br>\n                                        <span class=\"small\">Apabila yang disarankan &lt; 100 produk</span>\n                                    </span>"
+msgstr "<span class=\"panel-title\">\n                                        <span class=\"fa\" data-icon=\"&#57440;\"></span>\n                                        <strong>Membuat manual</strong><br/>\n                                        <span class=\"small\">Apabila yang disarankan &lt; 100 produk</span>\n                                    </span>"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -2511,14 +2503,6 @@ msgid ""
 "If you have less than 50 vendors, we recommend you\n"
 "                                        to create them manually."
 msgstr "Jika Anda memiliki kurang dari 50 vendor, kami sarankan Anda untuk membuat mereka secara manual."
-
-#. module: stock
-#: model:ir.ui.view,arch_db:stock.inventory_planner
-msgid ""
-"If you need help, do not hesitate to contact our experts\n"
-"                        using the <span class=\"fa fa-question-circle\"/> button on\n"
-"                        the top bar."
-msgstr "Jika Anda memerlukan bantuan, jangan ragu untuk menghubungi ahli kami menggunakan <span class=\"fa fa-question-circle\"></span> tombol pada bar bagian atas."
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.inventory_planner
@@ -5505,7 +5489,7 @@ msgstr "Stockable"
 #: code:addons/stock/product.py:400
 #, python-format
 msgid "Stockable Product"
-msgstr ""
+msgstr "Produk stockable"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_location_route_supplied_wh_id
@@ -6124,7 +6108,7 @@ msgstr "red cross permindahan darah"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_picking_partner_id
 msgid "Transfer Destination Address"
-msgstr ""
+msgstr "Alamat tujuan transfer"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_move_picking_id

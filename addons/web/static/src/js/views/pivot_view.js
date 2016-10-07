@@ -183,7 +183,7 @@ var PivotView = View.extend({
                 }
             }
         });
-        this.measures.__count__ = {string: _t("Quantity"), type: "integer"};
+        this.measures.__count__ = {string: _t("Count"), type: "integer"};
     },
     do_search: function (domain, context, group_by) {
         if (!this.ready) {
@@ -679,7 +679,6 @@ var PivotView = View.extend({
         if (width > 1) {
             var total_cell = {width:nbr_measures, height: depth, title:""};
             if (nbr_measures === 1) {
-                total_cell.title = this.measures[this.active_measures[0]].string;
                 total_cell.total = true;
             }
             result[0].push(total_cell);

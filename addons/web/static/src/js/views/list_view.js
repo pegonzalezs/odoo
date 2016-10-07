@@ -1183,8 +1183,8 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
                                    _(names).pluck(1).join(', '));
                         record.set(column.id, ids);
                     });
-                // temp empty value
-                record.set(column.id, false);
+                // temporary empty display name
+                record.set(column.id + '__display', false);
             }
         }
         return column.format(record.toForm().data, {
@@ -1901,6 +1901,7 @@ var Column = Class.extend({
             row_data[this.id].value, this, options.value_if_empty));
     }
 });
+ListView.Column = Column;
 
 var MetaColumn = Column.extend({
     meta: true,

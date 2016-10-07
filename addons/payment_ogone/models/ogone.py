@@ -47,11 +47,11 @@ class PaymentAcquirerOgone(osv.Model):
         return providers
 
     _columns = {
-        'ogone_pspid': fields.char('PSPID', required_if_provider='ogone'),
-        'ogone_userid': fields.char('API User ID', required_if_provider='ogone'),
-        'ogone_password': fields.char('API User Password', required_if_provider='ogone'),
-        'ogone_shakey_in': fields.char('SHA Key IN', size=32, required_if_provider='ogone'),
-        'ogone_shakey_out': fields.char('SHA Key OUT', size=32, required_if_provider='ogone'),
+        'ogone_pspid': fields.char('PSPID', required_if_provider='ogone', groups='base.group_user'),
+        'ogone_userid': fields.char('API User ID', required_if_provider='ogone', groups='base.group_user'),
+        'ogone_password': fields.char('API User Password', required_if_provider='ogone', groups='base.group_user'),
+        'ogone_shakey_in': fields.char('SHA Key IN', size=32, required_if_provider='ogone', groups='base.group_user'),
+        'ogone_shakey_out': fields.char('SHA Key OUT', size=32, required_if_provider='ogone', groups='base.group_user'),
         'ogone_alias_usage': fields.char('Alias Usage', help="""If you want to use Ogone Aliases,
                                                                 this default Alias Usage will be presented to
                                                                 the customer as the reason you want to
@@ -129,6 +129,7 @@ class PaymentAcquirerOgone(osv.Model):
                     'NCERRORED',
                     'ORDERID',
                     'PAYID',
+                    'PAYIDSUB',
                     'PM',
                     'SCO_CATEGORY',
                     'SCORING',
@@ -264,7 +265,7 @@ class PaymentTxOgone(osv.Model):
                                                   'acquirer_id': tx.acquirer_id.id,
                                                   'acquirer_ref': alias
                                                   })
-                tx.partner_reference = alias
+                tx.write({'payment_method_id': ref})
 
         return tx
 
@@ -294,7 +295,7 @@ class PaymentTxOgone(osv.Model):
                 'date_validate': datetime.datetime.strptime(data['TRXDATE'], '%m/%d/%y').strftime(DEFAULT_SERVER_DATE_FORMAT),
                 'acquirer_reference': data['PAYID'],
             }
-            if data.get('ALIAS') and tx.partner_id and tx.type == 'form_save':
+            if data.get('ALIAS') and tx.partner_id and tx.type == 'form_save' and not tx.payment_method_id:
                 pm_id = self.pool['payment.method'].create(cr, uid, {
                     'partner_id': tx.partner_id.id,
                     'acquirer_id': tx.acquirer_id.id,
@@ -399,6 +400,14 @@ class PaymentTxOgone(osv.Model):
                 'date_validate': datetime.date.today().strftime(DEFAULT_SERVER_DATE_FORMAT),
                 'acquirer_reference': tree.get('PAYID'),
             })
+            if tree.get('ALIAS') and tx.partner_id and tx.type == 'form_save' and not tx.payment_method_id:
+                pm = tx.env['payment.method'].create({
+                    'partner_id': tx.partner_id.id,
+                    'acquirer_id': tx.acquirer_id.id,
+                    'acquirer_ref': tree.get('ALIAS'),
+                    'name': tree.get('CARDNO'),
+                })
+                tx.write({'payment_method_id': pm.id})
             if tx.callback_eval:
                 safe_eval(tx.callback_eval, {'self': tx})
             return True
@@ -476,7 +485,7 @@ class PaymentMethod(osv.Model):
 
             data = {
                 'FILE_REFERENCE': alias,
-                'TRANSACTION_CODE': 'ATR',
+                'TRANSACTION_CODE': 'MTR',
                 'OPERATION': 'SAL',
                 'NB_PAYMENTS': 1,   # even if we do not actually have any payment, ogone want it to not be 0
                 'FILE': normalize('NFKD', line).encode('ascii','ignore'),  # Ogone Batch must be ASCII only

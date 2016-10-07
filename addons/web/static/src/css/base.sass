@@ -1960,6 +1960,7 @@ $sheet-padding: 16px
                 border-width: 0
         td.oe_number
             text-align: right !important
+            white-space: nowrap !important
             max-width: 100px
         td.oe_list_field_date, th.oe_list_header_date
             min-width: 6em
@@ -2555,10 +2556,18 @@ body
     .oe-view-manager-content
         > div
             position: absolute !important
+            top: 0
+            right: 0
+            bottom: 0
+            left: 0
         .oe-view-manager-content
             > div
                 position: relative !important
-
+    .modal .oe-view-manager-content > div
+        position: static !important
+        max-height: 450px
+    .modal > .modal-dialog > .modal-content
+        max-height: 450px
 
 // au BufWritePost,FileWritePost *.sass :!sass --style expanded --line-numbers <afile> > "%:p:r.css"
 

@@ -119,6 +119,7 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
         partners = partners[pager['offset']:pager['offset'] + self._references_per_page]
 
         google_map_partner_ids = ','.join(map(str, [p.id for p in partners]))
+        google_maps_api_key = request.env['ir.config_parameter'].sudo().get_param('google_maps_api_key')
 
         values = {
             'countries': countries,
@@ -130,8 +131,10 @@ class WebsiteCrmPartnerAssign(WebsitePartnerPage):
             'pager': pager,
             'searches': post,
             'search_path': "%s" % werkzeug.url_encode(post),
+            'google_maps_api_key': google_maps_api_key,
         }
-        return request.website.render("website_crm_partner_assign.index", values)
+        return request.render("website_crm_partner_assign.index", values, status=partners and 200 or 404)
+
 
     # Do not use semantic controller due to SUPERUSER_ID
     @http.route(['/partners/<partner_id>'], type='http', auth="public", website=True)
