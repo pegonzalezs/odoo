@@ -1054,6 +1054,7 @@ var abstractReconciliationLine = Widget.extend({
                                     no_remove_action: true,
                                     is_tax_line: false,
                                     tax_id: netto_line.tax_id,
+                                    journal_id: netto_line.journal_id,
                                 });
                             });
 
