@@ -113,11 +113,16 @@ var FieldTextHtmlSimple = widget.extend({
     },
     text_to_html: function (text) {
         var value = text || "";
-        if (value.match(/^\s*$/)) {
-            value = '<p><br/></p>';
-        } else {
-            value = "<p>"+value.split(/<br\/?>/).join("<br/></p><p>")+"</p>";
-            value = value.replace(/<p><\/p>/g, '').replace('<p><p>', '<p>').replace('<p><p ', '<p ').replace('</p></p>', '</p>');
+        try {
+            $(text)[0].innerHTML;
+            return text;
+        } catch (e) {
+            if (value.match(/^\s*$/)) {
+                value = '<p><br/></p>';
+            } else {
+                value = "<p>"+value.split(/<br\/?>/).join("<br/></p><p>")+"</p>";
+                value = value.replace(/<p><\/p>/g, '').replace('<p><p>', '<p>').replace('<p><p ', '<p ').replace('</p></p>', '</p>');
+            }
         }
         return value;
     },
@@ -213,16 +218,19 @@ var FieldTextHtml = widget.extend({
                 self.$iframe.css("height", (self.$body.find("#oe_snippets").length ? 500 : 300) + "px");
             }
         };
-        $(window).on('resize', self.resize);
+        $(window).on('resize', this.resize);
 
         var def = this._super.apply(this, arguments);
         this.$translate.remove();
         this.$translate = $();
         return def;
     },
+    get_datarecord: function() {
+        return this.view.get_fields_values();
+    },
     get_url: function (_attr) {
         var src = this.options.editor_url || "/web_editor/field/html";
-        var datarecord = this.view.get_fields_values();
+        var datarecord = this.get_datarecord();
 
         var attr = {
             'model': this.view.model,
@@ -269,7 +277,6 @@ var FieldTextHtml = widget.extend({
 
         delete datarecord[this.name];
         src += "&datarecord="+ encodeURIComponent(JSON.stringify(datarecord));
-
         return src;
     },
     initialize_content: function() {
@@ -372,7 +379,7 @@ var FieldTextHtml = widget.extend({
         }
     },
     destroy: function () {
-        $(window).off('resize', self.resize);
+        $(window).off('resize', this.resize);
         delete window.odoo[this.callback+"_editor"];
         delete window.odoo[this.callback+"_content"];
         delete window.odoo[this.callback+"_updown"];
@@ -383,5 +390,10 @@ var FieldTextHtml = widget.extend({
 core.form_widget_registry
     .add('html', FieldTextHtmlSimple)
     .add('html_frame', FieldTextHtml);
+
+return {
+    FieldTextHtmlSimple: FieldTextHtmlSimple,
+    FieldTextHtml: FieldTextHtml,
+};
 
 });

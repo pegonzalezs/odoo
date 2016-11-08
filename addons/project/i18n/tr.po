@@ -3,15 +3,16 @@
 # * project
 # 
 # Translators:
-# AYHAN KIZILTAN <akiziltan76@hotmail.com>, 2016
+# Abdulbaki Aybakan <abdulbakiaybakan@gmail.com>, 2016
+# Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2016
 # Ediz Duman <neps1192@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-10-09 09:17+0000\n"
-"PO-Revision-Date: 2016-06-25 20:47+0000\n"
-"Last-Translator: Ediz Duman <neps1192@gmail.com>\n"
+"PO-Revision-Date: 2016-11-01 19:08+0000\n"
+"Last-Translator: Abdulbaki Aybakan <abdulbakiaybakan@gmail.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/odoo/odoo-9/language/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -139,7 +140,7 @@ msgid ""
 "                                            <span class=\"fa fa-laptop\"/>\n"
 "                                            <strong> Screen Customization</strong>\n"
 "                                        </span>"
-msgstr ""
+msgstr "<span class=\"panel-title\">\n                                            <span class=\"fa fa-laptop\"/>\n                                            <strong> Ekran Özelleştirme</strong>\n                                        </span>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -175,7 +176,7 @@ msgid ""
 "                                            <span class=\"fa fa-sitemap\"/>\n"
 "                                            <strong> Workflow Customization</strong>\n"
 "                                        </span>"
-msgstr ""
+msgstr "<span class=\"panel-title\">\n                                            <span class=\"fa fa-sitemap\"/>\n                                            <strong> İş Akışı Özelleştirme</strong>\n                                        </span>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -194,7 +195,7 @@ msgid ""
 "                                            <strong> Exercise 1</strong><br/>\n"
 "                                            <span class=\"small\">Check Workload</span>\n"
 "                                        </span>"
-msgstr ""
+msgstr "<span class=\"panel-title\">\n<span class=\"fa fa-thumb-tack\"/>\n<strong> Egzersiz 1</strong><br/>\n<span class=\"small\"> İşgücünü Kontrol Edin Workload</span>\n</span>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -204,7 +205,7 @@ msgid ""
 "                                            <strong> Exercise 2</strong><br/>\n"
 "                                            <span class=\"small\">Delay to close an Issue</span>\n"
 "                                        </span>"
-msgstr ""
+msgstr "<span class=\"panel-title\">\n<span class=\"fa fa-thumb-tack\"/>\n<strong> Egzersiz 2</strong><br/>\n<span class=\"small\">Bir meseleyi kapatmak için erteleyin</span>\n</span>                 "
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -362,7 +363,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>Billing</strong>"
-msgstr ""
+msgstr "<strong>Fatura</strong>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -381,7 +382,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>Contact us now:</strong><br/>"
-msgstr ""
+msgstr "<strong>Şimdi bize ulaşın:</strong><br/>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -405,7 +406,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>Example: </strong>"
-msgstr ""
+msgstr "<strong>Örnek: </strong>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -438,12 +439,12 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>For issues:</strong>"
-msgstr ""
+msgstr "<strong>Sorunlar için:</strong>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>For tasks:</strong>"
-msgstr ""
+msgstr "<strong>Görevler için:</strong>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -515,7 +516,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>Notes</strong>"
-msgstr ""
+msgstr "<strong>Notlar</strong>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -527,7 +528,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "<strong>Recommended actions:</strong>"
-msgstr ""
+msgstr "<strong>Önerilen aksiyonlar:</strong>"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -838,7 +839,7 @@ msgstr "Atanan"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_date_assign
 msgid "Assigning Date"
-msgstr ""
+msgstr "Atama Tarihi"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.task_type_edit
@@ -903,7 +904,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Basic Management"
-msgstr ""
+msgstr "Temel Yönetim"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1048,7 +1049,7 @@ msgstr "Firma"
 #: model:ir.model.fields,field_description:project.field_account_analytic_account_company_uom_id
 #: model:ir.model.fields,field_description:project.field_project_project_company_uom_id
 msgid "Company UOM"
-msgstr ""
+msgstr "Firma Ölçü Birimi"
 
 #. module: project
 #: model:ir.ui.menu,name:project.menu_project_config
@@ -1071,7 +1072,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Congratulations, you're done !"
-msgstr ""
+msgstr "Tebrikler, bitirdiniz."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1100,7 +1101,7 @@ msgstr ""
 #: code:addons/project/static/src/js/web_planner_project.js:33
 #, python-format
 msgid "Copywriting / Design"
-msgstr ""
+msgstr "Reklam Yazarlığı / Tasarım"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_create_date
@@ -1116,7 +1117,7 @@ msgstr ""
 #: model:ir.actions.act_window,help:project.open_view_project_all
 #: model:ir.actions.act_window,help:project.open_view_project_all_config
 msgid "Create a new project."
-msgstr ""
+msgstr "- Yeni bir proje oluştur"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1191,7 +1192,7 @@ msgstr "Para Birimi"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Current Timesheet"
-msgstr ""
+msgstr "Mevcut Zaman Çizelgesi"
 
 #. module: project
 #: code:addons/project/project.py:829
@@ -1217,7 +1218,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Customer Service"
-msgstr ""
+msgstr "Müşteri Servisi"
 
 #. module: project
 #. openerp-web
@@ -1250,12 +1251,12 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Customer support tickets"
-msgstr ""
+msgstr "Müşteri destek biletleri"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Customization"
-msgstr ""
+msgstr "Özelleştirme"
 
 #. module: project
 #: model:ir.ui.menu,name:project.menu_projects
@@ -1337,7 +1338,7 @@ msgstr ""
 #: code:addons/project/static/src/js/web_planner_project.js:19
 #, python-format
 msgid "Deployment"
-msgstr ""
+msgstr "Yükleme"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_description
@@ -1480,7 +1481,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_task_kanban
 msgid "Edit Task"
-msgstr ""
+msgstr "Görevi Düzenle"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.edit_project
@@ -1562,7 +1563,7 @@ msgstr "Örnekler"
 #: code:addons/project/static/src/js/web_planner_project.js:74
 #, python-format
 msgid "Expert advice has been requested"
-msgstr ""
+msgstr "Uzman tavsiyesi talep edilmiştir"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_date
@@ -1589,7 +1590,7 @@ msgstr "Ekstra Bilgisi"
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_config_settings
 msgid "Extra features"
-msgstr ""
+msgstr "İlave Özellikler"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1674,7 +1675,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_config_settings
 msgid "Forecasts"
-msgstr ""
+msgstr "Tahminler"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_config_settings_module_project_forecast
@@ -1729,7 +1730,7 @@ msgstr "Görevlerin bir listesini görüntülerken sırasını verir."
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Good luck!"
-msgstr ""
+msgstr "İyi şanslar!"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1763,7 +1764,7 @@ msgstr ""
 #. module: project
 #: model:ir.actions.act_window,help:project.act_project_project_2_project_task_all
 msgid "Here, you can create new tasks"
-msgstr ""
+msgstr "Burada, yeni görevler oluşturabilirsiniz"
 
 #. module: project
 #: selection:project.task,priority:0
@@ -1889,12 +1890,12 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Implement"
-msgstr ""
+msgstr "Uygulamak"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Improve"
-msgstr ""
+msgstr "iyileştirme"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1987,7 +1988,7 @@ msgstr "Sorunlar"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Issues analysis"
-msgstr ""
+msgstr "Sorun analizleri"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -2042,12 +2043,12 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Kanban Stage"
-msgstr ""
+msgstr "Kanban Aşaması"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Kanban Stages"
-msgstr ""
+msgstr "Kanban Aşamaları"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_history_cumulative_kanban_state
@@ -2192,7 +2193,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Marketing Department"
-msgstr ""
+msgstr "Pazarlama Departmanı"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_message_ids
@@ -2240,7 +2241,7 @@ msgstr "Ad"
 #. module: project
 #: model:project.task.type,legend_blocked:project.project_stage_1
 msgid "Need functional or technical help"
-msgstr ""
+msgstr "Fonksiyonel veya teknik yardıma gerek"
 
 #. module: project
 #. openerp-web
@@ -2258,14 +2259,14 @@ msgstr "Yeni"
 #: code:addons/project/project.py:762
 #, python-format
 msgid "New Task"
-msgstr ""
+msgstr "Yeni Görev"
 
 #. module: project
 #. openerp-web
 #: code:addons/project/static/src/js/web_planner_project.js:86
 #, python-format
 msgid "New repair added"
-msgstr ""
+msgstr "Yeni onarım eklendi"
 
 #. module: project
 #: selection:project.config.settings,module_sale_service:0
@@ -2275,7 +2276,7 @@ msgstr ""
 #. module: project
 #: selection:project.config.settings,module_rating_project:0
 msgid "No customer rating"
-msgstr ""
+msgstr "Müşteri reyting olmadan"
 
 #. module: project
 #: selection:project.task,priority:0
@@ -2288,7 +2289,7 @@ msgstr "Normal"
 #. module: project
 #: model:project.task.type,legend_blocked:project.project_stage_0
 msgid "Not validated"
-msgstr ""
+msgstr "Doğrulanmadı"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_notes
@@ -2390,7 +2391,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Organize meetings"
-msgstr ""
+msgstr "Toplantılar düzenleme"
 
 #. module: project
 #: model:ir.actions.act_window,help:project.open_view_project_all
@@ -2517,7 +2518,7 @@ msgstr "Mail gateway'i kullanarak gönderilecek mesajların kurallarını belirl
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Prepare"
-msgstr ""
+msgstr "Hazırlama"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_task_priority
@@ -2563,7 +2564,7 @@ msgstr "Proje"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_config_settings_generate_project_alias
 msgid "Project Alias"
-msgstr ""
+msgstr "Proje Rumuzları"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_config_settings
@@ -2594,7 +2595,7 @@ msgstr "Proje Ayarları"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Project Settings."
-msgstr ""
+msgstr "Proje Ayarları."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_project_task_graph
@@ -2893,7 +2894,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Software development"
-msgstr ""
+msgstr "Yazılım geliştirme"
 
 #. module: project
 #. openerp-web
@@ -2977,7 +2978,7 @@ msgstr "Başlangıç Tarihi"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_account_type
 msgid "State"
-msgstr ""
+msgstr "İl/Eyalet"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_state
@@ -2989,7 +2990,7 @@ msgstr "Durumu"
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_subscription_ids
 msgid "Subscriptions"
-msgstr ""
+msgstr "Yarışmacılar"
 
 #. module: project
 #: sql_constraint:project.tags:0
@@ -3036,7 +3037,7 @@ msgstr "Görev Engellendi"
 #: model:mail.message.subtype,name:project.mt_project_task_new
 #: model:mail.message.subtype,name:project.mt_task_new
 msgid "Task Opened"
-msgstr ""
+msgstr "Görev Açıldı"
 
 #. module: project
 #: model:ir.filters,name:project.filter_task_report_task_pipe
@@ -3047,7 +3048,7 @@ msgstr "Görev Kanalı"
 #: model:mail.message.subtype,name:project.mt_project_task_ready
 #: model:mail.message.subtype,name:project.mt_task_ready
 msgid "Task Ready"
-msgstr ""
+msgstr "Görev Hazır"
 
 #. module: project
 #: model:ir.model,name:project.model_project_task_type
@@ -3065,12 +3066,12 @@ msgstr "Görev Aşama Değişti"
 #: model:ir.model.fields,field_description:project.field_project_task_name
 #: model:ir.model.fields,field_description:project.field_report_project_task_user_name
 msgid "Task Title"
-msgstr ""
+msgstr "Görev Başlığı"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_task_form2
 msgid "Task Title..."
-msgstr ""
+msgstr "Görev Başlığı..."
 
 #. module: project
 #: model:mail.message.subtype,description:project.mt_task_blocked
@@ -3166,7 +3167,7 @@ msgstr "Görev Aşamaları"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Tasks analysis"
-msgstr ""
+msgstr "Görev analizi"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -3343,12 +3344,12 @@ msgstr ""
 #. module: project
 #: model:ir.model.fields,field_description:project.field_res_company_project_time_mode_id
 msgid "Timesheet UoM"
-msgstr ""
+msgstr "Zaman Çizelgesi Ölçü Birimi"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_config_settings_module_project_timesheet_synchro
 msgid "Timesheet app for Chrome/Android/iOS"
-msgstr ""
+msgstr "Chrome/Android/iOS için Zaman Çizelgesi Uygulaması"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_use_timesheets
@@ -3696,12 +3697,12 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Your Projects"
-msgstr ""
+msgstr "Projeleriniz"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Your Projects:"
-msgstr ""
+msgstr "Projeleriniz:"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -3711,7 +3712,7 @@ msgstr ""
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "etc.."
-msgstr ""
+msgstr "vb.."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner

@@ -679,7 +679,6 @@ var PivotView = View.extend({
         if (width > 1) {
             var total_cell = {width:nbr_measures, height: depth, title:""};
             if (nbr_measures === 1) {
-                total_cell.title = this.measures[this.active_measures[0]].string;
                 total_cell.total = true;
             }
             result[0].push(total_cell);
@@ -814,6 +813,12 @@ var PivotView = View.extend({
             complete: framework.unblockUI,
             error: crash_manager.rpc_error.bind(crash_manager)
         });    
+    },
+    destroy: function () {
+        if (this.$buttons) {
+            this.$buttons.find('button').off(); // remove jquery's tooltip() handlers
+        }
+        return this._super.apply(this, arguments);
     },
 });
 
