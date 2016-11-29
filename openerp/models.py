@@ -1040,6 +1040,8 @@ class BaseModel(object):
         :param dict context:
         :returns: {ids: list(int)|False, messages: [Message]}
         """
+        if context is None:
+            context = {}
         cr.execute('SAVEPOINT model_load')
         messages = []
 
@@ -1094,6 +1096,10 @@ class BaseModel(object):
         if any(message['type'] == 'error' for message in messages):
             cr.execute('ROLLBACK TO SAVEPOINT model_load')
             ids = False
+
+        if ids and context.get('defer_parent_store_computation'):
+            self._parent_store_compute(cr)
+
         return {'ids': ids, 'messages': messages}
 
     def _add_fake_fields(self, cr, uid, fields, context=None):
@@ -1278,7 +1284,7 @@ class BaseModel(object):
                 except ValidationError, e:
                     raise
                 except Exception, e:
-                    raise ValidationError("Error while validating constraint\n\n%s" % tools.ustr(e))
+                    raise ValidationError("%s\n\n%s" % (_("Error while validating constraint"), tools.ustr(e)))
 
     @api.model
     def default_get(self, fields_list):
@@ -1386,7 +1392,7 @@ class BaseModel(object):
 
     def _get_default_form_view(self, cr, user, context=None):
         """ Generates a default single-line form view using all fields
-        of the current model except the m2m and o2m ones.
+        of the current model.
 
         :param cr: database cursor
         :param int user: user id
@@ -1397,7 +1403,7 @@ class BaseModel(object):
         view = etree.Element('form', string=self._description)
         group = etree.SubElement(view, 'group', col="4")
         for fname, field in self._fields.iteritems():
-            if field.automatic or field.type in ('one2many', 'many2many'):
+            if field.automatic:
                 continue
 
             etree.SubElement(group, 'field', name=fname)
@@ -1893,7 +1899,7 @@ class BaseModel(object):
         for order_part in orderby.split(','):
             order_split = order_part.split()
             order_field = order_split[0]
-            if order_field in groupby_fields:
+            if order_field == 'id' or order_field in groupby_fields:
 
                 if self._fields[order_field.split(':')[0]].type == 'many2one':
                     order_clause = self._generate_order_by(order_part, query).replace('ORDER BY ', '')
@@ -2583,8 +2589,8 @@ class BaseModel(object):
                                     self._set_default_value_on_column(cr, k, context=context)
                                 # add the NOT NULL constraint
                                 try:
-                                    cr.execute('ALTER TABLE "%s" ALTER COLUMN "%s" SET NOT NULL' % (self._table, k), log_exceptions=False)
                                     cr.commit()
+                                    cr.execute('ALTER TABLE "%s" ALTER COLUMN "%s" SET NOT NULL' % (self._table, k), log_exceptions=False)
                                     _schema.debug("Table '%s': column '%s': added NOT NULL constraint",
                                         self._table, k)
                                 except Exception:
@@ -3801,8 +3807,7 @@ class BaseModel(object):
           ``(6, _, ids)``
               replaces all existing records in the set by the ``ids`` list,
               equivalent to using the command ``5`` followed by a command
-              ``4`` for each ``id`` in ``ids``. Can not be used on
-              :class:`~openerp.fields.One2many`.
+              ``4`` for each ``id`` in ``ids``.
 
           .. note:: Values marked as ``_`` in the list above are ignored and
                     can be anything, generally ``0`` or ``False``.
@@ -3836,12 +3841,18 @@ class BaseModel(object):
         if old_vals:
             self._write(old_vals)
 
-        # put the values of pure new-style fields into cache, and inverse them
         if new_vals:
+            # put the values of pure new-style fields into cache
             for record in self:
                 record._cache.update(record._convert_to_cache(new_vals, update=True))
+            # mark the fields as being computed, to avoid their invalidation
+            for key in new_vals:
+                self.env.computed[self._fields[key]].update(self._ids)
+            # inverse the fields
             for key in new_vals:
                 self._fields[key].determine_inverse(self)
+            for key in new_vals:
+                self.env.computed[self._fields[key]].difference_update(self._ids)
 
         return True
 
@@ -4150,10 +4161,16 @@ class BaseModel(object):
         # create record with old-style fields
         record = self.browse(self._create(old_vals))
 
-        # put the values of pure new-style fields into cache, and inverse them
+        # put the values of pure new-style fields into cache
         record._cache.update(record._convert_to_cache(new_vals))
+        # mark the fields as being computed, to avoid their invalidation
+        for key in new_vals:
+            self.env.computed[self._fields[key]].add(record.id)
+        # inverse the fields
         for key in new_vals:
             self._fields[key].determine_inverse(record)
+        for key in new_vals:
+            self.env.computed[self._fields[key]].discard(record.id)
 
         return record
 

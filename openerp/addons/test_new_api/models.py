@@ -82,6 +82,7 @@ class Category(models.Model):
     name = fields.Char(required=True)
     color = fields.Integer('Color Index')
     parent = fields.Many2one('test_new_api.category')
+    root_categ = fields.Many2one(_name, compute='_compute_root_categ')
     display_name = fields.Char(compute='_compute_display_name', inverse='_inverse_display_name')
     dummy = fields.Char(store=False)
     discussions = fields.Many2many('test_new_api.discussion', 'test_new_api_discussion_category',
@@ -94,6 +95,14 @@ class Category(models.Model):
             self.display_name = self.parent.display_name + ' / ' + self.name
         else:
             self.display_name = self.name
+
+    @api.depends('parent')
+    def _compute_root_categ(self):
+        for cat in self:
+            current = cat
+            while current.parent:
+                current = current.parent
+            cat.root_categ = current
 
     @api.one
     def _inverse_display_name(self):
@@ -130,6 +139,16 @@ class Discussion(models.Model):
     message_concat = fields.Text(string='Message concatenate')
     important_messages = fields.One2many('test_new_api.message', 'discussion',
                                          domain=[('important', '=', True)])
+    very_important_messages = fields.One2many(
+        'test_new_api.message', 'discussion',
+        domain=lambda self: self._domain_very_important())
+    emails = fields.One2many('test_new_api.emailmessage', 'discussion')
+    important_emails = fields.One2many('test_new_api.emailmessage', 'discussion',
+                                       domain=[('important', '=', True)])
+
+    def _domain_very_important(self):
+        """Ensure computed O2M domains work as expected."""
+        return [("important", "=", True)]
 
     @api.onchange('moderator')
     def _onchange_moderator(self):
@@ -210,6 +229,14 @@ class Message(models.Model):
         return [('author.partner_id', operator, value)]
 
 
+class EmailMessage(models.Model):
+    _name = 'test_new_api.emailmessage'
+    _inherits = {'test_new_api.message': 'message'}
+
+    message = fields.Many2one('test_new_api.message', 'Message',
+                              required=True, ondelete='cascade')
+    email_to = fields.Char('To')
+
 class Multi(models.Model):
     """ Model for testing multiple onchange methods in cascade that modify a
         one2many field several times.
@@ -273,3 +300,25 @@ class BoolModel(models.Model):
     bool_true = fields.Boolean('b1', default=True)
     bool_false = fields.Boolean('b2', default=False)
     bool_undefined = fields.Boolean('b3')
+
+
+class Foo(models.Model):
+    _name = 'test_new_api.foo'
+
+    name = fields.Char()
+    value1 = fields.Integer()
+    value2 = fields.Integer()
+
+
+class Bar(models.Model):
+    _name = 'test_new_api.bar'
+
+    name = fields.Char()
+    foo = fields.Many2one('test_new_api.foo', compute='_compute_foo')
+    value1 = fields.Integer(related='foo.value1')
+    value2 = fields.Integer(related='foo.value2')
+
+    @api.depends('name')
+    def _compute_foo(self):
+        for bar in self:
+            bar.foo = self.env['test_new_api.foo'].search([('name', '=', bar.name)], limit=1)

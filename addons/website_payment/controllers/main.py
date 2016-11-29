@@ -10,6 +10,7 @@ class website_payment(http.Controller):
         acquirers = list(request.env['payment.acquirer'].search([('website_published', '=', True), ('registration_view_template_id', '!=', False)]))
         partner = request.env.user.partner_id
         payment_methods = partner.payment_method_ids
+        payment_methods |= partner.commercial_partner_id.sudo().payment_method_ids
         values = {
             'pms': payment_methods,
             'acquirers': acquirers
@@ -45,7 +46,7 @@ class website_payment(http.Controller):
 
         partner_id = user.partner_id.id if user.partner_id.id != request.website.partner_id.id else False
 
-        payment_form = acquirer.render(reference, float(amount), currency.id, values={'return_url': '/website_payment/confirm', 'partner_id': partner_id})[0]
+        payment_form = acquirer.sudo().render(reference, float(amount), currency.id, values={'return_url': '/website_payment/confirm', 'partner_id': partner_id})[0]
         values = {
             'reference': reference,
             'acquirer': acquirer,

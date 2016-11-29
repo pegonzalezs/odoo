@@ -238,7 +238,7 @@ class produce_price_history(osv.osv):
         'company_id': fields.many2one('res.company', required=True),
         'product_id': fields.many2one('product.product', 'Product', required=True, ondelete='cascade'),
         'datetime': fields.datetime('Date'),
-        'cost': fields.float('Cost'),
+        'cost': fields.float('Cost', digits_compute=dp.get_precision('Product Price')),
     }
 
     def _get_default_company(self, cr, uid, context=None):
@@ -447,7 +447,7 @@ class product_template(osv.osv):
             names = [names]
         res = {id: {} for id in ids}
         templates = self.browse(cr, uid, ids, context=context)
-        unique_templates = [template.id for template in templates if template.product_variant_count == 1]
+        unique_templates = [template.id for template in templates if len(template.product_variant_ids) == 1]
         for template in templates:
             for name in names:
                 res[template.id][name] = getattr(template.product_variant_ids[0], name) if template.id in unique_templates else 0.0
@@ -456,7 +456,7 @@ class product_template(osv.osv):
     def _set_product_template_field(self, cr, uid, product_tmpl_id, name, value, args, context=None):
         ''' Set the standard price modification on the variant if there is only one variant '''
         template = self.pool['product.template'].browse(cr, uid, product_tmpl_id, context=context)
-        if template.product_variant_count == 1:
+        if len(template.product_variant_ids) == 1:
             variant = self.pool['product.product'].browse(cr, uid, template.product_variant_ids.id, context=context)
             return variant.write({name: value})
         return {}
@@ -711,8 +711,9 @@ class product_template(osv.osv):
     def copy(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
-        template = self.browse(cr, uid, id, context=context)
-        default['name'] = _("%s (copy)") % (template['name'])
+        if 'name' not in default:
+            template = self.browse(cr, uid, id, context=context)
+            default['name'] = _("%s (copy)") % (template['name'])
         return super(product_template, self).copy(cr, uid, id, default=default, context=context)
 
     _defaults = {
@@ -941,6 +942,13 @@ class product_product(osv.osv):
             break
         return res
 
+    def _get_items(self, cr, uid, ids, field_name, args, context=None):
+        res = {}
+        for prod in self.browse(cr, uid, ids, context=context):
+            item_ids = self.pool['product.pricelist.item'].search(cr, uid, ['|', ('product_id', '=', prod.id), ('product_tmpl_id', '=', prod.product_tmpl_id.id)], context=context)
+            res[prod.id] = item_ids
+        return res
+
     _columns = {
         'price': fields.function(_product_price, fnct_inv=_set_product_lst_price, type='float', string='Price', digits_compute=dp.get_precision('Product Price')),
         'price_extra': fields.function(_get_price_extra, type='float', string='Variant Extra Price', help="This is the sum of the extra price of all attributes", digits_compute=dp.get_precision('Product Price')),
@@ -977,6 +985,7 @@ class product_product(osv.osv):
                                           groups="base.group_user", string="Cost"),
         'volume': fields.float('Volume', help="The volume in m3."),
         'weight': fields.float('Gross Weight', digits_compute=dp.get_precision('Stock Weight'), help="The weight of the contents in Kg, not including any packaging, etc."),
+        'item_ids': fields.function(_get_items, type='many2many', relation='product.pricelist.item', string='Pricelist Items', store=False),
     }
 
     _defaults = {
@@ -1068,8 +1077,7 @@ class product_product(osv.osv):
             name = variant and "%s (%s)" % (product.name, variant) or product.name
             sellers = []
             if partner_ids:
-                if variant:
-                    sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and (x.product_id == product)]
+                sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and (x.product_id == product)]
                 if not sellers:
                     sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and not x.product_id]
             if sellers:
@@ -1158,7 +1166,7 @@ class product_product(osv.osv):
             # if we copy a variant or create one, we keep the same template
             default['product_tmpl_id'] = product.product_tmpl_id.id
         elif 'name' not in default:
-            default['name'] = _("%s (copy)") % (product.name,)
+            default['name'] = product.name
 
         return super(product_product, self).copy(cr, uid, id, default=default, context=context)
 

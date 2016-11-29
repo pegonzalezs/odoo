@@ -1909,6 +1909,9 @@ $sheet-padding: 16px
                     width: calc(100% - 20px)
             &.oe_form_field_reference
                 display: table
+        .oe_list_record_delete
+            opacity: 0.5
+            pointer-events: none
     .oe_list_group_name
         white-space: nowrap
     // }}}
@@ -2556,10 +2559,18 @@ body
     .oe-view-manager-content
         > div
             position: absolute !important
+            top: 0
+            right: 0
+            bottom: 0
+            left: 0
         .oe-view-manager-content
             > div
                 position: relative !important
-
+    .modal .oe-view-manager-content > div
+        position: static !important
+        max-height: 450px
+    .modal > .modal-dialog > .modal-content
+        max-height: 450px
 
 // au BufWritePost,FileWritePost *.sass :!sass --style expanded --line-numbers <afile> > "%:p:r.css"
 
@@ -2594,3 +2605,6 @@ body
         width: 100px
         white-space: nowrap
         padding-left: 10px
+
+.nvtooltip thead
+    background-color: transparent

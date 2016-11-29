@@ -711,9 +711,11 @@ class expression(object):
             """ Return a domain implementing the child_of operator for [(left,child_of,ids)],
                 either as a range using the parent_left/right tree lookup fields
                 (when available), or as an expanded [(left,in,child_ids)] """
+            if context is None:
+                context = {}
             if not ids:
                 return FALSE_DOMAIN
-            if left_model._parent_store and (not left_model.pool._init):
+            if left_model._parent_store and (not left_model.pool._init) and (not context.get('defer_parent_store_computation')):
                 # TODO: Improve where joins are implemented for many with '.', replace by:
                 # doms += ['&',(prefix+'.parent_left','<',o.parent_right),(prefix+'.parent_left','>=',o.parent_left)]
                 doms = []
@@ -736,7 +738,9 @@ class expression(object):
             """ Return a domain implementing the parent_of operator for [(left,parent_of,ids)],
                 either as a range using the parent_left/right tree lookup fields
                 (when available), or as an expanded [(left,in,parent_ids)] """
-            if left_model._parent_store and (not left_model.pool._init):
+            if context is None:
+                context = {}
+            if left_model._parent_store and (not left_model.pool._init) and (not context.get('defer_parent_store_computation')):
                 doms = []
                 for node in left_model.browse(cr, uid, ids, context=context):
                     if doms:
@@ -828,7 +832,7 @@ class expression(object):
 
             elif left == 'id' and operator in HIERARCHY_FUNCS:
                 ids2 = to_ids(right, model, context)
-                dom = HIERARCHY_FUNCS[operator](left, ids2, model)
+                dom = HIERARCHY_FUNCS[operator](left, ids2, model, context=context)
                 for dom_leaf in reversed(dom):
                     new_leaf = create_substitution_leaf(leaf, dom_leaf, model)
                     push(new_leaf)
@@ -949,9 +953,9 @@ class expression(object):
             elif column._type == 'one2many' and operator in HIERARCHY_FUNCS:
                 ids2 = to_ids(right, comodel, context)
                 if column._obj != model._name:
-                    dom = HIERARCHY_FUNCS[operator](left, ids2, comodel, prefix=column._obj)
+                    dom = HIERARCHY_FUNCS[operator](left, ids2, comodel, prefix=column._obj, context=context)
                 else:
-                    dom = HIERARCHY_FUNCS[operator]('id', ids2, model, parent=left)
+                    dom = HIERARCHY_FUNCS[operator]('id', ids2, model, parent=left, context=context)
                 for dom_leaf in reversed(dom):
                     push(create_substitution_leaf(leaf, dom_leaf, model))
 
@@ -961,7 +965,10 @@ class expression(object):
                 if right is not False:
                     if isinstance(right, basestring):
                         op = {'!=': '=', 'not like': 'like', 'not ilike': 'ilike'}.get(operator, operator)
-                        ids2 = [x[0] for x in comodel.name_search(cr, uid, right, [], op, context=context, limit=None)]
+                        domain = column._domain
+                        if callable(domain):
+                            domain = domain(model)
+                        ids2 = [x[0] for x in comodel.name_search(cr, uid, right, domain or [], op, context=context, limit=None)]
                         if ids2:
                             operator = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
                     elif isinstance(right, collections.Iterable):
@@ -1004,7 +1011,7 @@ class expression(object):
                         return select_from_where(cr, rel_id1, rel_table, rel_id2, ids, operator)
 
                     ids2 = to_ids(right, comodel, context)
-                    dom = HIERARCHY_FUNCS[operator]('id', ids2, comodel)
+                    dom = HIERARCHY_FUNCS[operator]('id', ids2, comodel, context=context)
                     ids2 = comodel.search(cr, uid, dom, context=context)
                     push(create_substitution_leaf(leaf, ('id', 'in', _rec_convert(ids2)), model))
                 else:
@@ -1012,7 +1019,10 @@ class expression(object):
                     if right is not False:
                         if isinstance(right, basestring):
                             op = {'!=': '=', 'not like': 'like', 'not ilike': 'ilike'}.get(operator, operator)
-                            res_ids = [x[0] for x in comodel.name_search(cr, uid, right, [], op, context=context, limit=None)]
+                            domain = column._domain
+                            if callable(domain):
+                                domain = domain(model)
+                            res_ids = [x[0] for x in comodel.name_search(cr, uid, right, domain or [], op, context=context, limit=None)]
                             if res_ids:
                                 operator = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
                         else:
@@ -1040,9 +1050,9 @@ class expression(object):
                 if operator in HIERARCHY_FUNCS:
                     ids2 = to_ids(right, comodel, context)
                     if column._obj != model._name:
-                        dom = HIERARCHY_FUNCS[operator](left, ids2, comodel, prefix=column._obj)
+                        dom = HIERARCHY_FUNCS[operator](left, ids2, comodel, prefix=column._obj, context=context)
                     else:
-                        dom = HIERARCHY_FUNCS[operator]('id', ids2, model, parent=left)
+                        dom = HIERARCHY_FUNCS[operator]('id', ids2, model, parent=left, context=context)
                     for dom_leaf in reversed(dom):
                         push(create_substitution_leaf(leaf, dom_leaf, model))
                 else:

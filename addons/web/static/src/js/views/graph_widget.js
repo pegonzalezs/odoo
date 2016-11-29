@@ -18,7 +18,7 @@ return Widget.extend({
         this._super(parent);
         this.context = options.context;
         this.fields = options.fields;
-        this.fields.__count__ = {string: _t("Quantity"), type: "integer"};
+        this.fields.__count__ = {string: _t("Count"), type: "integer"};
         this.model = new Model(model, {group_by_no_leaf: true});
 
         this.domain = options.domain || [];
@@ -97,7 +97,8 @@ return Widget.extend({
                     "there is no active filter in the search bar."),
             }));
         } else {
-            this['display_' + this.mode]();
+            var chart = this['display_' + this.mode]();
+            chart.tooltip.chartContainer(this.$el[0]);
         }
     },
     display_bar: function () {
@@ -181,6 +182,8 @@ return Widget.extend({
         chart(svg);
         this.to_remove = chart.update;
         nv.utils.onWindowResize(chart.update);
+
+        return chart;
     },
     display_pie: function () {
         var data = [],
@@ -231,6 +234,8 @@ return Widget.extend({
         chart(svg);
         this.to_remove = chart.update;
         nv.utils.onWindowResize(chart.update);
+
+        return chart;
     },
     display_line: function () {
         if (this.data.length < 2) {
@@ -308,7 +313,9 @@ return Widget.extend({
 
         chart(svg);
         this.to_remove = chart.update;
-        nv.utils.onWindowResize(chart.update);  
+        nv.utils.onWindowResize(chart.update);
+
+        return chart;
     },
     destroy: function () {
         nv.utils.offWindowResize(this.to_remove);

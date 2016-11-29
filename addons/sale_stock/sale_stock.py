@@ -303,7 +303,14 @@ class StockPicking(models.Model):
                     break
             picking.sale_id = sale_order.id if sale_order else False
 
-    sale_id = fields.Many2one(comodel_name='sale.order', string="Sale Order", compute='_compute_sale_id')
+    def _search_sale_id(self, operator, value):
+        moves = self.env['stock.move'].search(
+            [('picking_id', '!=', False), ('procurement_id.sale_line_id.order_id', operator, value)]
+        )
+        return [('id', 'in', moves.mapped('picking_id').ids)]
+
+    sale_id = fields.Many2one(comodel_name='sale.order', string="Sale Order",
+                              compute='_compute_sale_id', search='_search_sale_id')
 
 
 class AccountInvoiceLine(models.Model):
@@ -329,7 +336,7 @@ class AccountInvoiceLine(models.Model):
                 # on the moves we encounter.
                 average_price_unit = self._compute_average_price(qty_done, quantity, moves)
                 price_unit = average_price_unit or price_unit
-                price_unit = uom_obj._compute_qty_obj(self.uom_id, price_unit, self.product_id.uom_id, round=False)
+                price_unit = self.product_id.uom_id._compute_price(self.product_id.uom_id.id, price_unit, to_uom_id=self.uom_id.id)
         return price_unit
 
     def _compute_average_price(self, qty_done, quantity, moves):
