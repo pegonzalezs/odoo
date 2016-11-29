@@ -143,7 +143,7 @@ $('.oe_website_sale').each(function () {
         if ($input.data('update_change')) {
             return;
         }
-      var value = parseInt($input.val(), 10);
+      var value = parseInt($input.val() || 0, 10);
       var $dom = $(this).closest('tr');
       var default_price = parseFloat($dom.find('.text-danger > span.oe_currency_value').text());
       var $dom_optional = $dom.nextUntil(':not(.optional_product.info)');
@@ -164,7 +164,7 @@ $('.oe_website_sale').each(function () {
         'set_qty': value})
         .then(function (data) {
             $input.data('update_change', false);
-            if (value !== parseInt($input.val(), 10)) {
+            if (value !== parseInt($input.val() || 0, 10)) {
                 $input.trigger('change');
                 return;
             }
@@ -211,7 +211,7 @@ $('.oe_website_sale').each(function () {
         var product_id = +$input.closest('*:has(input[name="product_id"])').find('input[name="product_id"]').val();
         var min = parseFloat($input.data("min") || 0);
         var max = parseFloat($input.data("max") || Infinity);
-        var quantity = ($link.has(".fa-minus").length ? -1 : 1) + parseFloat($input.val(),10);
+        var quantity = ($link.has(".fa-minus").length ? -1 : 1) + parseFloat($input.val() || 0, 10);
         // if they are more of one input for this product (eg: option modal)
         $('input[name="'+$input.attr("name")+'"]').add($input).filter(function () {
             var $prod = $(this).closest('*:has(input[name="product_id"])');
@@ -335,11 +335,13 @@ $('.oe_website_sale').each(function () {
         $('input.js_variant_change, select.js_variant_change', this).first().trigger('change');
     });
 
-    var state_options = $("select[name='state_id'] option:not(:first)");
+    var state_options = $("select[name='state_id']:visible option:not(:first)");
     $(oe_website_sale).on('change', "select[name='country_id']", function () {
-        var select = $("select[name='state_id']");
+        var select = $("select[name='state_id']:visible");
+        var selected_state = select.val();
         state_options.detach();
         var displayed_state = state_options.filter("[data-country_id="+($(this).val() || 0)+"]");
+        select.val(selected_state);
         var nb = displayed_state.appendTo(select).show().size();
         select.parent().toggle(nb>=1);
     });
@@ -348,8 +350,10 @@ $('.oe_website_sale').each(function () {
     var shipping_state_options = $("select[name='shipping_state_id'] option:not(:first)");
     $(oe_website_sale).on('change', "select[name='shipping_country_id']", function () {
         var select = $("select[name='shipping_state_id']");
+        var selected_state = select.val();
         shipping_state_options.detach();
         var displayed_state = shipping_state_options.filter("[data-country_id="+($(this).val() || 0)+"]");
+        select.val(selected_state);
         var nb = displayed_state.appendTo(select).show().size();
         select.parent().toggle(nb>=1);
     });
