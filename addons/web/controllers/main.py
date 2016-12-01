@@ -757,11 +757,11 @@ class Session(http.Controller):
         except Exception as e:
             # Makes a difference between the regular exception and the one raised by us (BT)
             if isinstance(e, except_orm) and e.name == 'Invalid Password':
-                return {'error': 'The new password cannot contain accented characters.',
-                        'title': 'Invalid New Password'}
+                return {'error': _('The new password cannot contain accented characters.'),
+                        'title': _('Invalid New Password')}
             else:
-                return {'error': 'The original password is incorrect.',
-                        'title': 'Incorrect Original Password'}
+                return {'error': _('The original password is incorrect.'),
+                        'title': _('Incorrect Original Password')}
         return {'error': _('Error, password not changed !'), 'title': _('Change Password')}
 
     @http.route('/web/session/get_lang_list', type='json', auth="none")
