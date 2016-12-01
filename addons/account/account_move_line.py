@@ -1383,8 +1383,7 @@ class account_move_line(osv.osv):
                 base_sign = 'ref_base_sign'
                 tax_sign = 'ref_tax_sign'
             base_adjusted = False
-            account_tax = account_obj.browse(cr, uid, account_id, context=context)
-            for tax in tax_obj.compute_all(cr, uid, [tax_id], total, 1.00, force_excluded=False, currency=account_tax.company_id.currency_id).get('taxes'):
+            for tax in tax_obj.compute_all(cr, uid, [tax_id], total, 1.00, force_excluded=False).get('taxes'):
                 #create the base movement
                 if base_adjusted == False:
                     base_adjusted = True
