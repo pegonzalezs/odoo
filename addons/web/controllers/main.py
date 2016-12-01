@@ -36,6 +36,7 @@ from openerp.tools.misc import str2bool, xlwt
 from openerp import http
 from openerp.http import request, serialize_exception as _serialize_exception, content_disposition
 from openerp.exceptions import AccessError
+from openerp.exceptions import except_orm
 
 _logger = logging.getLogger(__name__)
 
@@ -753,8 +754,14 @@ class Session(http.Controller):
             if request.session.model('res.users').change_password(
                 old_password, new_password):
                 return {'new_password':new_password}
-        except Exception:
-            return {'error': _('The old password you provided is incorrect, your password was not changed.'), 'title': _('Change Password')}
+        except Exception as e:
+            # Makes a difference between the regular exception and the one raised by us (BT)
+            if isinstance(e, except_orm) and e.name == 'Invalid Password':
+                return {'error': 'The new password cannot contain accented characters.',
+                        'title': 'Invalid New Password'}
+            else:
+                return {'error': 'The original password is incorrect.',
+                        'title': 'Incorrect Original Password'}
         return {'error': _('Error, password not changed !'), 'title': _('Change Password')}
 
     @http.route('/web/session/get_lang_list', type='json', auth="none")
