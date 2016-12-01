@@ -16,7 +16,7 @@ class MassMailingTag(models.Model):
     _description = 'Mass Mailing Tag'
     _order = 'name'
 
-    name = fields.Char(required=True)
+    name = fields.Char(required=True, translate=True)
     color = fields.Integer(string='Color Index')
 
     _sql_constraints = [
@@ -423,6 +423,12 @@ class MassMailing(models.Model):
     #------------------------------------------------------
     # Technical stuff
     #------------------------------------------------------
+
+    @api.model
+    def name_create(self, name):
+        """ _rec_name is source_id, creates a utm.source instead """
+        mass_mailing = self.create({'name': name})
+        return mass_mailing.name_get()[0]
 
     @api.multi
     def copy(self, default=None):

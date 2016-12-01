@@ -31,10 +31,10 @@ var TopBarContent = Widget.extend({
         var def = $.Deferred();
         if ($("[data-content_menu_id]").length) {
             var select = new SelectEditMenuDialog();
-            select.appendTo(document.body);
             select.on('save', this, function (root) {
                 def.resolve(root);
             });
+            select.open();
         } else {
             def.resolve(null);
         }
@@ -49,7 +49,7 @@ var TopBarContent = Widget.extend({
                 },
             }).then(function (menu) {
                 var dialog = new EditMenuDialog(this, {}, menu).open();
-                dialog.on("saved", null, function () {
+                dialog.on("save", null, function () {
                     $.when(action_before_reload && action_before_reload()).then(function () {
                         editor.reload();
                     });

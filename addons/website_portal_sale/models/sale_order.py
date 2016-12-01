@@ -14,9 +14,9 @@ class SaleOrder(models.Model):
         portal users that have access to a confirmed order. """
         # TDE note: read access on sale order to portal users granted to followed sale orders
         self.ensure_one()
-        if self.state in ['draft', 'cancel']:
+        if self.state == 'cancel' or (self.state == 'draft' and not self.env.context.get('mark_so_as_sent')):
             return super(SaleOrder, self).get_access_action()
-        if self.env.user.share:
+        if self.env.user.share or self.env.context.get('force_website'):
             try:
                 self.check_access_rule('read')
             except exceptions.AccessError:

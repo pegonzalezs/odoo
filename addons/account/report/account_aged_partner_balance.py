@@ -92,11 +92,12 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             for partial_line in line.matched_credit_ids:
                 if partial_line.create_date[:10] <= date_from:
                     line_amount -= partial_line.amount
-            undue_amounts[partner_id] += line_amount
-            lines[partner_id].append({
-                'line': line,
-                'amount': line_amount,
-                'period': 6,
+            if not self.env.user.company_id.currency_id.is_zero(line_amount):
+                undue_amounts[partner_id] += line_amount
+                lines[partner_id].append({
+                    'line': line,
+                    'amount': line_amount,
+                    'period': 6,
                 })
 
         # Use one query per period and store results in history (a list variable)
@@ -144,15 +145,18 @@ class ReportAgedPartnerBalance(models.AbstractModel):
                     if partial_line.create_date[:10] <= date_from:
                         line_amount -= partial_line.amount
 
-                partners_amount[partner_id] += line_amount
-                lines[partner_id].append({
-                    'line': line,
-                    'amount': line_amount,
-                    'period': i + 1,
-                    })
+                if not self.env.user.company_id.currency_id.is_zero(line_amount):
+                    partners_amount[partner_id] += line_amount
+                    lines[partner_id].append({
+                        'line': line,
+                        'amount': line_amount,
+                        'period': i + 1,
+                        })
             history.append(partners_amount)
 
         for partner in partners:
+            if partner['partner_id'] is None:
+                partner['partner_id'] = False
             at_least_one_amount = False
             values = {}
             undue_amt = 0.0

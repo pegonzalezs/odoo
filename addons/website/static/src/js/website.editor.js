@@ -74,16 +74,17 @@ website.TopBarCustomize = Widget.extend({
             key: this.view_name,
             full: false
         }).then(function (result) {
+            var current_group = "";
             _.each(result, function (item) {
-                if (item.header) {
-                    $menu.append('<li class="dropdown-header">' + item.name + '</li>');
-                } else {
-                    var $li = $('<li/>', {role: 'presentation'})
-                                .append($('<a/>', {href: '#', 'data-view-id': item.id, role: 'menuitem'})
-                                    .append(qweb.render('web_editor.components.switch', {id: 'switch-' + item.id, label: item.name})));
-                    $li.find('input').prop('checked', !!item.active);
-                    $menu.append($li);
+                if (current_group !== item.inherit_id[1]) {
+                    current_group = item.inherit_id[1];
+                    $menu.append("<li class=\"dropdown-header\">" + current_group + "</li>");
                 }
+                var $li = $('<li/>', {role: 'presentation'})
+                            .append($('<a/>', {href: '#', 'data-view-id': item.id, role: 'menuitem'})
+                                .append(qweb.render('web_editor.components.switch', {id: 'switch-' + item.id, label: item.name})));
+                $li.find('input').prop('checked', !!item.active);
+                $menu.append($li);
             });
         });
     },
@@ -216,7 +217,7 @@ base.ready().then(function () {
         var $wrap = $("#wrapwrap.homepage #wrap");
         if ($wrap.length && $wrap.html().trim() === "") {
             var $welcome_message = $(qweb.render("website.homepage_editor_welcome_message"));
-            $welcome_message.css("height", $wrap.parent("main").height() - ($wrap.outerHeight(true) - $wrap.height()));
+            $welcome_message.css("min-height", $wrap.parent("main").height() - ($wrap.outerHeight(true) - $wrap.height()));
             $wrap.empty().append($welcome_message);
         }
     }
