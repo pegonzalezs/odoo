@@ -1267,7 +1267,7 @@ class calendar_event(osv.Model):
         """
         if data['interval'] and data['interval'] < 0:
             raise osv.except_osv(_('warning!'), _('interval cannot be negative.'))
-        if data['count'] and data['count'] <= 0:
+        if data['end_type'] == 'count' and int(data['count']) <= 0:
             raise osv.except_osv(_('warning!'), _('count cannot be negative or 0.'))
 
         def get_week_string(freq, data):
@@ -1343,8 +1343,8 @@ class calendar_event(osv.Model):
             data['rrule_type'] = 'weekly'
         #repeat monthly by nweekday ((weekday, weeknumber), )
         if r._bynweekday:
-            data['week_list'] = day_list[r._bynweekday[0][0]].upper()
-            data['byday'] = str(r._bynweekday[0][1])
+            data['week_list'] = day_list[list(r._bynweekday)[0][0]].upper()
+            data['byday'] = str(list(r._bynweekday)[0][1])
             data['month_by'] = 'day'
             data['rrule_type'] = 'monthly'
 
@@ -1537,6 +1537,7 @@ class calendar_event(osv.Model):
                 recurrent_id=real_event_id,
                 recurrent_id_date=data.get('start'),
                 rrule_type=False,
+                end_type=False,
                 rrule='',
                 recurrency=False,
                 final_date=datetime.strptime(data.get('start'), DEFAULT_SERVER_DATETIME_FORMAT if data['allday'] else DEFAULT_SERVER_DATETIME_FORMAT) + timedelta(hours=values.get('duration', False) or data.get('duration'))
@@ -1708,7 +1709,9 @@ class calendar_event(osv.Model):
                     continue
             if r['class'] == 'private':
                 for f in r.keys():
-                    if f not in ('id', 'allday', 'start', 'stop', 'duration', 'user_id', 'state', 'interval', 'count', 'recurrent_id_date', 'rrule'):
+                    recurrent_fields = self._get_recurrent_fields(cr, uid, context=context)
+                    public_fields = list(set(recurrent_fields + ['id', 'allday', 'start', 'stop', 'display_start', 'display_stop', 'duration', 'user_id', 'state', 'interval', 'count', 'recurrent_id_date', 'rrule']))
+                    if f not in public_fields:
                         if isinstance(r[f], list):
                             r[f] = []
                         else:
@@ -1757,9 +1760,10 @@ class mail_message(osv.Model):
         '''
         convert the search on real ids in the case it was asked on virtual ids, then call super()
         '''
+        args = list(args)
         for index in range(len(args)):
             if args[index][0] == "res_id" and isinstance(args[index][2], basestring):
-                args[index][2] = get_real_ids(args[index][2])
+                args[index] = (args[index][0], args[index][1], get_real_ids(args[index][2]))
         return super(mail_message, self).search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=count)
 
     def _find_allowed_model_wise(self, cr, uid, doc_model, doc_dict, context=None):
@@ -1779,9 +1783,10 @@ class ir_attachment(osv.Model):
         '''
         convert the search on real ids in the case it was asked on virtual ids, then call super()
         '''
+        args = list(args)
         for index in range(len(args)):
             if args[index][0] == "res_id" and isinstance(args[index][2], basestring):
-                args[index][2] = get_real_ids(args[index][2])
+                args[index] = (args[index][0], args[index][1], get_real_ids(args[index][2]))
         return super(ir_attachment, self).search(cr, uid, args, offset=offset, limit=limit, order=order, context=context, count=count)
 
     def write(self, cr, uid, ids, vals, context=None):
