@@ -547,6 +547,7 @@ class sale_order(osv.osv):
                 for i in o.invoice_ids:
                     if i.state == 'draft':
                         return i.id
+        result = []
         for val in invoices.values():
             if grouped:
                 res = self._make_invoice(cr, uid, val[0][0], reduce(lambda x, y: x + y, [l for o, l in val], []), context=context)
@@ -571,7 +572,8 @@ class sale_order(osv.osv):
                     self.write(cr, uid, [order.id], {'state': 'progress'})
                     cr.execute('insert into sale_order_invoice_rel (order_id,invoice_id) values (%s,%s)', (order.id, res))
                     self.invalidate_cache(cr, uid, ['invoice_ids'], [order.id], context=context)
-        return res
+            result.append(res)
+        return result
 
     def action_invoice_cancel(self, cr, uid, ids, context=None):
         self.write(cr, uid, ids, {'state': 'invoice_except'}, context=context)
