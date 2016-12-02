@@ -1310,6 +1310,7 @@ openerp.account = function (instance) {
             if (self.monetaryIsZero(self.get("balance"))) balance_type = "equal";
             else if (self.get("balance") * self.st_line.amount > 0) balance_type = "greater";
             else if (self.get("balance") * self.st_line.amount < 0) balance_type = "lower";
+            else balance_type = 'greater';
 
             // Adjust to different cases
             if (balance_type === "equal") {
