@@ -995,7 +995,7 @@ msgstr "包含内容"
 #. module: stock
 #: selection:product.template,tracking:0
 msgid "By Lots"
-msgstr "批次"
+msgstr "按批次"
 
 #. module: stock
 #: selection:product.template,tracking:0
@@ -1113,7 +1113,7 @@ msgstr "勾选这次拣货关联的数量的存在"
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_pack_operation_exist
 msgid "Check the existence of pack operation on the picking"
-msgstr ""
+msgstr "检查在分拣打包作业的存在"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_location_return_location
@@ -2785,7 +2785,7 @@ msgstr "内部类型"
 msgid ""
 "Internal reference number in case it differs from the manufacturer's "
 "lot/serial number"
-msgstr ""
+msgstr "内部参考号码，它不同于制造商的批次/序列号码"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_category_id
@@ -2810,7 +2810,7 @@ msgstr "已盘点所有者"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_package_id
 msgid "Inventoried Pack"
-msgstr "已盘点包裹"
+msgstr "盘点包裹"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_inventory_product_id
@@ -3127,7 +3127,7 @@ msgstr "最近的盘点及移动"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_launch_pack_operations
 msgid "Launch Pack Operations"
-msgstr "开始包装作业"
+msgstr "启动包装作业"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_orderpoint_lead_days
@@ -3281,7 +3281,7 @@ msgstr "批次拆分"
 #. module: stock
 #: model:ir.model,name:stock.model_stock_production_lot
 msgid "Lot/Serial"
-msgstr "批次/序列号"
+msgstr "批次/序列"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_change_product_qty_lot_id
@@ -3318,7 +3318,7 @@ msgstr "批次/序列号码必须"
 #. module: stock
 #: model:ir.model,name:stock.model_stock_pack_operation_lot
 msgid "Lot/Serial number for pack ops"
-msgstr "批次/序列号码为打包作业"
+msgstr "打包作业的批次/序列号码"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_config_settings_group_stock_production_lot
@@ -3384,7 +3384,7 @@ msgstr "按订单生成"
 msgid ""
 "Make packages into a dedicated location, then bring them to the output "
 "location for shipping (Pick + Pack + Ship)"
-msgstr "在专用位置制作包裹，然后将他们送到出货位置等待送货(分拣+打包+发货)"
+msgstr "制作包裹放入在专用位置，然后将他们送到出货位置，等待送货(分拣+打包+发货)"
 
 #. module: stock
 #: model:res.groups,name:stock.group_tracking_owner
@@ -3721,7 +3721,7 @@ msgstr "新的调拨"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_pack_operation_fresh_record
 msgid "Newly created pack operation"
-msgstr "新建的包装作业"
+msgstr "新建的打包作业"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_backorder_confirmation
@@ -3786,7 +3786,7 @@ msgstr "非欧洲客户"
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_pack_operation_product_ids
 msgid "Non pack"
-msgstr "没有包装"
+msgstr "没有打包"
 
 #. module: stock
 #: selection:stock.move,priority:0 selection:stock.picking,priority:0
@@ -4123,22 +4123,22 @@ msgstr "P&L Qty"
 #: model:ir.model.fields,field_description:stock.field_stock_picking_pack_operation_pack_ids
 #, python-format
 msgid "Pack"
-msgstr "包裹"
+msgstr "打包"
 
 #. module: stock
 #: model:ir.actions.act_window,name:stock.pack_details
 msgid "Pack Details"
-msgstr "包裹详情"
+msgstr "打包详情"
 
 #. module: stock
 #: model:ir.model,name:stock.model_stock_move_operation_link
 msgid "Pack Operation / Moves Link"
-msgstr "包裹作业 / 移动连接"
+msgstr "打包作业 / 移动连接"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_pack_type_id
 msgid "Pack Type"
-msgstr "包裹类型"
+msgstr "打包类型"
 
 #. module: stock
 #: code:addons/stock/models/barcode.py:14
@@ -5432,7 +5432,7 @@ msgstr " 出库序列"
 #: code:addons/stock/models/stock_warehouse.py:660
 #, python-format
 msgid "Sequence packing"
-msgstr " 包装序列"
+msgstr "打包序列"
 
 #. module: stock
 #: code:addons/stock/models/stock_warehouse.py:661
@@ -5557,7 +5557,7 @@ msgstr "一些产品可使用不同的销售 / 采购单位 ( 高级 )"
 msgid ""
 "Some products require lots/serial numbers, so you need to specify those "
 "first!"
-msgstr ""
+msgstr "有些产品需要批次/序列号，所以你必须提供这些!"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_move_search
@@ -5828,7 +5828,7 @@ msgstr "本技术字段用于对属于此公司之间的仓库进行补给的路
 msgid ""
 "Technical field used to depict a restriction on the lot/serial number of "
 "quants to consider when marking this move as 'done'"
-msgstr ""
+msgstr "技术字段用来表述在标记此移动为‘完成’’时对要考虑的批次/序列号的限制"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_move_restrict_partner_id
@@ -6184,6 +6184,8 @@ msgid ""
 "This is the list of all the production lots you recorded. When\n"
 "            you select a lot, you can get the traceability of the products contained in lot."
 msgstr ""
+"这是你记录的所有生产批次的清单。\n"
+"当你选择了一个批次时，你追溯此批次包含的产品。"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_quant_owner_id
@@ -7018,6 +7020,8 @@ msgid ""
 "Please first validatethe first inventory adjustement with this product "
 "before creating another one."
 msgstr ""
+"同一产品(%s), 同一位置(%s), 同一包裹, 同一所有人以及同一批号，不能有2个状态为“进行中”的库存调整.  "
+"在创建另一个之前，请先验证第一个库存调整。"
 
 #. module: stock
 #: code:addons/stock/models/stock_quant.py:176
@@ -7368,7 +7372,7 @@ msgstr "带有<i>确认</i> 按钮"
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_picking_form
 msgid "↳Put in Pack"
-msgstr "↳放置在包裹中"
+msgstr "↳ 放入包裹"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_inventory_form
