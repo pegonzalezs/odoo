@@ -573,6 +573,10 @@ class sale_order(osv.osv):
                     cr.execute('insert into sale_order_invoice_rel (order_id,invoice_id) values (%s,%s)', (order.id, res))
                     self.invalidate_cache(cr, uid, ['invoice_ids'], [order.id], context=context)
             result.append(res)
+        # When following normal workflow on UI, it expects a single id, not a list
+        # We just provide a list when coming from button "Make Invoices"
+        if len(result) == 1:
+            result = result[0]
         return result
 
     def action_invoice_cancel(self, cr, uid, ids, context=None):
