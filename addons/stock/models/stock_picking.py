@@ -381,7 +381,7 @@ class Picking(models.Model):
             elif self.partner_id:
                 location_dest_id = self.partner_id.property_stock_customer.id
             else:
-                customerloc, location_dest_id = self.env['stock.warehouse']._get_partner_locations()
+                location_dest_id, supplierloc = self.env['stock.warehouse']._get_partner_locations()
 
             self.location_id = location_id
             self.location_dest_id = location_dest_id
@@ -389,7 +389,7 @@ class Picking(models.Model):
         if self.partner_id:
             if self.partner_id.picking_warn == 'no-message' and self.partner_id.parent_id:
                 partner = self.partner_id.parent_id
-            elif self.partner_id.picking_warn not in ('no-message', 'block') and partner.parent_id.picking_warn == 'block':
+            elif self.partner_id.picking_warn not in ('no-message', 'block') and self.partner_id.parent_id.picking_warn == 'block':
                 partner = self.partner_id.parent_id
             else:
                 partner = self.partner_id
