@@ -152,7 +152,7 @@ class res_partner(osv.Model, format_address):
         for all commercial fields (see :py:meth:`~_commercial_fields`) """
         result = dict.fromkeys(ids, False)
         for partner in self.browse(cr, uid, ids, context=context):
-            current_partner = partner 
+            current_partner = partner
             while not current_partner.is_company and current_partner.parent_id:
                 current_partner = current_partner.parent_id
             result[partner.id] = current_partner.id
@@ -224,7 +224,7 @@ class res_partner(osv.Model, format_address):
         'phone': fields.char('Phone'),
         'fax': fields.char('Fax'),
         'mobile': fields.char('Mobile'),
-        'birthdate': fields.char('Birthdate'),
+        'birthdate': fields.date('Birthdate'),
         'is_company': fields.boolean(
             'Is a Company',
             help="Check if the contact is a company, otherwise it is a person"),
@@ -441,7 +441,7 @@ class res_partner(osv.Model, format_address):
             # 1a. Commercial fields: sync if parent changed
             if update_values.get('parent_id'):
                 self._commercial_sync_from_company(cr, uid, partner, context=context)
-            # 1b. Address fields: sync if parent or use_parent changed *and* both are now set 
+            # 1b. Address fields: sync if parent or use_parent changed *and* both are now set
             if partner.parent_id and partner.type == 'contact':
                 onchange_vals = self.onchange_parent_id(cr, uid, [partner.id],
                                                         parent_id=partner.parent_id.id,
