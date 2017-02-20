@@ -1310,7 +1310,6 @@ openerp.account = function (instance) {
             if (self.monetaryIsZero(self.get("balance"))) balance_type = "equal";
             else if (self.get("balance") * self.st_line.amount > 0) balance_type = "greater";
             else if (self.get("balance") * self.st_line.amount < 0) balance_type = "lower";
-						else balance_type = "greater";
 
             // Adjust to different cases
             if (balance_type === "equal") {
@@ -1324,6 +1323,8 @@ openerp.account = function (instance) {
                     displayValidState(false, _t("Keep open"));
                     createOpenBalance(_t("Open balance"));
                 }
+            } else {
+                createOpenBalance(_t("Create Write-off"));
             }
 
             // Show or hide partial reconciliation
@@ -1498,6 +1499,10 @@ openerp.account = function (instance) {
 	                            line_created_being_edited[0].amount = (data.total.toFixed(3) === amount.toFixed(3) ? amount : data.total);
 	                            line_created_being_edited[0].partner_id = data.partner_id;
 	                            var current_line_cursor = 1;
+	                            if (data.taxes.length < 1) {
+		                            self.book_taxes_back_field.set_value(false);
+		                            alert('Cannot bock taxes automatically back. Info in move missing. You have to do it manually and to use the field Tax.');
+		                        };
 	                            $.each(data.taxes, function(index, tax){
 	                                if (tax.id) {
 	                                    var tax_account_id = (amount > 0 ? tax.account_collected_id : tax.account_paid_id);
@@ -1555,6 +1560,7 @@ openerp.account = function (instance) {
 	                        .then(function(data){
 	                            line_created_being_edited[0].amount_with_tax = line_created_being_edited[0].amount;
 	                            line_created_being_edited[0].amount = (data.total.toFixed(3) === amount.toFixed(3) ? amount : data.total);
+	                            line_created_being_edited[0].tax_id = tax_id;
 	                            var current_line_cursor = 1;
 	                            $.each(data.taxes, function(index, tax){
 	                                if (tax.amount !== 0.0) {
