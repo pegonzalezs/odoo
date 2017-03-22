@@ -206,7 +206,9 @@ var CompletionFieldMixin = {
             });
 
             // search more... if more results that max
-            if (values.length > self.limit) {
+            // if (values.length > self.limit) {
+            // This change can be reverted as soon as the module web_m2x_options (OCA/web) is available for v10
+            if (values.length > self.limit || self.options.search_more) {
                 values = values.slice(0, self.limit);
                 values.push({
                     label: _t("Search More..."),
