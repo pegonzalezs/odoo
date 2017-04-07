@@ -55,7 +55,10 @@ class account_move_line(osv.osv):
                 fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft')])
         else:
             #for initial balance as well as for normal query, we check only the selected FY because the best practice is to generate the FY opening entries
-            fiscalyear_ids = [context['fiscalyear']]
+            fiscalyear_ids = context['fiscalyear']
+            #We might already receive the ids as <type>list.
+            if not isinstance(fiscalyear_ids, list):
+                fiscalyear_ids = [fiscalyear_ids]
 
         fiscalyear_clause = (','.join([str(x) for x in fiscalyear_ids])) or '0'
         state = context.get('state', False)
