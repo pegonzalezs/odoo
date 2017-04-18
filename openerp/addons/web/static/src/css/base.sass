@@ -1700,6 +1700,7 @@ $sheet-padding: 16px
         .oe_form_sheetbg
             background: url(/web/static/src/img/form_sheetbg.png)
             border-bottom: 1px solid #ddd
+            z-index: 1
         .oe_form_sheet
             border: 1px solid #c8c8d3 //$tag-border
             @include box-shadow(0 4px 20px rgba(0,0,0,0.15))
@@ -2239,6 +2240,9 @@ $sheet-padding: 16px
                 margin: 0
             input, textarea, select
                 min-width: 0
+            textarea.field_text
+                position: relative
+                z-index: 1
             &.oe_form_field_float,&.oe_form_view_integer
                 input
                     text-align: right
