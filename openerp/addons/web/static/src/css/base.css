@@ -2148,6 +2148,7 @@
 .openerp .oe_application .oe_form_sheetbg {
   background: url(/web/static/src/img/form_sheetbg.png);
   border-bottom: 1px solid #dddddd;
+  z-index: 1;
 }
 .openerp .oe_application .oe_form_sheet {
   border: 1px solid #c8c8d3;
@@ -2855,6 +2856,10 @@
 }
 .openerp .oe_list.oe_list_editable.oe_editing .oe_form_field.oe_form_field_reference {
   display: table;
+}
+.openerp .oe_list.oe_list_editable.oe_editing .oe_form_field textarea.field_text {
+  position: relative;
+  z-index: 1;
 }
 .openerp .oe_list_group_name {
   white-space: nowrap;
