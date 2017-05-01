@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.14\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 00:36+0000\n"
-"PO-Revision-Date: 2012-11-27 17:05+0000\n"
-"Last-Translator: Mikael Akerberg <mikael.akerberg@dermanord.se>\n"
+"PO-Revision-Date: 2012-06-05 09:23+0000\n"
+"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:01+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_contract
 #: field:hr.contract,wage:0
@@ -59,7 +59,7 @@ msgstr "Aktuellt"
 #. module: hr_contract
 #: view:hr.contract:0
 msgid "Group By..."
-msgstr "Gruppera efter..."
+msgstr "Gruppera på..."
 
 #. module: hr_contract
 #: field:hr.contract,department_id:0
@@ -95,7 +95,6 @@ msgstr "Hem-arbetsplatsdistans"
 
 #. module: hr_contract
 #: view:hr.contract:0
-#: view:hr.employee:0
 #: field:hr.employee,contract_ids:0
 #: model:ir.actions.act_window,name:hr_contract.act_hr_employee_2_hr_contract
 #: model:ir.actions.act_window,name:hr_contract.action_hr_contract
@@ -124,9 +123,10 @@ msgid "Job"
 msgstr "Jobb"
 
 #. module: hr_contract
+#: view:hr.contract:0
 #: field:hr.contract,advantages:0
 msgid "Advantages"
-msgstr "Förmåner"
+msgstr "Fördelar"
 
 #. module: hr_contract
 #: view:hr.contract:0
@@ -165,7 +165,6 @@ msgid "Basic Salary of the employee"
 msgstr "Grundlön för anställda"
 
 #. module: hr_contract
-#: view:hr.contract:0
 #: field:hr.contract,name:0
 msgid "Contract Reference"
 msgstr "Avtalets referensnummer"
@@ -173,7 +172,7 @@ msgstr "Avtalets referensnummer"
 #. module: hr_contract
 #: help:hr.employee,vehicle_distance:0
 msgid "In kilometers"
-msgstr "I kilometer"
+msgstr "i kilometer"
 
 #. module: hr_contract
 #: view:hr.contract:0
@@ -188,7 +187,6 @@ msgstr "Arbetstillstånd nummer"
 
 #. module: hr_contract
 #: view:hr.contract:0
-#: view:hr.employee:0
 #: field:hr.employee,contract_id:0
 #: model:ir.model,name:hr_contract.model_hr_contract
 #: model:ir.ui.menu,name:hr_contract.next_id_56
@@ -223,7 +221,7 @@ msgstr "Visa utgångsdatum"
 #. module: hr_contract
 #: field:hr.contract,job_id:0
 msgid "Job Title"
-msgstr "Befattning"
+msgstr "Yrkesbeteckning"
 
 #. module: hr_contract
 #: field:hr.employee,manager:0

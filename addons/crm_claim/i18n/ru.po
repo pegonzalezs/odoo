@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:55+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:40+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: crm_claim
 #: field:crm.claim.report,nbr:0
@@ -85,12 +85,12 @@ msgstr ""
 #: code:addons/crm_claim/crm_claim.py:132
 #, python-format
 msgid "The claim '%s' has been opened."
-msgstr "Претензия  '%s' была открыта"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "Date Closed"
-msgstr "Дата закрытия"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim.report:0
@@ -130,7 +130,6 @@ msgstr "Фактические претензии"
 #. module: crm_claim
 #: selection:crm.claim,state:0
 #: selection:crm.claim.report,state:0
-#: selection:crm.claim.stage,state:0
 msgid "Cancelled"
 msgstr "Отменено"
 
@@ -152,12 +151,12 @@ msgstr "Ссылка"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Date of claim"
-msgstr "Дата претензии"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "All pending Claims"
-msgstr "Все ожидающие претензии"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim.report:0
@@ -188,7 +187,7 @@ msgstr "Контрагент"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Month of claim"
-msgstr "Месяц претензии"
+msgstr ""
 
 #. module: crm_claim
 #: selection:crm.claim,type_action:0
@@ -227,10 +226,8 @@ msgstr "Отправить новое эл. письмо"
 #: view:crm.claim:0
 #: selection:crm.claim,state:0
 #: view:crm.claim.report:0
-#: model:crm.claim.stage,name:crm_claim.stage_claim1
-#: selection:crm.claim.stage,state:0
 msgid "New"
-msgstr "Новый"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim:0
@@ -257,7 +254,7 @@ msgstr "Следующее действие"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "My Sales Team(s)"
-msgstr "Мои отделы продаж"
+msgstr ""
 
 #. module: crm_claim
 #: model:crm.case.stage,name:crm_claim.stage_claim3
@@ -289,7 +286,6 @@ msgid "July"
 msgstr "Июль"
 
 #. module: crm_claim
-#: view:crm.claim.stage:0
 #: model:ir.actions.act_window,name:crm_claim.crm_claim_stage_act
 msgid "Claim Stages"
 msgstr "Этапы претензии"
@@ -325,7 +321,7 @@ msgstr "Контакт"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Month-1"
-msgstr "Месяц-1"
+msgstr ""
 
 #. module: crm_claim
 #: model:ir.actions.act_window,name:crm_claim.action_report_crm_claim
@@ -384,7 +380,7 @@ msgstr "Дата изменения"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Year of claim"
-msgstr "Год претензи"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim.report:0
@@ -406,7 +402,7 @@ msgstr "Значение претензии"
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "Responsible User"
-msgstr "Ответственный пользователь"
+msgstr ""
 
 #. module: crm_claim
 #: help:crm.claim,email_cc:0
@@ -433,7 +429,6 @@ msgstr "Низкий"
 #: field:crm.claim,date_closed:0
 #: selection:crm.claim,state:0
 #: selection:crm.claim.report,state:0
-#: selection:crm.claim.stage,state:0
 msgid "Closed"
 msgstr "Закрыто"
 
@@ -447,7 +442,6 @@ msgstr "Ответ"
 #: selection:crm.claim,state:0
 #: view:crm.claim.report:0
 #: selection:crm.claim.report,state:0
-#: selection:crm.claim.stage,state:0
 msgid "Pending"
 msgstr "Отложено"
 
@@ -480,7 +474,7 @@ msgstr "Июнь"
 #. module: crm_claim
 #: view:res.partner:0
 msgid "Partners Claim"
-msgstr "Претензии партнера"
+msgstr ""
 
 #. module: crm_claim
 #: field:crm.claim,partner_phone:0
@@ -495,7 +489,7 @@ msgstr "Пользователь"
 #. module: crm_claim
 #: field:crm.claim,active:0
 msgid "Active"
-msgstr "Активен"
+msgstr ""
 
 #. module: crm_claim
 #: selection:crm.claim.report,month:0
@@ -547,9 +541,9 @@ msgstr "Категории претензий"
 #: view:crm.claim:0
 #: view:crm.claim.report:0
 #: model:ir.actions.act_window,name:crm_claim.act_claim_partner
+#: model:ir.actions.act_window,name:crm_claim.act_claim_partner_address
 #: model:ir.actions.act_window,name:crm_claim.crm_case_categ_claim0
 #: model:ir.ui.menu,name:crm_claim.menu_crm_case_claims
-#: view:res.partner:0
 #: field:res.partner,claims_ids:0
 msgid "Claims"
 msgstr "Претензии"
@@ -571,7 +565,6 @@ msgid "History"
 msgstr "История"
 
 #. module: crm_claim
-#: view:crm.claim:0
 #: model:ir.model,name:crm_claim.model_crm_claim
 #: model:ir.ui.menu,name:crm_claim.menu_config_claim
 msgid "Claim"
@@ -597,6 +590,7 @@ msgid "State"
 msgstr "Состояние"
 
 #. module: crm_claim
+#: view:crm.claim:0
 #: view:crm.claim.report:0
 msgid "Done"
 msgstr "Сделано"
@@ -607,6 +601,7 @@ msgid "Claim Reporter"
 msgstr "Предъявивший претензию"
 
 #. module: crm_claim
+#: view:crm.claim:0
 #: view:crm.claim.report:0
 msgid "Cancel"
 msgstr "Отменить"
@@ -617,6 +612,7 @@ msgid "Close"
 msgstr "Закрыть"
 
 #. module: crm_claim
+#: view:crm.claim:0
 #: view:crm.claim.report:0
 #: selection:crm.claim.report,state:0
 msgid "Open"
@@ -625,15 +621,13 @@ msgstr "Открыть"
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "New Claims"
-msgstr "Новые претензии"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim:0
 #: selection:crm.claim,state:0
-#: model:crm.claim.stage,name:crm_claim.stage_claim5
-#: selection:crm.claim.stage,state:0
 msgid "In Progress"
-msgstr "В работе"
+msgstr "Выполняется"
 
 #. module: crm_claim
 #: view:crm.claim:0
@@ -644,17 +638,17 @@ msgstr "Ответственный"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Claims created in current year"
-msgstr "Претензии созданные в текущем году"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "Unassigned Claims"
-msgstr "Не назначенные претензии"
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Claims created in current month"
-msgstr "Претензии созданные в текущем месяце"
+msgstr ""
 
 #. module: crm_claim
 #: field:crm.claim.report,delay_expected:0
@@ -724,7 +718,7 @@ msgstr "Выполненные действия"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "Claims created in last month"
-msgstr "Претензии созданные в прошлом месяце"
+msgstr ""
 
 #. module: crm_claim
 #: model:crm.case.stage,name:crm_claim.stage_claim5
@@ -766,7 +760,7 @@ msgstr "Год"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "My company"
-msgstr "Моя компания"
+msgstr ""
 
 #. module: crm_claim
 #: selection:crm.claim.report,month:0
@@ -786,7 +780,7 @@ msgstr "Идентификатор"
 #. module: crm_claim
 #: constraint:res.partner:0
 msgid "Error ! You cannot create recursive associated members."
-msgstr "Ошибка! Вы не можете создавать рекурсивные ссылки на участников."
+msgstr ""
 
 #. module: crm_claim
 #: view:crm.claim:0
@@ -816,4 +810,4 @@ msgstr "Дата создания"
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "In Progress Claims"
-msgstr "Претензии \"В работе\""
+msgstr ""

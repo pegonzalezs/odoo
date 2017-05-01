@@ -30,31 +30,66 @@ from osv import fields, osv, orm
 from tools.translate import _
 import decimal_precision as dp
 import tools
+from openerp import SUPERUSER_ID
 
 class account_move_line(osv.osv):
     _name = "account.move.line"
     _description = "Journal Items"
 
-    def _query_get(self, cr, uid, obj='l', context=None):
+    def _query_get_aged(self, cr, uid, obj='l', context=None):
+        cr.execute('select cid from res_company_users_rel where user_id = %s' %uid)
+        company_ids =  [ i[0] for i in cr.fetchall() ]
+        
         fiscalyear_obj = self.pool.get('account.fiscalyear')
         fiscalperiod_obj = self.pool.get('account.period')
         account_obj = self.pool.get('account.account')
         fiscalyear_ids = []
         if context is None:
             context = {}
+        
+        if context.get('fiscalyear'):
+            start = fiscalyear_obj.browse(cr,uid,context['fiscalyear']).date_start
+            stop = fiscalyear_obj.browse(cr,uid,context['fiscalyear']).date_stop
+        else:
+            start = datetime.now().strftime('%Y-01-01')
+            stop = datetime.now().strftime('%Y-12-31')    
+            
         initial_bal = context.get('initial_bal', False)
         company_clause = " "
         if context.get('company_id', False):
             company_clause = " AND " +obj+".company_id = %s" % context.get('company_id', False)
+        
         if not context.get('fiscalyear', False):
             if context.get('all_fiscalyear', False):
                 #this option is needed by the aged balance report because otherwise, if we search only the draft ones, an open invoice of a closed fiscalyear won't be displayed
-                fiscalyear_ids = fiscalyear_obj.search(cr, uid, [])
+                if context.get('active_model',False):
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [])
+                else:
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('date_start','>=',start),('date_stop','<=',stop)])
             else:
-                fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft')])
+                if context.get('active_model',False):
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft'),('date_start','>=',start),('date_stop','<=',stop)])
+                else:
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft')])
         else:
             #for initial balance as well as for normal query, we check only the selected FY because the best practice is to generate the FY opening entries
-            fiscalyear_ids = [context['fiscalyear']]
+            if context.get('active_model',False) in ('account.chart','account.balance.report'):
+                fiscalyear_ids = fiscalyear_obj.search(cr, SUPERUSER_ID, [('state', '=', 'draft'),('date_start','>=',start),('date_stop','<=',stop),('company_id','in',company_ids)])
+            elif context.get('account_report_common', False):
+                fiscalyear_ids = fiscalyear_obj.search(cr, SUPERUSER_ID, [('state', '=', 'draft'),('date_start','>=',start),('date_stop','<=',stop),('company_id','in',company_ids)])
+            else:
+                fiscalyear_ids = [context['fiscalyear']]
+            
+        # we zijn aged dus fuck this
+        fiscalyear_ids = fiscalyear_obj.search(cr, uid, [])    
+        
+        if context.get('period_from', False) and context.get('period_to', False) :
+            period_from = fiscalperiod_obj.browse(cr, uid, context['period_from'], context=context)
+            period_to = fiscalperiod_obj.browse(cr, uid, context['period_to'], context=context)
+            start = period_from.date_start
+            stop = period_to.date_stop
+
+        context.update({'start':start,'stop':stop})
 
         fiscalyear_clause = (','.join([str(x) for x in fiscalyear_ids])) or '0'
         state = context.get('state', False)
@@ -70,6 +105,7 @@ class account_move_line(osv.osv):
         if state:
             if state.lower() not in ['all']:
                 where_move_state= " AND "+obj+".move_id IN (SELECT id FROM account_move WHERE account_move.state = '"+state+"')"
+                
         if context.get('period_from', False) and context.get('period_to', False) and not context.get('periods', False):
             if initial_bal:
                 period_company_id = fiscalperiod_obj.browse(cr, uid, context['period_from'], context=context).company_id.id
@@ -77,6 +113,121 @@ class account_move_line(osv.osv):
                 context['periods'] = fiscalperiod_obj.build_ctx_periods(cr, uid, first_period, context['period_from'])
             else:
                 context['periods'] = fiscalperiod_obj.build_ctx_periods(cr, uid, context['period_from'], context['period_to'])
+        
+        if context.get('periods', False):
+            if initial_bal:
+                query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN (%s)) %s %s" % (fiscalyear_clause, where_move_state, where_move_lines_by_date)
+                period_ids = fiscalperiod_obj.search(cr, uid, [('id', 'in', context['periods'])], order='date_start', limit=1)
+                if period_ids and period_ids[0]:
+                    first_period = fiscalperiod_obj.browse(cr, uid, period_ids[0], context=context)
+                    ids = ','.join([str(x) for x in context['periods']])
+                    query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN (%s) AND date_start <= '%s' AND id NOT IN (%s)) %s %s" % (fiscalyear_clause, first_period.date_start, ids, where_move_state, where_move_lines_by_date)
+            else:
+                ids = ','.join([str(x) for x in context['periods']])
+                query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN (%s) AND id IN (%s)) %s %s" % (fiscalyear_clause, ids, where_move_state, where_move_lines_by_date)
+        else:
+            query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN (%s)) %s %s" % (fiscalyear_clause, where_move_state, where_move_lines_by_date)
+
+        if initial_bal and not context.get('periods', False) and not where_move_lines_by_date:
+            #we didn't pass any filter in the context, and the initial balance can't be computed using only the fiscalyear otherwise entries will be summed twice
+            #so we have to invalidate this query
+            raise osv.except_osv(_('Warning !'),_("You haven't supplied enough argument to compute the initial balance, please select a period and journal in the context."))
+
+
+        if context.get('journal_ids', False):
+            query += ' AND '+obj+'.journal_id IN (%s)' % ','.join(map(str, context['journal_ids']))
+
+        if context.get('chart_account_id', False):
+            child_ids = account_obj._get_children_and_consol(cr, uid, [context['chart_account_id']], context=context)
+            query += ' AND '+obj+'.account_id IN (%s)' % ','.join(map(str, child_ids))
+
+        query += company_clause
+        return query
+
+
+    def _query_get(self, cr, uid, obj='l', context=None):
+        cr.execute('select cid from res_company_users_rel where user_id = %s' %uid)
+        company_ids =  [ i[0] for i in cr.fetchall() ]
+        
+        fiscalyear_obj = self.pool.get('account.fiscalyear')
+        fiscalperiod_obj = self.pool.get('account.period')
+        account_obj = self.pool.get('account.account')
+        fiscalyear_ids = []
+        if context is None:
+            context = {}
+        
+        if context.get('fiscalyear'):
+            start = fiscalyear_obj.browse(cr,uid,context['fiscalyear']).date_start
+            stop = fiscalyear_obj.browse(cr,uid,context['fiscalyear']).date_stop
+        else:
+            start = datetime.now().strftime('%Y-01-01')
+            stop = datetime.now().strftime('%Y-12-31')    
+            
+        initial_bal = context.get('initial_bal', False)
+        company_clause = " "
+        if context.get('company_id', False):
+            company_clause = " AND " +obj+".company_id = %s" % context.get('company_id', False)
+        
+        if not context.get('fiscalyear', False):
+            if context.get('all_fiscalyear', False):
+                #this option is needed by the aged balance report because otherwise, if we search only the draft ones, an open invoice of a closed fiscalyear won't be displayed
+                if context.get('active_model',False):
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [])
+                else:
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('date_start','>=',start),('date_stop','<=',stop)])
+            else:
+                if context.get('active_model',False):
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft'),('date_start','>=',start),('date_stop','<=',stop)])
+                else:
+                    fiscalyear_ids = fiscalyear_obj.search(cr, uid, [('state', '=', 'draft')])
+        else:
+            #for initial balance as well as for normal query, we check only the selected FY because the best practice is to generate the FY opening entries
+            if context.get('active_model',False) in ('account.chart','account.balance.report'):
+                fiscalyear_ids = fiscalyear_obj.search(cr, SUPERUSER_ID, [('state', '=', 'draft'),('date_start','>=',start),('date_stop','<=',stop),('company_id','in',company_ids)])
+            elif context.get('account_report_common', False):
+                fiscalyear_ids = fiscalyear_obj.search(cr, SUPERUSER_ID, [('state', '=', 'draft'),('date_start','>=',start),('date_stop','<=',stop),('company_id','in',company_ids)])
+            else:
+                fiscalyear_ids = [context['fiscalyear']]
+            
+        if context.get('period_from', False) and context.get('period_to', False) :
+            period_from = fiscalperiod_obj.browse(cr, uid, context['period_from'], context=context)
+            period_to = fiscalperiod_obj.browse(cr, uid, context['period_to'], context=context)
+            start = period_from.date_start
+            stop = period_to.date_stop
+
+        context.update({'start':start,'stop':stop})
+        #if context.get('periods', False) and not context.get('account_report_common', False):
+        _periods = []
+        for fiscalyear_id in fiscalyear_ids:
+            fyperiods = self.pool.get('account.chart').onchange_fiscalyear(cr,uid,[],fiscalyear_id,context)['value']
+            if fyperiods['period_from'] and fyperiods['period_to']:
+                _periods += fiscalperiod_obj.build_ctx_periods(cr, uid, fyperiods['period_from'],fyperiods['period_to'])
+        if _periods:
+            context.update({'periods':_periods})
+
+        fiscalyear_clause = (','.join([str(x) for x in fiscalyear_ids])) or '0'
+        state = context.get('state', False)
+        where_move_state = ''
+        where_move_lines_by_date = ''
+
+        if context.get('date_from', False) and context.get('date_to', False):
+            if initial_bal:
+                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < '" +context['date_from']+"')"
+            else:
+                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date >= '" +context['date_from']+"' AND date <= '"+context['date_to']+"')"
+
+        if state:
+            if state.lower() not in ['all']:
+                where_move_state= " AND "+obj+".move_id IN (SELECT id FROM account_move WHERE account_move.state = '"+state+"')"
+                
+        if context.get('period_from', False) and context.get('period_to', False) and not context.get('periods', False):
+            if initial_bal:
+                period_company_id = fiscalperiod_obj.browse(cr, uid, context['period_from'], context=context).company_id.id
+                first_period = fiscalperiod_obj.search(cr, uid, [('company_id', '=', period_company_id)], order='date_start', limit=1)[0]
+                context['periods'] = fiscalperiod_obj.build_ctx_periods(cr, uid, first_period, context['period_from'])
+            else:
+                context['periods'] = fiscalperiod_obj.build_ctx_periods(cr, uid, context['period_from'], context['period_to'])
+        
         if context.get('periods', False):
             if initial_bal:
                 query = obj+".state <> 'draft' AND "+obj+".period_id IN (SELECT id FROM account_period WHERE fiscalyear_id IN (%s)) %s %s" % (fiscalyear_clause, where_move_state, where_move_lines_by_date)
@@ -129,13 +280,15 @@ class account_move_line(osv.osv):
             if not move_line.account_id.type in ('payable', 'receivable'):
                 #this function does not suport to be used on move lines not related to payable or receivable accounts
                 continue
-
+            
             if move_line.currency_id:
                 move_line_total = move_line.amount_currency
                 sign = move_line.amount_currency < 0 and -1 or 1
             else:
                 move_line_total = move_line.debit - move_line.credit
                 sign = (move_line.debit - move_line.credit) < 0 and -1 or 1
+            if context.get('act_window_from_bank_statement',False):
+                sign=1
             line_total_in_company_currency =  move_line.debit - move_line.credit
             context_unreconciled = context.copy()
             if move_line.reconcile_partial_id:
@@ -152,9 +305,9 @@ class account_move_line(osv.osv):
                         else:
                             move_line_total += (payment_line.debit - payment_line.credit)
                     line_total_in_company_currency += (payment_line.debit - payment_line.credit)
-
+            
             result = move_line_total
-            res[move_line.id]['amount_residual_currency'] =  sign * (move_line.currency_id and self.pool.get('res.currency').round(cr, uid, move_line.currency_id, result) or result)
+            res[move_line.id]['amount_residual_currency'] = sign * (move_line.currency_id and self.pool.get('res.currency').round(cr, uid, move_line.currency_id, result) or result)
             res[move_line.id]['amount_residual'] = sign * line_total_in_company_currency
         return res
 
@@ -839,17 +992,18 @@ class account_move_line(osv.osv):
                    (tuple(ids), ))
         r = cr.fetchall()
         #TODO: move this check to a constraint in the account_move_reconcile object
-        if len(r) != 1:
-            raise osv.except_osv(_('Error'), _('Entries are not of the same account or already reconciled ! '))
         if not unrec_lines:
             raise osv.except_osv(_('Error'), _('Entry is already reconciled'))
         account = account_obj.browse(cr, uid, account_id, context=context)
-        if not account.reconcile:
-            raise osv.except_osv(_('Error'), _('The account is not defined to be reconciled !'))
         if r[0][1] != None:
             raise osv.except_osv(_('Error'), _('Some entries are already reconciled !'))
 
-        if (not currency_obj.is_zero(cr, uid, account.company_id.currency_id, writeoff)) or \
+        if context.get('fy_closing'):
+            # We don't want to generate any write-off when being called from the
+            # wizard used to close a fiscal year (and it doesn't give us any
+            # writeoff_acc_id).
+            pass
+        elif (not currency_obj.is_zero(cr, uid, account.company_id.currency_id, writeoff)) or \
            (account.currency_id and (not currency_obj.is_zero(cr, uid, account.currency_id, currency))):
             if not writeoff_acc_id:
                 raise osv.except_osv(_('Warning'), _('You have to provide an account for the write off/exchange difference entry !'))

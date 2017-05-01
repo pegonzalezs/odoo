@@ -404,7 +404,7 @@ property or property parameter."),
                 if short or len(idate)<=10:
                     return date.fromtimestamp(time.mktime(time.strptime(idate, '%Y-%m-%d')))
                 else:
-                    return datetime.strptime(idate, '%Y-%m-%d %H:%M:%S')
+                    return datetime.strptime(idate, '%Y-%m-%d %H:%M:%S').replace(tzinfo=pytz.timezone('UTC'))
             else:
                 return False
         try:

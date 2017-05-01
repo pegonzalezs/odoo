@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 6.0dev\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 00:36+0000\n"
-"PO-Revision-Date: 2012-10-30 13:19+0000\n"
-"Last-Translator: Pedro Manuel Baeza <pedro.baeza@gmail.com>\n"
+"PO-Revision-Date: 2012-02-29 09:28+0000\n"
+"Last-Translator: Ignacio Ibeas (www.acysos.com) <ignacio@acysos.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:51+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:36+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: base_iban
 #: constraint:res.partner.bank:0
@@ -23,12 +23,9 @@ msgid ""
 "Please define BIC/Swift code on bank for bank type IBAN Account to make "
 "valid payments"
 msgstr ""
-"\n"
-"Por favor defina el código BIC/Swift del banco para una cuenta de tipo IBAN "
-"para realizar pagos válidos"
 
 #. module: base_iban
-#: code:addons/base_iban/base_iban.py:141
+#: code:addons/base_iban/base_iban.py:139
 #, python-format
 msgid "This IBAN does not pass the validation check, please verify it"
 msgstr "El código IBAN no es válido, por favor verifiquelo"
@@ -41,7 +38,7 @@ msgstr "%(bank_name)s: IBAN %(acc_number)s - BIC %(bank_bic)s"
 #. module: base_iban
 #: model:res.partner.bank.type.field,name:base_iban.bank_swift_field
 msgid "bank_bic"
-msgstr "Número BIC"
+msgstr ""
 
 #. module: base_iban
 #: model:res.partner.bank.type.field,name:base_iban.bank_zip_field
@@ -64,7 +61,7 @@ msgid "country_id"
 msgstr "País"
 
 #. module: base_iban
-#: code:addons/base_iban/base_iban.py:138
+#: code:addons/base_iban/base_iban.py:136
 #, python-format
 msgid ""
 "The IBAN does not seem to be correct. You should have entered something like "
@@ -79,7 +76,7 @@ msgid "IBAN"
 msgstr "IBAN"
 
 #. module: base_iban
-#: code:addons/base_iban/base_iban.py:142
+#: code:addons/base_iban/base_iban.py:140
 #, python-format
 msgid "The IBAN is invalid, it should begin with the country code"
 msgstr "El código IBAN es inválido, debe empieza por el código del país"
@@ -92,4 +89,4 @@ msgstr "Cuenta IBAN"
 #. module: base_iban
 #: constraint:res.partner.bank:0
 msgid "The RIB and/or IBAN is not valid"
-msgstr "La CC y/o IBAN no es válida"
+msgstr ""

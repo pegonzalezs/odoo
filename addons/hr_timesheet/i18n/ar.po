@@ -6,18 +6,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.4\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
-"POT-Creation-Date: 2012-10-08 12:29+0000\n"
-"PO-Revision-Date: 2012-11-16 18:57+0000\n"
+"POT-Creation-Date: 2012-02-08 00:36+0000\n"
+"PO-Revision-Date: 2012-08-07 17:38+0000\n"
 "Last-Translator: kifcaliph <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:03+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:46+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Wed"
@@ -79,12 +79,12 @@ msgstr "احصائية ماتم عمله"
 
 #. module: hr_timesheet
 #: view:hr.analytic.timesheet:0
-#: model:ir.ui.menu,name:hr_timesheet.menu_hr_timesheet_reports
+#: model:ir.ui.menu,name:hr_timesheet.menu_hr_reporting_timesheet
 msgid "Timesheet"
 msgstr "سجل الدوام"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Mon"
@@ -96,7 +96,7 @@ msgid "Sign in"
 msgstr "تسجيل الدخول"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Fri"
@@ -177,7 +177,7 @@ msgid "No cost unit defined for this employee !"
 msgstr "لا يوجد تكلفة موحدة محددة لهذا الموظف !"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Tue"
@@ -201,23 +201,18 @@ msgid "Sign In/Out By Project"
 msgstr "تسجيل الدخول/الخروج من المشروع:"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Sat"
 msgstr "السبت"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Sun"
 msgstr "الأحد"
-
-#. module: hr_timesheet
-#: xsl:hr.analytical.timesheet:0
-msgid "Sum"
-msgstr "المجموع"
 
 #. module: hr_timesheet
 #: view:hr.analytic.timesheet:0
@@ -243,7 +238,7 @@ msgid "Monthly Employees Timesheet"
 msgstr "سجل الدوام الشهري للموظفين"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -263,6 +258,11 @@ msgid "Categories"
 msgstr "الفئات"
 
 #. module: hr_timesheet
+#: constraint:hr.analytic.timesheet:0
+msgid "You cannot modify an entry in a Confirmed/Done timesheet !."
+msgstr "لا يمكنك تعديل عملية مؤكدة أو تمت في الجدول الزمني !."
+
+#. module: hr_timesheet
 #: help:hr.employee,product_id:0
 msgid "Specifies employee's designation as a product with type 'service'."
 msgstr "حدد مهمة الموظف كمنتج مع نوع ‘خدمة‘."
@@ -273,7 +273,7 @@ msgid "Total cost"
 msgstr "التكلفة الكلية"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -282,13 +282,9 @@ msgid "September"
 msgstr "سبتمبر"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
-#: code:addons/hr_timesheet/report/users_timesheet.py:73
-#: selection:hr.analytical.timesheet.employee,month:0
-#: selection:hr.analytical.timesheet.users,month:0
-#, python-format
-msgid "December"
-msgstr "ديسمبر"
+#: model:ir.model,name:hr_timesheet.model_hr_analytic_timesheet
+msgid "Timesheet Line"
+msgstr "خط سجل الدوام"
 
 #. module: hr_timesheet
 #: field:hr.analytical.timesheet.users,employee_ids:0
@@ -301,6 +297,7 @@ msgid "Stats by month"
 msgstr "الحالات بالشهر"
 
 #. module: hr_timesheet
+#: view:account.analytic.account:0
 #: field:hr.analytical.timesheet.employee,month:0
 #: field:hr.analytical.timesheet.users,month:0
 msgid "Month"
@@ -315,11 +312,6 @@ msgstr "وصف العمل"
 #: view:account.analytic.account:0
 msgid "Invoice Analysis"
 msgstr "تحليل الفاتورة"
-
-#. module: hr_timesheet
-#: xsl:hr.analytical.timesheet:0
-msgid "Timesheet by Employee"
-msgstr ""
 
 #. module: hr_timesheet
 #: model:ir.actions.report.xml,name:hr_timesheet.report_user_timesheet
@@ -338,9 +330,7 @@ msgid "Define your Analytic Structure"
 msgstr "تعريف هيكلك التحليلي"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/wizard/hr_timesheet_sign_in_out.py:146
 #: view:hr.sign.in.project:0
-#, python-format
 msgid "Sign in / Sign out"
 msgstr "تسجيل الدخول / تسجيل الخروج"
 
@@ -360,7 +350,6 @@ msgid "(Keep empty for current time)"
 msgstr "(احتفظ بالفراغ للوقت الحالي)"
 
 #. module: hr_timesheet
-#: field:account.analytic.account,use_timesheets:0
 #: view:hr.employee:0
 msgid "Timesheets"
 msgstr "الجداول الزمنية"
@@ -381,7 +370,7 @@ msgid "Analytic Line"
 msgstr "خط تحليلي"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -390,7 +379,7 @@ msgid "August"
 msgstr "أغسطس"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -409,7 +398,7 @@ msgid "Date"
 msgstr "تاريخ"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -428,7 +417,7 @@ msgid "Closing Date"
 msgstr "تاريخ الاغلاق"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -437,7 +426,7 @@ msgid "October"
 msgstr "أكتوبر"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -451,7 +440,7 @@ msgid "Key dates"
 msgstr "التواريخ الرئيسية"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:44
+#: code:addons/hr_timesheet/report/user_timesheet.py:43
 #: code:addons/hr_timesheet/report/users_timesheet.py:77
 #, python-format
 msgid "Thu"
@@ -484,9 +473,13 @@ msgid "My Timesheet"
 msgstr "سجل الدوام الخاص بي"
 
 #. module: hr_timesheet
-#: constraint:hr.analytic.timesheet:0
-msgid "You cannot modify an entry in a Confirmed/Done timesheet !."
-msgstr "لا يمكنك تعديل عملية مؤكدة أو تمت في الجدول الزمني !."
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
+#: code:addons/hr_timesheet/report/users_timesheet.py:73
+#: selection:hr.analytical.timesheet.employee,month:0
+#: selection:hr.analytical.timesheet.users,month:0
+#, python-format
+msgid "December"
+msgstr "ديسمبر"
 
 #. module: hr_timesheet
 #: view:hr.analytical.timesheet.employee:0
@@ -497,9 +490,9 @@ msgid "Cancel"
 msgstr "إلغاء"
 
 #. module: hr_timesheet
-#: xsl:hr.analytical.timesheet_users:0
 #: model:ir.actions.act_window,name:hr_timesheet.action_hr_timesheet_users
 #: model:ir.actions.report.xml,name:hr_timesheet.report_users_timesheet
+#: model:ir.actions.wizard,name:hr_timesheet.wizard_hr_timesheet_users
 #: model:ir.ui.menu,name:hr_timesheet.menu_hr_timesheet_users
 msgid "Employees Timesheet"
 msgstr "سجل دوام الموظفين"
@@ -530,11 +523,6 @@ msgid "Current Date"
 msgstr "التاريخ الحالي"
 
 #. module: hr_timesheet
-#: model:ir.model,name:hr_timesheet.model_hr_analytic_timesheet
-msgid "Timesheet Line"
-msgstr "خط سجل الدوام"
-
-#. module: hr_timesheet
 #: view:hr.analytical.timesheet.employee:0
 msgid "This wizard will print monthly timesheet"
 msgstr "سيطبع هذا المعالج سجل الدوام شهريًا"
@@ -551,7 +539,7 @@ msgid "Invoicing"
 msgstr "الفواتير"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -575,7 +563,7 @@ msgid "Sign In By Project"
 msgstr "تسجيل الدخول الى المشروع"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -594,7 +582,7 @@ msgid "Employees"
 msgstr "الموظفون"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -603,7 +591,7 @@ msgid "March"
 msgstr "مارس"
 
 #. module: hr_timesheet
-#: code:addons/hr_timesheet/report/user_timesheet.py:41
+#: code:addons/hr_timesheet/report/user_timesheet.py:40
 #: code:addons/hr_timesheet/report/users_timesheet.py:73
 #: selection:hr.analytical.timesheet.employee,month:0
 #: selection:hr.analytical.timesheet.users,month:0
@@ -622,6 +610,7 @@ msgstr ""
 "الرجاء ضع حساب تحليلي اما لا يمكننا ملء سجل الدوام تلقائيًا."
 
 #. module: hr_timesheet
+#: view:account.analytic.account:0
 #: view:hr.analytic.timesheet:0
 msgid "Users"
 msgstr "المستخدمون"
@@ -652,12 +641,6 @@ msgstr "سنة"
 #: view:hr.analytic.timesheet:0
 msgid "Accounting"
 msgstr "المحاسبة"
-
-#. module: hr_timesheet
-#: xsl:hr.analytical.timesheet:0
-#: xsl:hr.analytical.timesheet_users:0
-msgid "Total"
-msgstr "الإجمالي"
 
 #. module: hr_timesheet
 #: view:hr.sign.out.project:0

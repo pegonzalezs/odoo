@@ -14,18 +14,18 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:00+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr
 #: model:process.node,name:hr.process_node_openerpuser0
 msgid "Openerp user"
-msgstr "Openerp корисник"
+msgstr "OpenERP kорисник"
 
 #. module: hr
-#: field:hr.job,requirements:0
+#: view:hr.job:0 field:hr.job,requirements:0
 msgid "Requirements"
-msgstr "Барања"
+msgstr "Потреби"
 
 #. module: hr
 #: constraint:hr.department:0
@@ -35,33 +35,29 @@ msgstr "Грешка! Не можете да креирате рекурзивн
 #. module: hr
 #: model:process.transition,name:hr.process_transition_contactofemployee0
 msgid "Link the employee to information"
-msgstr "Поврзи вработен до информација"
+msgstr "Врска од вработениот до дадената информација"
 
 #. module: hr
 #: field:hr.employee,sinid:0
 msgid "SIN No"
-msgstr "SIN No"
+msgstr "Број на Осигурување"
 
 #. module: hr
-#: model:ir.actions.act_window,name:hr.open_board_hr
-#: model:ir.ui.menu,name:hr.menu_hr_dashboard
 #: model:ir.ui.menu,name:hr.menu_hr_main
-#: model:ir.ui.menu,name:hr.menu_hr_reporting
+#: model:ir.ui.menu,name:hr.menu_hr_management
 #: model:ir.ui.menu,name:hr.menu_hr_root
-#: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 msgid "Human Resources"
-msgstr "Човечки ресурси"
+msgstr "Човечки Ресурси"
 
 #. module: hr
-#: view:hr.employee:0
-#: view:hr.job:0
+#: view:hr.employee:0 view:hr.job:0
 msgid "Group By..."
-msgstr "Групирај по..."
+msgstr "Групирај По..."
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.view_department_form_installer
 msgid "Create Your Departments"
-msgstr "Креирајте Ваши оддели"
+msgstr "Креирајте ги Секторите"
 
 #. module: hr
 #: model:ir.actions.act_window,help:hr.action_hr_job
@@ -80,14 +76,10 @@ msgstr ""
 "алатка за идните апликанти на ова работно место."
 
 #. module: hr
-#: view:hr.department:0
-#: view:hr.employee:0
-#: field:hr.employee,department_id:0
-#: view:hr.job:0
-#: field:hr.job,department_id:0
-#: model:ir.model,name:hr.model_hr_department
+#: view:hr.employee:0 field:hr.employee,department_id:0 view:hr.job:0
+#: field:hr.job,department_id:0 view:res.users:0
 msgid "Department"
-msgstr "Оддел"
+msgstr "Сектор"
 
 #. module: hr
 #: view:hr.job:0
@@ -97,25 +89,23 @@ msgstr "Обележи како Старо"
 #. module: hr
 #: view:hr.job:0
 msgid "Jobs"
-msgstr "Работни места"
+msgstr "Работни Места"
 
 #. module: hr
 #: view:hr.job:0
 msgid "In Recruitment"
-msgstr "При вработување"
+msgstr "Во процес на вработување"
 
 #. module: hr
-#: field:hr.department,company_id:0
-#: view:hr.employee:0
-#: view:hr.job:0
+#: field:hr.department,company_id:0 view:hr.employee:0 view:hr.job:0
 #: field:hr.job,company_id:0
 msgid "Company"
-msgstr "Компанија"
+msgstr "Фирма"
 
 #. module: hr
 #: field:hr.job,no_of_recruitment:0
 msgid "Expected in Recruitment"
-msgstr "Очекува при вработувањето"
+msgstr "Очекуван Број"
 
 #. module: hr
 #: model:ir.actions.todo.category,name:hr.category_hr_management_config
@@ -135,22 +125,22 @@ msgstr ""
 #. module: hr
 #: model:process.transition,name:hr.process_transition_employeeuser0
 msgid "Link a user to an employee"
-msgstr "Поврзи корисник со вработен"
+msgstr "Го поврзува корисникот (корисничкото име во системот) со вработениот"
 
 #. module: hr
 #: field:hr.department,parent_id:0
 msgid "Parent Department"
-msgstr "Одделение родител"
+msgstr "Главен Сектор"
 
 #. module: hr
-#: field:hr.employee,notes:0
+#: view:hr.employee:0 field:hr.employee,notes:0
 msgid "Notes"
-msgstr "Белешки"
+msgstr "Забелешки"
 
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Married"
-msgstr "Во брак"
+msgstr "Оженет / Омажена"
 
 #. module: hr
 #: model:ir.actions.act_window,help:hr.action_create_hr_employee_installer
@@ -184,8 +174,9 @@ msgid ""
 "The Related user field on the Employee form allows to link the OpenERP user "
 "(and her rights) to the employee."
 msgstr ""
-"Полето поврзан корисник на формуларот за вработени ви дозволува да го "
-"поврзете OpenERP корисникот (и нејзините права)со вработениот."
+"Даденото корисничко поле во формуларот за вработени, може да ви помогне да "
+"го поврзете корисникот (корисничкото име) на OpenERP (вклучувајќи ги "
+"неговите/нејзиние кориснички права) со одреден вработен."
 
 #. module: hr
 #: view:hr.job:0 selection:hr.job,state:0
@@ -195,12 +186,12 @@ msgstr "Во процес на вработување"
 #. module: hr
 #: field:hr.employee,identification_id:0
 msgid "Identification No"
-msgstr "Број за идентификација"
+msgstr "Број на Л. Карта"
 
 #. module: hr
 #: selection:hr.employee,gender:0
 msgid "Female"
-msgstr "Женско"
+msgstr "Женски"
 
 #. module: hr
 #: help:hr.job,expected_employees:0
@@ -220,23 +211,23 @@ msgstr "Број на Социјално осигурување"
 #. module: hr
 #: field:hr.employee,work_phone:0
 msgid "Work Phone"
-msgstr "Службен телефон"
+msgstr "Службен Телефон"
 
 #. module: hr
 #: field:hr.employee.category,child_ids:0
 msgid "Child Categories"
-msgstr "Категории дете"
+msgstr "Под-Категорија"
 
 #. module: hr
-#: field:hr.job,description:0
+#: view:hr.job:0 field:hr.job,description:0
 #: model:ir.model,name:hr.model_hr_job
 msgid "Job Description"
-msgstr "Опис на работно место"
+msgstr "Опис на Работно Место"
 
 #. module: hr
 #: field:hr.employee,work_location:0
 msgid "Office Location"
-msgstr "Локација на канцеларија"
+msgstr "Локација на Канцеларијата"
 
 #. module: hr
 #: view:hr.employee:0
@@ -244,8 +235,7 @@ msgid "My Departments Employee"
 msgstr "Вработени во вашиот (мојот) сектор"
 
 #. module: hr
-#: view:hr.employee:0
-#: model:ir.model,name:hr.model_hr_employee
+#: view:hr.employee:0 model:ir.model,name:hr.model_hr_employee
 #: model:process.node,name:hr.process_node_employee0
 msgid "Employee"
 msgstr "Вработен"
@@ -253,7 +243,7 @@ msgstr "Вработен"
 #. module: hr
 #: model:process.node,note:hr.process_node_employeecontact0
 msgid "Other information"
-msgstr "Други информации"
+msgstr "Останати информации"
 
 #. module: hr
 #: field:hr.employee,work_email:0
@@ -263,7 +253,7 @@ msgstr "Службен Е-Маил"
 #. module: hr
 #: field:hr.employee,birthday:0
 msgid "Date of Birth"
-msgstr "Датум на раѓање"
+msgstr "Датум на Раѓање"
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_reporting
@@ -271,16 +261,15 @@ msgid "Reporting"
 msgstr "Известувања"
 
 #. module: hr
-#: view:board.board:0
+#: model:ir.actions.act_window,name:hr.open_board_hr
+#: model:ir.ui.menu,name:hr.menu_hr_dashboard_user
 msgid "Human Resources Dashboard"
-msgstr "Контролна табла за човечки ресурси"
+msgstr "Главна Табла за приказ на информациите поврзани со Човечките Ресурси"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,job_id:0
-#: view:hr.job:0
+#: view:hr.employee:0 field:hr.employee,job_id:0 view:hr.job:0
 msgid "Job"
-msgstr "Работно место"
+msgstr "Работно Место"
 
 #. module: hr
 #: field:hr.department,member_ids:0
@@ -305,12 +294,12 @@ msgstr "Потребен број"
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Divorced"
-msgstr "Разведен"
+msgstr "Разведен / Разведена"
 
 #. module: hr
 #: field:hr.employee.category,parent_id:0
 msgid "Parent Category"
-msgstr "Категорија Родител"
+msgstr "Главна (Во) Категорија"
 
 #. module: hr
 #: constraint:hr.employee.category:0
@@ -321,13 +310,14 @@ msgstr "Грешка! Не можете да креирате рекурзивн
 #: view:hr.department:0
 #: model:ir.actions.act_window,name:hr.open_module_tree_department
 #: model:ir.ui.menu,name:hr.menu_hr_department_tree
+#: field:res.users,context_department_id:0
 msgid "Departments"
-msgstr "Оддели"
+msgstr "Сектори"
 
 #. module: hr
 #: model:process.node,name:hr.process_node_employeecontact0
 msgid "Employee Contact"
-msgstr "Контакт на вработен"
+msgstr "Контакт на вработениот"
 
 #. module: hr
 #: view:board.board:0
@@ -337,7 +327,7 @@ msgstr "Моја Табла"
 #. module: hr
 #: selection:hr.employee,gender:0
 msgid "Male"
-msgstr "Машко"
+msgstr "Машки"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_view_categ_form
@@ -349,12 +339,12 @@ msgstr "Категории на вработените"
 #: view:hr.employee.category:0
 #: model:ir.model,name:hr.model_hr_employee_category
 msgid "Employee Category"
-msgstr "Категорија на вработен"
+msgstr "Категорија на вработениот"
 
 #. module: hr
 #: model:process.process,name:hr.process_process_employeecontractprocess0
 msgid "Employee Contract"
-msgstr "Договор со вработен"
+msgstr "Договори на врабтениот"
 
 #. module: hr
 #: model:ir.model,name:hr.model_hr_department
@@ -399,17 +389,17 @@ msgstr ""
 #. module: hr
 #: help:hr.employee,bank_account_id:0
 msgid "Employee bank salary account"
-msgstr "Банкарска сметка за плата на вработен"
+msgstr "Трансакциска сметка на вработениот"
 
 #. module: hr
 #: field:hr.department,note:0
 msgid "Note"
-msgstr "Белешка"
+msgstr "Забелешка"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_view_employee_tree
 msgid "Employees Structure"
-msgstr "Структура на вработени"
+msgstr "Структура на вработените"
 
 #. module: hr
 #: constraint:res.users:0
@@ -419,12 +409,12 @@ msgstr ""
 #. module: hr
 #: view:hr.employee:0
 msgid "Contact Information"
-msgstr "Контакт информации"
+msgstr "Контакт Информации"
 
 #. module: hr
 #: field:hr.employee,address_id:0
 msgid "Working Address"
-msgstr "Адреса на работа"
+msgstr "Службена Адреса"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_board_hr_manager
@@ -437,12 +427,10 @@ msgstr ""
 #. module: hr
 #: field:hr.department,child_ids:0
 msgid "Child Departments"
-msgstr "Одделенија дете"
+msgstr "Под-Сектор"
 
 #. module: hr
 #: view:hr.employee:0
-#: view:hr.job:0
-#: field:hr.job,state:0
 msgid "Status"
 msgstr "Статус"
 
@@ -465,12 +453,12 @@ msgstr "Број на вработени со тоа работно место"
 #. module: hr
 #: field:hr.employee,ssnid:0
 msgid "SSN No"
-msgstr "SSN No"
+msgstr "Матичен Број"
 
 #. module: hr
 #: view:hr.employee:0
 msgid "Active"
-msgstr "Активно"
+msgstr "Активен"
 
 #. module: hr
 #: constraint:hr.employee:0
@@ -493,12 +481,12 @@ msgstr ""
 #. module: hr
 #: field:hr.employee,bank_account_id:0
 msgid "Bank Account Number"
-msgstr "Број на банкарска сметка"
+msgstr "Банкарска Сметка"
 
 #. module: hr
 #: view:hr.department:0
 msgid "Companies"
-msgstr "Компании"
+msgstr "Фирми"
 
 #. module: hr
 #: model:process.transition,note:hr.process_transition_contactofemployee0
@@ -506,8 +494,8 @@ msgid ""
 "In the Employee form, there are different kind of information like Contact "
 "information."
 msgstr ""
-"Во формуларот на вработениот има различни видови на информации како Контакт "
-"информации."
+"Во формуларот за Вработени, постојат повеќе видови на информации како: "
+"Контакт Информации итн."
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_dashboard
@@ -532,7 +520,7 @@ msgstr "Статус"
 #. module: hr
 #: field:hr.employee,marital:0
 msgid "Marital Status"
-msgstr "Брачен статус"
+msgstr "Брачна Состојба"
 
 #. module: hr
 #: model:ir.model,name:hr.model_ir_actions_act_window
@@ -542,10 +530,10 @@ msgstr "ir.actions.act_window"
 #. module: hr
 #: model:process.node,note:hr.process_node_employee0
 msgid "Employee form and structure"
-msgstr "Форма и структура на вработени"
+msgstr "Структура на вработените"
 
 #. module: hr
-#: field:hr.employee,image:0
+#: field:hr.employee,photo:0
 msgid "Photo"
 msgstr "Фотографија"
 
@@ -557,7 +545,7 @@ msgstr "res.users"
 #. module: hr
 #: view:hr.employee:0
 msgid "Personal Information"
-msgstr "Лични информации"
+msgstr "Лични Информации"
 
 #. module: hr
 #: field:hr.employee,city:0
@@ -567,22 +555,22 @@ msgstr "Град"
 #. module: hr
 #: field:hr.employee,passport_id:0
 msgid "Passport No"
-msgstr "Број на пасош"
+msgstr "Број на Пасош"
 
 #. module: hr
 #: field:hr.employee,mobile_phone:0
 msgid "Work Mobile"
-msgstr "Службен мобилен телефон"
+msgstr "Службен мобилен"
 
 #. module: hr
 #: view:hr.employee.category:0
 msgid "Employees Categories"
-msgstr "Категории на вработени"
+msgstr "Категории на вработените"
 
 #. module: hr
 #: field:hr.employee,address_home_id:0
 msgid "Home Address"
-msgstr "Домашна адреса"
+msgstr "Домашна Адреса"
 
 #. module: hr
 #: view:hr.job:0
@@ -592,22 +580,22 @@ msgstr "Опис"
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Single"
-msgstr "Самец"
+msgstr "Неженет / Немажена"
 
 #. module: hr
 #: field:hr.job,name:0
 msgid "Job Name"
-msgstr "Име на работно место"
+msgstr "Работно Место"
 
 #. module: hr
-#: view:hr.job:0
+#: view:hr.job:0 selection:hr.job,state:0
 msgid "In Position"
-msgstr "Во позиција"
+msgstr "На Позиција"
 
 #. module: hr
 #: view:hr.department:0
 msgid "department"
-msgstr "оддел"
+msgstr "Сектор"
 
 #. module: hr
 #: field:hr.employee,country_id:0
@@ -632,7 +620,6 @@ msgstr "Ресурс"
 
 #. module: hr
 #: field:hr.department,complete_name:0
-#: field:hr.employee,name_related:0
 #: field:hr.employee.category,complete_name:0
 msgid "Name"
 msgstr "Име"
@@ -643,30 +630,31 @@ msgid "Gender"
 msgstr "Пол"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee.category,employee_ids:0
+#: view:hr.employee:0 view:hr.employee.category:0
+#: field:hr.employee.category,employee_ids:0 view:hr.job:0
 #: field:hr.job,employee_ids:0
 #: model:ir.actions.act_window,name:hr.hr_employee_normal_action_tree
 #: model:ir.actions.act_window,name:hr.open_view_employee_list
 #: model:ir.actions.act_window,name:hr.open_view_employee_list_my
 #: model:ir.ui.menu,name:hr.menu_open_view_employee_list_my
+#: model:ir.ui.menu,name:hr.menu_view_employee_category_configuration_form
 msgid "Employees"
 msgstr "Вработени"
 
 #. module: hr
 #: help:hr.employee,sinid:0
 msgid "Social Insurance Number"
-msgstr "Број на социјално осигурување"
+msgstr "Број на Социјално Осигуруванје"
 
 #. module: hr
 #: field:hr.department,name:0
 msgid "Department Name"
-msgstr "Име на оддел"
+msgstr "Име на Секторот"
 
 #. module: hr
 #: help:hr.employee,ssnid:0
 msgid "Social Security Number"
-msgstr "Број на социјално осигурување"
+msgstr "Број на Социјално Осигурување"
 
 #. module: hr
 #: model:process.node,note:hr.process_node_openerpuser0
@@ -676,7 +664,7 @@ msgstr "Креирање на OpenERP корисник"
 #. module: hr
 #: field:hr.employee,login:0
 msgid "Login"
-msgstr "Логирање"
+msgstr "Корисничко Име"
 
 #. module: hr
 #: view:hr.employee:0
@@ -687,23 +675,22 @@ msgstr "Информации за работата"
 #: model:ir.actions.act_window,name:hr.action_hr_job
 #: model:ir.ui.menu,name:hr.menu_hr_job
 msgid "Job Positions"
-msgstr "Работни позиции"
+msgstr "Работна Позиција"
 
 #. module: hr
 #: field:hr.employee,otherid:0
 msgid "Other Id"
-msgstr "Друг Id"
+msgstr ""
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,coach_id:0
+#: view:hr.employee:0 field:hr.employee,coach_id:0
 msgid "Coach"
-msgstr "Тренер"
+msgstr "Тренер/Тутор"
 
 #. module: hr
 #: sql_constraint:hr.job:0
 msgid "The name of the job position must be unique per company!"
-msgstr "Името на работната позиција мора да биде единстевно по компанија!"
+msgstr ""
 
 #. module: hr
 #: view:hr.job:0
@@ -711,8 +698,7 @@ msgid "My Departments Jobs"
 msgstr ""
 
 #. module: hr
-#: field:hr.department,manager_id:0
-#: view:hr.employee:0
+#: field:hr.department,manager_id:0 view:hr.employee:0
 #: field:hr.employee,parent_id:0
 msgid "Manager"
 msgstr "Менаџер"
@@ -720,7 +706,7 @@ msgstr "Менаџер"
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Widower"
-msgstr "Вдовец"
+msgstr "Вдовец / Вдовица"
 
 #. module: hr
 #: field:hr.employee,child_ids:0

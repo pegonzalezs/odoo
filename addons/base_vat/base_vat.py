@@ -108,9 +108,9 @@ class res_partner(osv.osv):
         if not self.check_vat(cr, uid, ids, context=context):
             msg = self._construct_constraint_msg(cr, uid, ids, context=context)
             raise osv.except_osv(_('Error'), msg)
-        return True
 
     def check_vat(self, cr, uid, ids, context=None):
+#        return True  # We don't want to check the VAT for partner import
         user_company = self.pool.get('res.users').browse(cr, uid, uid).company_id
         if user_company.vat_check_vies:
             # force full VIES online check

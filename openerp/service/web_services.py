@@ -730,6 +730,7 @@ class report_spool(netsvc.ExportService):
                     self._reports[id]['exception'] = openerp.exceptions.DeferredException('RML is not available at specified location or not enough data to print!', tb)
                 self._reports[id]['result'] = result
                 self._reports[id]['format'] = format
+                self._reports[id]['name'] = obj.get_name(cr, uid, ids, datas, context)
                 self._reports[id]['state'] = True
             except Exception, exception:
                 _logger.exception('Exception: %s\n', str(exception))
@@ -766,6 +767,7 @@ class report_spool(netsvc.ExportService):
             if res2:
                 res['result'] = base64.encodestring(res2)
             res['format'] = result['format']
+            res['name'] = result['name']
             del self._reports[report_id]
         return res
 

@@ -13,8 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:59+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:43+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: event
 #: view:event.event:0
@@ -29,7 +29,7 @@ msgstr ""
 #. module: event
 #: field:event.event,main_speaker_id:0
 msgid "Main Speaker"
-msgstr "Glavni govornik"
+msgstr ""
 
 #. module: event
 #: view:event.event:0
@@ -64,9 +64,10 @@ msgid "Make Invoices"
 msgstr "Kreiraj fakture"
 
 #. module: event
-#: field:event.registration,date_open:0
+#: view:event.event:0
+#: view:event.registration:0
 msgid "Registration Date"
-msgstr "Datum registracije"
+msgstr ""
 
 #. module: event
 #: view:partner.event.registration:0
@@ -76,7 +77,7 @@ msgstr "_Zatvori"
 #. module: event
 #: model:event.event,name:event.event_0
 msgid "Concert of Bon Jovi"
-msgstr "Koncert Bon Jovi"
+msgstr ""
 
 #. module: event
 #: view:report.event.registration:0
@@ -123,10 +124,14 @@ msgid "Pricelist version for current event."
 msgstr ""
 
 #. module: event
+#: code:addons/event/wizard/partner_event_registration.py:88
 #: view:event.registration:0
+#: model:ir.actions.act_window,name:event.action_partner_event_registration
 #: model:ir.model,name:event.model_event_registration
+#: view:partner.event.registration:0
+#, python-format
 msgid "Event Registration"
-msgstr "Organizacija događaja"
+msgstr ""
 
 #. module: event
 #: field:event.event,parent_id:0
@@ -146,7 +151,7 @@ msgstr ""
 #. module: event
 #: view:report.event.registration:0
 msgid "Event on Registration"
-msgstr "Organizacija događaja"
+msgstr ""
 
 #. module: event
 #: help:event.event,reply_to:0
@@ -161,12 +166,12 @@ msgstr ""
 #. module: event
 #: view:event.event:0
 msgid "Confirmed events"
-msgstr "Potvrđeni događaji"
+msgstr ""
 
 #. module: event
 #: view:report.event.registration:0
 msgid "Event Beginning Date"
-msgstr "Datum početka događaja"
+msgstr ""
 
 #. module: event
 #: model:ir.actions.act_window,name:event.action_report_event_registration
@@ -174,13 +179,12 @@ msgstr "Datum početka događaja"
 #: model:ir.ui.menu,name:event.menu_report_event_registration
 #: view:report.event.registration:0
 msgid "Events Analysis"
-msgstr "Analiza događaja"
+msgstr ""
 
 #. module: event
-#: field:event.event,message_ids:0
 #: field:event.registration,message_ids:0
 msgid "Messages"
-msgstr "Poruke"
+msgstr ""
 
 #. module: event
 #: model:ir.model,name:event.model_event_registration_badge
@@ -198,17 +202,18 @@ msgid "Ticket for Opera"
 msgstr ""
 
 #. module: event
+#: code:addons/event/event.py:125
 #: view:event.event:0
+#, python-format
 msgid "Confirm Event"
-msgstr "Potvrdi događaj"
+msgstr ""
 
 #. module: event
 #: selection:event.event,state:0
 #: selection:event.registration,state:0
-#: selection:report.event.registration,event_state:0
-#: selection:report.event.registration,registration_state:0
+#: selection:report.event.registration,state:0
 msgid "Cancelled"
-msgstr "Otkazano"
+msgstr ""
 
 #. module: event
 #: field:event.event,reply_to:0
@@ -224,7 +229,7 @@ msgstr ""
 #. module: event
 #: model:event.event,name:event.event_1
 msgid "Opera of Verdi"
-msgstr "Verdijeva opera"
+msgstr ""
 
 #. module: event
 #: selection:report.event.registration,month:0
@@ -271,8 +276,8 @@ msgid "Customer Invoices"
 msgstr ""
 
 #. module: event
-#: selection:report.event.registration,event_state:0
-#: selection:report.event.registration,registration_state:0
+#: selection:event.event,state:0
+#: selection:report.event.registration,state:0
 msgid "Draft"
 msgstr ""
 
@@ -284,17 +289,19 @@ msgstr ""
 #. module: event
 #: model:ir.model,name:event.model_event_type
 msgid " Event Type "
-msgstr " Vrsta Događaja "
+msgstr ""
 
 #. module: event
+#: view:event.event:0
 #: view:event.registration:0
 #: field:event.registration,event_id:0
 #: model:ir.model,name:event.model_event_event
+#: field:partner.event.registration,event_id:0
 #: view:report.event.registration:0
 #: field:report.event.registration,event_id:0
 #: view:res.partner:0
 msgid "Event"
-msgstr "Događaj"
+msgstr ""
 
 #. module: event
 #: view:event.registration:0
@@ -307,10 +314,9 @@ msgstr ""
 #: selection:event.event,state:0
 #: view:event.registration:0
 #: selection:event.registration,state:0
-#: selection:report.event.registration,event_state:0
-#: selection:report.event.registration,registration_state:0
+#: selection:report.event.registration,state:0
 msgid "Confirmed"
-msgstr "Potvrđeno"
+msgstr ""
 
 #. module: event
 #: view:event.confirm.registration:0
@@ -323,7 +329,6 @@ msgid "Events in New state"
 msgstr ""
 
 #. module: event
-#: view:event.registration:0
 #: view:report.event.registration:0
 msgid "Confirm"
 msgstr ""
@@ -369,6 +374,7 @@ msgid "Location"
 msgstr ""
 
 #. module: event
+#: view:event.event:0
 #: view:event.registration:0
 #: view:report.event.registration:0
 msgid "New"
@@ -376,6 +382,7 @@ msgstr ""
 
 #. module: event
 #: field:event.event,register_current:0
+#: view:report.event.registration:0
 msgid "Confirmed Registrations"
 msgstr ""
 
@@ -391,7 +398,7 @@ msgid "Type"
 msgstr ""
 
 #. module: event
-#: field:event.registration,email:0
+#: field:event.registration,email_from:0
 msgid "Email"
 msgstr ""
 
@@ -420,8 +427,8 @@ msgid "Error !"
 msgstr ""
 
 #. module: event
-#: field:event.event,message_summary:0
-#: field:event.registration,message_summary:0
+#: field:event.event,name:0
+#: field:event.registration,name:0
 msgid "Summary"
 msgstr ""
 
@@ -480,6 +487,7 @@ msgstr ""
 
 #. module: event
 #: view:event.confirm:0
+#: view:event.confirm.registration:0
 msgid "Confirm Anyway"
 msgstr ""
 
@@ -497,8 +505,10 @@ msgstr ""
 #. module: event
 #: view:event.event:0
 #: view:event.registration:0
+#: field:event.registration.badge,registration_id:0
+#: model:ir.actions.act_window,name:event.act_event_list_register_event
 msgid "Registration"
-msgstr "Registracija"
+msgstr ""
 
 #. module: event
 #: field:report.event.registration,nbevent:0
@@ -530,13 +540,15 @@ msgid "Contact"
 msgstr ""
 
 #. module: event
+#: view:event.event:0
 #: view:event.registration:0
 #: field:event.registration,partner_id:0
 #: model:ir.model,name:event.model_res_partner
 msgid "Partner"
-msgstr "Partner"
+msgstr ""
 
 #. module: event
+#: view:board.board:0
 #: model:ir.actions.act_window,name:event.act_event_reg
 #: view:report.event.registration:0
 msgid "Events Filling Status"
@@ -558,6 +570,7 @@ msgid "Events States"
 msgstr ""
 
 #. module: event
+#: view:board.board:0
 #: field:event.event,register_prospect:0
 msgid "Unconfirmed Registrations"
 msgstr ""
@@ -579,7 +592,11 @@ msgstr ""
 
 #. module: event
 #: view:event.event:0
-#: field:event.event,state_id:0
+#: field:event.event,state:0
+#: view:event.registration:0
+#: field:event.registration,state:0
+#: view:report.event.registration:0
+#: field:report.event.registration,state:0
 msgid "State"
 msgstr ""
 
@@ -650,7 +667,7 @@ msgstr ""
 #: view:event.event:0
 #: view:report.event.registration:0
 msgid "My Events"
-msgstr "Moji događaji"
+msgstr ""
 
 #. module: event
 #: view:event.event:0
@@ -693,12 +710,8 @@ msgstr ""
 #. module: event
 #: view:event.event:0
 #: model:ir.actions.act_window,name:event.action_event_view
-#: model:ir.actions.act_window,name:event.open_board_associations_manager
-#: model:ir.module.category,name:event.module_category_event_management
-#: model:ir.ui.menu,name:event.event_main_menu
-#: model:ir.ui.menu,name:event.menu_board_associations_manager
 #: model:ir.ui.menu,name:event.menu_event_event
-#: model:ir.ui.menu,name:event.menu_reporting_events
+#: model:ir.ui.menu,name:event.menu_event_event_assiciation
 #: view:res.partner:0
 msgid "Events"
 msgstr ""
@@ -765,7 +778,7 @@ msgid "Active"
 msgstr ""
 
 #. module: event
-#: field:event.event,date_begin:0
+#: field:event.registration,date:0
 msgid "Start Date"
 msgstr ""
 
@@ -816,13 +829,17 @@ msgid "Set To Draft"
 msgstr ""
 
 #. module: event
+#: code:addons/event/event.py:499
 #: view:event.event:0
 #: view:event.registration:0
 #: view:res.partner:0
+#, python-format
 msgid "Confirm Registration"
 msgstr ""
 
 #. module: event
+#: view:event.event:0
+#: view:report.event.registration:0
 #: view:res.partner:0
 msgid "Date"
 msgstr ""
@@ -840,7 +857,7 @@ msgstr ""
 #. module: event
 #: view:report.event.registration:0
 msgid "Registrations in confirmed or done state"
-msgstr "Registracije sa statusom potvrđeno ili gotovo"
+msgstr ""
 
 #. module: event
 #: view:event.registration:0
@@ -891,8 +908,12 @@ msgid "Error ! Closing Date cannot be set before Beginning Date."
 msgstr ""
 
 #. module: event
+#: code:addons/event/event.py:446
 #: selection:event.event,state:0
-#: selection:report.event.registration,event_state:0
+#: view:event.make.invoice:0
+#: selection:event.registration,state:0
+#: selection:report.event.registration,state:0
+#, python-format
 msgid "Done"
 msgstr ""
 
@@ -914,7 +935,8 @@ msgid "Year"
 msgstr ""
 
 #. module: event
-#: view:event.confirm:0
+#: code:addons/event/event.py:465
+#, python-format
 msgid "Cancel"
 msgstr ""
 
@@ -951,6 +973,9 @@ msgstr ""
 #. module: event
 #: view:event.event:0
 #: view:event.registration:0
+#: field:event.registration,user_id:0
+#: view:report.event.registration:0
+#: field:report.event.registration,user_id:0
 msgid "Responsible"
 msgstr ""
 
@@ -1008,7 +1033,10 @@ msgid "Product"
 msgstr ""
 
 #. module: event
+#: view:event.event:0
 #: field:event.event,note:0
+#: view:event.registration:0
+#: field:event.registration,description:0
 msgid "Description"
 msgstr ""
 
@@ -1018,7 +1046,6 @@ msgid " # No of Confirmed Registrations"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
 #: model:ir.actions.act_window,name:event.act_register_event_partner
 msgid "Subscribe"
 msgstr ""
@@ -1057,7 +1084,7 @@ msgstr ""
 #: view:board.board:0
 #: model:ir.actions.act_window,name:event.act_event_view
 msgid "Next Events"
-msgstr "Sljedeći događaji"
+msgstr ""
 
 #. module: event
 #: view:partner.event.registration:0
@@ -1076,8 +1103,6 @@ msgid "Beginning Date of Event"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
-#: selection:event.event,state:0
 #: selection:event.registration,state:0
 msgid "Unconfirmed"
 msgstr ""
@@ -1089,7 +1114,7 @@ msgid "Auto Registration: [%s] %s"
 msgstr ""
 
 #. module: event
-#: field:event.event,date_end:0
+#: field:event.registration,date_deadline:0
 msgid "End Date"
 msgstr ""
 
@@ -1105,8 +1130,7 @@ msgstr ""
 
 #. module: event
 #: view:event.event:0
-#: field:event.event,name:0
-#: field:event.registration,name:0
+#: field:event.registration.badge,name:0
 msgid "Name"
 msgstr ""
 
@@ -1119,7 +1143,6 @@ msgid "Sale Team"
 msgstr ""
 
 #. module: event
-#: view:event.event:0
 #: field:event.event,country_id:0
 msgid "Country"
 msgstr ""
@@ -1131,7 +1154,11 @@ msgid "Registration is set as Cannot be invoiced"
 msgstr ""
 
 #. module: event
+#: code:addons/event/event.py:527
+#: view:event.event:0
+#: view:event.registration:0
 #: view:res.partner:0
+#, python-format
 msgid "Close Registration"
 msgstr ""
 
@@ -1155,21 +1182,19 @@ msgstr ""
 #. module: event
 #: view:event.event:0
 #: view:event.type:0
-#: field:event.type,name:0
 #: view:report.event.registration:0
-#: field:report.event.registration,event_type:0
+#: field:report.event.registration,type:0
 msgid "Event Type"
 msgstr ""
 
 #. module: event
 #: view:event.event:0
 #: field:event.event,registration_ids:0
-#: model:ir.actions.act_window,name:event.act_event_list_register_event
 #: model:ir.actions.act_window,name:event.action_registration
 #: model:ir.ui.menu,name:event.menu_action_registration
-#: view:res.partner:0
+#: model:ir.ui.menu,name:event.menu_action_registration_association
 msgid "Registrations"
-msgstr "Registracije"
+msgstr ""
 
 #. module: event
 #: field:event.registration,id:0
@@ -1188,8 +1213,7 @@ msgid "Error ! You cannot create recursive associated members."
 msgstr ""
 
 #. module: event
-#: field:event.registration,event_begin_date:0
-#: field:report.event.registration,event_date:0
+#: field:report.event.registration,date:0
 msgid "Event Start Date"
 msgstr ""
 

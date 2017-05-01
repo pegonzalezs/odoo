@@ -7,108 +7,102 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 6.0dev\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-11-10 12:58+0000\n"
-"Last-Translator: Ayhan KIZILTAN <Unknown>\n"
+"PO-Revision-Date: 2012-02-17 09:10+0000\n"
+"Last-Translator: Fabien (Open ERP) <fp@tinyerp.com>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:01+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:45+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
 #: model:process.node,name:hr_expense.process_node_confirmedexpenses0
 msgid "Confirmed Expenses"
-msgstr "Onaylı Giderler"
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_expense_line
 msgid "Expense Line"
-msgstr "Gider Satırı"
+msgstr "Gider Kalemi"
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_reimbursement0
 msgid "The accoutant reimburse the expenses"
-msgstr "Muhasebeci masrafları geri ödeme"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,date_confirm:0
 #: field:hr.expense.report,date_confirm:0
 msgid "Confirmation Date"
-msgstr "Onay Tarihi"
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: view:hr.expense.report:0
+#: view:hr.expense.expense:0 view:hr.expense.report:0
 msgid "Group By..."
-msgstr "Grupla İle..."
+msgstr ""
 
 #. module: hr_expense
 #: model:product.template,name:hr_expense.air_ticket_product_template
 msgid "Air Ticket"
-msgstr "Uçak Bileti"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "Validated By"
-msgstr "Onaylayan"
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: field:hr.expense.expense,department_id:0
-#: view:hr.expense.report:0
-#: field:hr.expense.report,department_id:0
+#: view:hr.expense.expense:0 field:hr.expense.expense,department_id:0
+#: view:hr.expense.report:0 field:hr.expense.report,department_id:0
 msgid "Department"
-msgstr "Departmen"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "New Expense"
-msgstr "Yeni Giderler"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "March"
-msgstr "Mart"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.report,invoiced:0
 msgid "# of Invoiced Lines"
-msgstr "Faturalandırılmış Öğe #"
+msgstr ""
 
 #. module: hr_expense
-#: field:hr.expense.expense,company_id:0
-#: view:hr.expense.report:0
+#: field:hr.expense.expense,company_id:0 view:hr.expense.report:0
 #: field:hr.expense.report,company_id:0
 msgid "Company"
-msgstr "Firma"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Set to Draft"
-msgstr "Taslağa  Ayarla"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "To Pay"
-msgstr "Ödenecek"
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.model,name:hr_expense.model_hr_expense_report
 msgid "Expenses Statistics"
-msgstr "Gider İstatistikleri"
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.report:0
-#: field:hr.expense.report,day:0
+#: view:hr.expense.report:0 field:hr.expense.report,day:0
 msgid "Day"
-msgstr "Gün"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.line,uom_id:0 view:product.product:0
 msgid "UoM"
-msgstr "Ölçü Birimi"
+msgstr "Birim"
 
 #. module: hr_expense
 #: help:hr.expense.expense,date_valid:0
@@ -116,60 +110,59 @@ msgid ""
 "Date of the acceptation of the sheet expense. It's filled when the button "
 "Accept is pressed."
 msgstr ""
-"Gider Tablolarının kabul tarihi. Kabul düğmesine basıldığında doldurulur."
 
 #. module: hr_expense
 #: view:hr.expense.report:0
 msgid "Expenses during current month"
-msgstr "Geçerli aydaki giderler"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Notes"
-msgstr "Notlar"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,invoice_id:0
 msgid "Employee's Invoice"
-msgstr "Çalışan Faturası"
+msgstr ""
 
 #. module: hr_expense
-#: model:ir.actions.act_window,name:hr_expense.hr_expense_product
 #: view:product.product:0
 msgid "Products"
-msgstr "Ürünler"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
 msgid "Confirm Expenses"
-msgstr "Giderleri Onayla"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,state:0
 msgid "Cancelled"
-msgstr "İptalEdildi"
+msgstr "İptal Edildi"
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_refused0
 msgid "The direct manager refuses the sheet.Reset as draft."
-msgstr "Yönetici tabloyu geri çevirir. Taslağa geri ayarla."
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Validation"
-msgstr "Doğrulama"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,state:0
 msgid "Waiting confirmation"
-msgstr "Onay bekliyor"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,state:0
 msgid "Accepted"
-msgstr "KabulEdildi"
+msgstr ""
 
 #. module: hr_expense
+#: report:hr.expense:0 field:hr.expense.expense,ref:0
 #: field:hr.expense.line,ref:0
 msgid "Reference"
 msgstr "Referans"
@@ -177,7 +170,7 @@ msgstr "Referans"
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "Certified honest and conform,"
-msgstr "Sertifikalı dürüst ve uygun"
+msgstr ""
 
 #. module: hr_expense
 #: help:hr.expense.expense,date_confirm:0
@@ -185,23 +178,21 @@ msgid ""
 "Date of the confirmation of the sheet expense. It's filled when the button "
 "Confirm is pressed."
 msgstr ""
-"Gider tablosunun onaylanma tarihi. Onayla düğmesine basıldığında doldurulur."
 
 #. module: hr_expense
-#: view:hr.expense.report:0
-#: field:hr.expense.report,nbr:0
+#: view:hr.expense.report:0 field:hr.expense.report,nbr:0
 msgid "# of Lines"
-msgstr "# nın Satırları"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,name:hr_expense.process_transition_refuseexpense0
 msgid "Refuse expense"
-msgstr "Red Gider"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.report,price_average:0
 msgid "Average Price"
-msgstr "Ortalam Fiyat"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
@@ -212,12 +203,12 @@ msgstr ""
 #: view:hr.expense.expense:0
 #: model:process.transition.action,name:hr_expense.process_transition_action_confirm0
 msgid "Confirm"
-msgstr "Onayla"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_supplierinvoice0
 msgid "The accoutant validates the sheet"
-msgstr "Muhasebeci tabloyu doğrular"
+msgstr ""
 
 #. module: hr_expense
 #: code:addons/hr_expense/hr_expense.py:187
@@ -228,24 +219,23 @@ msgstr ""
 #. module: hr_expense
 #: field:hr.expense.report,delay_valid:0
 msgid "Delay to Valid"
-msgstr "Onaylama Süresi"
+msgstr ""
 
 #. module: hr_expense
 #: help:hr.expense.line,sequence:0
 msgid "Gives the sequence order when displaying a list of expense lines."
-msgstr "Gider kalemlerinin liste olarak görüntülenme sırasını verir."
+msgstr ""
 
 #. module: hr_expense
-#: field:hr.expense.line,analytic_account:0
-#: view:hr.expense.report:0
+#: field:hr.expense.line,analytic_account:0 view:hr.expense.report:0
 #: field:hr.expense.report,analytic_account:0
 msgid "Analytic account"
-msgstr "Analiz hesabı"
+msgstr "Analiz Hesabı"
 
 #. module: hr_expense
 #: field:hr.expense.report,date:0
 msgid "Date "
-msgstr "Tarih "
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,state:0 view:hr.expense.report:0
@@ -267,18 +257,15 @@ msgid "Expenses during last month"
 msgstr ""
 
 #. module: hr_expense
-#: report:hr.expense:0
-#: view:hr.expense.expense:0
-#: field:hr.expense.expense,employee_id:0
-#: view:hr.expense.report:0
+#: report:hr.expense:0 view:hr.expense.expense:0
+#: field:hr.expense.expense,employee_id:0 view:hr.expense.report:0
 msgid "Employee"
 msgstr "Personel"
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: selection:hr.expense.expense,state:0
+#: view:hr.expense.expense:0 selection:hr.expense.expense,state:0
 msgid "New"
-msgstr "Yeni"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
@@ -286,21 +273,19 @@ msgid "Confirmed Expense"
 msgstr ""
 
 #. module: hr_expense
-#: report:hr.expense:0
-#: field:hr.expense.report,product_qty:0
+#: report:hr.expense:0 field:hr.expense.report,product_qty:0
 msgid "Qty"
-msgstr "Mik."
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.report:0
-#: field:hr.expense.report,price_total:0
+#: view:hr.expense.report:0 field:hr.expense.report,price_total:0
 msgid "Total Price"
-msgstr "Toplam fiyat"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_reinvoicing0
 msgid "Some costs may be reinvoices to the customer"
-msgstr "Bazı maliyetler müşteriye geri fatura edilebilir."
+msgstr ""
 
 #. module: hr_expense
 #: code:addons/hr_expense/hr_expense.py:173
@@ -312,57 +297,54 @@ msgstr ""
 
 #. module: hr_expense
 #: view:board.board:0
-#: view:hr.expense.expense:0
 #: model:ir.actions.act_window,name:hr_expense.action_my_expense
 msgid "My Expenses"
-msgstr "Benim Giderlerim"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
 msgid "Creation Date"
-msgstr "Oluşturma tarihi"
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.actions.report.xml,name:hr_expense.hr_expenses
 msgid "HR expenses"
-msgstr "İK gigerleri"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,id:0
 msgid "Sheet ID"
-msgstr "Tablo ID"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,name:hr_expense.process_transition_reimburseexpense0
 msgid "Reimburse expense"
-msgstr "Gider ödeme"
+msgstr ""
 
 #. module: hr_expense
-#: field:hr.expense.expense,journal_id:0
-#: field:hr.expense.report,journal_id:0
+#: field:hr.expense.expense,journal_id:0 field:hr.expense.report,journal_id:0
 msgid "Force Journal"
-msgstr "Günlüğe Zorla"
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.report:0
-#: field:hr.expense.report,no_of_products:0
+#: view:hr.expense.report:0 field:hr.expense.report,no_of_products:0
 msgid "# of Products"
-msgstr "# nın Ürünleri"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "July"
-msgstr "Temmuz"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,note:hr_expense.process_transition_reimburseexpense0
 msgid "After creating invoice, reimburse expenses"
-msgstr "Fatura oluşturulduktan sonra, giderleri geri ödeme"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,name:hr_expense.process_node_reimbursement0
 msgid "Reimbursement"
-msgstr "Geri Ödeme"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
@@ -370,10 +352,9 @@ msgid "    Month-1    "
 msgstr ""
 
 #. module: hr_expense
-#: field:hr.expense.expense,date_valid:0
-#: field:hr.expense.report,date_valid:0
+#: field:hr.expense.expense,date_valid:0 field:hr.expense.report,date_valid:0
 msgid "Validation Date"
-msgstr "Geçerlilik Tarihi"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
@@ -385,37 +366,35 @@ msgstr ""
 #: model:ir.actions.act_window,name:hr_expense.action_hr_expense_report_all
 #: model:ir.ui.menu,name:hr_expense.menu_hr_expense_report_all
 msgid "Expenses Analysis"
-msgstr "Gider Analizi"
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: field:hr.expense.line,expense_id:0
+#: view:hr.expense.expense:0 field:hr.expense.line,expense_id:0
 #: model:ir.model,name:hr_expense.model_hr_expense_expense
 #: model:process.process,name:hr_expense.process_process_expenseprocess0
 msgid "Expense"
 msgstr "Gider"
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: field:hr.expense.expense,line_ids:0
+#: view:hr.expense.expense:0 field:hr.expense.expense,line_ids:0
 #: view:hr.expense.line:0
 msgid "Expense Lines"
-msgstr "Gider Satırları"
+msgstr "Gider Kalemleri"
 
 #. module: hr_expense
 #: field:hr.expense.report,delay_confirm:0
 msgid "Delay to Confirm"
-msgstr "Onayda Gecikme"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "September"
-msgstr "Eylül"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "December"
-msgstr "Aralık"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
@@ -423,27 +402,26 @@ msgid "Invoiced Expenses"
 msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: view:hr.expense.report:0
+#: view:hr.expense.expense:0 view:hr.expense.report:0
 #: field:hr.expense.report,month:0
 msgid "Month"
-msgstr "Ay"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,currency_id:0
 #: field:hr.expense.report,currency_id:0
 msgid "Currency"
-msgstr "ParaBirimi"
+msgstr "Para Birimi"
 
 #. module: hr_expense
 #: selection:hr.expense.expense,state:0
 msgid "Waiting Approval"
-msgstr "Onay bekleyen"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_draftexpenses0
 msgid "Employee encode all his expenses"
-msgstr "Personel bütün giderlerini kodlama"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.expense,state:0 view:hr.expense.report:0
@@ -454,7 +432,7 @@ msgstr "Faturalandı"
 #. module: hr_expense
 #: field:product.product,hr_expense_ok:0
 msgid "Can Constitute an Expense"
-msgstr "Bir Gider Oluşturabilir"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.expense,state:0 selection:hr.expense.report,state:0
@@ -469,7 +447,7 @@ msgstr "Not"
 #. module: hr_expense
 #: model:process.transition,note:hr_expense.process_transition_reimbursereinvoice0
 msgid "Create Customer invoice"
-msgstr "Müşteri fatura oluşturma"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,state:0
@@ -484,17 +462,17 @@ msgstr ""
 #. module: hr_expense
 #: model:process.transition,note:hr_expense.process_transition_approveexpense0
 msgid "Expense is approved."
-msgstr "Gideri onaylanmıştır"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "August"
-msgstr "Ağustos"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_approved0
 msgid "The direct manager approves the sheet"
-msgstr "Doğrudan Yöneticisi sayfasını onayla"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,amount:0
@@ -504,12 +482,12 @@ msgstr "Toplam Tutar"
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "June"
-msgstr "Haziran"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,name:hr_expense.process_node_draftexpenses0
 msgid "Draft Expenses"
-msgstr "Taslak Giderleri"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
@@ -519,11 +497,10 @@ msgstr ""
 #. module: hr_expense
 #: model:ir.actions.act_window,name:hr_expense.product_normal_form_view_installer
 msgid "Review Your Expenses Products"
-msgstr "Gider Ürünlerinizi İnceleyin"
+msgstr ""
 
 #. module: hr_expense
-#: report:hr.expense:0
-#: field:hr.expense.expense,date:0
+#: report:hr.expense:0 field:hr.expense.expense,date:0
 #: field:hr.expense.line,date_value:0
 msgid "Date"
 msgstr "Tarih"
@@ -531,15 +508,15 @@ msgstr "Tarih"
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "November"
-msgstr "Kasım"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
 msgid "Extended Filters..."
-msgstr "Genişletilmiş Filtreler ..."
+msgstr ""
 
 #. module: hr_expense
-#: field:hr.expense.expense,user_id:0
+#: view:hr.expense.expense:0 field:hr.expense.expense,user_id:0
 msgid "User"
 msgstr "Kullanıcı"
 
@@ -552,67 +529,66 @@ msgstr ""
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "October"
-msgstr "Ekim"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "Total:"
-msgstr "Toplam:"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "January"
-msgstr "Ocak"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "HR Expenses"
-msgstr "İK Giderleri"
+msgstr ""
 
 #. module: hr_expense
 #: model:product.template,name:hr_expense.car_travel_product_template
 msgid "Car Travel Expenses"
-msgstr "Araba Seyahat Giderleri"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Submit to Manager"
-msgstr "Yöneticisi Gönder"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,note:hr_expense.process_node_confirmedexpenses0
 msgid "The employee validates his expense sheet"
-msgstr "Personel doğrular kendi gider sayfasından"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Expenses to Invoice"
-msgstr "Giderleri Faturala"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.node,name:hr_expense.process_node_supplierinvoice0
 #: model:process.transition,name:hr_expense.process_transition_approveinvoice0
 msgid "Supplier Invoice"
-msgstr "Tedarikçi Fatura"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Expenses Sheet"
-msgstr "Giderler Formu"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
 msgid "Waiting"
-msgstr "Bekleyen"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.report:0
 msgid "Approved Expenses"
-msgstr "Onaylı Giderler"
+msgstr ""
 
 #. module: hr_expense
-#: report:hr.expense:0
-#: field:hr.expense.line,unit_amount:0
+#: report:hr.expense:0 field:hr.expense.line,unit_amount:0
 msgid "Unit Price"
 msgstr "Birim Fiyat"
 
@@ -622,6 +598,7 @@ msgid "References"
 msgstr ""
 
 #. module: hr_expense
+#: view:hr.expense.expense:0 field:hr.expense.report,invoice_id:0
 #: model:process.transition.action,name:hr_expense.process_transition_action_supplierinvoice0
 msgid "Invoice"
 msgstr "Fatura"
@@ -629,7 +606,7 @@ msgstr "Fatura"
 #. module: hr_expense
 #: model:process.transition,name:hr_expense.process_transition_reimbursereinvoice0
 msgid "Reinvoice"
-msgstr "Yeniden Faturala"
+msgstr ""
 
 #. module: hr_expense
 #: view:board.board:0
@@ -651,32 +628,32 @@ msgstr ""
 #: view:hr.expense.expense:0
 #: model:process.transition.action,name:hr_expense.process_transition_action_refuse0
 msgid "Refuse"
-msgstr "Reddet"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,name:hr_expense.process_transition_confirmexpense0
 msgid "Confirm expense"
-msgstr "Harcamayı doğrula"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,name:hr_expense.process_transition_approveexpense0
 msgid "Approve expense"
-msgstr "Haramayı onayla"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition.action,name:hr_expense.process_transition_action_accept0
 msgid "Accept"
-msgstr "Kabul"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "This document must be dated and signed for reimbursement"
-msgstr "Ödeme için belgeye tarih konulup imzalanmalıdır"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,note:hr_expense.process_transition_refuseexpense0
 msgid "Expense is refused."
-msgstr "Gideri reddedildi."
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.actions.act_window,help:hr_expense.product_normal_form_view_installer
@@ -687,19 +664,12 @@ msgid ""
 "based on real costs, set the cost at 0.00. The user will set the real price "
 "when recording his expense sheet."
 msgstr ""
-"Bir çalışan için izin verilen her gider türü için bir ürün tanımlayın (araç "
-"ile yolculuk, hostel, lokanta, vb.). Çalışana sabit bir tutar ödeme "
-"yapıyorsanız, ürüne bir maliyet ve ölçü birimi girin. Gerçek maliyetlere "
-"göre ödeme yapıyorsanız, maliyeti 0.00 olarak ayarlayın. Kullanıcı gider "
-"tablosunu kaydederken gerçek fiyatı belirtecektir."
 
 #. module: hr_expense
-#: selection:hr.expense.expense,state:0
-#: view:hr.expense.report:0
-#: model:mail.message.subtype,name:hr_expense.mt_expense_approved
+#: selection:hr.expense.expense,state:0 view:hr.expense.report:0
 #: model:process.node,name:hr_expense.process_node_approved0
 msgid "Approved"
-msgstr "Onaylandı"
+msgstr ""
 
 #. module: hr_expense
 #: code:addons/hr_expense/hr_expense.py:141
@@ -708,8 +678,7 @@ msgid "Supplier Invoices"
 msgstr ""
 
 #. module: hr_expense
-#: field:hr.expense.line,product_id:0
-#: view:hr.expense.report:0
+#: field:hr.expense.line,product_id:0 view:hr.expense.report:0
 #: field:hr.expense.report,product_id:0
 #: model:ir.model,name:hr_expense.model_product_product
 msgid "Product"
@@ -721,9 +690,7 @@ msgid "Expenses of My Department"
 msgstr ""
 
 #. module: hr_expense
-#: report:hr.expense:0
-#: view:hr.expense.expense:0
-#: field:hr.expense.expense,name:0
+#: view:hr.expense.expense:0 field:hr.expense.expense,name:0
 #: field:hr.expense.line,description:0
 msgid "Description"
 msgstr "Açıklama"
@@ -731,7 +698,7 @@ msgstr "Açıklama"
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "May"
-msgstr "Mayıs"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.line,unit_quantity:0
@@ -741,29 +708,28 @@ msgstr "Miktarlar"
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "Price"
-msgstr "Fiyat"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.report,no_of_account:0
 msgid "# of Accounts"
-msgstr "# nın Hesapları"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.expense,state:0
-#: model:mail.message.subtype,name:hr_expense.mt_expense_refused
 #: model:process.node,name:hr_expense.process_node_refused0
 msgid "Refused"
-msgstr "RedEdilen"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "Ref."
-msgstr "Ref."
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.report,employee_id:0
 msgid "Employee's Name"
-msgstr "Personel Adı"
+msgstr ""
 
 #. module: hr_expense
 #: model:ir.actions.act_window,help:hr_expense.expense_all
@@ -782,50 +748,50 @@ msgid "This Month"
 msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.report:0
+#: field:hr.expense.expense,user_valid:0 view:hr.expense.report:0
 #: field:hr.expense.report,user_id:0
 msgid "Validation User"
-msgstr "Geçerli Kullanıcı"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "(Date and signature)"
-msgstr "(Tarih ve imza)"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "February"
-msgstr "Şubat"
+msgstr ""
 
 #. module: hr_expense
 #: report:hr.expense:0
 msgid "Name"
-msgstr "Adı"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.expense,account_move_id:0
 msgid "Ledger Posting"
-msgstr "Defteri Kebir İşleme"
+msgstr ""
 
 #. module: hr_expense
 #: model:process.transition,note:hr_expense.process_transition_approveinvoice0
 msgid "Creates supplier invoice."
-msgstr "Tedarikçi fatura oluşturur."
+msgstr ""
 
 #. module: hr_expense
 #: model:product.template,name:hr_expense.hotel_rent_product_template
 msgid "Hotel Accommodation"
-msgstr "Otel Konaklama"
+msgstr ""
 
 #. module: hr_expense
 #: selection:hr.expense.report,month:0
 msgid "April"
-msgstr "Nisan"
+msgstr ""
 
 #. module: hr_expense
 #: field:hr.expense.line,name:0
 msgid "Expense Note"
-msgstr "Gider Notu"
+msgstr ""
 
 #. module: hr_expense
 #: help:hr.expense.expense,state:0
@@ -841,12 +807,10 @@ msgstr ""
 #. module: hr_expense
 #: view:hr.expense.expense:0
 msgid "Approve"
-msgstr "Onay"
+msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.expense:0
-#: view:hr.expense.line:0
-#: field:hr.expense.line,total_amount:0
+#: view:hr.expense.line:0 field:hr.expense.line,total_amount:0
 msgid "Total"
 msgstr "Toplam"
 
@@ -858,12 +822,12 @@ msgstr ""
 #. module: hr_expense
 #: field:hr.expense.line,sequence:0
 msgid "Sequence"
-msgstr "Sıralama"
+msgstr "Sıra No"
 
 #. module: hr_expense
 #: model:process.transition,note:hr_expense.process_transition_confirmexpense0
 msgid "Expense is confirmed."
-msgstr "Gideri onaylandı."
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
@@ -872,7 +836,7 @@ msgstr "Gideri onaylandı."
 #: model:ir.ui.menu,name:hr_expense.next_id_49
 #: model:product.category,name:hr_expense.cat_expense
 msgid "Expenses"
-msgstr "Giderler"
+msgstr ""
 
 #. module: hr_expense
 #: constraint:product.product:0
@@ -880,16 +844,14 @@ msgid "Error: Invalid ean code"
 msgstr ""
 
 #. module: hr_expense
-#: view:hr.expense.report:0
-#: field:hr.expense.report,year:0
+#: view:hr.expense.report:0 field:hr.expense.report,year:0
 msgid "Year"
-msgstr "Yıl"
+msgstr ""
 
 #. module: hr_expense
 #: view:hr.expense.expense:0
-#: model:mail.message.subtype,name:hr_expense.mt_expense_confirmed
 msgid "To Approve"
-msgstr "Onaylama"
+msgstr ""
 
 #. module: hr_expense
 #: help:product.product,hr_expense_ok:0
@@ -901,4 +863,4 @@ msgstr ""
 #. module: hr_expense
 #: model:process.node,name:hr_expense.process_node_reinvoicing0
 msgid "Reinvoicing"
-msgstr "YenidenFaturalama"
+msgstr ""

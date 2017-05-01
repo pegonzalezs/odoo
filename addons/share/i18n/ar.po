@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:22+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-17 04:59+0000\n"
+"X-Generator: Launchpad (build 15944)\n"
 
 #. module: share
 #: field:share.wizard,embed_option_title:0
@@ -53,7 +53,7 @@ msgid "Share Access URL"
 msgstr "مشاركة الوصول URL"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:886
+#: code:addons/share/wizard/share_wizard.py:782
 #, python-format
 msgid "You may use your current login (%s) and password to view them.\n"
 msgstr ""
@@ -61,7 +61,7 @@ msgstr ""
 "لعرضها.\n"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:620
+#: code:addons/share/wizard/share_wizard.py:601
 #, python-format
 msgid "(Modified)"
 msgstr "(عدل)"
@@ -77,23 +77,21 @@ msgstr ""
 "على:"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:598
+#: code:addons/share/wizard/share_wizard.py:579
 #, python-format
 msgid "Sharing filter created by user %s (%s) for group %s"
 msgstr ""
 
 #. module: share
-#: field:share.wizard,embed_url:0
-#: field:share.wizard.result.line,share_url:0
+#: field:share.wizard,embed_url:0 field:share.wizard.result.line,share_url:0
 msgid "Share URL"
 msgstr "مشاركة URL"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:848
-#: code:addons/share/wizard/share_wizard.py:880
+#: code:addons/share/wizard/share_wizard.py:776
 #, python-format
 msgid "These are your credentials to access this protected area:\n"
-msgstr "هذا هو اعتمادك للوصول إلى هذه المناطق المحمية\n"
+msgstr ""
 
 #. module: share
 #: code:addons/share/wizard/share_wizard.py:643
@@ -108,15 +106,12 @@ msgid "Access info"
 msgstr "معلومات الولوج"
 
 #. module: share
-#. openerp-web
-#: code:addons/share/static/src/js/share.js:60
 #: view:share.wizard:0
-#, python-format
 msgid "Share"
 msgstr "حصة"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:570
+#: code:addons/share/wizard/share_wizard.py:551
 #, python-format
 msgid "(Duplicated for modified sharing permissions)"
 msgstr "(تكرار للحصول على أذونات مشاركة تعديل)"
@@ -124,7 +119,7 @@ msgstr "(تكرار للحصول على أذونات مشاركة تعديل)"
 #. module: share
 #: help:share.wizard,domain:0
 msgid "Optional domain for further data filtering"
-msgstr "المجال اختياري لمزيد من بيانات التصفية"
+msgstr ""
 
 #. module: share
 #: sql_constraint:res.users:0
@@ -142,8 +137,7 @@ msgid "Next"
 msgstr "التالي"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:849
-#: code:addons/share/wizard/share_wizard.py:881
+#: code:addons/share/wizard/share_wizard.py:777
 #, python-format
 msgid "Username"
 msgstr "اسم المستخدم"
@@ -168,7 +162,7 @@ msgstr "إغلاق"
 #: code:addons/share/wizard/share_wizard.py:640
 #, python-format
 msgid "Action and Access Mode are required to create a shared access"
-msgstr "نمط الإجراء والوصول لإنشاء مشاركة الوصول"
+msgstr ""
 
 #. module: share
 #: view:share.wizard:0
@@ -176,15 +170,14 @@ msgid ""
 "Please select the action that opens the screen containing the data you want "
 "to share."
 msgstr ""
-"الرجاء اختيار الإجراء الذي يفتح شاشة تحتوي على البيانات التي تريد مشاركتها."
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:885
+#: code:addons/share/wizard/share_wizard.py:781
 #, python-format
 msgid ""
 "The documents have been automatically added to your current OpenERP "
 "documents.\n"
-msgstr "المستندات تمت إضافتها بشكل تلقائي لمستندات اوبن اي ار بي الخاصة بك\n"
+msgstr ""
 
 #. module: share
 #: view:share.wizard:0
@@ -197,8 +190,7 @@ msgid "Share Group"
 msgstr "مشاركة المجموعة"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid "Email required"
 msgstr "لا بدّ من ذكر عنوان بريد إلكتروني"
@@ -208,12 +200,12 @@ msgstr "لا بدّ من ذكر عنوان بريد إلكتروني"
 msgid ""
 "Optionally, you may specify an additional domain restriction that will be "
 "applied to the shared data."
-msgstr "اختيارياً، اختيار محدودية مجال لتطبيقها على المعلومات المشاركة."
+msgstr ""
 
 #. module: share
 #: help:share.wizard,name:0
 msgid "Title for the share (displayed to users as menu and shortcut name)"
-msgstr "عنوان المشاركة (تعرض للمستخدمين كقائمة واسم مختصر)"
+msgstr ""
 
 #. module: share
 #: view:share.wizard:0
@@ -223,31 +215,26 @@ msgstr "خيارات"
 #. module: share
 #: view:res.groups:0
 msgid "Regular groups only (no share groups"
-msgstr "المجموعات المنتظمة فقط( لا مجموعات مشاركة)"
+msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:855
-#: code:addons/share/wizard/share_wizard.py:889
+#: code:addons/share/wizard/share_wizard.py:787
 #, python-format
 msgid ""
 "OpenERP is a powerful and user-friendly suite of Business Applications (CRM, "
 "Sales, HR, etc.)\n"
 "It is open source and can be found on http://www.openerp.com."
 msgstr ""
-"OpenERP هي قوية ومجموعة من تطبيقات الأعمال سهل الاستعمال(إدارة علاقات "
-"العملاء,المبيعات, موارد بشرية, الخ.)\n"
-"هي مفتوحة المصدر ويمكنك الوصول إليها عن طريق هذا الرابط "
-"http://www.openerp.com."
 
 #. module: share
 #: field:share.wizard,action_id:0
 msgid "Action to share"
-msgstr "إجراء للمشاركة"
+msgstr ""
 
 #. module: share
 #: view:share.wizard:0
 msgid "Optional: include a personal message"
-msgstr "اختياري: تضمين رسالة خاصة"
+msgstr ""
 
 #. module: share
 #: field:res.users,share:0
@@ -259,23 +246,22 @@ msgstr "مشاركة المستخدم"
 #, python-format
 msgid "Please indicate the emails of the persons to share with, one per line"
 msgstr ""
-"يرجى الإشارة إلى رسائل البريد الإلكتروني للأشخاص للمشاركة معه، واحد في كل سطر"
 
 #. module: share
-#: field:share.wizard.result.line,user_id:0
+#: field:share.wizard,embed_code:0 field:share.wizard.result.line,user_id:0
 msgid "unknown"
 msgstr "مجهول"
 
 #. module: share
 #: help:res.groups,share:0
 msgid "Group created to set access rights for sharing data with some users."
-msgstr "إنشاء مجموعة لتعيين حقوق الوصول لتبادل البيانات مع بعض المستخدمين."
+msgstr ""
 
 #. module: share
 #: help:share.wizard,action_id:0
 msgid ""
 "The action that opens the screen containing the data you wish to share."
-msgstr "الإجراء الذي يفتح شاشة تحتوي على البيانات التي ترغب في مشاركتها."
+msgstr ""
 
 #. module: share
 #: constraint:res.users:0
@@ -284,18 +270,18 @@ msgstr ""
 "الشركة المختارة غير مدرجة ضمن قائمة الشركات المسموح بها لهذا المستخدم"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:545
+#: code:addons/share/wizard/share_wizard.py:526
 #, python-format
 msgid "(Copy for sharing)"
-msgstr "(نسخة من المشاركة)"
+msgstr ""
 
 #. module: share
 #: field:share.wizard.result.line,newly_created:0
 msgid "Newly created"
-msgstr "منشأة حديثاً"
+msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:635
+#: code:addons/share/wizard/share_wizard.py:616
 #, python-format
 msgid "Indirect sharing filter created by user %s (%s) for group %s"
 msgstr ""
@@ -309,7 +295,7 @@ msgstr ""
 #. module: share
 #: help:share.wizard,share_root_url:0
 msgid "Main access page for users that are granted shared access"
-msgstr "صفحة الوصول الرئيسية للمستخدمين لضمان مشاركة الوصول"
+msgstr ""
 
 #. module: share
 #: sql_constraint:res.groups:0
@@ -327,7 +313,7 @@ msgid "Groups"
 msgstr "مجموعات"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:657
+#: code:addons/share/wizard/share_wizard.py:636
 #, python-format
 msgid ""
 "Sorry, the current screen and filter you are trying to share are not "
@@ -341,8 +327,7 @@ msgid "Use this link"
 msgstr "استخدم هذا الرابط"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:851
-#: code:addons/share/wizard/share_wizard.py:883
+#: code:addons/share/wizard/share_wizard.py:779
 #, python-format
 msgid "Database"
 msgstr "قاعدة البيانات"
@@ -353,13 +338,12 @@ msgid "Domain"
 msgstr "نطاق"
 
 #. module: share
-#: view:share.wizard:0
-#: field:share.wizard,result_line_ids:0
+#: view:share.wizard:0 field:share.wizard,result_line_ids:0
 msgid "Summary"
 msgstr "ملخّص"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:512
+#: code:addons/share/wizard/share_wizard.py:493
 #, python-format
 msgid "Copied access for sharing"
 msgstr "نسخ الوصول للمشاركة"
@@ -439,7 +423,7 @@ msgid "Share Wizard"
 msgstr "معالج المشاركة"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:792
+#: code:addons/share/wizard/share_wizard.py:740
 #, python-format
 msgid "Shared access created!"
 msgstr ""
@@ -458,17 +442,14 @@ msgid "Access Groups"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:850
-#: code:addons/share/wizard/share_wizard.py:882
+#: code:addons/share/wizard/share_wizard.py:778
 #: field:share.wizard.result.line,password:0
 #, python-format
 msgid "Password"
 msgstr "كلمة المرور"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:77
 #: field:share.wizard,new_users:0
-#, python-format
 msgid "Emails"
 msgstr "الرسائل الإلكترونية"
 
@@ -489,8 +470,7 @@ msgid "Personal Message"
 msgstr "رسالة شخصيّة"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid ""
 "The current user must have an email address configured in User Preferences "

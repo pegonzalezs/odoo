@@ -985,8 +985,10 @@ class _rml_template(object):
             fis.append(PageReset())
             story_cnt += 1
         if self.localcontext and self.localcontext.get('internal_header',False):
-            self.doc_tmpl.afterFlowable(fis)
-            self.doc_tmpl.build(fis,canvasmaker=NumberedCanvas)
+            # Internal Header is used to print reports with logo!!!
+            #self.doc_tmpl.afterFlowable(fis)
+            #self.doc_tmpl.build(fis,canvasmaker=NumberedCanvas)
+            self.doc_tmpl.build(fis)
         else:
             self.doc_tmpl.build(fis)
 

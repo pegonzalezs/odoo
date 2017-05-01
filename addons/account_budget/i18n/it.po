@@ -6,15 +6,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: OpenERP Server 6.0dev\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
-"POT-Creation-Date: 2012-10-08 12:28+0000\n"
+"POT-Creation-Date: 2012-02-08 00:35+0000\n"
 "PO-Revision-Date: 2012-02-17 09:10+0000\n"
 "Last-Translator: Nicola Riolini - Micronaet <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:43+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:28+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: account_budget
 #: field:crossovered.budget,creating_user_id:0
@@ -130,7 +130,7 @@ msgstr ""
 #: code:addons/account_budget/account_budget.py:119
 #, python-format
 msgid "The Budget '%s' has no accounts!"
-msgstr "Il Budget '%s' non ha un conto!"
+msgstr ""
 
 #. module: account_budget
 #: report:account.budget:0
@@ -214,7 +214,7 @@ msgstr "Data fine"
 #: model:ir.model,name:account_budget.model_account_budget_analytic
 #: model:ir.model,name:account_budget.model_account_budget_report
 msgid "Account Budget report for analytic account"
-msgstr "Report Budget Conto per conto analitico"
+msgstr ""
 
 #. module: account_budget
 #: view:account.analytic.account:0
@@ -226,11 +226,6 @@ msgstr "Importo teorico"
 #: field:crossovered.budget,name:0
 msgid "Name"
 msgstr "Nome"
-
-#. module: account_budget
-#: report:account.analytic.account.budget:0
-msgid "Total:"
-msgstr ""
 
 #. module: account_budget
 #: model:ir.model,name:account_budget.model_crossovered_budget_lines
@@ -256,7 +251,7 @@ msgstr "Budget"
 #. module: account_budget
 #: view:crossovered.budget:0
 msgid "To Approve Budgets"
-msgstr "Approvazione Budgets"
+msgstr ""
 
 #. module: account_budget
 #: code:addons/account_budget/account_budget.py:119
@@ -278,6 +273,7 @@ msgstr "Questo wizard è utilizzato per stampare il Budget"
 
 #. module: account_budget
 #: model:ir.actions.act_window,name:account_budget.act_crossovered_budget_view
+#: model:ir.actions.act_window,name:account_budget.action_account_budget_post_tree
 #: model:ir.actions.act_window,name:account_budget.action_account_budget_report
 #: model:ir.actions.report.xml,name:account_budget.report_crossovered_budget
 #: model:ir.ui.menu,name:account_budget.menu_act_crossovered_budget_view
@@ -296,12 +292,6 @@ msgstr "Questo wizard è utilizzato per stampare un riepilogo dei budget"
 #: selection:crossovered.budget,state:0
 msgid "Cancelled"
 msgstr "Annullato"
-
-#. module: account_budget
-#: report:account.analytic.account.budget:0
-#: model:ir.actions.report.xml,name:account_budget.account_budget_analytic
-msgid "Analytic Budget"
-msgstr ""
 
 #. module: account_budget
 #: view:crossovered.budget:0
@@ -332,7 +322,7 @@ msgstr "Inizio Periodo"
 #. module: account_budget
 #: model:ir.model,name:account_budget.model_account_budget_crossvered_summary_report
 msgid "Account Budget  crossvered summary report"
-msgstr "Report riepilogativo budgets"
+msgstr ""
 
 #. module: account_budget
 #: report:account.budget:0
@@ -405,6 +395,7 @@ msgstr "Linee Budget"
 #: view:account.budget.crossvered.report:0
 #: view:account.budget.crossvered.summary.report:0
 #: view:account.budget.report:0
+#: view:crossovered.budget:0
 msgid "Cancel"
 msgstr "Annulla"
 
@@ -422,4 +413,4 @@ msgstr "Maschera Analisi"
 #. module: account_budget
 #: view:crossovered.budget:0
 msgid "Draft Budgets"
-msgstr "Budget in Bozza"
+msgstr ""

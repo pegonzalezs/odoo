@@ -11,7 +11,7 @@
       <field name="model">coda.bank.account</field>
       <field name="type">search</field>
       <field name="arch" type="xml">
-        <form string="CODA Bank Account Configuration">
+        <search string="CODA Bank Account Configuration">
           <filter string="Normal" domain="[('state','=','normal')]" icon="terp-folder-green"/>
           <filter string="Info" domain="[('state','=','info')]" icon="terp-folder-yellow"/>
           <separator orientation="vertical"/>
@@ -26,7 +26,7 @@
             <filter string="Bank Account" icon="terp-folder-yellow" domain="[]" context="{'group_by':'bank_id'}"/>
             <filter string="Currency" icon="terp-dolar" domain="[]" context="{'group_by':'currency'}"/>
           </group>
-        </form>
+        </search>
       </field>
     </record>
     <record id="view_coda_bank_account_list" model="ir.ui.view">
@@ -59,14 +59,53 @@
           <field name="state" on_change="onchange_state(state)"/>
           <field name="journal" attrs="{'invisible':[('state','=','info')]}"/>
           <newline/>
-          <field name="def_payable"/>
-          <field name="def_receivable"/>
-          <field name="awaiting_account"/>
-          <field name="transfer_account"/>
+          <field name="find_payment"/>
           <field name="find_bbacom"/>
+          <field name="find_inv_number"/>
           <field name="find_partner"/>
-          <field name="company_id" widget='selection' groups="base.group_multi_company"/>
+          <field name="update_partner"/>
+          <field name="balance_start_enforce"/>
+          <field name="discard_dup"/>
           <field name="active"/>
+          <field name="company_id" widget='selection' groups="base.group_multi_company"/>
+          <notebook colspan="4">
+            <page string="Default Accounts">
+              <separator colspan="4" string="Default Account Mapping"/>
+              <field name="awaiting_account"/>
+              <field name="transfer_account"/>
+            </page>
+            <page string="Accounts Mapping">
+              <field colspan="4" name="account_mapping_ids" nolabel="1">
+                <tree string="Account Mapping Rules">
+                  <field name="sequence"/>
+                  <field name="name"/>
+                  <field name="trans_type_id"/>
+                  <field name="trans_family_id"/>
+                  <field name="trans_code_id"/>
+                  <field name="trans_category_id"/>
+                  <field name="struct_comm_type_id"/>
+                  <field name="partner_id"/>
+                  <field name="account_id"/>
+                </tree>
+                <form string="Account Mapping Rules">
+                  <field name="name"/>
+                  <field name="sequence"/>
+                  <field name="active"/>
+                  <separator string="Conditions" colspan="4"/>
+                  <field name="trans_type_id"/>
+                  <field name="trans_family_id"/>
+                  <field name="trans_code_id" domain="[('parent_id', '=', trans_family_id)]"/>
+                  <field name="trans_category_id"/>
+                  <field name="struct_comm_type_id"/>
+                  <field name="partner_id"/>
+                  <separator string="Result" colspan="6"/>
+                  <field name="account_id"/>
+                  <field name="tax_code_id"/>
+                  <field name="action"/>
+                </form>
+              </field>
+            </page>
+          </notebook>
         </form>
       </field>
     </record>
@@ -263,6 +302,7 @@
         <search string="Search CODA Files">
           <group col="10" colspan="4">
             <field name="coda_creation_date"/>
+            <field name="name"/>
             <field name="date"/>
             <field name="user_id" widget='selection'/>
             <field name="company_id" widget="selection" groups="base.group_multi_company"/>
@@ -297,11 +337,12 @@
       <field name="model">coda.bank.statement</field>
       <field name="type">tree</field>
       <field name="arch" type="xml">
-        <tree colors="red:balance_end_real!=balance_end;blue:state=='draft' and (balance_end_real==balance_end)" string="CODA Bank Statements">
+        <tree colors="red:balance_end_real!=balance_end" string="CODA Bank Statements">
           <field name="name"/>
-          <field name="date"/>
-          <field name="period_id"/>
+          <field name="coda_creation_date"/>
           <field name="coda_bank_account_id"/>
+          <field name="old_balance_date"/>
+          <field name="new_balance_date"/>
           <field name="balance_start"/>
           <field name="balance_end_real"/>
           <field name="balance_end"/>
@@ -317,14 +358,15 @@
       <field name="arch" type="xml">
         <form string="CODA Bank Statement">
           <field name="name" select="1"/>
-          <field name="date" select="1"/>
+          <field name="coda_creation_date" select="1"/>
           <field name="coda_bank_account_id" select="1"/>
           <field name="currency"/>
-          <field name="period_id" select="2"/>
           <field name="type"/>
           <newline/>
           <field name="balance_start"/>
           <field name="balance_end_real"/>
+          <field name="old_balance_date" select="2"/>
+          <field name="new_balance_date" select="2"/>
           <notebook colspan="4">
             <page string="Transactions">
               <field colspan="4" name="line_ids" nolabel="1">
@@ -378,8 +420,9 @@
             <filter string="Info" domain="[('type','=','info')]" icon="terp-folder-yellow"/>
             <separator orientation="vertical"/>
             <field name="name"/>
-            <field name="date"/>
-            <field name="period_id"/>
+            <field name="coda_creation_date"/>
+            <field name="old_balance_date"/>
+            <field name="new_balance_date"/>
             <field name="coda_bank_account_id"/>
             <field name="journal_id" widget="selection" domain="[('type', '=', 'bank')]"/>
           </group>
@@ -412,7 +455,7 @@
       <field name="model">coda.bank.statement.line</field>
       <field name="type">tree</field>
       <field name="arch" type="xml">
-        <tree editable="bottom" string="CODA Statement Lines">
+        <tree editable="bottom" string="CODA Bank Statement Lines">
           <field name="sequence" readonly="1" invisible="1"/>
           <field name="coda_bank_account_id" readonly="1"/>
           <field name="date" readonly="1" groups="base.group_extended"/>
@@ -422,7 +465,7 @@
           <field name="ref" readonly="1"/>
           <field name="partner_id" on_change="onchange_partner_id(partner_id)"/>
           <field name="type" on_change="onchange_type(partner_id, type)"/>
-          <field name="account_id" domain="[('journal_id','=',parent.journal_id)]"/>
+          <field name="account_id" domain="[('type','!=','view')]"/>
           <field name="amount" readonly="1" sum="Total Amount"/>
           <field name="globalisation_id" string="Glob. Id"/>
           <field name="globalisation_amount" string="Glob. Am."/>
@@ -435,7 +478,7 @@
       <field name="model">coda.bank.statement.line</field>
       <field name="type">form</field>
       <field name="arch" type="xml">
-        <form string="CODA Statement Line">
+        <form string="CODA Bank Statement Line">
           <field name="statement_id"/>
           <field name="coda_bank_account_id"/>
           <field name="date"/>
@@ -444,7 +487,7 @@
           <field name="ref" readonly="0"/>
           <field name="partner_id" on_change="onchange_partner_id(partner_id)"/>
           <field name="type" on_change="onchange_type(partner_id, type)"/>
-          <field domain="[('journal_id', '=', parent.journal_id), ('type', '&lt;&gt;', 'view')]" name="account_id"/>
+          <field name="account_id" domain="[('type', '!=', 'view')]"/>
           <field name="amount"/>
           <field name="globalisation_id"/>
           <field name="sequence" readonly="0"/>
@@ -491,7 +534,7 @@
     </record>
 
     <record id="action_coda_bank_statement_line" model="ir.actions.act_window">
-      <field name="name">CODA Statement Lines</field>
+      <field name="name">CODA Bank Statement Lines</field>
       <field name="res_model">coda.bank.statement.line</field>
       <field name="view_type">form</field>
       <field name="view_mode">tree,graph,form</field>
@@ -517,6 +560,18 @@
       view_type="form"
       view_mode="tree,form"
       id="act_coda_bank_statement_goto_account_bank_statement"/>
+    <record model="ir.actions.act_window.view" id="action_bank_statement_tree_bank">
+      <field name="sequence" eval="1"/>
+      <field name="view_mode">tree</field>
+      <field name="view_id" ref="account.view_bank_statement_tree"/>
+      <field name="act_window_id" ref="act_coda_bank_statement_goto_account_bank_statement"/>
+    </record>
+    <record model="ir.actions.act_window.view" id="action_bank_statement_form_bank">
+      <field name="sequence" eval="1"/>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="account.view_bank_statement_form"/>
+      <field name="act_window_id" ref="act_coda_bank_statement_goto_account_bank_statement"/>
+    </record>
 
     <act_window name="CODA Bank Statement"
       domain="[('statement_id', '=', active_id)]"

@@ -9,6 +9,7 @@
 #     - support negative balance
 #     - assign amount of tax code 71-72 correclty to grid 71 or 72
 #     - support Noviat tax code scheme
+#     - support multiple accounting periods per VAT declaration
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -41,7 +42,7 @@ class l10n_be_vat_declaration(osv.osv_memory):
 
     _columns = {
         'name': fields.char('File Name', size=32),
-        'period_id': fields.many2one('account.period','Period', required=True),
+        'period_ids': fields.many2many('account.period', 'vat_declaration_period_rel', 'acc_id', 'period_id', 'Period (s)', help = 'Select here the period(s) you want to include in your VAT declaration'),
         'tax_code_id': fields.many2one('account.tax.code', 'Tax Code', domain=[('parent_id', '=', False)], required=True),
         'msg': fields.text('File created', size=64, readonly=True),
         'file_save': fields.binary('Save File'),
@@ -77,6 +78,10 @@ class l10n_be_vat_declaration(osv.osv_memory):
 
         list_of_tags = ['00','01','02','03','44','45','46','47','48','49','54','55','56','57','59','61','62','63','64','71','72','81','82','83','84','85','86','87','88','91']
         data_tax = self.browse(cr, uid, ids[0])
+        
+        if not data_tax.period_ids:
+            raise osv.except_osv(_('Data Insufficient!'),_('Please select at least one Period.'))
+        
         if data_tax.tax_code_id:
             obj_company = data_tax.tax_code_id.company_id
         else:
@@ -90,22 +95,30 @@ class l10n_be_vat_declaration(osv.osv_memory):
         tax_code_ids = obj_tax_code.search(cr, uid, [('parent_id','child_of',data_tax.tax_code_id.id), ('company_id','=',obj_company.id)], context=context)
         ctx = context.copy()
         data  = self.read(cr, uid, ids)[0]
-        ctx['period_id'] = data['period_id'][0]
-        tax_info = obj_tax_code.read(cr, uid, tax_code_ids, ['code','sum_period'], context=ctx)
+        tax_info = {}
+        for period_id in data['period_ids']: 
+            ctx['period_id'] = period_id #added context here
+            tax_period_info = obj_tax_code.read(cr, uid, tax_code_ids, ['code','sum_period'], context=ctx)
+            for c in tax_period_info:
+                tax_info.update({c['code']: tax_info.get(c['code'], 0.0) + c['sum_period']})
 
         name = email = phone = address = post_code = city = country_code = ''
         name, email, phone, city, post_code, address, country_code = self.pool.get('res.company')._get_default_ad(obj_company.partner_id.address)
 
-        account_period = obj_acc_period.browse(cr, uid, data['period_id'][0], context=context)
+        account_periods = obj_acc_period.browse(cr, uid, data['period_ids'], context=context)
         issued_by = vat_no[:2] 
         comments = data['comments'] or ''
-            
-        send_ref = str(obj_company.partner_id.id) + str(account_period.date_start[5:7]) + str(account_period.date_stop[:4])
+
+        period_end_dates = sorted([x.date_stop for x in account_periods])
+        period_start_dates = sorted([x.date_start for x in account_periods])                    
+        send_ref = str(obj_company.partner_id.id) + period_end_dates[0][5:7] + period_end_dates[-1][:4]
         
-        starting_month = account_period.date_start[5:7]
-        ending_month = account_period.date_stop[5:7]
+        starting_month = period_start_dates[0][5:7]
+        ending_month = period_end_dates[-1][5:7]
         quarter = str(((int(starting_month) - 1) / 3) + 1)
-    
+
+        if not country_code:
+            raise osv.except_osv(_('Data Insufficient!'),_('No country associated with the company.'))    
         if not email:
             raise osv.except_osv(_('Data Insufficient!'),_('No email address associated with the company.'))
         if not phone:
@@ -124,7 +137,7 @@ class l10n_be_vat_declaration(osv.osv_memory):
                         'send_ref': send_ref,
                         'quarter': quarter,
                         'month': starting_month,
-                        'year': str(account_period.date_stop[:4]),
+                        'year': period_end_dates[-1][:4],
                         'client_nihil': (data['client_nihil'] and 'YES' or 'NO'),
                         'ask_restitution': (data['ask_restitution'] and 'YES' or 'NO'),
                         'ask_payment': (data['ask_payment'] and 'YES' or 'NO'),
@@ -166,27 +179,31 @@ class l10n_be_vat_declaration(osv.osv_memory):
         data_of_file += '\t<ns2:Year>%(year)s</ns2:Year>' % (file_data)
         data_of_file += '\n\t\t</ns2:Period>\n'
         data_of_file += '\t\t<ns2:Data>\t'
+        
+        if tax_info.get('VI') >= 0:
+            tax_info['71'] = tax_info['VI']
+        else:
+            tax_info['72'] = tax_info['VI']
         cases_list = []
         for item in tax_info:
-            if item['code'] == '91' and ending_month != 12:
+            if tax_info['91'] and ending_month != 12:
                 #the tax code 91 can only be send for the declaration of December
                 continue
-            if item['code'] and item['sum_period']:
-                if item['code'] == 'VI':
-                    if item['sum_period'] >= 0:
-                        item['code'] = '71'
-                    else:
-                        item['code'] = '72'
-                if item['code'] in list_of_tags:
-                    cases_list.append(item)
+            if tax_info[item] and item in list_of_tags: 
+                cases_list.append(item)
         cases_list.sort()
         for item in cases_list:
-            data_of_file += '\n\t\t\t<ns2:Amount GridNumber="%s">%.2f</ns2:Amount''>' % (str(int(item['code'])), abs(item['sum_period']))
-
+            grid_amount_data = {
+                    'code': str(int(item)),
+                    'amount': '%.2f' %abs(tax_info[item]),
+                    }
+            data_of_file += '\n\t\t\t<ns2:Amount GridNumber="%(code)s">%(amount)s</ns2:Amount''>' % (grid_amount_data)
+            
         data_of_file += '\n\t\t</ns2:Data>'
         data_of_file += '\n\t\t<ns2:ClientListingNihil>%(client_nihil)s</ns2:ClientListingNihil>' % (file_data)
         data_of_file += '\n\t\t<ns2:Ask Restitution="%(ask_restitution)s" Payment="%(ask_payment)s"/>' % (file_data)
-        data_of_file += '\n\t\t<ns2:Comment>%(comments)s</ns2:Comment>' % (file_data)
+        if file_data['comments']:
+            data_of_file += '\n\t\t<ns2:Comment>%(comments)s</ns2:Comment>' % (file_data)
         data_of_file += '\n\t</ns2:VATDeclaration> \n</ns2:VATConsignment>'
         model_data_ids = mod_obj.search(cr, uid,[('model','=','ir.ui.view'),('name','=','view_vat_save')], context=context)
         resource_id = mod_obj.read(cr, uid, model_data_ids, fields=['res_id'], context=context)[0]['res_id']

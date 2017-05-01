@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:22+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 10:03+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: share
 #: field:share.wizard,embed_option_title:0
@@ -53,13 +53,13 @@ msgid "Share Access URL"
 msgstr "Erişim Adresini (URL) Paylaş"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:886
+#: code:addons/share/wizard/share_wizard.py:782
 #, python-format
 msgid "You may use your current login (%s) and password to view them.\n"
 msgstr "Görmek için şuanki kullanıcı (%s) ve şifrenizi kullanabilirsiniz.\n"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:620
+#: code:addons/share/wizard/share_wizard.py:601
 #, python-format
 msgid "(Modified)"
 msgstr "(Değiştirildi)"
@@ -75,21 +75,19 @@ msgstr ""
 "adresten inceleyebilirsiniz:"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:598
+#: code:addons/share/wizard/share_wizard.py:579
 #, python-format
 msgid "Sharing filter created by user %s (%s) for group %s"
 msgstr ""
 "%s (%s) kullanıcısı tarafından %s grubu için oluşturulan Paylaşım filtresi"
 
 #. module: share
-#: field:share.wizard,embed_url:0
-#: field:share.wizard.result.line,share_url:0
+#: field:share.wizard,embed_url:0 field:share.wizard.result.line,share_url:0
 msgid "Share URL"
 msgstr "Paylaşım Adresi"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:848
-#: code:addons/share/wizard/share_wizard.py:880
+#: code:addons/share/wizard/share_wizard.py:776
 #, python-format
 msgid "These are your credentials to access this protected area:\n"
 msgstr "Korumalı alana erişebilmek için kimlik bilgileriniz:\n"
@@ -108,15 +106,12 @@ msgid "Access info"
 msgstr "Erişim Bilgisi"
 
 #. module: share
-#. openerp-web
-#: code:addons/share/static/src/js/share.js:60
 #: view:share.wizard:0
-#, python-format
 msgid "Share"
 msgstr "Paylaş"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:570
+#: code:addons/share/wizard/share_wizard.py:551
 #, python-format
 msgid "(Duplicated for modified sharing permissions)"
 msgstr "(Değiştirilmiş paylaşım izinleri için çoğaltıldı)"
@@ -142,8 +137,7 @@ msgid "Next"
 msgstr "Sonraki"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:849
-#: code:addons/share/wizard/share_wizard.py:881
+#: code:addons/share/wizard/share_wizard.py:777
 #, python-format
 msgid "Username"
 msgstr "Kullanıcı Adı"
@@ -179,7 +173,7 @@ msgstr ""
 "Lütfen paylaşmak istediğiniz verileri içeren ekranı açan eylemi seçin."
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:885
+#: code:addons/share/wizard/share_wizard.py:781
 #, python-format
 msgid ""
 "The documents have been automatically added to your current OpenERP "
@@ -199,8 +193,7 @@ msgid "Share Group"
 msgstr "Paylaşım Grubu"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid "Email required"
 msgstr "E-posta Gerekli"
@@ -232,8 +225,7 @@ msgid "Regular groups only (no share groups"
 msgstr "Sadece normal gruplar (paylaşım grupları değil)"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:855
-#: code:addons/share/wizard/share_wizard.py:889
+#: code:addons/share/wizard/share_wizard.py:787
 #, python-format
 msgid ""
 "OpenERP is a powerful and user-friendly suite of Business Applications (CRM, "
@@ -265,7 +257,7 @@ msgstr ""
 "kişi"
 
 #. module: share
-#: field:share.wizard.result.line,user_id:0
+#: field:share.wizard,embed_code:0 field:share.wizard.result.line,user_id:0
 msgid "unknown"
 msgstr "bilinmeyen"
 
@@ -288,7 +280,7 @@ msgid "The chosen company is not in the allowed companies for this user"
 msgstr "Seçilen firma bu kullanıcı için izin verilen şirketler arasında yok"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:545
+#: code:addons/share/wizard/share_wizard.py:526
 #, python-format
 msgid "(Copy for sharing)"
 msgstr "(paylaşım için kopya)"
@@ -299,7 +291,7 @@ msgid "Newly created"
 msgstr "Yeni Oluşturuldu"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:635
+#: code:addons/share/wizard/share_wizard.py:616
 #, python-format
 msgid "Indirect sharing filter created by user %s (%s) for group %s"
 msgstr ""
@@ -333,7 +325,7 @@ msgid "Groups"
 msgstr "Gruplar"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:657
+#: code:addons/share/wizard/share_wizard.py:636
 #, python-format
 msgid ""
 "Sorry, the current screen and filter you are trying to share are not "
@@ -350,8 +342,7 @@ msgid "Use this link"
 msgstr "Bu adrese gidin"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:851
-#: code:addons/share/wizard/share_wizard.py:883
+#: code:addons/share/wizard/share_wizard.py:779
 #, python-format
 msgid "Database"
 msgstr "Veritabanı"
@@ -362,13 +353,12 @@ msgid "Domain"
 msgstr "Alan adı"
 
 #. module: share
-#: view:share.wizard:0
-#: field:share.wizard,result_line_ids:0
+#: view:share.wizard:0 field:share.wizard,result_line_ids:0
 msgid "Summary"
 msgstr "Özet"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:512
+#: code:addons/share/wizard/share_wizard.py:493
 #, python-format
 msgid "Copied access for sharing"
 msgstr "Paylaşım için kopyalanmış erişim"
@@ -449,7 +439,7 @@ msgid "Share Wizard"
 msgstr "Paylaşım Sihirbazı"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:792
+#: code:addons/share/wizard/share_wizard.py:740
 #, python-format
 msgid "Shared access created!"
 msgstr "Paylaşım izni oluşturuldu!"
@@ -472,17 +462,14 @@ msgid "Access Groups"
 msgstr "Erişim Grupları"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:850
-#: code:addons/share/wizard/share_wizard.py:882
+#: code:addons/share/wizard/share_wizard.py:778
 #: field:share.wizard.result.line,password:0
 #, python-format
 msgid "Password"
 msgstr "Parola"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:77
 #: field:share.wizard,new_users:0
-#, python-format
 msgid "Emails"
 msgstr "E-postalar"
 
@@ -503,15 +490,14 @@ msgid "Personal Message"
 msgstr "Kişisel Mesaj"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid ""
 "The current user must have an email address configured in User Preferences "
 "to be able to send outgoing emails."
 msgstr ""
-"Geçerli kullanıcının eposta gönderebilmesi için Kullanıcı önceliklerinde "
-"eposta adresi olmalıdır."
+"Geçerli kullanıcının e-posta gönderebilmesi için kullanıcı seçeneklerinde e-"
+"posta adresi girilmelidir."
 
 #. module: share
 #: field:share.wizard.result.line,login:0

@@ -44,23 +44,44 @@ class account_chart(osv.osv_memory):
 
     def onchange_fiscalyear(self, cr, uid, ids, fiscalyear_id=False, context=None):
         res = {}
+        if context is None:
+            context = {}
         if fiscalyear_id:
             start_period = end_period = False
-            cr.execute('''
-                SELECT * FROM (SELECT p.id
-                               FROM account_period p
-                               LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
-                               WHERE f.id = %s
-                               ORDER BY p.date_start ASC
-                               LIMIT 1) AS period_start
-                UNION ALL
-                SELECT * FROM (SELECT p.id
-                               FROM account_period p
-                               LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
-                               WHERE f.id = %s
-                               AND p.date_start < NOW()
-                               ORDER BY p.date_stop DESC
-                               LIMIT 1) AS period_stop''', (fiscalyear_id, fiscalyear_id))
+            if context.get('start', False) and context.get('stop', False) :
+                start = context.get('start')
+                stop = context.get('stop')
+                cr.execute('''
+                    SELECT * FROM (SELECT p.id
+                                   FROM account_period p
+                                   LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
+                                   WHERE f.id = %s and p.date_start >= %s
+                                   ORDER BY p.date_start ASC, p.special DESC
+                                   LIMIT 1) AS period_start
+                    UNION ALL
+                    SELECT * FROM (SELECT p.id
+                                   FROM account_period p
+                                   LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
+                                   WHERE f.id = %s and p.date_stop <= %s
+                                   AND p.date_start < NOW()
+                                   ORDER BY p.date_stop DESC
+                                   LIMIT 1) AS period_stop''', (fiscalyear_id, start, fiscalyear_id, stop))
+            else:
+                cr.execute('''
+                    SELECT * FROM (SELECT p.id
+                                   FROM account_period p
+                                   LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
+                                   WHERE f.id = %s
+                                   ORDER BY p.date_start ASC, p.special DESC
+                                   LIMIT 1) AS period_start
+                    UNION ALL
+                    SELECT * FROM (SELECT p.id
+                                   FROM account_period p
+                                   LEFT JOIN account_fiscalyear f ON (p.fiscalyear_id = f.id)
+                                   WHERE f.id = %s
+                                   AND p.date_start < NOW()
+                                   ORDER BY p.date_stop DESC
+                                   LIMIT 1) AS period_stop''', (fiscalyear_id, fiscalyear_id))
             periods =  [i[0] for i in cr.fetchall()]
             if periods and len(periods) > 1:
                 start_period = periods[0]

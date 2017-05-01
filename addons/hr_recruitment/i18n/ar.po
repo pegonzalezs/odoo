@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-11-16 18:13+0000\n"
+"PO-Revision-Date: 2012-08-13 04:24+0000\n"
 "Last-Translator: kifcaliph <Unknown>\n"
 "Language-Team: Arabic <ar@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:03+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:46+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_recruitment
 #: help:hr.applicant,active:0
@@ -26,8 +26,7 @@ msgstr ""
 "اذا كان وضع الحقل النشط خاطيء, ستسمح لك بإخفاء الحالة من غير ازالتها."
 
 #. module: hr_recruitment
-#: view:hr.recruitment.stage:0
-#: field:hr.recruitment.stage,requirements:0
+#: view:hr.recruitment.stage:0 field:hr.recruitment.stage,requirements:0
 msgid "Requirements"
 msgstr "المتطلبات"
 
@@ -64,10 +63,8 @@ msgid "Filter and view on next actions and date"
 msgstr "تصفية و عرض  للإجراءت المقبلة و التاريخ"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,department_id:0
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,department_id:0
+#: view:hr.applicant:0 field:hr.applicant,department_id:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,department_id:0
 msgid "Department"
 msgstr "الإدارة"
 
@@ -79,7 +76,7 @@ msgstr "موعد الاجراء التالي"
 #. module: hr_recruitment
 #: field:hr.applicant,salary_expected_extra:0
 msgid "Expected Salary Extra"
-msgstr "الراتب الاضافي المتوقع"
+msgstr "راتب إضافي متوقع"
 
 #. module: hr_recruitment
 #: view:hr.recruitment.report:0
@@ -92,8 +89,7 @@ msgid "Pending Jobs"
 msgstr "وظائف معلقة"
 
 #. module: hr_recruitment
-#: field:hr.applicant,company_id:0
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,company_id:0 view:hr.recruitment.report:0
 #: field:hr.recruitment.report,company_id:0
 msgid "Company"
 msgstr "شركة"
@@ -104,7 +100,7 @@ msgid "No"
 msgstr "كلا"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:445
+#: code:addons/hr_recruitment/hr_recruitment.py:436
 #, python-format
 msgid "You must define Applied Job for this applicant."
 msgstr "يجب أن تحدد الوظيفة المقدم لها هذا الطلب."
@@ -141,8 +137,7 @@ msgid "Create Partner"
 msgstr "إنشاء شريك"
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,day:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,day:0
 msgid "Day"
 msgstr "يوم"
 
@@ -192,14 +187,12 @@ msgid "Next Actions"
 msgstr "الاجراء التالي"
 
 #. module: hr_recruitment
-#: field:hr.applicant,salary_expected:0
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,salary_expected:0 view:hr.recruitment.report:0
 msgid "Expected Salary"
 msgstr "الراتب المتوقع"
 
 #. module: hr_recruitment
-#: field:hr.applicant,job_id:0
-#: field:hr.recruitment.report,job_id:0
+#: field:hr.applicant,job_id:0 field:hr.recruitment.report,job_id:0
 msgid "Applied Job"
 msgstr "وظيفة مطبقة"
 
@@ -211,10 +204,10 @@ msgstr "خريج"
 #. module: hr_recruitment
 #: field:hr.applicant,color:0
 msgid "Color Index"
-msgstr "الألوان"
+msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
+#: view:board.board:0 view:hr.applicant:0
 #: model:ir.actions.act_window,name:hr_recruitment.action_applicants_status
 msgid "Applicants Status"
 msgstr "أوضاع المتقدمين"
@@ -244,7 +237,7 @@ msgid "Recruitment"
 msgstr "التوظيف"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:445
+#: code:addons/hr_recruitment/hr_recruitment.py:436
 #, python-format
 msgid "Warning!"
 msgstr "تحذير!"
@@ -262,12 +255,10 @@ msgstr "تغيير اللون"
 #. module: hr_recruitment
 #: view:hr.recruitment.report:0
 msgid "Avg Proposed Salary"
-msgstr "متوسط الراتب المقترح"
+msgstr "متوسط المبلغ المقترح"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,availability:0
-#: field:hr.recruitment.report,available:0
+#: view:hr.applicant:0 field:hr.recruitment.report,available:0
 msgid "Availability"
 msgstr "متاح"
 
@@ -333,8 +324,7 @@ msgid "Job Description"
 msgstr "وصف العمل"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,source_id:0
+#: view:hr.applicant:0 field:hr.applicant,source_id:0
 msgid "Source"
 msgstr "المصدر"
 
@@ -350,11 +340,8 @@ msgid "A partner is already defined on this job request."
 msgstr "الشريك محدد بالفعل في طلب الوظيفة هذه."
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: selection:hr.applicant,state:0
-#: view:hr.recruitment.report:0
-#: selection:hr.recruitment.report,state:0
-#: selection:hr.recruitment.stage,state:0
+#: view:hr.applicant:0 selection:hr.applicant,state:0
+#: view:hr.recruitment.report:0 selection:hr.recruitment.report,state:0
 msgid "New"
 msgstr "جديد"
 
@@ -401,8 +388,7 @@ msgstr ""
 "الاولي، المقابلة الثانية، الرفض أو التعيين."
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,create_date:0
+#: view:hr.applicant:0 field:hr.applicant,create_date:0
 #: view:hr.recruitment.report:0
 msgid "Creation Date"
 msgstr "تاريخ الإنشاء"
@@ -419,8 +405,7 @@ msgid "Planned Date"
 msgstr "الوقت المخطط"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,priority:0
+#: view:hr.applicant:0 field:hr.applicant,priority:0
 #: field:hr.recruitment.report,priority:0
 msgid "Appreciation"
 msgstr "التقدير"
@@ -436,20 +421,15 @@ msgid "Print Interview"
 msgstr "اطبع المقابلة"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,stage_id:0
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,stage_id:0
+#: view:hr.applicant:0 field:hr.applicant,stage_id:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,stage_id:0
 #: view:hr.recruitment.stage:0
 msgid "Stage"
 msgstr "مرحلة"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: selection:hr.applicant,state:0
-#: view:hr.recruitment.report:0
-#: selection:hr.recruitment.report,state:0
-#: selection:hr.recruitment.stage,state:0
+#: view:hr.applicant:0 selection:hr.applicant,state:0
+#: view:hr.recruitment.report:0 selection:hr.recruitment.report,state:0
 msgid "Pending"
 msgstr "معلّق"
 
@@ -470,7 +450,6 @@ msgstr "يوليو"
 
 #. module: hr_recruitment
 #: view:hr.applicant:0
-#: field:hr.applicant,name:0
 msgid "Subject"
 msgstr "الموضوع"
 
@@ -481,6 +460,8 @@ msgstr "مراقبو رسائل البريد الالكتروني"
 
 #. module: hr_recruitment
 #: view:hr.applicant:0
+#: model:ir.actions.act_window,name:hr_recruitment.crm_case_categ0_act_job
+#: model:ir.ui.menu,name:hr_recruitment.menu_crm_case_categ0_act_job
 msgid "Applicants"
 msgstr "الراتب المتوقع"
 
@@ -525,9 +506,7 @@ msgid "Gives the sequence order when displaying a list of stages."
 msgstr "ويعطي امر المتتابعة عند عرض قائمة المراحل."
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:347
-#: field:hr.applicant,partner_id:0
-#, python-format
+#: view:hr.applicant:0
 msgid "Contact"
 msgstr "جهة الاتصال"
 
@@ -542,7 +521,7 @@ msgid "Qualification"
 msgstr "المؤهل"
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,partner_id:0 view:hr.recruitment.report:0
 #: field:hr.recruitment.report,partner_id:0
 msgid "Partner"
 msgstr "شريك"
@@ -615,8 +594,7 @@ msgid "Recruitment during last month"
 msgstr "توظيف خلال الشهر الماضي"
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,month:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,month:0
 msgid "Month"
 msgstr "شهر"
 
@@ -646,8 +624,7 @@ msgid "Yes"
 msgstr "نعم"
 
 #. module: hr_recruitment
-#: field:hr.applicant,salary_proposed:0
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,salary_proposed:0 view:hr.recruitment.report:0
 msgid "Proposed Salary"
 msgstr "الراتب المقترح"
 
@@ -693,9 +670,7 @@ msgid "Group By ..."
 msgstr "تجميع حسب ..."
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: selection:hr.applicant,state:0
-#: selection:hr.recruitment.stage,state:0
+#: view:hr.applicant:0 selection:hr.applicant,state:0
 msgid "In Progress"
 msgstr "قيد التقدم"
 
@@ -731,8 +706,7 @@ msgid "Degrees"
 msgstr "درجات"
 
 #. module: hr_recruitment
-#: field:hr.applicant,date_closed:0
-#: field:hr.recruitment.report,date_closed:0
+#: field:hr.applicant,date_closed:0 field:hr.recruitment.report,date_closed:0
 msgid "Closed"
 msgstr "مغلق"
 
@@ -762,15 +736,13 @@ msgid "Meeting"
 msgstr "إجتماع"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:360
+#: code:addons/hr_recruitment/hr_recruitment.py:347
 #, python-format
 msgid "No Subject"
 msgstr "بدون موضوع"
 
 #. module: hr_recruitment
-#: field:hr.applicant,state:0
-#: field:hr.recruitment.report,state:0
-#: field:hr.recruitment.stage,state:0
+#: view:hr.applicant:0
 msgid "Status"
 msgstr "الحالة"
 
@@ -785,10 +757,8 @@ msgid "August"
 msgstr "أغسطس"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,type_id:0
-#: view:hr.recruitment.degree:0
-#: view:hr.recruitment.report:0
+#: view:hr.applicant:0 field:hr.applicant,type_id:0
+#: view:hr.recruitment.degree:0 view:hr.recruitment.report:0
 #: field:hr.recruitment.report,type_id:0
 #: model:ir.actions.act_window,name:hr_recruitment.hr_recruitment_degree_action
 msgid "Degree"
@@ -884,8 +854,7 @@ msgid "Not Good"
 msgstr "غير جيد"
 
 #. module: hr_recruitment
-#: field:hr.applicant,date:0
-#: field:hr.recruitment.report,date:0
+#: field:hr.applicant,date:0 field:hr.recruitment.report,date:0
 msgid "Date"
 msgstr "تاريخ"
 
@@ -969,13 +938,12 @@ msgid "The name of the Degree of Recruitment must be unique!"
 msgstr "أسم درجة الوظيفية يجب أن يكون فريد !"
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,year:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,year:0
 msgid "Year"
 msgstr "سنة"
 
 #. module: hr_recruitment
-#: view:hired.employee:0
+#: view:hired.employee:0 view:hr.recruitment.job2phonecall:0
 #: view:hr.recruitment.partner.create:0
 msgid "Cancel"
 msgstr "إلغاء"
@@ -1007,8 +975,7 @@ msgid "Gives the sequence order when displaying a list of degrees."
 msgstr "ويعطي امر المتتابعة عند عرض قائمة الدرجات."
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,user_id:0
+#: view:hr.applicant:0 field:hr.applicant,user_id:0
 #: view:hr.recruitment.report:0
 msgid "Responsible"
 msgstr "مسئول"
@@ -1046,8 +1013,7 @@ msgid "Reply"
 msgstr "رد"
 
 #. module: hr_recruitment
-#: model:crm.meeting.type,name:hr_recruitment.categ_meet_interview
-#: view:hr.job:0
+#: view:hr.applicant:0
 msgid "Interview"
 msgstr "المقابلة"
 
@@ -1077,10 +1043,8 @@ msgid "Word of Mouth"
 msgstr "علي لسان العامة"
 
 #. module: hr_recruitment
-#: selection:hr.applicant,state:0
-#: selection:hr.recruitment.report,state:0
+#: selection:hr.applicant,state:0 selection:hr.recruitment.report,state:0
 #: model:hr.recruitment.stage,name:hr_recruitment.stage_job6
-#: selection:hr.recruitment.stage,state:0
 msgid "Refused"
 msgstr "مرفوض"
 
@@ -1091,10 +1055,8 @@ msgid "Applicant '%s' is being hired."
 msgstr "ويجري التعاقد للطلب ‘%s‘"
 
 #. module: hr_recruitment
-#: selection:hr.applicant,state:0
-#: view:hr.recruitment.report:0
+#: selection:hr.applicant,state:0 view:hr.recruitment.report:0
 #: selection:hr.recruitment.report,state:0
-#: selection:hr.recruitment.stage,state:0
 msgid "Hired"
 msgstr "متعاقد"
 
@@ -1120,8 +1082,7 @@ msgid "February"
 msgstr "فبراير"
 
 #. module: hr_recruitment
-#: field:hr.applicant_category,name:0
-#: field:hr.recruitment.degree,name:0
+#: field:hr.applicant,name:0 field:hr.recruitment.degree,name:0
 #: field:hr.recruitment.stage,name:0
 msgid "Name"
 msgstr "الاسم"
@@ -1154,7 +1115,7 @@ msgstr "في إنتظار التعيين"
 #. module: hr_recruitment
 #: model:hr.recruitment.source,name:hr_recruitment.source_monster
 msgid "Monster"
-msgstr "موقع مونستر"
+msgstr ""
 
 #. module: hr_recruitment
 #: model:ir.ui.menu,name:hr_recruitment.menu_hr_job
@@ -1164,12 +1125,12 @@ msgstr "نوع الوظيفة"
 #. module: hr_recruitment
 #: view:hr.recruitment.report:0
 msgid "In progress recruitment"
-msgstr "جاري التوظيف"
+msgstr ""
 
 #. module: hr_recruitment
 #: sql_constraint:hr.job:0
 msgid "The name of the job position must be unique per company!"
-msgstr "يجب أن يكون اسم الوظيفة فريداً في الشركة !"
+msgstr ""
 
 #. module: hr_recruitment
 #: field:hr.recruitment.degree,sequence:0
@@ -1200,6 +1161,7 @@ msgstr "راتب مقترح من قبل المنشأة، مزايا إضافية
 
 #. module: hr_recruitment
 #: help:hr.recruitment.report,delay_close:0
+#: help:hr.recruitment.report,delay_open:0
 msgid "Number of Days to close the project issue"
 msgstr "عدد الايام لغلق مسألة المشروع"
 

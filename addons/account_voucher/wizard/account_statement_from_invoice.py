@@ -84,7 +84,7 @@ class account_statement_from_invoice_lines(osv.osv_memory):
                             'account_id': result.get('account_id', statement.journal_id.default_credit_account_id.id), # improve me: statement.journal_id.default_credit_account_id.id
                             'company_id':statement.company_id.id,
                             'currency_id':statement.currency.id,
-                            'date':line.date,
+                            'date': statement.date,
                             'amount':abs(amount),
                             'payment_rate': result['value']['payment_rate'],
                             'payment_rate_currency_id': result['value']['payment_rate_currency_id'],
@@ -100,11 +100,6 @@ class account_statement_from_invoice_lines(osv.osv_memory):
             if voucher_line_dict:
                 voucher_line_dict.update({'voucher_id': voucher_id})
                 voucher_line_obj.create(cr, uid, voucher_line_dict, context=context)
-
-            #Updated the amount of voucher in case of partially paid invoice
-            amount_res = voucher_line_dict.get('amount_unreconciled',amount)
-            voucher_obj.write(cr, uid, voucher_id, {'amount':amount_res}, context=context)
-
             if line.journal_id.type == 'sale':
                 type = 'customer'
             elif line.journal_id.type == 'purchase':
@@ -113,7 +108,7 @@ class account_statement_from_invoice_lines(osv.osv_memory):
                 type = 'general'
             statement_line_obj.create(cr, uid, {
                 'name': line.name or '?',
-                'amount': amount_res if amount >= 0 else -amount_res,
+                'amount': amount,
                 'type': type,
                 'partner_id': line.partner_id.id,
                 'account_id': line.account_id.id,

@@ -31,6 +31,7 @@ import openerp.modules
 import print_xml
 import render
 import urllib
+import time
 
 #
 # coerce any type to a unicode string (to preserve non-ascii characters)
@@ -55,6 +56,25 @@ class report_int(netsvc.Service):
     def create(self, cr, uid, ids, datas, context=None):
         return False
 
+    def get_name(self, cr, uid, ids, datas, context):
+        from tools import safe_eval
+        name = "test.pdf"
+        pool = pooler.get_pool(cr.dbname)
+        ir_actions_report_xml_obj = pool.get('ir.actions.report.xml')
+        report_xml_ids = ir_actions_report_xml_obj.search(cr, uid, [('report_name', '=', self.name[7:])], context=context)
+        report = report_xml_ids and ir_actions_report_xml_obj.browse(cr, uid, report_xml_ids)[0] or None
+        if report:
+            if report.attachment and len(report.attachment.strip()):
+                obj = pool.get(context['active_model']).browse(cr, uid, context['active_ids'], context)[0]
+                name = safe_eval.safe_eval(report.attachment, {'object': obj, 'time': time})
+                if name:
+                    name = name.rsplit( ".", 1 )[ 0 ]
+                if not isinstance(name, basestring) or not len(name):
+                    name = report.name.replace('Print', '').strip()
+            else:
+                name = report.name.replace('Print', '').strip()
+        return name
+    
 """
     Class to automatically build a document using the transformation process:
         XML -> DATAS -> RML -> PDF
@@ -163,30 +183,15 @@ class report_rml(report_int):
         # * (re)build/update the stylesheet with the translated items
 
         def translate(doc, lang):
-            translate_aux(doc, lang, False)
-
-        def translate_aux(doc, lang, t):
-            for node in doc:
-                t = t or node.get("t")
-                if t:
-                    text = None
-                    tail = None
-                    if node.text:
-                        text = node.text.strip().replace('\n',' ')
-                    if node.tail:
-                        tail = node.tail.strip().replace('\n',' ')
-                    if text:
-                        translation1 = ir_translation_obj._get_source(cr, uid, self.name2, 'xsl', lang, text)
-                        if translation1:
-                            node.text = node.text.replace(text, translation1)
-                    if tail:
-                        translation2 = ir_translation_obj._get_source(cr, uid, self.name2, 'xsl', lang, tail)
-                        if translation2:
-                            node.tail = node.tail.replace(tail, translation2)
-                translate_aux(node, lang, t)
+            for node in doc.xpath('//*[@t]'):
+                if not node.text:
+                    continue
+                translation = ir_translation_obj._get_source(cr, uid, self.name2, 'xsl', lang, node.text)
+                if translation:
+                    node.text = translation
 
         if context.get('lang', False):
-            translate(stylesheet.iter(), context['lang'])
+            translate(stylesheet, context['lang'])
 
         transform = etree.XSLT(stylesheet)
         xml = etree.tostring(

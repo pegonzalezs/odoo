@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:22+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 10:03+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: share
 #: field:share.wizard,embed_option_title:0
@@ -53,14 +53,14 @@ msgid "Share Access URL"
 msgstr "Delnings URL"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:886
+#: code:addons/share/wizard/share_wizard.py:782
 #, python-format
 msgid "You may use your current login (%s) and password to view them.\n"
 msgstr ""
 "Du kan använda nuvarande inloggning (%s) och lösenord för att se dem.\n"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:620
+#: code:addons/share/wizard/share_wizard.py:601
 #, python-format
 msgid "(Modified)"
 msgstr "(Ändrad)"
@@ -76,20 +76,18 @@ msgstr ""
 "server på:"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:598
+#: code:addons/share/wizard/share_wizard.py:579
 #, python-format
 msgid "Sharing filter created by user %s (%s) for group %s"
 msgstr ""
 
 #. module: share
-#: field:share.wizard,embed_url:0
-#: field:share.wizard.result.line,share_url:0
+#: field:share.wizard,embed_url:0 field:share.wizard.result.line,share_url:0
 msgid "Share URL"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:848
-#: code:addons/share/wizard/share_wizard.py:880
+#: code:addons/share/wizard/share_wizard.py:776
 #, python-format
 msgid "These are your credentials to access this protected area:\n"
 msgstr ""
@@ -106,15 +104,12 @@ msgid "Access info"
 msgstr ""
 
 #. module: share
-#. openerp-web
-#: code:addons/share/static/src/js/share.js:60
 #: view:share.wizard:0
-#, python-format
 msgid "Share"
 msgstr "Utdelning"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:570
+#: code:addons/share/wizard/share_wizard.py:551
 #, python-format
 msgid "(Duplicated for modified sharing permissions)"
 msgstr ""
@@ -140,8 +135,7 @@ msgid "Next"
 msgstr "Nästa"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:849
-#: code:addons/share/wizard/share_wizard.py:881
+#: code:addons/share/wizard/share_wizard.py:777
 #, python-format
 msgid "Username"
 msgstr "Användarnamn"
@@ -176,7 +170,7 @@ msgid ""
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:885
+#: code:addons/share/wizard/share_wizard.py:781
 #, python-format
 msgid ""
 "The documents have been automatically added to your current OpenERP "
@@ -194,8 +188,7 @@ msgid "Share Group"
 msgstr "Delningsgrupp"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid "Email required"
 msgstr "E-post krävs"
@@ -223,8 +216,7 @@ msgid "Regular groups only (no share groups"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:855
-#: code:addons/share/wizard/share_wizard.py:889
+#: code:addons/share/wizard/share_wizard.py:787
 #, python-format
 msgid ""
 "OpenERP is a powerful and user-friendly suite of Business Applications (CRM, "
@@ -254,7 +246,7 @@ msgid "Please indicate the emails of the persons to share with, one per line"
 msgstr ""
 
 #. module: share
-#: field:share.wizard.result.line,user_id:0
+#: field:share.wizard,embed_code:0 field:share.wizard.result.line,user_id:0
 msgid "unknown"
 msgstr "okänd"
 
@@ -275,7 +267,7 @@ msgid "The chosen company is not in the allowed companies for this user"
 msgstr "Detta bolag är inte tillåtet för den här användaren"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:545
+#: code:addons/share/wizard/share_wizard.py:526
 #, python-format
 msgid "(Copy for sharing)"
 msgstr ""
@@ -286,7 +278,7 @@ msgid "Newly created"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:635
+#: code:addons/share/wizard/share_wizard.py:616
 #, python-format
 msgid "Indirect sharing filter created by user %s (%s) for group %s"
 msgstr ""
@@ -318,7 +310,7 @@ msgid "Groups"
 msgstr "Grupper"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:657
+#: code:addons/share/wizard/share_wizard.py:636
 #, python-format
 msgid ""
 "Sorry, the current screen and filter you are trying to share are not "
@@ -332,8 +324,7 @@ msgid "Use this link"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:851
-#: code:addons/share/wizard/share_wizard.py:883
+#: code:addons/share/wizard/share_wizard.py:779
 #, python-format
 msgid "Database"
 msgstr "Databas"
@@ -344,13 +335,12 @@ msgid "Domain"
 msgstr "Domän"
 
 #. module: share
-#: view:share.wizard:0
-#: field:share.wizard,result_line_ids:0
+#: view:share.wizard:0 field:share.wizard,result_line_ids:0
 msgid "Summary"
 msgstr "Sammandrag"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:512
+#: code:addons/share/wizard/share_wizard.py:493
 #, python-format
 msgid "Copied access for sharing"
 msgstr ""
@@ -430,7 +420,7 @@ msgid "Share Wizard"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:792
+#: code:addons/share/wizard/share_wizard.py:740
 #, python-format
 msgid "Shared access created!"
 msgstr ""
@@ -449,17 +439,14 @@ msgid "Access Groups"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:850
-#: code:addons/share/wizard/share_wizard.py:882
+#: code:addons/share/wizard/share_wizard.py:778
 #: field:share.wizard.result.line,password:0
 #, python-format
 msgid "Password"
 msgstr "Lösenord"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:77
 #: field:share.wizard,new_users:0
-#, python-format
 msgid "Emails"
 msgstr "E-post"
 
@@ -480,8 +467,7 @@ msgid "Personal Message"
 msgstr "Personligt meddelande"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid ""
 "The current user must have an email address configured in User Preferences "

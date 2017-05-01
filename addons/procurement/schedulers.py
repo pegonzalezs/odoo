@@ -28,6 +28,9 @@ from tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT
 import tools
 import netsvc
 import pooler
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class procurement_order(osv.osv):
     _inherit = 'procurement.order'
@@ -187,7 +190,10 @@ class procurement_order(osv.osv):
                     continue
 
                 product = product_obj.browse(cr, uid, [product_read['id']], context=context)[0]
-                if product.supply_method == 'buy':
+                _logger.debug("create_automatic_op Product: [%s]%s" %(product.default_code,product.name))
+                if product.supply_method == 'buy' and product.procure_method == 'make_to_order':
+                    continue
+                elif product.supply_method == 'buy':
                     location_id = warehouse.lot_input_id.id
                 elif product.supply_method == 'produce':
                     location_id = warehouse.lot_stock_id.id

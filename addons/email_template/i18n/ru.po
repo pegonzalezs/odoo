@@ -8,20 +8,20 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2012-02-08 00:36+0000\n"
-"PO-Revision-Date: 2012-10-31 09:02+0000\n"
-"Last-Translator: Chertykov Denis <chertykov@gmail.com>\n"
+"PO-Revision-Date: 2012-02-17 09:10+0000\n"
+"Last-Translator: Stanislav Hanzhin <Unknown>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:58+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:42+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: email_template
 #: field:email.template,subtype:0
 #: field:email_template.preview,subtype:0
 msgid "Message type"
-msgstr "Тип сообщения"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,report_name:0
@@ -32,49 +32,48 @@ msgstr "Файл отчета"
 #. module: email_template
 #: view:email.template:0
 msgid "SMTP Server"
-msgstr "Сервер SMTP"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
 msgid "Remove the sidebar button currently displayed on related documents"
 msgstr ""
-"Удалить кнопку боковой панели показываемую сейчас по связанным документам"
 
 #. module: email_template
 #: field:email.template,ref_ir_act_window:0
 #: field:email_template.preview,ref_ir_act_window:0
 msgid "Sidebar action"
-msgstr "Действие боковой панели"
+msgstr ""
 
 #. module: email_template
 #: view:mail.compose.message:0
 msgid "Save as a new template"
-msgstr "Сохранить как новый шаблон"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,subject:0
 #: help:email_template.preview,subject:0
 msgid "Subject (placeholders may be used here)"
-msgstr "Тема (здесь могут быть использованы подстановки)"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,email_cc:0
 #: help:email_template.preview,email_cc:0
 msgid "Carbon copy recipients (placeholders may be used here)"
-msgstr "Получатели копий (здесь могут быть использованы подстановки)"
+msgstr ""
 
 #. module: email_template
 #: selection:email.template,state:0
 #: selection:email_template.preview,state:0
 msgid "Received"
-msgstr "Получено"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
 #: field:email.template,ref_ir_value:0
 #: field:email_template.preview,ref_ir_value:0
 msgid "Sidebar button"
-msgstr "Кнопка боковой панели"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,report_name:0
@@ -83,25 +82,22 @@ msgid ""
 "Name to use for the generated report file (may contain placeholders)\n"
 "The extension can be omitted and will then come from the report type."
 msgstr ""
-"Название для использования созданного файла отчёта (может содержать "
-"подстановки)\n"
-"Расширение может быть опущено и будет взято из типа отчёта."
 
 #. module: email_template
 #: view:email.template:0
 msgid "Attach existing files"
-msgstr "Прикрепить существующие файлы"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
 msgid "Email Content"
-msgstr "Содержание письма"
+msgstr ""
 
 #. module: email_template
 #: selection:email.template,state:0
 #: selection:email_template.preview,state:0
 msgid "Cancelled"
-msgstr "Отменено"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,reply_to:0
@@ -116,7 +112,7 @@ msgid "Auto Delete"
 msgstr "Авто удаление"
 
 #. module: email_template
-#: code:addons/email_template/email_template.py:231
+#: code:addons/email_template/email_template.py:218
 #, python-format
 msgid "Warning"
 msgstr "Предупреждение"
@@ -124,13 +120,13 @@ msgstr "Предупреждение"
 #. module: email_template
 #: model:ir.model,name:email_template.model_res_partner
 msgid "Partner"
-msgstr "Партнёр"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,subject:0
 #: field:email_template.preview,subject:0
 msgid "Subject"
-msgstr "Тема"
+msgstr "Предмет"
 
 #. module: email_template
 #: field:email.template,email_from:0
@@ -147,13 +143,13 @@ msgstr "Шаблон"
 #: field:email.template,partner_id:0
 #: field:email_template.preview,partner_id:0
 msgid "Related partner"
-msgstr "Связанный партнер"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,sub_model_object_field:0
 #: field:email_template.preview,sub_model_object_field:0
 msgid "Sub-field"
-msgstr "Субполе"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
@@ -161,8 +157,6 @@ msgid ""
 "Display a button in the sidebar of related documents to open a composition "
 "wizard with this template"
 msgstr ""
-"Показать кнопку связанных документов на боковой панели для открытия мастера "
-"составления с этим шаблоном"
 
 #. module: email_template
 #: field:email.template,state:0
@@ -183,34 +177,32 @@ msgid ""
 "Type of message, usually 'html' or 'plain', used to select plaintext or rich "
 "text contents accordingly"
 msgstr ""
-"Тип сообщения, обычно 'html' или 'простой', используемый для выбора "
-"содержимого соответственно простого текста или форматного текста"
 
 #. module: email_template
 #: model:ir.model,name:email_template.model_mail_compose_message
 msgid "E-mail composition wizard"
-msgstr "Мастер создания электронной почты"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
 msgid "Dynamic Values Builder"
-msgstr "Конструктор динамических значений"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,res_id:0
 msgid "Related Document ID"
-msgstr "ID связанного документа"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,lang:0
 #: field:email_template.preview,lang:0
 msgid "Language Selection"
-msgstr "Выбор языка"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
 msgid "Advanced"
-msgstr "Расширенный"
+msgstr "Продвинутый"
 
 #. module: email_template
 #: field:email.template,email_to:0
@@ -222,7 +214,7 @@ msgstr "Кому"
 #: field:email.template,model:0
 #: field:email_template.preview,model:0
 msgid "Related Document model"
-msgstr "Модель связанного документа"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,model_object_field:0
@@ -232,9 +224,6 @@ msgid ""
 "If it is a relationship field you will be able to select a target field at "
 "the destination of the relationship."
 msgstr ""
-"Выбор целевого поля из связанной модели документа.\n"
-"Если это поле взаимоотношений, вы сможете выбрать целевое поле при месте "
-"назначения взаимоотношения."
 
 #. module: email_template
 #: view:email.template:0
@@ -245,13 +234,13 @@ msgstr "Предпросмотр шаблона"
 #: field:email.template,null_value:0
 #: field:email_template.preview,null_value:0
 msgid "Null value"
-msgstr "Нулевое значение"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,sub_object:0
 #: field:email_template.preview,sub_object:0
 msgid "Sub-model"
-msgstr "Субмодель"
+msgstr "Подмодель"
 
 #. module: email_template
 #: help:email.template,track_campaign_item:0
@@ -261,21 +250,17 @@ msgid ""
 "emails so you can identify replies and link them back to the corresponding "
 "resource record. This is useful for CRM leads for example"
 msgstr ""
-"Позвольте это, если вы хотите включение специального маркера слежения в "
-"исходящие письма, так чтобы вы могли идентифицировать ответы и их обратную "
-"связь с соответствующей записью ресурса.Например, это удобно для кандидатов "
-"в CRM"
 
 #. module: email_template
 #: field:mail.compose.message,use_template:0
 msgid "Use Template"
-msgstr "Использовать шаблон"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,attachment_ids:0
 #: field:email_template.preview,attachment_ids:0
 msgid "Files to attach"
-msgstr "Файлы для вложения"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
@@ -286,13 +271,13 @@ msgstr "Настройки"
 #: field:email.template,model_id:0
 #: field:email_template.preview,model_id:0
 msgid "Related document model"
-msgstr "Модель связанного документа"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,email_from:0
 #: help:email_template.preview,email_from:0
 msgid "Sender address (placeholders may be used here)"
-msgstr "Адрес отправителя (здесь могут быть использованы подстановки)"
+msgstr ""
 
 #. module: email_template
 #: help:res.partner,opt_out:0
@@ -300,13 +285,11 @@ msgid ""
 "If checked, this partner will not receive any automated email notifications, "
 "such as the availability of invoices."
 msgstr ""
-"Если отмечен, этот партнёр не будет получать автоматические почтовые "
-"уведомления, такие как возможность выставления счетов."
 
 #. module: email_template
 #: view:email.template:0
 msgid "Note: This is Raw HTML."
-msgstr "Примечание: это сырой HTML"
+msgstr "Примечание: Этот HTML сырой"
 
 #. module: email_template
 #: view:email.template:0
@@ -317,27 +300,25 @@ msgstr "Группировать по..."
 #: field:email.template,user_signature:0
 #: field:email_template.preview,user_signature:0
 msgid "Add Signature"
-msgstr "Добавить подпись"
+msgstr ""
 
 #. module: email_template
-#: help:email.template,body:0
-#: help:email_template.preview,body:0
+#: help:email.template,body_text:0
+#: help:email_template.preview,body_text:0
 msgid "Plaintext version of the message (placeholders may be used here)"
 msgstr ""
-"Простая текстовая версия сообщения (здесь могут быть использованы "
-"подстановки)"
 
 #. module: email_template
 #: help:email.template,original:0
 #: help:email_template.preview,original:0
 msgid "Original version of the message, as it was sent on the network"
-msgstr "Оригинальная версия сообщения, как было отправлено в сеть"
+msgstr ""
 
 #. module: email_template
 #: code:addons/email_template/email_template.py:230
 #, python-format
 msgid "(copy)"
-msgstr "(copy)"
+msgstr ""
 
 #. module: email_template
 #: selection:email.template,state:0
@@ -348,7 +329,7 @@ msgstr "Исходящие"
 #. module: email_template
 #: view:mail.compose.message:0
 msgid "Use a message template"
-msgstr "Использовать шаблон сообщения"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,user_signature:0
@@ -357,14 +338,12 @@ msgid ""
 "If checked, the user's signature will be appended to the text version of the "
 "message"
 msgstr ""
-"Если помечен, к текстовой версии сообщения будет добавлена подпись "
-"пользователя"
 
 #. module: email_template
 #: view:email.template:0
 #: view:email_template.preview:0
 msgid "Body (Rich/HTML)"
-msgstr "Тело (форматированне/HTML)"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,sub_object:0
@@ -373,8 +352,6 @@ msgid ""
 "When a relationship field is selected as first field, this field shows the "
 "document model the relationship goes to."
 msgstr ""
-"Когда связывающее поле выбрано как первое поле, это поле показывает "
-"связанную модель документа ."
 
 #. module: email_template
 #: model:ir.model,name:email_template.model_email_template
@@ -385,7 +362,7 @@ msgstr "Шаблоны писем"
 #: field:email.template,date:0
 #: field:email_template.preview,date:0
 msgid "Date"
-msgstr "Дата"
+msgstr ""
 
 #. module: email_template
 #: model:ir.actions.act_window,name:email_template.wizard_email_template_preview
@@ -396,12 +373,12 @@ msgstr "Просмотр шаблона"
 #: field:email.template,message_id:0
 #: field:email_template.preview,message_id:0
 msgid "Message-Id"
-msgstr "ID сообщения"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
 msgid "Add sidebar button"
-msgstr "Добавить кнопку боковой панели"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
@@ -415,16 +392,16 @@ msgid "Advanced Options"
 msgstr "Расширенные настройки"
 
 #. module: email_template
-#: code:addons/email_template/email_template.py:196
+#: code:addons/email_template/email_template.py:183
 #, python-format
 msgid "Send Mail (%s)"
-msgstr "Отправить почту (%s)"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,body_html:0
 #: field:email_template.preview,body_html:0
 msgid "Rich-text contents"
-msgstr "Содержимое форматированного текста"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,copyvalue:0
@@ -436,7 +413,7 @@ msgstr "Выражение"
 #: field:email.template,original:0
 #: field:email_template.preview,original:0
 msgid "Original"
-msgstr "Оригинал"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
@@ -450,49 +427,46 @@ msgid ""
 "Final placeholder expression, to be copy-pasted in the desired template "
 "field."
 msgstr ""
-"Окончательное выражение подстановки, для копирования-вставки в желаемое поле "
-"шаблона."
 
 #. module: email_template
-#: field:email.template,attachment_ids:0
-#: field:email_template.preview,attachment_ids:0
+#: view:email.template:0
 msgid "Attachments"
-msgstr "Вложения"
+msgstr "Прикрепленные файлы"
 
 #. module: email_template
 #: view:email.template:0
 msgid "Email Details"
-msgstr "Подробности письма"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,email_cc:0
 #: field:email_template.preview,email_cc:0
 msgid "Cc"
-msgstr "Копия"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,body_text:0
 #: field:email_template.preview,body_text:0
 msgid "Text contents"
-msgstr "Текстовое содержимое"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,auto_delete:0
 #: help:email_template.preview,auto_delete:0
 msgid "Permanently delete this email after sending it, to save space"
-msgstr "Навсегда удалить это письмо после отправки, для экономии места"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,references:0
 #: field:email_template.preview,references:0
 msgid "References"
-msgstr "Ссылки"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,display_text:0
 #: field:email_template.preview,display_text:0
 msgid "Display Text"
-msgstr "Вывести текст"
+msgstr ""
 
 #. module: email_template
 #: view:email_template.preview:0
@@ -506,8 +480,6 @@ msgid ""
 "You may attach files to this template, to be added to all emails created "
 "from this template"
 msgstr ""
-"Вы можете прикрепить файлы к этому шаблону для добавления ко всем письмам "
-"созданным из этого шаблона"
 
 #. module: email_template
 #: help:email.template,headers:0
@@ -516,14 +488,12 @@ msgid ""
 "Full message headers, e.g. SMTP session headers (usually available on "
 "inbound messages only)"
 msgstr ""
-"Полные заголовки сообщения, т.е. заголовки сессии SMTP (обычно доступные "
-"только во входящих сообщениях)"
 
 #. module: email_template
 #: field:email.template,mail_server_id:0
 #: field:email_template.preview,mail_server_id:0
 msgid "Outgoing Mail Server"
-msgstr "Сервер исходящей почты"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,ref_ir_act_window:0
@@ -532,8 +502,6 @@ msgid ""
 "Sidebar action to make this template available on records of the related "
 "document model"
 msgstr ""
-"Действие боковой панели для доступности этого шаблона по записям связанным с "
-"моделью документа"
 
 #. module: email_template
 #: field:email.template,model_object_field:0
@@ -545,7 +513,7 @@ msgstr "Поле"
 #: field:email.template,user_id:0
 #: field:email_template.preview,user_id:0
 msgid "Related user"
-msgstr "Связанный пользователь"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
@@ -557,13 +525,13 @@ msgstr "Шаблоны"
 #. module: email_template
 #: field:res.partner,opt_out:0
 msgid "Opt-out"
-msgstr "Без уведомлений"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,email_bcc:0
 #: help:email_template.preview,email_bcc:0
 msgid "Blind carbon copy recipients (placeholders may be used here)"
-msgstr "Получатели скрытой копии (здесь могут быть использованы подстановки)"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,lang:0
@@ -574,23 +542,17 @@ msgid ""
 "a placeholder expression that provides the appropriate language code, e.g. "
 "${object.partner_id.lang.code}."
 msgstr ""
-"Необязательный язык перевода (ISO код) для выбора при отправке почты. Если "
-"не задан, будет использована английская версия. Это обычно будет выражение "
-"подстановки, которое предусматривает соответствующий код языка, например "
-"${object.partner_id.lang.code}."
 
 #. module: email_template
 #: field:email_template.preview,res_id:0
 msgid "Sample Document"
-msgstr "Пример документа"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,email_to:0
 #: help:email_template.preview,email_to:0
 msgid "Comma-separated recipient addresses (placeholders may be used here)"
 msgstr ""
-"Адреса получателей разделённые запятыми (здесь могут быть использованы "
-"подстановки)"
 
 #. module: email_template
 #: field:email.template,name:0
@@ -602,7 +564,7 @@ msgstr "Название"
 #: field:email.template,track_campaign_item:0
 #: field:email_template.preview,track_campaign_item:0
 msgid "Resource Tracking"
-msgstr "Отслеживание ресурса"
+msgstr ""
 
 #. module: email_template
 #: model:ir.model,name:email_template.model_email_template_preview
@@ -624,42 +586,35 @@ msgid ""
 "instead.\n"
 "Placeholders must be used here, as this value always needs to be unique!"
 msgstr ""
-"Заголовок ID-сообщения SMTP для использования в исходящих сообщениях "
-"основанных на шаблоне. Учтите, пожалуйста, что это переопределит параметр "
-"'Отслеживание ресурса', так что если вы просто нуждаетесь в отслеживании "
-"ответов на исходящие письма, вместо этого включите эту опцию.\n"
-"Здесь могут быть использованы подстановки, , так как это значение всегда "
-"должно быть уникальным !"
 
 #. module: email_template
 #: field:email.template,headers:0
 #: field:email_template.preview,headers:0
 msgid "Message headers"
-msgstr "Заголовки сообщения"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,email_bcc:0
 #: field:email_template.preview,email_bcc:0
 msgid "Bcc"
-msgstr "Скрытая копия"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,reply_to:0
 #: help:email_template.preview,reply_to:0
 msgid "Preferred response address (placeholders may be used here)"
 msgstr ""
-"Предпочтительный обратный адрес (здесь могут быть использованы подстановки)"
 
 #. module: email_template
 #: view:email.template:0
 msgid "Remove sidebar button"
-msgstr "Удалить кнопку боковой панели"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,null_value:0
 #: help:email_template.preview,null_value:0
 msgid "Optional value to use if the target field is empty"
-msgstr "Необязательное значение используемое если целевое поле пусто"
+msgstr ""
 
 #. module: email_template
 #: view:email.template:0
@@ -670,24 +625,24 @@ msgstr "Модель"
 #: help:email.template,references:0
 #: help:email_template.preview,references:0
 msgid "Message references, such as identifiers of previous messages"
-msgstr "Ссылки сообщения, такие как идентификаторы предыдущих сообщений"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,ref_ir_value:0
 #: help:email_template.preview,ref_ir_value:0
 msgid "Sidebar button to open the sidebar action"
-msgstr "Кнопка боковой панели для открытия действия боковой панели"
+msgstr ""
 
 #. module: email_template
 #: constraint:res.partner:0
 msgid "Error ! You cannot create recursive associated members."
-msgstr "Ошибка! Вы не можете создавать рекурсивные ссылки на участников."
+msgstr ""
 
 #. module: email_template
-#: code:addons/email_template/email_template.py:231
+#: code:addons/email_template/email_template.py:218
 #, python-format
 msgid "Deletion of the action record failed."
-msgstr "Удаление действия не удалось."
+msgstr ""
 
 #. module: email_template
 #: help:email.template,mail_server_id:0
@@ -696,14 +651,12 @@ msgid ""
 "Optional preferred server for outgoing mails. If not set, the highest "
 "priority one will be used."
 msgstr ""
-"Необязательный предпочтительный сервер для исходящей почты. Если не задан, "
-"будет использован имеющий высший приоритет."
 
 #. module: email_template
 #: selection:email.template,state:0
 #: selection:email_template.preview,state:0
 msgid "Delivery Failed"
-msgstr "Доставка не удалась"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,sub_model_object_field:0
@@ -712,24 +665,20 @@ msgid ""
 "When a relationship field is selected as first field, this field lets you "
 "select the target field within the destination document model (sub-model)."
 msgstr ""
-"Когда поле связи выбрано как первое поле, это поле даёт вам выбор целевого "
-"поля в пределах модели целевого документа (под-модели)."
 
 #. module: email_template
 #: view:email.template:0
 msgid "Attach Report"
-msgstr "Прикрепить отчёт"
+msgstr ""
 
 #. module: email_template
 #: field:email.template,report_template:0
 #: field:email_template.preview,report_template:0
 msgid "Optional report to print and attach"
-msgstr "Необязательный отчёт для печати и прикрепления"
+msgstr ""
 
 #. module: email_template
 #: help:email.template,body_html:0
 #: help:email_template.preview,body_html:0
 msgid "Rich-text/HTML version of the message (placeholders may be used here)"
 msgstr ""
-"Версия сообщения с форматированным текстом/HTML (здесь могут быть "
-"использованы подстановки)"

@@ -2,39 +2,50 @@
 <openerp>
     <data>
 
-        <record id="view_vat_declaration" model="ir.ui.view">
-            <field name="name">Vat Declaraion</field>
-            <field name="model">l1on_be.vat.declaration</field>
-            <field name="type">form</field>
-            <field name="arch" type="xml">
-                <form string="Periodical VAT Declaration">
-                    <group>
-                        <group colspan="4">
-                            <separator string="Declare Periodical VAT" colspan="4"/>
-                            <field name="period_id" widget="selection"/>
-                            <field name="tax_code_id" string="Company" widget="selection" groups="base.group_multi_company"/>
-                            <newline/>
-                            <separator string="Advanced Options" colspan="4"/>
-                            <field name="ask_restitution"/>
-                            <field name="ask_payment"/>
-                            <field name="client_nihil" string="Is Last Declaration"/><label/>
-                        </group>
-                        <group colspan="4" groups="base.group_extended">
-                            <separator string="Comments" colspan="4"/>
-                            <field colspan="4" name="comments" nolabel="1"/>
-                        </group>
-                        <group>
-                            <separator colspan="4"/>
-                            <newline/>
-                            <button special="cancel" string="Close" icon="gtk-cancel"/>
-                            <button icon="gtk-execute"  name="create_xml" string="Create XML" type="object" default_focus="1" />
-                        </group>
-                    </group>
-                </form>
-            </field>
-        </record>
+      <record id="view_vat_declaration" model="ir.ui.view">
+        <field name="name">Vat Declaraion</field>
+        <field name="model">l1on_be.vat.declaration</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+          <form string="Periodical VAT Declaration">
+            <group>
+              <group colspan="4">
+                <separator string="Declare Periodical VAT" colspan="4"/>
+                <field name="tax_code_id" string="Company" widget="selection" groups="base.group_multi_company"/>
+                <separator string="Periods" colspan="4"/>
+                <field name="period_ids" nolabel="1" colspan="4" height="200" width="550">
+                  <tree colors="blue:state in ('draft');gray:state in ('done') " string="Period">
+                    <field name="name"/>
+                    <field name="code"/>
+                    <field name="date_start"/>
+                    <field name="date_stop"/>
+                    <field name="special"/>
+                    <field name="state"/>
+                  </tree>
+                </field>
+                <newline/>
+                <separator string="Advanced Options" colspan="4"/>
+                <field name="ask_restitution"/>
+                <field name="ask_payment"/>
+                <field name="client_nihil" string="Is Last Declaration"/>
+                <label/>
+              </group>
+              <group colspan="4" groups="base.group_extended">
+                <separator string="Comments" colspan="4"/>
+                <field colspan="4" name="comments" nolabel="1"/>
+              </group>
+              <group>
+                <separator colspan="4"/>
+                <newline/>
+                <button special="cancel" string="Close" icon="gtk-cancel"/>
+                <button icon="gtk-execute"  name="create_xml" string="Create XML" type="object" default_focus="1" />
+              </group>
+            </group>
+          </form>
+        </field>
+      </record>
 
-        <record id="view_vat_save" model="ir.ui.view">
+      <record id="view_vat_save" model="ir.ui.view">
             <field name="name">Save XML</field>
             <field name="model">l1on_be.vat.declaration</field>
             <field name="type">form</field>

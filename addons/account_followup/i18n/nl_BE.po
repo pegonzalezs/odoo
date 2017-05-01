@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:46+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:30+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: account_followup
 #: view:account_followup.followup:0
@@ -24,9 +24,8 @@ msgstr "Aanmaning zoeken"
 
 #. module: account_followup
 #: view:account_followup.stat:0
-#: view:res.partner:0
 msgid "Group By..."
-msgstr "Groeperen op..."
+msgstr "Groepeer op..."
 
 #. module: account_followup
 #: view:res.company:0
@@ -35,9 +34,10 @@ msgid "Follow-up Message"
 msgstr "Aanmaningsbericht"
 
 #. module: account_followup
-#: field:account_followup.print,followup_id:0
+#: view:account_followup.followup:0
+#: field:account_followup.followup,followup_line:0
 msgid "Follow-Up"
-msgstr "Aanmaningen"
+msgstr "Aanmanen"
 
 #. module: account_followup
 #: help:account.followup.print.all,test_print:0
@@ -79,15 +79,13 @@ msgstr "Bedrijf"
 
 #. module: account_followup
 #: report:account_followup.followup.print:0
-#: code:addons/account_followup/account_followup.py:259
-#, python-format
 msgid "Invoice Date"
 msgstr "Factuurdatum"
 
 #. module: account_followup
-#: field:account_followup.print,email_subject:0
+#: field:account.followup.print.all,email_subject:0
 msgid "Email Subject"
-msgstr "E-mailonderwerp"
+msgstr "E-mail onderwerp"
 
 #. module: account_followup
 #: model:ir.actions.act_window,help:account_followup.action_followup_stat
@@ -115,10 +113,8 @@ msgstr "Ok"
 
 #. module: account_followup
 #: report:account_followup.followup.print:0
-#: code:addons/account_followup/account_followup.py:263
-#, python-format
 msgid "Amount"
-msgstr "Bedrag"
+msgstr ""
 
 #. module: account_followup
 #: sql_constraint:account.move.line:0
@@ -159,40 +155,37 @@ msgid "%(heading)s: Move line header"
 msgstr ""
 
 #. module: account_followup
-#: view:account_followup.followup:0
-#: field:account_followup.followup,followup_line:0
-#: view:res.partner:0
+#: field:account.followup.print,followup_id:0
 msgid "Follow-up"
 msgstr "Aanmaning"
 
 #. module: account_followup
 #: report:account_followup.followup.print:0
 msgid "VAT:"
-msgstr "Btw:"
+msgstr "BTW:"
 
 #. module: account_followup
 #: view:account_followup.stat:0
 #: field:account_followup.stat,partner_id:0
 #: field:account_followup.stat.by.partner,partner_id:0
-#: model:ir.model,name:account_followup.model_res_partner
 msgid "Partner"
 msgstr "Relatie"
 
 #. module: account_followup
 #: report:account_followup.followup.print:0
 msgid "Date :"
-msgstr "Datum:"
+msgstr "Datum :"
 
 #. module: account_followup
-#: field:account_followup.print,partner_ids:0
+#: field:account.followup.print.all,partner_ids:0
 msgid "Partners"
 msgstr "Relaties"
 
 #. module: account_followup
-#: code:addons/account_followup/wizard/account_followup_print.py:254
+#: code:addons/account_followup/wizard/account_followup_print.py:142
 #, python-format
 msgid "Invoices Reminder"
-msgstr "Aanmaning facturen"
+msgstr "Facturen aanmaning"
 
 #. module: account_followup
 #: model:ir.model,name:account_followup.model_account_followup_followup
@@ -207,7 +200,7 @@ msgstr "Eind v/d Maand"
 #. module: account_followup
 #: view:account_followup.stat:0
 msgid "Not Litigation"
-msgstr "Geen betwisting"
+msgstr ""
 
 #. module: account_followup
 #: view:account.followup.print.all:0
@@ -238,7 +231,7 @@ msgstr "Ref"
 #. module: account_followup
 #: help:account_followup.followup.line,sequence:0
 msgid "Gives the sequence order when displaying a list of follow-up lines."
-msgstr "Bepaalt de volgorde bij het weergeven van de aanmaningslijnen."
+msgstr "Bepaalt de volgorde bij het afbeelden van de aanmaningregels"
 
 #. module: account_followup
 #: view:account.followup.print.all:0
@@ -248,12 +241,12 @@ msgstr "Bericht"
 
 #. module: account_followup
 #: field:account.move.line,followup_line_id:0
-#: view:account_followup.stat:0
 msgid "Follow-up Level"
-msgstr "Aanmaningsniveau"
+msgstr "Niveau aanmaning"
 
 #. module: account_followup
 #: field:account_followup.stat,date_followup:0
+#: field:account_followup.stat.by.partner,date_followup:0
 msgid "Latest followup"
 msgstr "Laatste aanmaning"
 
@@ -263,9 +256,9 @@ msgid "Select Partners to Remind"
 msgstr "Selecteren aan te manen relaties"
 
 #. module: account_followup
-#: field:account_followup.print,partner_lang:0
+#: field:account.followup.print.all,partner_lang:0
 msgid "Send Email in Partner Language"
-msgstr "Stuur e-mail in taal relatie"
+msgstr "Stuur email-bericht in taal relatie"
 
 #. module: account_followup
 #: view:account.followup.print.all:0
@@ -329,8 +322,6 @@ msgid ""
 "Your description is invalid, use the right legend or %% if you want to use "
 "the percent character."
 msgstr ""
-"Uw beschrijving is niet geldig. Gebruik de juiste parameter of %% als u het "
-"percentageteken wilt gebruiken."
 
 #. module: account_followup
 #: constraint:account.move.line:0
@@ -372,7 +363,7 @@ msgid ""
 msgstr ""
 
 #. module: account_followup
-#: help:account_followup.print,date:0
+#: help:account.followup.print,date:0
 msgid ""
 "This field allow you to select a forecast date to plan your follow-ups"
 msgstr ""
@@ -380,7 +371,7 @@ msgstr ""
 "vooraf te plannen."
 
 #. module: account_followup
-#: field:account_followup.print,date:0
+#: field:account.followup.print,date:0
 msgid "Follow-up Sending Date"
 msgstr "Verzenddatum aanmaning"
 
@@ -433,7 +424,7 @@ msgstr "Stuur bevestigings e-mail"
 #. module: account_followup
 #: report:account_followup.followup.print:0
 msgid "Total:"
-msgstr "Totaal:"
+msgstr ""
 
 #. module: account_followup
 #: constraint:res.company:0
@@ -451,9 +442,10 @@ msgid "Companies"
 msgstr "Bedrijven"
 
 #. module: account_followup
-#: field:account_followup.print,summary:0
+#: view:account.followup.print.all:0
+#: field:account.followup.print.all,summary:0
 msgid "Summary"
-msgstr "Overzicht"
+msgstr ""
 
 #. module: account_followup
 #: field:account_followup.stat,credit:0
@@ -481,7 +473,6 @@ msgid "%(company_currency)s: User's Company Currency"
 msgstr "%(company_currency)s: Bedrijfsvaluta gebruiker"
 
 #. module: account_followup
-#: field:account.move.line,result:0
 #: view:account_followup.stat:0
 #: field:account_followup.stat,balance:0
 #: field:account_followup.stat.by.partner,balance:0
@@ -503,7 +494,7 @@ msgstr "Aanmaning afdrukken en email versturen naar klanten"
 #: field:account_followup.stat,date_move_last:0
 #: field:account_followup.stat.by.partner,date_move_last:0
 msgid "Last move"
-msgstr "Laatste boeking"
+msgstr ""
 
 #. module: account_followup
 #: model:ir.actions.report.xml,name:account_followup.account_followup_followup_report
@@ -518,28 +509,29 @@ msgstr ""
 #. module: account_followup
 #: field:account_followup.stat,period_id:0
 msgid "Period"
-msgstr "Periode"
+msgstr ""
 
 #. module: account_followup
-#: code:addons/account_followup/wizard/account_followup_print.py:300
+#: code:addons/account_followup/wizard/account_followup_print.py:307
 #, python-format
 msgid "Followup Summary"
 msgstr ""
 
 #. module: account_followup
-#: view:account_followup.print:0
+#: view:account.followup.print:0
+#: view:account.followup.print.all:0
 msgid "Cancel"
-msgstr "Annuleren"
+msgstr ""
 
 #. module: account_followup
 #: view:account_followup.stat:0
 msgid "Litigation"
-msgstr "Betwist"
+msgstr ""
 
 #. module: account_followup
 #: field:account_followup.stat.by.partner,max_followup_id:0
 msgid "Max Follow Up Level"
-msgstr "Max. aanmaningsniveau"
+msgstr ""
 
 #. module: account_followup
 #: model:ir.actions.act_window,name:account_followup.action_view_account_followup_followup_form
@@ -588,7 +580,7 @@ msgstr ""
 #. module: account_followup
 #: view:account_followup.stat:0
 msgid "Including journal entries marked as a litigation"
-msgstr "Inclusief betwiste boekingen"
+msgstr ""
 
 #. module: account_followup
 #: view:account_followup.stat:0
@@ -596,10 +588,8 @@ msgid "Followup Level"
 msgstr ""
 
 #. module: account_followup
+#: field:account_followup.followup,description:0
 #: report:account_followup.followup.print:0
-#: field:account_followup.sending.results,description:0
-#: code:addons/account_followup/account_followup.py:260
-#, python-format
 msgid "Description"
 msgstr "Omschrijving"
 
@@ -611,21 +601,19 @@ msgstr ""
 #. module: account_followup
 #: view:account_followup.stat:0
 msgid "This Fiscal year"
-msgstr "Dit boekjaar"
+msgstr ""
 
 #. module: account_followup
 #: view:account.move.line:0
 msgid "Partner entries"
-msgstr "Relatieboekingen"
+msgstr ""
 
 #. module: account_followup
-#: help:account_followup.print,partner_lang:0
+#: help:account.followup.print.all,partner_lang:0
 msgid ""
 "Do not change message text, if you want to send email in partner language, "
 "or configure from company"
 msgstr ""
-"Wijzig de tekst niet als u de e-mail in de taal van de relatie wilt sturen, "
-"of stel de tekst in op firma."
 
 #. module: account_followup
 #: model:ir.actions.act_window,name:account_followup.act_account_partner_account_move_all
@@ -635,8 +623,9 @@ msgstr ""
 #. module: account_followup
 #: view:account_followup.stat:0
 #: model:ir.actions.act_window,name:account_followup.action_followup_stat
+#: model:ir.ui.menu,name:account_followup.menu_action_followup_stat_follow
 msgid "Follow-ups Sent"
-msgstr "Verstuurde aanmaningen"
+msgstr ""
 
 #. module: account_followup
 #: sql_constraint:res.company:0
@@ -645,6 +634,7 @@ msgstr ""
 
 #. module: account_followup
 #: field:account_followup.followup,name:0
+#: field:account_followup.followup.line,name:0
 msgid "Name"
 msgstr "Naam:"
 
@@ -652,12 +642,12 @@ msgstr "Naam:"
 #: field:account_followup.stat,date_move:0
 #: field:account_followup.stat.by.partner,date_move:0
 msgid "First move"
-msgstr "Eerste boeking"
+msgstr ""
 
 #. module: account_followup
 #: report:account_followup.followup.print:0
 msgid "Li."
-msgstr "Bt."
+msgstr ""
 
 #. module: account_followup
 #: view:account.followup.print:0
@@ -672,12 +662,12 @@ msgstr ""
 #. module: account_followup
 #: report:account_followup.followup.print:0
 msgid "Document : Customer account statement"
-msgstr "Document: Rekeninguittreksel"
+msgstr ""
 
 #. module: account_followup
 #: view:account.move.line:0
 msgid "Total credit"
-msgstr "Totaal credit"
+msgstr ""
 
 #. module: account_followup
 #: model:account_followup.followup.line,description:account_followup.demo_followup_line3
@@ -712,7 +702,7 @@ msgstr ""
 #. module: account_followup
 #: field:account_followup.followup.line,sequence:0
 msgid "Sequence"
-msgstr "Volgorde"
+msgstr ""
 
 #. module: account_followup
 #: view:account_followup.followup.line:0
@@ -722,12 +712,12 @@ msgstr ""
 #. module: account_followup
 #: report:account_followup.followup.print:0
 msgid "Customer Ref :"
-msgstr "Klantenref.:"
+msgstr ""
 
 #. module: account_followup
-#: field:account_followup.print,test_print:0
+#: field:account.followup.print.all,test_print:0
 msgid "Test Print"
-msgstr "Testafdruk"
+msgstr ""
 
 #. module: account_followup
 #: view:account.followup.print.all:0

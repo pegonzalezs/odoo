@@ -13,8 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:57+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:41+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: document
 #: field:document.directory,parent_id:0
@@ -22,7 +22,7 @@ msgid "Parent Directory"
 msgstr "Горна директория"
 
 #. module: document
-#: code:addons/document/document.py:350
+#: code:addons/document/document_directory.py:276
 #, python-format
 msgid "Directory name contains special characters!"
 msgstr "Името на директорията съдържа специални символи!"
@@ -56,6 +56,7 @@ msgstr ""
 
 #. module: document
 #: view:document.directory:0
+#: view:document.storage:0
 msgid "Group By..."
 msgstr "Групирай по"
 
@@ -82,6 +83,7 @@ msgstr "Файове за месец"
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "March"
 msgstr "Март"
 
@@ -135,8 +137,8 @@ msgid "Path"
 msgstr "Път"
 
 #. module: document
-#: code:addons/document/document.py:340
-#: code:addons/document/document.py:345
+#: code:addons/document/document_directory.py:266
+#: code:addons/document/document_directory.py:271
 #, python-format
 msgid "Directory name must be unique!"
 msgstr "Името на директорията трябва да бъде уникално!"
@@ -147,7 +149,6 @@ msgid "Filter on my documents"
 msgstr ""
 
 #. module: document
-#: view:ir.attachment:0
 #: field:ir.attachment,index_content:0
 msgid "Indexed Content"
 msgstr "Индексирано съдържание"
@@ -168,7 +169,7 @@ msgstr ""
 
 #. module: document
 #: view:document.directory:0
-#: model:ir.actions.act_window,name:document.action_document_directory_form
+#: field:document.storage,dir_ids:0
 #: model:ir.ui.menu,name:document.menu_document_directories
 msgid "Directories"
 msgstr "Директории"
@@ -179,8 +180,8 @@ msgid "Files details by Users"
 msgstr ""
 
 #. module: document
-#: code:addons/document/document_storage.py:569
-#: code:addons/document/document_storage.py:597
+#: code:addons/document/document_storage.py:573
+#: code:addons/document/document_storage.py:601
 #, python-format
 msgid "Error!"
 msgstr "Грешка!"
@@ -213,6 +214,7 @@ msgstr "Настройки на приложение ЗНАНИЯ"
 #. module: document
 #: view:ir.attachment:0
 #: field:ir.attachment,partner_id:0
+#: field:report.files.partner,partner:0
 msgid "Partner"
 msgstr "Партньор"
 
@@ -227,9 +229,11 @@ msgid "Document directory"
 msgstr "Директория с документи"
 
 #. module: document
-#: code:addons/document/document.py:340
-#: code:addons/document/document.py:345
-#: code:addons/document/document.py:350
+#: code:addons/document/document.py:220
+#: code:addons/document/document.py:299
+#: code:addons/document/document_directory.py:266
+#: code:addons/document/document_directory.py:271
+#: code:addons/document/document_directory.py:276
 #, python-format
 msgid "ValidateError"
 msgstr "ValidateError"
@@ -241,6 +245,7 @@ msgstr "ir.actions.report.xml"
 
 #. module: document
 #: model:ir.actions.act_window,name:document.action_document_file_form
+#: view:ir.attachment:0
 #: model:ir.ui.menu,name:document.menu_document_doc
 #: model:ir.ui.menu,name:document.menu_document_files
 msgid "Documents"
@@ -263,8 +268,10 @@ msgid "Resource model"
 msgstr ""
 
 #. module: document
+#: field:ir.attachment,file_size:0
 #: field:report.document.file,file_size:0
 #: field:report.document.user,file_size:0
+#: field:report.files.partner,file_size:0
 msgid "File Size"
 msgstr "Размер на файл"
 
@@ -277,6 +284,8 @@ msgstr "Вид съдържание"
 #. module: document
 #: view:document.directory:0
 #: field:document.directory,type:0
+#: view:document.storage:0
+#: field:document.storage,type:0
 msgid "Type"
 msgstr "Тип"
 
@@ -321,6 +330,7 @@ msgstr "Справка"
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "July"
 msgstr "Юли"
 
@@ -351,7 +361,7 @@ msgid "Modified"
 msgstr "Променян"
 
 #. module: document
-#: code:addons/document/document.py:576
+#: code:addons/document/document_storage.py:639
 #, python-format
 msgid "Error at doc write!"
 msgstr "Грешка при писане!"
@@ -386,6 +396,7 @@ msgstr "Сигурност"
 
 #. module: document
 #: field:document.directory,write_uid:0
+#: field:document.storage,write_uid:0
 #: field:ir.attachment,write_uid:0
 msgid "Last Modification User"
 msgstr ""
@@ -403,6 +414,7 @@ msgstr "Домейн"
 
 #. module: document
 #: field:document.directory,write_date:0
+#: field:document.storage,write_date:0
 #: field:ir.attachment,write_date:0
 msgid "Date Modified"
 msgstr "Дата на промяна"
@@ -418,6 +430,7 @@ msgid "All users files"
 msgstr ""
 
 #. module: document
+#: view:board.board:0
 #: model:ir.actions.act_window,name:document.action_view_size_month
 #: view:report.document.file:0
 msgid "File Size by Month"
@@ -425,6 +438,7 @@ msgstr ""
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "December"
 msgstr ""
 
@@ -459,9 +473,11 @@ msgstr ""
 #. module: document
 #: view:document.directory:0
 #: field:document.directory,user_id:0
+#: field:document.storage,user_id:0
 #: view:ir.attachment:0
 #: field:ir.attachment,user_id:0
 #: field:report.document.user,user_id:0
+#: field:report.document.wall,user_id:0
 msgid "Owner"
 msgstr "Собственик"
 
@@ -477,6 +493,7 @@ msgstr "Съдържание"
 
 #. module: document
 #: field:document.directory,create_date:0
+#: field:document.storage,create_date:0
 #: field:report.document.user,create_date:0
 msgid "Date Created"
 msgstr "Дата на създаване"
@@ -531,6 +548,7 @@ msgstr ""
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "August"
 msgstr "Август"
 
@@ -541,6 +559,7 @@ msgstr ""
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "June"
 msgstr "Юни"
 
@@ -552,6 +571,7 @@ msgstr "Потребител"
 
 #. module: document
 #: field:document.directory,group_ids:0
+#: field:document.storage,group_ids:0
 msgid "Groups"
 msgstr "Групи"
 
@@ -562,10 +582,12 @@ msgstr "Активен"
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "November"
 msgstr "Ноември"
 
 #. module: document
+#: view:ir.attachment:0
 #: field:ir.attachment,db_datas:0
 msgid "Data"
 msgstr "Данни"
@@ -586,6 +608,7 @@ msgstr "Дефиниция"
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "October"
 msgstr "Октомври"
 
@@ -601,6 +624,7 @@ msgstr "База данни"
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "January"
 msgstr "Януари"
 
@@ -630,7 +654,7 @@ msgid "Read Only"
 msgstr "Само за четене"
 
 #. module: document
-#: view:document.directory:0
+#: model:ir.actions.act_window,name:document.action_document_directory_form
 msgid "Document Directory"
 msgstr ""
 
@@ -641,6 +665,7 @@ msgstr ""
 
 #. module: document
 #: field:document.directory,create_uid:0
+#: field:document.storage,create_uid:0
 msgid "Creator"
 msgstr "Създател"
 
@@ -659,6 +684,7 @@ msgid ""
 msgstr ""
 
 #. module: document
+#: view:board.board:0
 #: model:ir.actions.act_window,name:document.action_view_files_by_month_graph
 #: view:report.document.user:0
 msgid "Files by Month"
@@ -666,6 +692,7 @@ msgstr ""
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "September"
 msgstr "Септември"
 
@@ -739,6 +766,9 @@ msgstr ""
 #. module: document
 #: field:report.document.file,month:0
 #: field:report.document.user,month:0
+#: field:report.document.wall,month:0
+#: field:report.document.wall,name:0
+#: field:report.files.partner,month:0
 msgid "Month"
 msgstr ""
 
@@ -759,6 +789,7 @@ msgstr "Дървовидна структура"
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "May"
 msgstr "Май"
 
@@ -838,6 +869,7 @@ msgstr ""
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "February"
 msgstr "Февруари"
 
@@ -856,6 +888,7 @@ msgstr ""
 
 #. module: document
 #: field:document.directory,name:0
+#: field:document.storage,name:0
 msgid "Name"
 msgstr "Име"
 
@@ -876,12 +909,14 @@ msgstr ""
 
 #. module: document
 #: selection:report.document.user,month:0
+#: selection:report.files.partner,month:0
 msgid "April"
 msgstr "Април"
 
 #. module: document
 #: field:report.document.file,nbr:0
 #: field:report.document.user,nbr:0
+#: field:report.files.partner,nbr:0
 msgid "# of Files"
 msgstr ""
 
@@ -950,11 +985,15 @@ msgstr ""
 
 #. module: document
 #: field:report.document.user,name:0
+#: field:report.files.partner,name:0
 msgid "Year"
 msgstr "Година"
 
 #. module: document
+#: view:document.storage:0
+#: model:ir.actions.act_window,name:document.action_document_storage_form
 #: model:ir.model,name:document.model_document_storage
+#: model:ir.ui.menu,name:document.menu_document_storage_media
 msgid "Storage Media"
 msgstr "Носители"
 

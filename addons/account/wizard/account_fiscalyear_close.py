@@ -110,8 +110,7 @@ class account_fiscalyear_close(osv.osv_memory):
             obj_acc_move_line._remove_move_reconcile(cr, uid, move_line_ids, context=context)
             obj_acc_move_line.unlink(cr, uid, move_line_ids, context=context)
             obj_acc_move.unlink(cr, uid, move_ids, context=context)
-
-        cr.execute("SELECT id FROM account_fiscalyear WHERE date_stop < %s", (str(new_fyear.date_start),))
+        cr.execute("SELECT id FROM account_fiscalyear WHERE date_stop < %s AND company_id = %s and end_journal_period_id is null", (str(new_fyear.date_start),company_id,))
         result = cr.dictfetchall()
         fy_ids = ','.join([str(x['id']) for x in result])
         query_line = obj_acc_move_line._query_get(cr, uid,

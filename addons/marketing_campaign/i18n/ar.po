@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:07+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-09 05:07+0000\n"
+"X-Generator: Launchpad (build 15914)\n"
 
 #. module: marketing_campaign
 #: view:marketing.campaign:0
@@ -28,7 +28,7 @@ msgid "Previous Activity"
 msgstr "النشاط السابق"
 
 #. module: marketing_campaign
-#: code:addons/marketing_campaign/marketing_campaign.py:819
+#: code:addons/marketing_campaign/marketing_campaign.py:818
 #, python-format
 msgid "The current step for this item has no email or report to preview."
 msgstr "الخطوة الحالية لهذا الصنف لا تملك بريد إلكتروني أو تقرير للمعاينة"
@@ -69,7 +69,7 @@ msgstr ""
 #. module: marketing_campaign
 #: field:marketing.campaign.transition,trigger:0
 msgid "Trigger"
-msgstr "زر"
+msgstr ""
 
 #. module: marketing_campaign
 #: field:campaign.analysis,count:0
@@ -123,7 +123,6 @@ msgid "Set to Draft"
 msgstr "حفظ كمسودة"
 
 #. module: marketing_campaign
-#: view:marketing.campaign.activity:0
 #: field:marketing.campaign.activity,to_ids:0
 msgid "Next Activities"
 msgstr "النشاطات التالية"
@@ -139,7 +138,7 @@ msgid "The interval must be positive or zero"
 msgstr "الفترة يجب أن تكون إيجابية أو صفر"
 
 #. module: marketing_campaign
-#: code:addons/marketing_campaign/marketing_campaign.py:819
+#: code:addons/marketing_campaign/marketing_campaign.py:818
 #, python-format
 msgid "No preview"
 msgstr "لا معاينة"
@@ -362,7 +361,6 @@ msgid "Run"
 msgstr ""
 
 #. module: marketing_campaign
-#: view:marketing.campaign.activity:0
 #: field:marketing.campaign.activity,from_ids:0
 msgid "Previous Activities"
 msgstr "النشاطات السابقة"
@@ -388,7 +386,6 @@ msgstr ""
 #: model:ir.ui.menu,name:marketing_campaign.menu_marketing_campaign
 #: model:ir.ui.menu,name:marketing_campaign.menu_marketing_campaign_form
 #: view:marketing.campaign:0
-#: view:res.partner:0
 msgid "Campaigns"
 msgstr ""
 
@@ -398,7 +395,7 @@ msgid "Interval Unit"
 msgstr ""
 
 #. module: marketing_campaign
-#: code:addons/marketing_campaign/marketing_campaign.py:793
+#: code:addons/marketing_campaign/marketing_campaign.py:792
 #, python-format
 msgid "Email Preview"
 msgstr ""
@@ -443,6 +440,8 @@ msgid "Campaign Segment"
 msgstr "حملة القطاع"
 
 #. module: marketing_campaign
+#: view:marketing.campaign:0
+#: view:marketing.campaign.segment:0
 #: view:marketing.campaign.workitem:0
 msgid "Cancel"
 msgstr ""
@@ -460,7 +459,6 @@ msgid "Exceptions"
 msgstr ""
 
 #. module: marketing_campaign
-#: model:ir.actions.act_window,name:marketing_campaign.act_marketing_campaing_followup
 #: field:res.partner,workitem_ids:0
 msgid "Workitems"
 msgstr ""
@@ -522,9 +520,7 @@ msgid "Next Activity"
 msgstr ""
 
 #. module: marketing_campaign
-#: model:ir.actions.act_window,name:marketing_campaign.act_marketing_campaing_stat
-#: model:ir.actions.act_window,name:marketing_campaign.action_marketing_campaign_workitem
-#: model:ir.ui.menu,name:marketing_campaign.menu_action_marketing_campaign_workitem
+#: model:ir.actions.act_window,name:marketing_campaign.act_marketing_campaing_followup
 msgid "Campaign Follow-up"
 msgstr "متابعة الحملة"
 
@@ -549,7 +545,7 @@ msgid "ir.actions.report.xml"
 msgstr ""
 
 #. module: marketing_campaign
-#: view:marketing.campaign:0
+#: model:ir.actions.act_window,name:marketing_campaign.act_marketing_campaing_stat
 msgid "Campaign Statistics"
 msgstr ""
 
@@ -662,6 +658,7 @@ msgstr ""
 
 #. module: marketing_campaign
 #: field:campaign.analysis,date:0
+#: view:marketing.campaign.workitem:0
 msgid "Date"
 msgstr ""
 
@@ -671,6 +668,7 @@ msgid "November"
 msgstr ""
 
 #. module: marketing_campaign
+#: view:marketing.campaign.activity:0
 #: field:marketing.campaign.activity,condition:0
 msgid "Condition"
 msgstr ""
@@ -745,6 +743,7 @@ msgid "Error"
 msgstr ""
 
 #. module: marketing_campaign
+#: view:marketing.campaign.activity:0
 #: field:marketing.campaign.activity,server_action_id:0
 msgid "Action"
 msgstr ""
@@ -873,10 +872,8 @@ msgid "Campaign Step"
 msgstr ""
 
 #. module: marketing_campaign
-#: model:ir.actions.act_window,name:marketing_campaign.act_marketing_campaing_segment_opened
 #: model:ir.actions.act_window,name:marketing_campaign.action_marketing_campaign_segment_form
 #: model:ir.ui.menu,name:marketing_campaign.menu_marketing_campaign_segment_form
-#: view:marketing.campaign:0
 #: view:marketing.campaign.segment:0
 msgid "Segments"
 msgstr ""
@@ -902,7 +899,6 @@ msgid "Day(s)"
 msgstr ""
 
 #. module: marketing_campaign
-#: view:marketing.campaign:0
 #: field:marketing.campaign,activity_ids:0
 #: view:marketing.campaign.activity:0
 msgid "Activities"
@@ -939,7 +935,6 @@ msgstr ""
 
 #. module: marketing_campaign
 #: model:ir.model,name:marketing_campaign.model_marketing_campaign
-#: view:marketing.campaign:0
 msgid "Marketing Campaign"
 msgstr ""
 
@@ -1012,6 +1007,7 @@ msgstr ""
 #. module: marketing_campaign
 #: view:campaign.analysis:0
 #: field:campaign.analysis,activity_id:0
+#: view:marketing.campaign.activity:0
 #: view:marketing.campaign.workitem:0
 #: field:marketing.campaign.workitem,activity_id:0
 msgid "Activity"
@@ -1038,6 +1034,7 @@ msgid "Next Synchronization"
 msgstr ""
 
 #. module: marketing_campaign
+#: view:marketing.campaign.segment:0
 #: field:marketing.campaign.segment,ir_filter_id:0
 msgid "Filter"
 msgstr ""
@@ -1070,6 +1067,7 @@ msgstr ""
 #. module: marketing_campaign
 #: view:campaign.analysis:0
 #: field:campaign.analysis,total_cost:0
+#: view:marketing.campaign:0
 msgid "Cost"
 msgstr ""
 

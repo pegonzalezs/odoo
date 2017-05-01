@@ -8,15 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-10-22 00:09+0000\n"
-"Last-Translator: Maxime Chambreuil (http://www.savoirfairelinux.com) "
-"<maxime.chambreuil@savoirfairelinux.com>\n"
+"PO-Revision-Date: 2012-02-17 09:10+0000\n"
+"Last-Translator: OpenERP Administrators <Unknown>\n"
 "Language-Team: French <fr@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:07+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:49+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: lunch
 #: view:lunch.cashbox.clean:0
@@ -26,7 +25,7 @@ msgstr "Réinitialiser la caisse"
 #. module: lunch
 #: view:report.lunch.amount:0
 msgid "Box amount in current year"
-msgstr "Montant des boîtes dans l'année courante"
+msgstr ""
 
 #. module: lunch
 #: model:ir.actions.act_window,name:lunch.action_lunch_order_form
@@ -47,8 +46,8 @@ msgid "Cash Moves"
 msgstr "Déplacement de trésorerie"
 
 #. module: lunch
-#: view:lunch.cashmove:0
-#: view:lunch.order.line:0
+#: view:lunch.cashmove:0 view:lunch.order:0 view:report.lunch.amount:0
+#: view:report.lunch.order:0
 msgid "Group By..."
 msgstr "Grouper par ..."
 
@@ -63,23 +62,23 @@ msgid "    7 Days    "
 msgstr "    7 jours    "
 
 #. module: lunch
-#: view:lunch.order.line:0
+#: view:lunch.cashmove:0 view:lunch.order:0
 msgid "Today"
 msgstr "Aujourd'hui"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "March"
 msgstr "Mars"
 
 #. module: lunch
-#: report:lunch.order.line:0
+#: report:lunch.order:0
 msgid "Total :"
 msgstr "Total :"
 
 #. module: lunch
-#: field:lunch.alert,specific_day:0
-#: field:report.lunch.order.line,day:0
+#: field:report.lunch.amount,day:0 view:report.lunch.order:0
+#: field:report.lunch.order,day:0
 msgid "Day"
 msgstr "Jour"
 
@@ -97,20 +96,17 @@ msgid ""
 "You can create on cashbox by employee if you want to keep track of the "
 "amount due by employee according to what have been ordered."
 msgstr ""
-"Vous pouvez créer une caisse par employé si vous voulez suivre le montant dû "
-"par employé selon ce qui a été commandé."
 
 #. module: lunch
-#: field:lunch.cashmove,amount:0
+#: field:lunch.cashmove,amount:0 field:report.lunch.amount,amount:0
 msgid "Amount"
 msgstr "Montant"
 
 #. module: lunch
-#: model:ir.actions.act_window,name:lunch.action_lunch_products
-#: model:ir.ui.menu,name:lunch.menu_lunch_products
-#: field:lunch.order,order_line_ids:0
+#: model:ir.actions.act_window,name:lunch.action_lunch_product_form
+#: model:ir.ui.menu,name:lunch.menu_lunch_product_form view:lunch.product:0
 msgid "Products"
-msgstr "Articles"
+msgstr "Produits"
 
 #. module: lunch
 #: model:ir.model,name:lunch.model_report_lunch_amount
@@ -123,7 +119,7 @@ msgid "   Month   "
 msgstr "   Mois   "
 
 #. module: lunch
-#: model:ir.model,name:lunch.model_report_lunch_order_line
+#: model:ir.model,name:lunch.model_report_lunch_order
 msgid "Lunch Orders Statistics"
 msgstr "Statistiques des commandes de repas"
 
@@ -133,12 +129,12 @@ msgid "CashMove"
 msgstr "Transfert de trésorerie"
 
 #. module: lunch
-#: selection:lunch.order,state:0
+#: view:lunch.order:0 selection:lunch.order,state:0
 msgid "Confirmed"
 msgstr "Confirmée"
 
 #. module: lunch
-#: view:lunch.order.line:0
+#: view:lunch.order.confirm:0
 msgid "Confirm"
 msgstr "Confirmer"
 
@@ -154,12 +150,11 @@ msgstr "État"
 
 #. module: lunch
 #: selection:lunch.order,state:0
-#: selection:lunch.order.line,state:0
 msgid "New"
-msgstr "Nouveau"
+msgstr ""
 
 #. module: lunch
-#: field:report.lunch.order.line,price_total:0
+#: field:report.lunch.order,price_total:0
 msgid "Total Price"
 msgstr "Prix total"
 
@@ -174,7 +169,7 @@ msgid "Creation Date"
 msgstr "Date de création"
 
 #. module: lunch
-#: report:lunch.order.line:0
+#: report:lunch.order:0
 msgid "Name/Date"
 msgstr "Nom/Date"
 
@@ -186,7 +181,7 @@ msgstr "Description de commande"
 #. module: lunch
 #: view:report.lunch.amount:0
 msgid "Box amount in last month"
-msgstr "Montant des boîtes dans le dernier mois"
+msgstr ""
 
 #. module: lunch
 #: model:ir.actions.act_window,name:lunch.action_lunch_order_confirm
@@ -196,7 +191,7 @@ msgid "Confirm Order"
 msgstr "Confirmer la commande"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "July"
 msgstr "Juillet"
 
@@ -231,32 +226,33 @@ msgid "Set to Zero"
 msgstr "Mettre à zéro"
 
 #. module: lunch
-#: field:lunch.order.line,cashmove:0
+#: model:ir.model,name:lunch.model_lunch_cashmove
 msgid "Cash Move"
 msgstr "Déplacement de trésorerie"
 
 #. module: lunch
 #: view:report.lunch.order:0
 msgid "Tasks performed in last 365 days"
-msgstr "Tâches réalisées dans les 365 derniers jours"
+msgstr ""
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "April"
 msgstr "avril"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "September"
 msgstr "septembre"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "December"
 msgstr "décembre"
 
 #. module: lunch
-#: field:report.lunch.order.line,month:0
+#: field:report.lunch.amount,month:0 view:report.lunch.order:0
+#: field:report.lunch.order,month:0
 msgid "Month"
 msgstr "Mois"
 
@@ -271,8 +267,9 @@ msgid "Yes"
 msgstr "Oui"
 
 #. module: lunch
+#: model:ir.model,name:lunch.model_lunch_category view:lunch.category:0
+#: view:lunch.order:0 field:lunch.order,category:0
 #: field:lunch.product,category_id:0
-#: field:lunch.product.category,name:0
 msgid "Category"
 msgstr "Catégorie"
 
@@ -282,10 +279,9 @@ msgid "  Year  "
 msgstr "  Année  "
 
 #. module: lunch
-#: model:ir.actions.act_window,name:lunch.action_lunch_product_categories
-#: model:ir.ui.menu,name:lunch.menu_lunch_product_categories
+#: model:ir.ui.menu,name:lunch.menu_lunch_category_form
 msgid "Product Categories"
-msgstr "Catégories d'articles"
+msgstr "Catégories de produits"
 
 #. module: lunch
 #: view:lunch.cashbox.clean:0 view:lunch.order.cancel:0
@@ -310,13 +306,9 @@ msgid ""
 "by supplier. It will be easier for the lunch manager to filter lunch orders "
 "by categories."
 msgstr ""
-"Définir tous les produits que les employés peuvent commander pour le "
-"déjeuner. Si vous commandez de différents endroits, vous pouvez utiliser les "
-"catégories de produits pour séparer par fournisseur. Ce sera plus facile "
-"pour le gestionnaire de filtrer les commandes de déjeuner par catégorie."
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "August"
 msgstr "août"
 
@@ -327,14 +319,13 @@ msgid "Lunch Order Analysis"
 msgstr "Analyse des commandes de repas"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "June"
 msgstr "juin"
 
 #. module: lunch
-#: field:lunch.cashmove,user_id:0
-#: field:lunch.order,user_id:0
-#: field:report.lunch.order.line,user_id:0
+#: field:lunch.cashmove,user_cashmove:0 field:lunch.order,user_id:0
+#: field:report.lunch.amount,user_id:0 field:report.lunch.order,user_id:0
 msgid "User Name"
 msgstr "Nom d'utilisateur"
 
@@ -344,37 +335,32 @@ msgid "Sales Analysis"
 msgstr "Analyse des ventes"
 
 #. module: lunch
-#: model:ir.module.category,name:lunch.module_lunch_category
-#: model:ir.ui.menu,name:lunch.menu_lunch
-#: model:ir.ui.menu,name:lunch.menu_lunch_title
+#: model:ir.ui.menu,name:lunch.menu_lunch_category_root_configuration
 msgid "Lunch"
 msgstr "Déjeuner"
 
 #. module: lunch
-#: field:lunch.order.line,user_id:0
-#: model:res.groups,name:lunch.group_lunch_user
+#: view:lunch.cashmove:0 view:report.lunch.order:0
 msgid "User"
 msgstr "Utilisateur"
 
 #. module: lunch
-#: field:lunch.cashmove,date:0
-#: field:lunch.order,date:0
-#: field:lunch.order.line,date:0
+#: view:lunch.cashmove:0 field:lunch.order,date:0
 msgid "Date"
 msgstr "Date"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "November"
 msgstr "novembre"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "October"
 msgstr "octobre"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "January"
 msgstr "janvier"
 
@@ -394,7 +380,7 @@ msgid "Active"
 msgstr "Actif"
 
 #. module: lunch
-#: field:report.lunch.order.line,date:0
+#: field:report.lunch.order,date:0
 msgid "Date Order"
 msgstr "Date de commande"
 
@@ -412,13 +398,10 @@ msgstr "Mettre la caisse à zéro"
 #. module: lunch
 #: view:lunch.product:0
 msgid "General Information"
-msgstr "Informations générales"
+msgstr ""
 
 #. module: lunch
-#: view:lunch.cancel:0
-#: view:lunch.order.line:0
-#: view:lunch.order.order:0
-#: view:lunch.validation:0
+#: view:lunch.order.confirm:0
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -428,31 +411,28 @@ msgid " Cashboxes "
 msgstr " Caisses "
 
 #. module: lunch
-#: report:lunch.order.line:0
+#: report:lunch.order:0
 msgid "Unit Price"
 msgstr "Prix unitaire"
 
 #. module: lunch
-#: field:lunch.order.line,product_id:0
-#: field:lunch.product,name:0
+#: field:lunch.order,product:0
 msgid "Product"
-msgstr "Article"
+msgstr "Produit"
 
 #. module: lunch
-#: field:lunch.cashmove,description:0
-#: report:lunch.order.line:0
+#: field:lunch.cashmove,name:0 report:lunch.order:0 view:lunch.product:0
 #: field:lunch.product,description:0
 msgid "Description"
 msgstr "Description"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "May"
 msgstr "mai"
 
 #. module: lunch
-#: field:lunch.order.line,price:0
-#: field:lunch.product,price:0
+#: field:lunch.order,price:0 field:lunch.product,price:0
 msgid "Price"
 msgstr "Prix"
 
@@ -482,7 +462,7 @@ msgid "Total price"
 msgstr "Prix total"
 
 #. module: lunch
-#: selection:report.lunch.order.line,month:0
+#: selection:report.lunch.amount,month:0 selection:report.lunch.order,month:0
 msgid "February"
 msgstr "février"
 
@@ -500,7 +480,7 @@ msgstr "Montant total"
 #. module: lunch
 #: view:report.lunch.order:0
 msgid "Tasks performed in last 30 days"
-msgstr "Tâches réalisées dans les 30 derniers jours"
+msgstr ""
 
 #. module: lunch
 #: view:lunch.category:0
@@ -513,35 +493,31 @@ msgid "Cashboxes"
 msgstr "Caisses"
 
 #. module: lunch
-#: field:lunch.cashmove,order_id:0
-#: selection:lunch.cashmove,state:0
-#: report:lunch.order.line:0
-#: view:lunch.order.line:0
-#: field:lunch.order.line,order_id:0
+#: view:lunch.category:0 report:lunch.order:0 view:lunch.order:0
 msgid "Order"
 msgstr "Commande"
 
 #. module: lunch
 #: model:ir.actions.report.xml,name:lunch.report_lunch_order
 #: model:ir.model,name:lunch.model_lunch_order
-#: report:lunch.order.line:0
+#: model:ir.ui.menu,name:lunch.menu_lunch report:lunch.order:0
 msgid "Lunch Order"
 msgstr "Commande de repas"
 
 #. module: lunch
 #: view:report.lunch.amount:0
 msgid "Box amount in current month"
-msgstr "Montant des boîtes dans le mois courant"
+msgstr ""
 
 #. module: lunch
 #: model:ir.actions.act_window,name:lunch.view_lunch_product_form_installer
 msgid "Define Your Lunch Products"
-msgstr "Définir vos produits de déjeuner"
+msgstr ""
 
 #. module: lunch
 #: view:report.lunch.order:0
 msgid "Tasks during last 7 days"
-msgstr "Tâches réalisées dans les 7 derniers jours"
+msgstr ""
 
 #. module: lunch
 #: model:ir.actions.act_window,name:lunch.action_report_lunch_amount_tree
@@ -550,7 +526,7 @@ msgid "Cash Position by User"
 msgstr "Situation de trésorerie par utilisateur"
 
 #. module: lunch
-#: model:res.groups,name:lunch.group_lunch_manager
+#: field:lunch.cashbox,manager:0
 msgid "Manager"
 msgstr "Responsable"
 
@@ -565,11 +541,12 @@ msgid "To Confirm"
 msgstr "A confirmer"
 
 #. module: lunch
-#: field:report.lunch.order.line,year:0
+#: field:report.lunch.amount,year:0 view:report.lunch.order:0
+#: field:report.lunch.order,year:0
 msgid "Year"
 msgstr "Année"
 
 #. module: lunch
 #: model:ir.actions.act_window,name:lunch.action_create_cashbox
 msgid "Create Lunch Cash Boxes"
-msgstr "Créer les caisses de déjeuners"
+msgstr ""

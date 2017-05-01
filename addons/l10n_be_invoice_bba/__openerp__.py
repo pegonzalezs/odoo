@@ -3,7 +3,7 @@
 #
 #    OpenERP, Open Source Management Solution
 #    
-#    Copyright (c) 2011 Noviat nv/sa (www.noviat.be). All rights reserved.
+#    Copyright (c) 2012 Noviat nv/sa (www.noviat.be). All rights reserved.
 # 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@
 
 {
     'name': 'Belgium - Structured Communication',
-    'version': '1.2',
+    'version': '1.5',
     'license': 'AGPL-3',
     'author': 'Noviat',
     'category' : 'Localization',
@@ -52,7 +52,9 @@ A 'random' Structured Communication will generated if no algorithm is specified 
         'account_invoice_view.xml',        
     ],
     'auto_install': False,
-    'installable': True,    'certificate': '00137058831885',
-}
+    'installable': True,
+    'certificate': '00137058831885',
+    }
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+

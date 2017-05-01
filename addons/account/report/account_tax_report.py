@@ -23,7 +23,6 @@ import time
 
 from common_report_header import common_report_header
 from report import report_sxw
-from tools.translate import _
 
 class tax_report(report_sxw.rml_parse, common_report_header):
     _name = 'report.account.vat.declaration'
@@ -36,7 +35,8 @@ class tax_report(report_sxw.rml_parse, common_report_header):
         self.display_detail = data['form']['display_detail']
         res['periods'] = ''
         res['fiscalyear'] = data['form'].get('fiscalyear_id', False)
-
+        self.fiscalyear = data['form'].get('fiscalyear_id', False)
+        
         if data['form'].get('period_from', False) and data['form'].get('period_to', False):
             self.period_ids = period_obj.build_ctx_periods(self.cr, self.uid, data['form']['period_from'], data['form']['period_to'])
             periods_l = period_obj.read(self.cr, self.uid, self.period_ids, ['name'])
@@ -63,21 +63,20 @@ class tax_report(report_sxw.rml_parse, common_report_header):
         })
 
     def _get_basedon(self, form):
-        based_on = form['form']['based_on']
-        if based_on == 'invoices':
-            return _('Invoices')
-        elif based_on == 'payments':
-            return _('Payments')
+        return form['form']['based_on']
 
     def _get_lines(self, based_on, company_id=False, parent=False, level=0, context=None):
         period_list = self.period_ids
         res = self._get_codes(based_on, company_id, parent, level, period_list, context=context)
+        
         if period_list:
             res = self._add_codes(based_on, res, period_list, context=context)
         else:
-            self.cr.execute ("select id from account_fiscalyear")
-            fy = self.cr.fetchall()
-            self.cr.execute ("select id from account_period where fiscalyear_id = %s",(fy[0][0],))
+            if not self.fiscalyear:
+                self.cr.execute ("select id from account_fiscalyear")
+                fy = self.cr.fetchall()
+                self.fiscalyear = fy[0][0]
+            self.cr.execute ("select id from account_period where fiscalyear_id = %s",(self.fiscalyear,))
             periods = self.cr.fetchall()
             for p in periods:
                 period_list.append(p[0])
@@ -110,8 +109,8 @@ class tax_report(report_sxw.rml_parse, common_report_header):
         return top_result
 
     def _get_general(self, tax_code_id, period_list, company_id, based_on, context=None):
-        if not self.display_detail:
-            return []
+        #if not self.display_detail:
+        #    return []
         res = []
         obj_account = self.pool.get('account.account')
         periods_ids = tuple(period_list)

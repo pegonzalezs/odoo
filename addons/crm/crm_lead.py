@@ -205,6 +205,7 @@ class crm_lead(crm_case, osv.osv):
         'ref': fields.reference('Reference', selection=crm._links_get, size=128),
         'ref2': fields.reference('Reference 2', selection=crm._links_get, size=128),
         'phone': fields.char("Phone", size=64),
+        'mobile': fields.char("Mobile", size=64),
         'date_deadline': fields.date('Expected Closing'),
         'date_action': fields.date('Next Action Date', select=True),
         'title_action': fields.char('Next Action', size=64),

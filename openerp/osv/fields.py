@@ -44,7 +44,6 @@ import openerp
 import openerp.tools as tools
 from openerp.tools.translate import _
 from openerp.tools import float_round, float_repr
-from openerp import SUPERUSER_ID
 import simplejson
 
 _logger = logging.getLogger(__name__)
@@ -280,8 +279,8 @@ class date(_column):
            This method may be passed as value to initialize _defaults.
 
            :param Model model: model (osv) for which the date value is being
-                               computed - automatically passed when used in
-                                _defaults.
+                               computed - technical field, currently ignored,
+                               automatically passed when used in _defaults.
            :param datetime timestamp: optional datetime value to use instead of
                                       the current date and time (must be a
                                       datetime, regular dates can't be converted
@@ -294,14 +293,9 @@ class date(_column):
         today = timestamp or DT.datetime.now()
         context_today = None
         if context and context.get('tz'):
-            tz_name = context['tz']
-        else:
-            tz_name = model.pool.get('res.users').read(cr, SUPERUSER_ID, uid,
-                                                       ['context_tz'])['context_tz']
-        if tz_name:
             try:
                 utc = pytz.timezone('UTC')
-                context_tz = pytz.timezone(tz_name)
+                context_tz = pytz.timezone(context['tz'])
                 utc_today = utc.localize(today, is_dst=False) # UTC = no DST
                 context_today = utc_today.astimezone(context_tz)
             except Exception:
@@ -342,21 +336,16 @@ class datetime(_column):
         """
         assert isinstance(timestamp, DT.datetime), 'Datetime instance expected'
         if context and context.get('tz'):
-            tz_name = context['tz']
-        else:
-            registry = openerp.modules.registry.RegistryManager.get(cr.dbname)
-            tz_name = registry.get('res.users').read(cr, SUPERUSER_ID, uid,
-                                                     ['context_tz'])['context_tz']
-        utc_timestamp = pytz.utc.localize(timestamp, is_dst=False) # UTC = no DST
-        if tz_name:
             try:
-                context_tz = pytz.timezone(tz_name)
+                utc = pytz.timezone('UTC')
+                context_tz = pytz.timezone(context['tz'])
+                utc_timestamp = utc.localize(timestamp, is_dst=False) # UTC = no DST
                 return utc_timestamp.astimezone(context_tz)
             except Exception:
                 _logger.debug("failed to compute context/client-specific timestamp, "
                               "using the UTC value",
                               exc_info=True)
-        return utc_timestamp
+        return timestamp
 
 class time(_column):
     _type = 'time'
@@ -1076,8 +1065,6 @@ class function(_column):
             self._classic_write = True
             if type=='binary':
                 self._symbol_get=lambda x:x and str(x)
-            else:
-                self._prefetch = True
 
         if type == 'float':
             self._symbol_c = float._symbol_c

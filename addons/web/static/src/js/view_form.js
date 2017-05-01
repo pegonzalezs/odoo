@@ -181,7 +181,7 @@ openerp.web.FormView = openerp.web.View.extend( /** @lends openerp.web.FormView#
         this.$element.removeClass('oe_form_dirty');
         return this.has_been_loaded.pipe(function() {
             var result;
-            if (self.dataset.index === null) {
+            if (self.dataset.index === null || self.dataset.index < 0) {
                 // null index means we should start a new record
                 result = self.on_button_new();
             } else {
@@ -225,7 +225,7 @@ openerp.web.FormView = openerp.web.View.extend( /** @lends openerp.web.FormView#
                 // New record: Second pass in order to trigger the onchanges
                 // respecting the fields order defined in the view
                 _.each(self.fields_order, function(field_name) {
-                    if (record[field_name] !== undefined) {
+                    if (record[field_name] && record[field_name] !== undefined) {
                         var field = self.fields[field_name];
                         field.dirty = true;
                         self.do_onchange(field);
@@ -529,7 +529,7 @@ openerp.web.FormView = openerp.web.View.extend( /** @lends openerp.web.FormView#
                     if (!first_invalid_field) {
                         first_invalid_field = f;
                     }
-                } else if (f.name !== 'id' && !f.readonly && (!self.datarecord.id || f.is_dirty())) {
+                } else if (f.name !== 'id' && !f.readonly && f.is_dirty()) {
                     // Special case 'id' field, do not save this field
                     // on 'create' : save all non readonly fields
                     // on 'edit' : save non readonly modified fields
@@ -543,7 +543,7 @@ openerp.web.FormView = openerp.web.View.extend( /** @lends openerp.web.FormView#
                 return $.Deferred().reject();
             } else {
                 var save_deferral;
-                if (!self.datarecord.id) {
+                if (!self.datarecord.id && (!_.isEmpty(values) || self.force_dirty)) {
                     //console.log("FormView(", self, ") : About to create", values);
                     save_deferral = self.dataset.create(values).pipe(function(r) {
                         return self.on_created(r, undefined, prepend_on_create);
@@ -832,7 +832,7 @@ openerp.web.form.SidebarAttachments = openerp.web.OldWidget.extend({
         this.$element.find('.oe-sidebar-attachment-delete').click(this.on_attachment_delete);
     },
     on_attachment_changed: function(e) {
-        window[this.element_id + '_iframe_callback'] = this.do_update;
+        window[this.element_id + '_iframe'] = this.do_update;
         var $e = $(e.target);
         if ($e.val() != '') {
             this.$element.find('form.oe-binary-form').submit();
@@ -1476,7 +1476,7 @@ openerp.web.form.Field = openerp.web.form.Widget.extend(/** @lends openerp.web.f
         if (!this.disable_utility_classes) {
             this.$element.toggleClass('disabled', this.readonly);
             this.$element.toggleClass('required', this.required);
-            if (show_invalid || this.$element.hasClass('invalid')) {
+            if (show_invalid) {
                 this.$element.toggleClass('invalid', !this.is_valid());
             }
         }
@@ -2035,7 +2035,6 @@ openerp.web.form.FieldMany2One = openerp.web.form.Field.extend({
         this.$input = this.$element.find("input");
         this.$drop_down = this.$element.find(".oe-m2o-drop-down-button");
         this.$menu_btn = this.$element.find(".oe-m2o-cm-button");
-        var $self = $(self), ignore_blur = false, cm_ignore_blur = false;
 
         // context menu
         var init_context_menu_def = $.Deferred().then(function(e) {
@@ -2084,24 +2083,6 @@ openerp.web.form.FieldMany2One = openerp.web.form.Field.extend({
                 });
                 var cmenu = self.$menu_btn.contextMenu(self.cm_id, {'noRightClick': true,
                     bindings: bindings, itemStyle: {"color": ""},
-                    onShowMenu: function(ev, menu) {
-                        if (menu.attr('openerp_cm_id') && menu.attr('openerp_cm_id') != self.cm_id) {
-                            // if contextMenu still visible but for a different
-                            // m2o, force it to hide to ensure 'cm_ignore_blur'
-                            // is correctly resetted.
-                            menu.hide();
-                        }
-                        menu.attr('openerp_cm_id', self.cm_id);
-                        cm_ignore_blur = true;
-                        menu.hide = function() {
-                            if ($(this).attr('openerp_cm_id')) {
-                                $(this).attr('openerp_cm_id', null);
-                                cm_ignore_blur = false;
-                            }
-                            $(this).hide();
-                        }
-                        return menu;
-                    },
                     onContextMenu: function() {
                         if(self.value) {
                             $("#" + self.cm_id + " .oe_m2o_menu_item_mandatory").removeClass("oe-m2o-disabled-cm");
@@ -2119,14 +2100,9 @@ openerp.web.form.FieldMany2One = openerp.web.form.Field.extend({
                 $.async_when().then(function() {self.$menu_btn.trigger(e);});
             });
         });
-        this.$menu_btn.bind({
-            click: function(e) { init_context_menu_def.resolve(e); e.preventDefault() },
-            focus: function () { $self.trigger('widget-focus'); },
-            blur: function () {
-                if (cm_ignore_blur) { return; }
-                $self.trigger('widget-blur');
-            }
-        });
+        var ctx_callback = function(e) {init_context_menu_def.resolve(e); e.preventDefault()};
+        this.$menu_btn.click(ctx_callback);
+
         // some behavior for input
         this.$input.keyup(function() {
             if (self.$input.val() === "") {
@@ -2166,6 +2142,7 @@ openerp.web.form.FieldMany2One = openerp.web.form.Field.extend({
                 }
             }
         };
+        var $self = $(self), ignore_blur = false;
         this.$input.bind({
             focusout: anyoneLoosesFocus,
             focus: function () { $self.trigger('widget-focus'); },
@@ -2173,7 +2150,7 @@ openerp.web.form.FieldMany2One = openerp.web.form.Field.extend({
             autocompleteclose: function () { ignore_blur = false; },
             blur: function () {
                 // autocomplete open
-                if (ignore_blur || cm_ignore_blur) { return; }
+                if (ignore_blur) { return; }
                 var child_popup_open = _(self.widget_children).any(function (child) {
                     return child instanceof openerp.web.form.SelectCreatePopup
                         || child instanceof openerp.web.form.FormOpenPopup;
@@ -2216,6 +2193,7 @@ openerp.web.form.FieldMany2One = openerp.web.form.Field.extend({
             }
         });
 
+        this.setupFocus(this.$menu_btn);
     },
     // autocomplete component content handling
     get_search_result: function(request, response) {
@@ -2734,9 +2712,16 @@ openerp.web.form.FieldOne2Many = openerp.web.form.Field.extend({
 });
 
 openerp.web.form.One2ManyDataSet = openerp.web.BufferedDataSet.extend({
-    get_context: function() {
+    /*get_context: function() {
         this.context = this.o2m.build_context([this.o2m.name]);
         return this._super.apply(this, arguments);
+    }*/
+    get_context: function(request_context) {
+        this.context = this.o2m.build_context([this.o2m.name]);
+        if (request_context) {
+            return new openerp.web.CompoundContext(this.context, request_context);
+        }
+        return this.context;
     }
 });
 
@@ -3484,7 +3469,7 @@ openerp.web.form.FieldBinary = openerp.web.form.Field.extend({
         // TODO: on modern browsers, we could directly read the file locally on client ready to be used on image cropper
         // http://www.html5rocks.com/tutorials/file/dndfiles/
         // http://deepliquid.com/projects/Jcrop/demos.php?demo=handler
-        window[this.iframe + '_callback'] = this.on_file_uploaded;
+        window[this.iframe] = this.on_file_uploaded;
         if ($(e.target).val() != '') {
             this.$element.find('form.oe-binary-form input[name=session_id]').val(this.session.session_id);
             this.$element.find('form.oe-binary-form').submit();

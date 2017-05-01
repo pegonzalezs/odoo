@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2012-02-08 00:36+0000\n"
-"PO-Revision-Date: 2012-10-17 09:30+0000\n"
-"Last-Translator: Daniel Trajkovski <daniel.trajkovski@gmail.com>\n"
+"PO-Revision-Date: 2012-09-17 15:05+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Macedonian <mk@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:50+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-18 05:30+0000\n"
+"X-Generator: Launchpad (build 15966)\n"
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -26,7 +26,7 @@ msgstr ""
 #: selection:calendar.alarm,trigger_related:0
 #: selection:res.alarm,trigger_related:0
 msgid "The event starts"
-msgstr "Настанот започнува"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -36,13 +36,10 @@ msgstr ""
 #. module: base_calendar
 #: help:calendar.event,exdate:0
 #: help:calendar.todo,exdate:0
-#: help:crm.meeting,exdate:0
 msgid ""
 "This property defines the list of date/time exceptions for a recurring "
 "calendar component."
 msgstr ""
-"Ова својство ја дефинира листата на исклучоците датум/време за компонентата "
-"рекурсивен календар."
 
 #. module: base_calendar
 #: constraint:res.users:0
@@ -52,9 +49,8 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.event,we:0
 #: field:calendar.todo,we:0
-#: field:crm.meeting,we:0
 msgid "Wed"
-msgstr "Сре"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,rrule_type:0
@@ -65,7 +61,7 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.attendee,cutype:0
 msgid "Unknown"
-msgstr "Непознато"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -80,40 +76,38 @@ msgstr ""
 #. module: base_calendar
 #: help:calendar.event,recurrency:0
 #: help:calendar.todo,recurrency:0
-#: help:crm.meeting,recurrency:0
 msgid "Recurrent Meeting"
-msgstr "Состанок кој се повторува"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.actions.act_window,name:base_calendar.action_res_alarm_view
 #: model:ir.ui.menu,name:base_calendar.menu_crm_meeting_avail_alarm
 msgid "Alarms"
-msgstr "Аларми"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Sunday"
-msgstr "Недела"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: field:calendar.attendee,role:0
 msgid "Role"
-msgstr "Улога"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: view:calendar.event:0
-#: view:crm.meeting:0
 msgid "Invitation details"
-msgstr "Детали за поканата"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,byday:0
 #: selection:calendar.todo,byday:0
-#: selection:crm.meeting,byday:0
 msgid "Fourth"
-msgstr "Четврто"
+msgstr ""
 
 #. module: base_calendar
 #: code:addons/base_calendar/base_calendar.py:1006
@@ -126,17 +120,14 @@ msgstr ""
 #: selection:calendar.event,select1:0
 #: field:calendar.todo,day:0
 #: selection:calendar.todo,select1:0
-#: field:crm.meeting,day:0
-#: selection:crm.meeting,select1:0
 msgid "Date of month"
-msgstr "Датум од месецот"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,class:0
 #: selection:calendar.todo,class:0
-#: selection:crm.meeting,class:0
 msgid "Public"
-msgstr "Јавно"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
@@ -146,9 +137,8 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "March"
-msgstr "Март"
+msgstr ""
 
 #. module: base_calendar
 #: code:addons/base_calendar/base_calendar.py:418
@@ -160,38 +150,34 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.event,rrule_type:0
 #: field:calendar.todo,rrule_type:0
-#: field:crm.meeting,rrule_type:0
 msgid "Recurrency"
-msgstr "Повторливост"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Friday"
-msgstr "Петок"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,allday:0
 #: field:calendar.todo,allday:0
-#: field:crm.meeting,allday:0
 msgid "All Day"
-msgstr "Цел ден"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,select1:0
 #: field:calendar.todo,select1:0
-#: field:crm.meeting,select1:0
 msgid "Option"
-msgstr "Опција"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,availability:0
 #: selection:calendar.event,show_as:0
 #: selection:calendar.todo,show_as:0
-#: selection:crm.meeting,show_as:0
+#: selection:res.users,availability:0
 msgid "Free"
-msgstr "Бесплатно"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.attendee,rsvp:0
@@ -201,17 +187,17 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.alarm,alarm_id:0
 msgid "Basic Alarm"
-msgstr "Основен аларм"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.attendee,delegated_to:0
 msgid "The users that the original request was delegated to"
-msgstr "Корисници на кои е делегирано оригиналното барање"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,ref:0
 msgid "Event Ref"
-msgstr "Реф на настан"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
@@ -221,16 +207,14 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.event,tu:0
 #: field:calendar.todo,tu:0
-#: field:crm.meeting,tu:0
 msgid "Tue"
-msgstr "Вто"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,byday:0
 #: selection:calendar.todo,byday:0
-#: selection:crm.meeting,byday:0
 msgid "Third"
-msgstr "Трет"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,rrule_type:0
@@ -241,14 +225,13 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,byday:0
 #: selection:calendar.todo,byday:0
-#: selection:crm.meeting,byday:0
 msgid "Last"
-msgstr "Последна"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,cutype:0
 msgid "Room"
-msgstr "Соба"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -259,23 +242,25 @@ msgstr ""
 #: selection:calendar.alarm,trigger_interval:0
 #: selection:res.alarm,trigger_interval:0
 msgid "Days"
-msgstr "Денови"
+msgstr ""
 
 #. module: base_calendar
-#: code:addons/base_calendar/base_calendar.py:1260
+#: code:addons/base_calendar/base_calendar.py:1194
+#: code:addons/base_calendar/wizard/base_calendar_invite_attendee.py:96
+#: code:addons/base_calendar/wizard/base_calendar_invite_attendee.py:143
 #, python-format
 msgid "Error!"
-msgstr "Грешка!"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,role:0
 msgid "Chair Person"
-msgstr "Претседател"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,action:0
 msgid "Procedure"
-msgstr "Процедура"
+msgstr ""
 
 #. module: base_calendar
 #: code:addons/base_calendar/base_calendar.py:1004
@@ -287,7 +272,7 @@ msgstr ""
 #: selection:calendar.event,state:0
 #: selection:calendar.todo,state:0
 msgid "Cancelled"
-msgstr "Откажано"
+msgstr ""
 
 #. module: base_calendar
 #: code:addons/base_calendar/wizard/base_calendar_invite_attendee.py:143
@@ -299,12 +284,12 @@ msgstr ""
 #: selection:calendar.alarm,trigger_interval:0
 #: selection:res.alarm,trigger_interval:0
 msgid "Minutes"
-msgstr "Минути"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,action:0
 msgid "Display"
-msgstr "Прикажи"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -320,12 +305,13 @@ msgstr ""
 #: selection:calendar.alarm,trigger_related:0
 #: selection:res.alarm,trigger_related:0
 msgid "The event ends"
-msgstr "Настанот завршува"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: view:calendar.event:0
 msgid "Group By..."
-msgstr "Групирај по..."
+msgstr ""
 
 #. module: base_calendar
 #: help:base_calendar.invite.attendee,email:0
@@ -340,18 +326,18 @@ msgstr ""
 #. module: base_calendar
 #: help:calendar.attendee,cutype:0
 msgid "Specify the type of Invitation"
-msgstr "Назначи го типот на поканата"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,event_end_date:0
 #: field:calendar.attendee,event_end_date:0
 msgid "Event End Date"
-msgstr "Датум на завршување"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,role:0
 msgid "Optional Participation"
-msgstr "Опционо учество"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,date_deadline:0
@@ -360,25 +346,20 @@ msgid "Deadline"
 msgstr ""
 
 #. module: base_calendar
-#: code:addons/base_calendar/base_calendar.py:399
-#: code:addons/base_calendar/base_calendar.py:441
-#: code:addons/base_calendar/base_calendar.py:1013
-#: code:addons/base_calendar/base_calendar.py:1015
-#: code:addons/base_calendar/base_calendar.py:1460
+#: code:addons/base_calendar/base_calendar.py:389
+#: code:addons/base_calendar/base_calendar.py:1004
+#: code:addons/base_calendar/base_calendar.py:1006
 #, python-format
 msgid "Warning!"
-msgstr "Внимание!"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,active:0
 #: help:calendar.todo,active:0
-#: help:crm.meeting,active:0
 msgid ""
 "If the active field is set to          true, it will allow you to hide the "
 "event alarm information without removing it."
 msgstr ""
-"Доколку активното поле е означено, ќе можете да ја сокриете информацијата за "
-"аларм за настанот без да ја отстраните."
 
 #. module: base_calendar
 #: field:base_calendar.invite.attendee,partner_id:0
@@ -392,50 +373,42 @@ msgstr ""
 #: field:calendar.event,organizer_id:0
 #: field:calendar.todo,organizer:0
 #: field:calendar.todo,organizer_id:0
-#: field:crm.meeting,organizer:0
-#: field:crm.meeting,organizer_id:0
 msgid "Organizer"
-msgstr "Организатор"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: view:calendar.event:0
 #: field:calendar.event,user_id:0
 #: field:calendar.todo,user_id:0
-#: field:crm.meeting,user_id:0
 msgid "Responsible"
-msgstr "Одговорен"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
-#: model:res.request.link,name:base_calendar.request_link_event
+#: model:res.request.link,name:base_calendar.request_link_meeting
 msgid "Event"
-msgstr "Настан"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,trigger_occurs:0
 #: selection:res.alarm,trigger_occurs:0
 msgid "Before"
-msgstr "Пред"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 #: selection:calendar.event,state:0
 #: selection:calendar.todo,state:0
-#: field:crm.meeting,date_open:0
-#: selection:crm.meeting,state:0
 msgid "Confirmed"
-msgstr "Потврдено"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,attendee_ids:0
 #: field:calendar.event,attendee_ids:0
-#: field:calendar.event,partner_ids:0
 #: field:calendar.todo,attendee_ids:0
-#: field:calendar.todo,partner_ids:0
-#: field:crm.meeting,attendee_ids:0
-#: field:crm.meeting,partner_ids:0
 msgid "Attendees"
-msgstr "Присутни"
+msgstr ""
 
 #. module: base_calendar
 #: code:addons/base_calendar/base_calendar.py:1411
@@ -446,55 +419,52 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Confirm"
-msgstr "Потврди"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_calendar_todo
 msgid "Calendar Task"
-msgstr "Календарска задача"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,su:0
 #: field:calendar.todo,su:0
-#: field:crm.meeting,su:0
 msgid "Sun"
-msgstr "Нед"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,cutype:0
 msgid "Invite Type"
-msgstr "Тип на покана"
+msgstr ""
 
 #. module: base_calendar
 #: view:res.alarm:0
 msgid "Reminder details"
-msgstr "Детали за потсетникот"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,parent_ids:0
 msgid "Delegrated From"
-msgstr "Делегирано од"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,select1:0
 #: selection:calendar.todo,select1:0
-#: selection:crm.meeting,select1:0
 msgid "Day of month"
-msgstr "Ден од месецот"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.event:0
 #: field:calendar.event,location:0
 #: field:calendar.todo,location:0
-#: field:crm.meeting,location:0
 msgid "Location"
-msgstr "Локација"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,class:0
 #: selection:calendar.todo,class:0
-#: selection:crm.meeting,class:0
 msgid "Public for Employees"
-msgstr "Јавно за вработени"
+msgstr ""
 
 #. module: base_calendar
 #: field:base_calendar.invite.attendee,send_mail:0
@@ -502,10 +472,11 @@ msgid "Send mail?"
 msgstr ""
 
 #. module: base_calendar
+#: field:base_calendar.invite.attendee,email:0
 #: selection:calendar.alarm,action:0
 #: field:calendar.attendee,email:0
 msgid "Email"
-msgstr "Е-пошта"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -515,21 +486,19 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.alarm,state:0
 msgid "Run"
-msgstr "Изврши"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,exdate:0
 #: field:calendar.todo,exdate:0
-#: field:crm.meeting,exdate:0
 msgid "Exception Date/Times"
-msgstr "Датум/Времиња на исклучок"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,end_date:0
 #: field:calendar.todo,end_date:0
-#: field:crm.meeting,end_date:0
 msgid "Repeat Until"
-msgstr "Повторувај додека"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.actions.act_window,help:base_calendar.action_res_alarm_view
@@ -547,55 +516,52 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Visibility"
-msgstr "Видливост"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,rsvp:0
 msgid "Required Reply?"
-msgstr "Дали е потребен е одговор?"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,base_calendar_url:0
 #: field:calendar.todo,base_calendar_url:0
-#: field:crm.meeting,base_calendar_url:0
 msgid "Caldav URL"
-msgstr "Caldav URL"
+msgstr ""
 
 #. module: base_calendar
-#: field:calendar.event,recurrent_id:0
-#: field:calendar.todo,recurrent_id:0
-#: field:crm.meeting,recurrent_id:0
+#: field:calendar.event,recurrent_uid:0
+#: field:calendar.todo,recurrent_uid:0
 msgid "Recurrent ID"
-msgstr "Повторувачка ID"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "July"
-msgstr "Јули"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: selection:calendar.attendee,state:0
 msgid "Accepted"
-msgstr "Прифатено"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,th:0
 #: field:calendar.todo,th:0
-#: field:crm.meeting,th:0
 msgid "Thu"
-msgstr "Чет"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,child_ids:0
 msgid "Delegrated To"
-msgstr "Делегирано на"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "To"
-msgstr "До"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -605,13 +571,13 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.attendee,role:0
 msgid "Participation required"
-msgstr "Учеството е задолжително"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,create_date:0
 #: field:calendar.todo,create_date:0
 msgid "Created"
-msgstr "Креирано"
+msgstr ""
 
 #. module: base_calendar
 #: sql_constraint:ir.model:0
@@ -631,16 +597,16 @@ msgid "Mark as"
 msgstr ""
 
 #. module: base_calendar
-#: field:calendar.attendee,partner_id:0
+#: view:calendar.attendee:0
+#: field:calendar.attendee,partner_address_id:0
 msgid "Contact"
-msgstr "Контакт"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,rrule_type:0
 #: help:calendar.todo,rrule_type:0
-#: help:crm.meeting,rrule_type:0
 msgid "Let the event automatically repeat at that interval"
-msgstr "Дозволете настанот автоматски да се повторува во овој интервал"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -657,49 +623,41 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,byday:0
 #: selection:calendar.todo,byday:0
-#: selection:crm.meeting,byday:0
 msgid "First"
-msgstr "Прво"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
-#: field:calendar.event,class:0
-#: field:calendar.todo,class:0
-#: field:crm.meeting,class:0
 msgid "Privacy"
-msgstr "Приватност"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,vtimezone:0
 #: field:calendar.todo,vtimezone:0
-#: field:crm.meeting,vtimezone:0
 msgid "Timezone"
-msgstr "Временска зона"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
-#: view:crm.meeting:0
 msgid "Subject"
-msgstr "Тема"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,state:0
 msgid "Needs Action"
-msgstr "Потребно е дејство"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "September"
-msgstr "Септември"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "December"
-msgstr "Декември"
+msgstr ""
 
 #. module: base_calendar
 #: help:base_calendar.invite.attendee,send_mail:0
@@ -709,24 +667,23 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Availability"
-msgstr "Достапност"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,cutype:0
 msgid "Individual"
-msgstr "Индивидуално"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,count:0
 #: help:calendar.todo,count:0
-#: help:crm.meeting,count:0
 msgid "Repeat x times"
-msgstr "Повтори x пати"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,user_id:0
 msgid "Owner"
-msgstr "Сопственик"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -736,17 +693,18 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Start Date"
-msgstr "Почетен датум"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,cn:0
 msgid "Common name"
-msgstr "Вообичаено име"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: selection:calendar.attendee,state:0
 msgid "Declined"
-msgstr "Одбиено"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -756,25 +714,24 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "My Events"
-msgstr "Мои настани"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: view:calendar.event:0
-#: view:crm.meeting:0
 msgid "Decline"
-msgstr "Одбиј"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,cutype:0
 msgid "Group"
-msgstr "Група"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,class:0
 #: selection:calendar.todo,class:0
-#: selection:crm.meeting,class:0
 msgid "Private"
-msgstr "Приватно"
+msgstr ""
 
 #. module: base_calendar
 #: field:base_calendar.invite.attendee,contact_ids:0
@@ -784,52 +741,51 @@ msgstr ""
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_res_alarm
 msgid "Basic Alarm Information"
-msgstr "Основни информации за алармот"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,fr:0
 #: field:calendar.todo,fr:0
-#: field:crm.meeting,fr:0
 msgid "Fri"
-msgstr "Пет"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,trigger_interval:0
 #: selection:res.alarm,trigger_interval:0
 msgid "Hours"
-msgstr "Часови"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: view:calendar.event:0
 msgid "Invitation Detail"
-msgstr "Детали за поканата"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,member:0
 msgid "Member"
-msgstr "Член"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "From"
-msgstr "Од"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,rrule:0
 #: field:calendar.todo,rrule:0
-#: field:crm.meeting,rrule:0
 msgid "Recurrent Rule"
-msgstr "Правило за повторување"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,state:0
 msgid "Draft"
-msgstr "Нацрт"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,attach:0
 msgid "Attachment"
-msgstr "Приврзок"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -843,18 +799,15 @@ msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
-#: field:calendar.event,alarm_id:0
-#: field:calendar.todo,alarm_id:0
-#: field:crm.meeting,alarm_id:0
 msgid "Reminder"
-msgstr "Потсетник"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 #: model:ir.actions.act_window,name:base_calendar.action_view_event
 #: model:ir.ui.menu,name:base_calendar.menu_events
 msgid "Events"
-msgstr "Настани"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.actions.act_window,name:base_calendar.action_view_calendar_invite_attendee_wizard
@@ -865,16 +818,15 @@ msgstr ""
 #. module: base_calendar
 #: help:calendar.attendee,email:0
 msgid "Email of Invited Person"
-msgstr "Е-пошта на поканета личност"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,repeat:0
 #: field:calendar.event,count:0
 #: field:calendar.todo,count:0
-#: field:crm.meeting,count:0
 #: field:res.alarm,repeat:0
 msgid "Repeat"
-msgstr "Повтори"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.attendee,dir:0
@@ -886,77 +838,71 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "August"
-msgstr "Август"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Monday"
-msgstr "Понеделник"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_ir_model
 msgid "Models"
-msgstr "Модели"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "June"
-msgstr "Јуни"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,event_date:0
 #: field:calendar.attendee,event_date:0
 #: view:calendar.event:0
 msgid "Event Date"
-msgstr "Датум на настанот"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,end_type:0
 #: selection:calendar.todo,end_type:0
-#: selection:crm.meeting,end_type:0
 msgid "Number of repetitions"
-msgstr "Број на повторувања"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
-#: view:crm.meeting:0
 msgid "The"
-msgstr "The"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: field:calendar.attendee,delegated_from:0
 msgid "Delegated From"
-msgstr "Делегирано од"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,user_id:0
 msgid "User"
-msgstr "Корисник"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 #: field:calendar.event,date:0
-#: field:crm.meeting,date:0
 msgid "Date"
-msgstr "Датум"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "November"
-msgstr "Ноември"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.attendee,member:0
 msgid "Indicate the groups that the attendee belongs to"
-msgstr "Ги покажува групите на кои припаѓа учесникот"
+msgstr ""
 
 #. module: base_calendar
 #: view:base_calendar.invite.attendee:0
@@ -972,9 +918,8 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.event,mo:0
 #: field:calendar.todo,mo:0
-#: field:crm.meeting,mo:0
 msgid "Mon"
-msgstr "Пон"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -984,36 +929,31 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "October"
-msgstr "Октомври"
+msgstr ""
 
 #. module: base_calendar
-#: selection:calendar.attendee,state:0
+#: view:calendar.attendee:0
 #: view:calendar.event:0
-#: selection:calendar.event,state:0
-#: selection:calendar.todo,state:0
-#: view:crm.meeting:0
 msgid "Uncertain"
-msgstr "Неизвесно"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,language:0
 msgid "Language"
-msgstr "Јазик"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,trigger_occurs:0
 #: field:res.alarm,trigger_occurs:0
 msgid "Triggers"
-msgstr "Активатори"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "January"
-msgstr "Јануари"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -1024,46 +964,43 @@ msgstr ""
 #: field:calendar.alarm,trigger_interval:0
 #: field:res.alarm,trigger_interval:0
 msgid "Interval"
-msgstr "Интервал"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Wednesday"
-msgstr "Среда"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,name:0
 #: view:calendar.event:0
-#: field:crm.meeting,message_summary:0
 msgid "Summary"
-msgstr "Резиме"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,active:0
 #: field:calendar.event,active:0
 #: field:calendar.todo,active:0
-#: field:crm.meeting,active:0
 #: field:res.alarm,active:0
 msgid "Active"
-msgstr "Активно"
+msgstr ""
 
 #. module: base_calendar
-#: code:addons/base_calendar/base_calendar.py:399
+#: code:addons/base_calendar/base_calendar.py:389
 #, python-format
 msgid "You cannot duplicate a calendar attendee."
-msgstr "Не може да дуплирате календарски учесник."
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Choose day in the month where repeat the meeting"
-msgstr "Избери ден во месецот кога ќе се повторува состанокот"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,action:0
 msgid "Action"
-msgstr "Акција"
+msgstr ""
 
 #. module: base_calendar
 #: help:base_calendar.invite.attendee,type:0
@@ -1077,8 +1014,6 @@ msgid ""
 "Duration' and 'Repeat' are both optional, but if one occurs, so MUST the "
 "other"
 msgstr ""
-"'Времетраење' и 'Повотри' се опциони, но доколку се појави едното, мора и "
-"другото"
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -1091,32 +1026,31 @@ msgid "Participation role for the calendar user"
 msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: field:calendar.attendee,delegated_to:0
 msgid "Delegated To"
-msgstr "Делегирано на"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.alarm,action:0
 msgid "Defines the action to be invoked when an alarm is triggered"
 msgstr ""
-"Ја дефинира акцијата која треба да биде повикана кога е активиран алармот"
 
 #. module: base_calendar
 #: selection:calendar.event,end_type:0
 #: selection:calendar.todo,end_type:0
-#: selection:crm.meeting,end_type:0
 msgid "End date"
-msgstr "Краен датум"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Search Events"
-msgstr "Барај Настани"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Recurrency Option"
-msgstr "Опција за повторување"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,rrule_type:0
@@ -1131,13 +1065,10 @@ msgid ""
 "If the active field is set to true, it will allow you to hide the event "
 "alarm information without removing it."
 msgstr ""
-"Доколку активното поле е означено, ќе можете да ја сокриете информацијата за "
-"аларм за настанот без да ја отстраните."
 
 #. module: base_calendar
-#: field:calendar.event,recurrent_id_date:0
-#: field:calendar.todo,recurrent_id_date:0
-#: field:crm.meeting,recurrent_id_date:0
+#: field:calendar.event,recurrent_id:0
+#: field:calendar.todo,recurrent_id:0
 msgid "Recurrent ID date"
 msgstr ""
 
@@ -1159,7 +1090,7 @@ msgstr ""
 #. module: base_calendar
 #: view:res.alarm:0
 msgid "Reminder Details"
-msgstr "Детали за потсетникот"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -1169,24 +1100,25 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.alarm,state:0
 msgid "Done"
-msgstr "Завршено"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,interval:0
 #: help:calendar.todo,interval:0
-#: help:crm.meeting,interval:0
 msgid "Repeat every (Days/Week/Month/Year)"
-msgstr "Повторувај секој(Ден/Недела/Месец/Година)"
+msgstr ""
 
 #. module: base_calendar
-#: model:ir.model,name:base_calendar.model_res_users
+#: view:base_calendar.invite.attendee:0
+#: field:base_calendar.invite.attendee,user_ids:0
 msgid "Users"
-msgstr "Корисници"
+msgstr ""
 
 #. module: base_calendar
+#: view:base_calendar.invite.attendee:0
 #: view:calendar.event:0
 msgid "Cancel"
-msgstr "Откажи"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_res_users
@@ -1196,9 +1128,8 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Tuesday"
-msgstr "Вторник"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.alarm,description:0
@@ -1207,28 +1138,26 @@ msgid ""
 "calendar component, than that                             provided by the "
 "\"SUMMARY\" property"
 msgstr ""
-"Дава покомплетен                             опис на календарската "
-"компонента, од онаа                             дадена во \"РЕЗИМЕ\""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Responsible User"
-msgstr "Одговорен корисник"
+msgstr ""
 
 #. module: base_calendar
-#: code:addons/base_calendar/base_calendar.py:1519
+#: code:addons/base_calendar/base_calendar.py:1466
 #: selection:calendar.attendee,availability:0
 #: selection:calendar.event,show_as:0
 #: selection:calendar.todo,show_as:0
-#: selection:crm.meeting,show_as:0
+#: selection:res.users,availability:0
 #, python-format
 msgid "Busy"
-msgstr "Зафатен"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_calendar_event
 msgid "Calendar Event"
-msgstr "Календарски настан"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,state:0
@@ -1246,16 +1175,14 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.event,recurrency:0
 #: field:calendar.todo,recurrency:0
-#: field:crm.meeting,recurrency:0
 msgid "Recurrent"
-msgstr "Повторувачко"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,location:0
 #: help:calendar.todo,location:0
-#: help:crm.meeting,location:0
 msgid "Location of Event"
-msgstr "Локација на настанот"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.actions.act_window,name:base_calendar.action_view_attendee_form
@@ -1266,16 +1193,14 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Thursday"
-msgstr "Четврток"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,exrule:0
 #: field:calendar.todo,exrule:0
-#: field:crm.meeting,exrule:0
 msgid "Exception Rule"
-msgstr "Правило за исклучок"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.attendee,language:0
@@ -1286,12 +1211,11 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Details"
-msgstr "Детали"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,exrule:0
 #: help:calendar.todo,exrule:0
-#: help:crm.meeting,exrule:0
 msgid ""
 "Defines a rule or repeating pattern of time to exclude from the recurring "
 "rule."
@@ -1300,9 +1224,8 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.event,month_list:0
 #: field:calendar.todo,month_list:0
-#: field:crm.meeting,month_list:0
 msgid "Month"
-msgstr "Месец"
+msgstr ""
 
 #. module: base_calendar
 #: view:base_calendar.invite.attendee:0
@@ -1313,12 +1236,12 @@ msgstr ""
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Confirmed Events"
-msgstr "Потврдени настани"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,dir:0
 msgid "URI Reference"
-msgstr "URI Референца"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,description:0
@@ -1327,16 +1250,14 @@ msgstr "URI Референца"
 #: field:calendar.event,name:0
 #: field:calendar.todo,description:0
 #: field:calendar.todo,name:0
-#: field:crm.meeting,description:0
 msgid "Description"
-msgstr "Опис"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "May"
-msgstr "Мај"
+msgstr ""
 
 #. module: base_calendar
 #: field:base_calendar.invite.attendee,type:0
@@ -1353,81 +1274,76 @@ msgstr ""
 #: selection:calendar.alarm,trigger_occurs:0
 #: selection:res.alarm,trigger_occurs:0
 msgid "After"
-msgstr "После"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,state:0
 msgid "Stop"
-msgstr "Стоп"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_ir_values
 msgid "ir.values"
-msgstr "ir.values"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_ir_attachment
 msgid "ir.attachment"
-msgstr "ir.attachment"
+msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: selection:calendar.attendee,state:0
 msgid "Delegated"
-msgstr "Пренесено"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,sa:0
 #: field:calendar.todo,sa:0
-#: field:crm.meeting,sa:0
 msgid "Sat"
-msgstr "Саб"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Choose day where repeat the meeting"
-msgstr "Изберете ден кога ќе се повтори состанокот"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,trigger_related:0
 #: field:res.alarm,trigger_related:0
 msgid "Related to"
-msgstr "Поврзано со"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.attendee,sent_by:0
 msgid "Specify the user that is acting on behalf of the calendar user"
-msgstr "Означува корисник кој делува во име на календарски корисник"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
-#: field:calendar.event,date_deadline:0
-#: field:calendar.todo,date_deadline:0
-#: field:crm.meeting,date_deadline:0
 msgid "End Date"
-msgstr "Краен датум"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "February"
-msgstr "Февруари"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,cutype:0
 msgid "Resource"
-msgstr "Ресурс"
+msgstr ""
 
 #. module: base_calendar
-#: field:crm.meeting.type,name:0
 #: field:res.alarm,name:0
 msgid "Name"
-msgstr "Име"
+msgstr ""
 
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_calendar_alarm
 msgid "Event alarm information"
-msgstr "Информација за аларм за настан"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.alarm,name:0
@@ -1435,68 +1351,63 @@ msgid ""
 "Contains the text to be                      used as the message subject for "
 "email                      or contains the text to be used for display"
 msgstr ""
-"Содржи текст кој треба да биде                      употребен како тема на "
-"пораката за email                      содржи текст за прикажување"
 
 #. module: base_calendar
+#: field:calendar.event,alarm_id:0
 #: field:calendar.event,base_calendar_alarm_id:0
+#: field:calendar.todo,alarm_id:0
 #: field:calendar.todo,base_calendar_alarm_id:0
-#: field:crm.meeting,base_calendar_alarm_id:0
 msgid "Alarm"
-msgstr "Аларм"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,sent_by_uid:0
 msgid "Sent By User"
-msgstr "Испратено од корисник"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,month_list:0
 #: selection:calendar.todo,month_list:0
-#: selection:crm.meeting,month_list:0
 msgid "April"
-msgstr "Април"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.event:0
 msgid "Recurrency period"
-msgstr "Период на повторување"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,week_list:0
 #: field:calendar.todo,week_list:0
-#: field:crm.meeting,week_list:0
 msgid "Weekday"
-msgstr "Ден од недела"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,byday:0
 #: field:calendar.todo,byday:0
-#: field:crm.meeting,byday:0
 msgid "By day"
-msgstr "По ден"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,model_id:0
 msgid "Model"
-msgstr "Модел"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.alarm,action:0
 msgid "Audio"
-msgstr "Звук"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,id:0
 #: field:calendar.todo,id:0
-#: field:crm.meeting,id:0
 msgid "ID"
-msgstr "ID"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.attendee,role:0
 msgid "For information Purpose"
-msgstr "За информативна намена"
+msgstr ""
 
 #. module: base_calendar
 #: view:base_calendar.invite.attendee:0
@@ -1506,12 +1417,12 @@ msgstr ""
 #. module: base_calendar
 #: model:ir.model,name:base_calendar.model_calendar_attendee
 msgid "Attendee information"
-msgstr "Информации за учесник"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,res_id:0
 msgid "Resource ID"
-msgstr "ID на ресурс"
+msgstr ""
 
 #. module: base_calendar
 #: code:addons/base_calendar/base_calendar.py:418
@@ -1522,21 +1433,19 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.attendee,sent_by:0
 msgid "Sent By"
-msgstr "Испратено од"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.event,sequence:0
 #: field:calendar.todo,sequence:0
-#: field:crm.meeting,sequence:0
 msgid "Sequence"
-msgstr "Секвенца"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.event,alarm_id:0
 #: help:calendar.todo,alarm_id:0
-#: help:crm.meeting,alarm_id:0
 msgid "Set an alarm at this time, before the event occurs"
-msgstr "Подесува аларм во ова време, пред да се појави настанот"
+msgstr ""
 
 #. module: base_calendar
 #: selection:base_calendar.invite.attendee,type:0
@@ -1544,17 +1453,16 @@ msgid "Internal User"
 msgstr ""
 
 #. module: base_calendar
+#: view:calendar.attendee:0
 #: view:calendar.event:0
-#: view:crm.meeting:0
 msgid "Accept"
-msgstr "Прифати"
+msgstr ""
 
 #. module: base_calendar
 #: selection:calendar.event,week_list:0
 #: selection:calendar.todo,week_list:0
-#: selection:crm.meeting,week_list:0
 msgid "Saturday"
-msgstr "Сабота"
+msgstr ""
 
 #. module: base_calendar
 #: view:calendar.attendee:0
@@ -1564,14 +1472,14 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,byday:0
 #: selection:calendar.todo,byday:0
-#: selection:crm.meeting,byday:0
 msgid "Second"
-msgstr "Секунда"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.attendee,availability:0
+#: field:res.users,availability:0
 msgid "Free/Busy"
-msgstr "Слободен/зафатен"
+msgstr ""
 
 #. module: base_calendar
 #: field:calendar.alarm,duration:0
@@ -1579,11 +1487,10 @@ msgstr "Слободен/зафатен"
 #: field:calendar.event,duration:0
 #: field:calendar.todo,date:0
 #: field:calendar.todo,duration:0
-#: field:crm.meeting,duration:0
 #: field:res.alarm,duration:0
 #: field:res.alarm,trigger_duration:0
 msgid "Duration"
-msgstr "Времетраење"
+msgstr ""
 
 #. module: base_calendar
 #: selection:base_calendar.invite.attendee,type:0
@@ -1593,7 +1500,7 @@ msgstr ""
 #. module: base_calendar
 #: field:calendar.alarm,trigger_date:0
 msgid "Trigger Date"
-msgstr "Датум на активирање"
+msgstr ""
 
 #. module: base_calendar
 #: help:calendar.alarm,attach:0
@@ -1609,6 +1516,5 @@ msgstr ""
 #. module: base_calendar
 #: selection:calendar.event,byday:0
 #: selection:calendar.todo,byday:0
-#: selection:crm.meeting,byday:0
 msgid "Fifth"
-msgstr "Петто"
+msgstr ""

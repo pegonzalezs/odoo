@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.14\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-12-07 14:55+0000\n"
-"Last-Translator: Mikael Akerberg <mikael.akerberg@dermanord.se>\n"
+"PO-Revision-Date: 2012-07-27 10:45+0000\n"
+"Last-Translator: Anders Wallenquist <anders.wallenquist@vertel.se>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:00+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr
 #: model:process.node,name:hr.process_node_openerpuser0
@@ -22,7 +22,7 @@ msgid "Openerp user"
 msgstr "OpenERP användare"
 
 #. module: hr
-#: field:hr.job,requirements:0
+#: view:hr.job:0 field:hr.job,requirements:0
 msgid "Requirements"
 msgstr "Krav"
 
@@ -42,18 +42,14 @@ msgid "SIN No"
 msgstr "Personnummer"
 
 #. module: hr
-#: model:ir.actions.act_window,name:hr.open_board_hr
-#: model:ir.ui.menu,name:hr.menu_hr_dashboard
 #: model:ir.ui.menu,name:hr.menu_hr_main
-#: model:ir.ui.menu,name:hr.menu_hr_reporting
+#: model:ir.ui.menu,name:hr.menu_hr_management
 #: model:ir.ui.menu,name:hr.menu_hr_root
-#: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 msgid "Human Resources"
-msgstr "Personal"
+msgstr "Personalresurser"
 
 #. module: hr
-#: view:hr.employee:0
-#: view:hr.job:0
+#: view:hr.employee:0 view:hr.job:0
 msgid "Group By..."
 msgstr "Gruppera på..."
 
@@ -78,12 +74,8 @@ msgstr ""
 "för denna befattning."
 
 #. module: hr
-#: view:hr.department:0
-#: view:hr.employee:0
-#: field:hr.employee,department_id:0
-#: view:hr.job:0
-#: field:hr.job,department_id:0
-#: model:ir.model,name:hr.model_hr_department
+#: view:hr.employee:0 field:hr.employee,department_id:0 view:hr.job:0
+#: field:hr.job,department_id:0 view:res.users:0
 msgid "Department"
 msgstr "Avdelning"
 
@@ -103,9 +95,7 @@ msgid "In Recruitment"
 msgstr "I anställningsprocessen"
 
 #. module: hr
-#: field:hr.department,company_id:0
-#: view:hr.employee:0
-#: view:hr.job:0
+#: field:hr.department,company_id:0 view:hr.employee:0 view:hr.job:0
 #: field:hr.job,company_id:0
 msgid "Company"
 msgstr "Företag"
@@ -113,7 +103,7 @@ msgstr "Företag"
 #. module: hr
 #: field:hr.job,no_of_recruitment:0
 msgid "Expected in Recruitment"
-msgstr "Rekryteringsbehov"
+msgstr "Väntas i rekryteringen"
 
 #. module: hr
 #: model:ir.actions.todo.category,name:hr.category_hr_management_config
@@ -140,7 +130,7 @@ msgid "Parent Department"
 msgstr "Huvudavdelning"
 
 #. module: hr
-#: field:hr.employee,notes:0
+#: view:hr.employee:0 field:hr.employee,notes:0
 msgid "Notes"
 msgstr "Anteckningar"
 
@@ -228,7 +218,7 @@ msgid "Child Categories"
 msgstr "Underkategori"
 
 #. module: hr
-#: field:hr.job,description:0
+#: view:hr.job:0 field:hr.job,description:0
 #: model:ir.model,name:hr.model_hr_job
 msgid "Job Description"
 msgstr "Arbetsbeskrivning"
@@ -244,8 +234,7 @@ msgid "My Departments Employee"
 msgstr "Anställda på min avdelning"
 
 #. module: hr
-#: view:hr.employee:0
-#: model:ir.model,name:hr.model_hr_employee
+#: view:hr.employee:0 model:ir.model,name:hr.model_hr_employee
 #: model:process.node,name:hr.process_node_employee0
 msgid "Employee"
 msgstr "Anställd"
@@ -271,14 +260,13 @@ msgid "Reporting"
 msgstr "Rapportering"
 
 #. module: hr
-#: view:board.board:0
+#: model:ir.actions.act_window,name:hr.open_board_hr
+#: model:ir.ui.menu,name:hr.menu_hr_dashboard_user
 msgid "Human Resources Dashboard"
 msgstr "Personalinfopanel"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,job_id:0
-#: view:hr.job:0
+#: view:hr.employee:0 field:hr.employee,job_id:0 view:hr.job:0
 msgid "Job"
 msgstr "Jobb"
 
@@ -321,6 +309,7 @@ msgstr "Fel! Du kan inte skapa rekursiva kategorier"
 #: view:hr.department:0
 #: model:ir.actions.act_window,name:hr.open_module_tree_department
 #: model:ir.ui.menu,name:hr.menu_hr_department_tree
+#: field:res.users,context_department_id:0
 msgid "Departments"
 msgstr "Avdelningar"
 
@@ -424,7 +413,7 @@ msgstr "Kontaktinformation"
 #. module: hr
 #: field:hr.employee,address_id:0
 msgid "Working Address"
-msgstr "ArbetsAdress"
+msgstr "adress"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_board_hr_manager
@@ -439,8 +428,6 @@ msgstr "Underavdelning"
 
 #. module: hr
 #: view:hr.employee:0
-#: view:hr.job:0
-#: field:hr.job,state:0
 msgid "Status"
 msgstr "Status"
 
@@ -546,7 +533,7 @@ msgid "Employee form and structure"
 msgstr "Anställdsformulär och struktur"
 
 #. module: hr
-#: field:hr.employee,image:0
+#: field:hr.employee,photo:0
 msgid "Photo"
 msgstr "Bild"
 
@@ -583,7 +570,7 @@ msgstr "Anställningskategorier"
 #. module: hr
 #: field:hr.employee,address_home_id:0
 msgid "Home Address"
-msgstr "HemAdress"
+msgstr "Hemadress"
 
 #. module: hr
 #: view:hr.job:0
@@ -601,7 +588,7 @@ msgid "Job Name"
 msgstr "Jobbnamn"
 
 #. module: hr
-#: view:hr.job:0
+#: view:hr.job:0 selection:hr.job,state:0
 msgid "In Position"
 msgstr "I befattning"
 
@@ -632,7 +619,6 @@ msgstr "Resurs"
 
 #. module: hr
 #: field:hr.department,complete_name:0
-#: field:hr.employee,name_related:0
 #: field:hr.employee.category,complete_name:0
 msgid "Name"
 msgstr "Namn"
@@ -643,13 +629,14 @@ msgid "Gender"
 msgstr "Kön"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee.category,employee_ids:0
+#: view:hr.employee:0 view:hr.employee.category:0
+#: field:hr.employee.category,employee_ids:0 view:hr.job:0
 #: field:hr.job,employee_ids:0
 #: model:ir.actions.act_window,name:hr.hr_employee_normal_action_tree
 #: model:ir.actions.act_window,name:hr.open_view_employee_list
 #: model:ir.actions.act_window,name:hr.open_view_employee_list_my
 #: model:ir.ui.menu,name:hr.menu_open_view_employee_list_my
+#: model:ir.ui.menu,name:hr.menu_view_employee_category_configuration_form
 msgid "Employees"
 msgstr "Anställda"
 
@@ -687,7 +674,7 @@ msgstr "Jobbinformation"
 #: model:ir.actions.act_window,name:hr.action_hr_job
 #: model:ir.ui.menu,name:hr.menu_hr_job
 msgid "Job Positions"
-msgstr "Befattningar"
+msgstr "Platser"
 
 #. module: hr
 #: field:hr.employee,otherid:0
@@ -695,10 +682,9 @@ msgid "Other Id"
 msgstr "Annat ID"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,coach_id:0
+#: view:hr.employee:0 field:hr.employee,coach_id:0
 msgid "Coach"
-msgstr "Handledare"
+msgstr "Tränare"
 
 #. module: hr
 #: sql_constraint:hr.job:0
@@ -711,8 +697,7 @@ msgid "My Departments Jobs"
 msgstr "Min avdelnings arbeten"
 
 #. module: hr
-#: field:hr.department,manager_id:0
-#: view:hr.employee:0
+#: field:hr.department,manager_id:0 view:hr.employee:0
 #: field:hr.employee,parent_id:0
 msgid "Manager"
 msgstr "Chef"

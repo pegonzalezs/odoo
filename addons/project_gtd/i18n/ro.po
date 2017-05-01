@@ -7,19 +7,19 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.4\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-10-14 11:14+0000\n"
+"PO-Revision-Date: 2012-05-26 17:16+0000\n"
 "Last-Translator: Fekete Mihai <mihai@erpsystems.ro>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:16+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:58+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: project_gtd
 #: view:project.task:0
 msgid "In Progress"
-msgstr "In desfasurare"
+msgstr "In curs de desfasurare"
 
 #. module: project_gtd
 #: view:project.task:0
@@ -59,7 +59,7 @@ msgstr "Sarcini in asteptare"
 #. module: project_gtd
 #: view:project.task:0
 msgid "Next"
-msgstr "Urmatorul"
+msgstr "Urmatorul (urmatoarea)"
 
 #. module: project_gtd
 #: model:ir.actions.act_window,help:project_gtd.open_gtd_timebox_tree
@@ -93,9 +93,8 @@ msgid "Pending"
 msgstr "In asteptare"
 
 #. module: project_gtd
-#: view:project.gtd.timebox:0
-#: field:project.gtd.timebox,name:0
-#: field:project.task,timebox_id:0
+#: view:project.gtd.timebox:0 field:project.gtd.timebox,name:0
+#: view:project.task:0 field:project.task,timebox_id:0
 msgid "Timebox"
 msgstr "Perioada"
 
@@ -216,8 +215,7 @@ msgstr "In desfasurare si sarcini ciorna"
 
 #. module: project_gtd
 #: model:ir.model,name:project_gtd.model_project_gtd_context
-#: view:project.gtd.context:0
-#: field:project.gtd.context,name:0
+#: view:project.gtd.context:0 field:project.gtd.context,name:0
 #: field:project.task,context_id:0
 msgid "Context"
 msgstr "Context"
@@ -239,8 +237,7 @@ msgid "Office"
 msgstr "Birou"
 
 #. module: project_gtd
-#: field:project.gtd.context,sequence:0
-#: field:project.gtd.timebox,sequence:0
+#: field:project.gtd.context,sequence:0 field:project.gtd.timebox,sequence:0
 msgid "Sequence"
 msgstr "Secventa"
 

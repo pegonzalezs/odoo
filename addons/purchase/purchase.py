@@ -682,7 +682,7 @@ class purchase_order_line(osv.osv):
 
     }
     _defaults = {
-        'product_uom' : _get_uom_id,
+        #'product_uom' : _get_uom_id,
         'product_qty': lambda *a: 1.0,
         'state': lambda *args: 'draft',
         'invoiced': lambda *a: 0,
@@ -705,9 +705,10 @@ class purchase_order_line(osv.osv):
         """
         if not uom_id:
             return {'value': {'price_unit': price_unit or 0.0, 'name': name or '', 'notes': notes or'', 'product_uom' : uom_id or False}}
-        return self.onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
-            partner_id, date_order=date_order, fiscal_position_id=fiscal_position_id, date_planned=date_planned,
-            name=name, price_unit=price_unit, notes=notes, context=context)
+        #return self.onchange_product_id(cr, uid, ids, pricelist_id, product_id, qty, uom_id,
+        #    partner_id, date_order=date_order, fiscal_position_id=fiscal_position_id, date_planned=date_planned,
+        #    name=name, price_unit=price_unit, notes=notes, context=context)
+	return {}
 
     def _get_date_planned(self, cr, uid, supplier_info, date_order_str, context=None):
         """Return the datetime value to use as Schedule Date (``date_planned``) for
@@ -729,10 +730,6 @@ class purchase_order_line(osv.osv):
             name=False, price_unit=False, notes=False, context=None):
         """
         onchange handler of product_id.
-
-        :param dict context: 'force_product_uom' key in context override
-                             default onchange behaviour to force using the UoM
-                             defined on the provided product
         """
         if context is None:
             context = {}
@@ -766,7 +763,7 @@ class purchase_order_line(osv.osv):
 
         # - check that uom and product uom belong to the same category
         product_uom_po_id = product.uom_po_id.id
-        if not uom_id or context.get('force_product_uom'):
+        if not uom_id:
             uom_id = product_uom_po_id
         
         if product.uom_id.category_id.id != product_uom.browse(cr, uid, uom_id, context=context).category_id.id:
@@ -781,7 +778,7 @@ class purchase_order_line(osv.osv):
 
         qty = qty or 1.0
         supplierinfo = False
-        supplierinfo_ids = product_supplierinfo.search(cr, uid, [('name','=',partner_id),('product_id','=',product.id)])
+        supplierinfo_ids = product_supplierinfo.search(cr, uid, [('name','=',partner_id),('product_id','=',product.product_tmpl_id.id)])
         if supplierinfo_ids:
             supplierinfo = product_supplierinfo.browse(cr, uid, supplierinfo_ids[0], context=context)
             if supplierinfo.product_uom.id != uom_id:

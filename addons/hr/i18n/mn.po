@@ -20,8 +20,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:00+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr
 #: model:process.node,name:hr.process_node_openerpuser0
@@ -29,7 +29,7 @@ msgid "Openerp user"
 msgstr "Openerp хэрэглэгч"
 
 #. module: hr
-#: field:hr.job,requirements:0
+#: view:hr.job:0 field:hr.job,requirements:0
 msgid "Requirements"
 msgstr "Шаардлагууд"
 
@@ -49,18 +49,14 @@ msgid "SIN No"
 msgstr "Даатгалын дугаар"
 
 #. module: hr
-#: model:ir.actions.act_window,name:hr.open_board_hr
-#: model:ir.ui.menu,name:hr.menu_hr_dashboard
 #: model:ir.ui.menu,name:hr.menu_hr_main
-#: model:ir.ui.menu,name:hr.menu_hr_reporting
+#: model:ir.ui.menu,name:hr.menu_hr_management
 #: model:ir.ui.menu,name:hr.menu_hr_root
-#: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 msgid "Human Resources"
 msgstr "Хүний нөөц"
 
 #. module: hr
-#: view:hr.employee:0
-#: view:hr.job:0
+#: view:hr.employee:0 view:hr.job:0
 msgid "Group By..."
 msgstr "Бүлэглэх..."
 
@@ -84,12 +80,8 @@ msgstr ""
 "үнэлэхтэй холбоотой ярилцлагын асуулт зэрэгийг хавсаргах боломжтой."
 
 #. module: hr
-#: view:hr.department:0
-#: view:hr.employee:0
-#: field:hr.employee,department_id:0
-#: view:hr.job:0
-#: field:hr.job,department_id:0
-#: model:ir.model,name:hr.model_hr_department
+#: view:hr.employee:0 field:hr.employee,department_id:0 view:hr.job:0
+#: field:hr.job,department_id:0 view:res.users:0
 msgid "Department"
 msgstr "Хэлтэс"
 
@@ -109,9 +101,7 @@ msgid "In Recruitment"
 msgstr "Хүний нөөцийн бүрдүүлэлтэд"
 
 #. module: hr
-#: field:hr.department,company_id:0
-#: view:hr.employee:0
-#: view:hr.job:0
+#: field:hr.department,company_id:0 view:hr.employee:0 view:hr.job:0
 #: field:hr.job,company_id:0
 msgid "Company"
 msgstr "Компани"
@@ -146,7 +136,7 @@ msgid "Parent Department"
 msgstr "Толгой хэлтэс"
 
 #. module: hr
-#: field:hr.employee,notes:0
+#: view:hr.employee:0 field:hr.employee,notes:0
 msgid "Notes"
 msgstr "Тэмдэглэл"
 
@@ -205,7 +195,7 @@ msgstr "Ялгах дугаар"
 #. module: hr
 #: selection:hr.employee,gender:0
 msgid "Female"
-msgstr "Эмэгтэй"
+msgstr "эм"
 
 #. module: hr
 #: help:hr.job,expected_employees:0
@@ -233,7 +223,7 @@ msgid "Child Categories"
 msgstr "Хүү зэрэглэл"
 
 #. module: hr
-#: field:hr.job,description:0
+#: view:hr.job:0 field:hr.job,description:0
 #: model:ir.model,name:hr.model_hr_job
 msgid "Job Description"
 msgstr "Ажлын байрны тодорхойлолт"
@@ -249,8 +239,7 @@ msgid "My Departments Employee"
 msgstr "Манай хэлтсийн ажилчид"
 
 #. module: hr
-#: view:hr.employee:0
-#: model:ir.model,name:hr.model_hr_employee
+#: view:hr.employee:0 model:ir.model,name:hr.model_hr_employee
 #: model:process.node,name:hr.process_node_employee0
 msgid "Employee"
 msgstr "Ажилтан"
@@ -276,14 +265,13 @@ msgid "Reporting"
 msgstr "Тайлан"
 
 #. module: hr
-#: view:board.board:0
+#: model:ir.actions.act_window,name:hr.open_board_hr
+#: model:ir.ui.menu,name:hr.menu_hr_dashboard_user
 msgid "Human Resources Dashboard"
 msgstr "Хүний нөөцийн хянах самбар"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,job_id:0
-#: view:hr.job:0
+#: view:hr.employee:0 field:hr.employee,job_id:0 view:hr.job:0
 msgid "Job"
 msgstr "Ажлын байр"
 
@@ -326,6 +314,7 @@ msgstr "Алдаа ! Рекурс зэрэглэлийг үүсгэж болох
 #: view:hr.department:0
 #: model:ir.actions.act_window,name:hr.open_module_tree_department
 #: model:ir.ui.menu,name:hr.menu_hr_department_tree
+#: field:res.users,context_department_id:0
 msgid "Departments"
 msgstr "Хэлтсүүд"
 
@@ -342,7 +331,7 @@ msgstr "Өөрийн хянах самбар"
 #. module: hr
 #: selection:hr.employee,gender:0
 msgid "Male"
-msgstr "Эрэгтэй"
+msgstr "эр"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_view_categ_form
@@ -443,8 +432,6 @@ msgstr "Хүү хэлтэсүүд"
 
 #. module: hr
 #: view:hr.employee:0
-#: view:hr.job:0
-#: field:hr.job,state:0
 msgid "Status"
 msgstr "Төлөв"
 
@@ -548,7 +535,7 @@ msgid "Employee form and structure"
 msgstr "Ажилтны маягт, бүтэц"
 
 #. module: hr
-#: field:hr.employee,image:0
+#: field:hr.employee,photo:0
 msgid "Photo"
 msgstr "Зураг"
 
@@ -603,7 +590,7 @@ msgid "Job Name"
 msgstr "Ажлын байрны нэр"
 
 #. module: hr
-#: view:hr.job:0
+#: view:hr.job:0 selection:hr.job,state:0
 msgid "In Position"
 msgstr "Нээлттэй"
 
@@ -634,7 +621,6 @@ msgstr "Нөөц"
 
 #. module: hr
 #: field:hr.department,complete_name:0
-#: field:hr.employee,name_related:0
 #: field:hr.employee.category,complete_name:0
 msgid "Name"
 msgstr "Нэр"
@@ -645,13 +631,14 @@ msgid "Gender"
 msgstr "Хүйс"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee.category,employee_ids:0
+#: view:hr.employee:0 view:hr.employee.category:0
+#: field:hr.employee.category,employee_ids:0 view:hr.job:0
 #: field:hr.job,employee_ids:0
 #: model:ir.actions.act_window,name:hr.hr_employee_normal_action_tree
 #: model:ir.actions.act_window,name:hr.open_view_employee_list
 #: model:ir.actions.act_window,name:hr.open_view_employee_list_my
 #: model:ir.ui.menu,name:hr.menu_open_view_employee_list_my
+#: model:ir.ui.menu,name:hr.menu_view_employee_category_configuration_form
 msgid "Employees"
 msgstr "Ажилчид"
 
@@ -697,8 +684,7 @@ msgid "Other Id"
 msgstr "Бусад дугаар"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,coach_id:0
+#: view:hr.employee:0 field:hr.employee,coach_id:0
 msgid "Coach"
 msgstr "Дадлагажуулагч"
 
@@ -713,8 +699,7 @@ msgid "My Departments Jobs"
 msgstr "Миний алба, хэлтсийн ажлын байрууд"
 
 #. module: hr
-#: field:hr.department,manager_id:0
-#: view:hr.employee:0
+#: field:hr.department,manager_id:0 view:hr.employee:0
 #: field:hr.employee,parent_id:0
 msgid "Manager"
 msgstr "Менежер"

@@ -240,8 +240,6 @@ class partner_balance(report_sxw.rml_parse, common_report_header):
         if self.target_move == 'posted':
             move_state = ['posted']
 
-        if not self.ids:
-            return 0.0
         self.cr.execute(
                 "SELECT sum(debit) " \
                 "FROM account_move_line AS l " \
@@ -257,9 +255,6 @@ class partner_balance(report_sxw.rml_parse, common_report_header):
         move_state = ['draft','posted']
         if self.target_move == 'posted':
             move_state = ['posted']
-
-        if not self.ids:
-            return 0.0
         self.cr.execute(
                 "SELECT sum(credit) " \
                 "FROM account_move_line AS l " \
@@ -276,9 +271,7 @@ class partner_balance(report_sxw.rml_parse, common_report_header):
         move_state = ['draft','posted']
         if self.target_move == 'posted':
             move_state = ['posted']
-
-        if not self.ids:
-            return 0.0
+            
         self.cr.execute(
                 "SELECT sum(debit-credit) " \
                 "FROM account_move_line AS l " \

@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:03+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:46+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_recruitment
 #: help:hr.applicant,active:0
@@ -25,8 +25,7 @@ msgid ""
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.recruitment.stage:0
-#: field:hr.recruitment.stage,requirements:0
+#: view:hr.recruitment.stage:0 field:hr.recruitment.stage,requirements:0
 msgid "Requirements"
 msgstr "Изисквания"
 
@@ -63,10 +62,8 @@ msgid "Filter and view on next actions and date"
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,department_id:0
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,department_id:0
+#: view:hr.applicant:0 field:hr.applicant,department_id:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,department_id:0
 msgid "Department"
 msgstr "Отдел"
 
@@ -91,8 +88,7 @@ msgid "Pending Jobs"
 msgstr ""
 
 #. module: hr_recruitment
-#: field:hr.applicant,company_id:0
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,company_id:0 view:hr.recruitment.report:0
 #: field:hr.recruitment.report,company_id:0
 msgid "Company"
 msgstr "Фирма"
@@ -103,7 +99,7 @@ msgid "No"
 msgstr ""
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:445
+#: code:addons/hr_recruitment/hr_recruitment.py:436
 #, python-format
 msgid "You must define Applied Job for this applicant."
 msgstr ""
@@ -140,8 +136,7 @@ msgid "Create Partner"
 msgstr "Създаване на контрагент"
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,day:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,day:0
 msgid "Day"
 msgstr "Ден"
 
@@ -191,14 +186,12 @@ msgid "Next Actions"
 msgstr "Следващи действия"
 
 #. module: hr_recruitment
-#: field:hr.applicant,salary_expected:0
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,salary_expected:0 view:hr.recruitment.report:0
 msgid "Expected Salary"
 msgstr ""
 
 #. module: hr_recruitment
-#: field:hr.applicant,job_id:0
-#: field:hr.recruitment.report,job_id:0
+#: field:hr.applicant,job_id:0 field:hr.recruitment.report,job_id:0
 msgid "Applied Job"
 msgstr ""
 
@@ -213,7 +206,7 @@ msgid "Color Index"
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
+#: view:board.board:0 view:hr.applicant:0
 #: model:ir.actions.act_window,name:hr_recruitment.action_applicants_status
 msgid "Applicants Status"
 msgstr ""
@@ -241,7 +234,7 @@ msgid "Recruitment"
 msgstr ""
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:445
+#: code:addons/hr_recruitment/hr_recruitment.py:436
 #, python-format
 msgid "Warning!"
 msgstr ""
@@ -262,9 +255,7 @@ msgid "Avg Proposed Salary"
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,availability:0
-#: field:hr.recruitment.report,available:0
+#: view:hr.applicant:0 field:hr.recruitment.report,available:0
 msgid "Availability"
 msgstr "Наличност"
 
@@ -328,8 +319,7 @@ msgid "Job Description"
 msgstr "Описание на работата"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,source_id:0
+#: view:hr.applicant:0 field:hr.applicant,source_id:0
 msgid "Source"
 msgstr ""
 
@@ -345,11 +335,8 @@ msgid "A partner is already defined on this job request."
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: selection:hr.applicant,state:0
-#: view:hr.recruitment.report:0
-#: selection:hr.recruitment.report,state:0
-#: selection:hr.recruitment.stage,state:0
+#: view:hr.applicant:0 selection:hr.applicant,state:0
+#: view:hr.recruitment.report:0 selection:hr.recruitment.report,state:0
 msgid "New"
 msgstr "Нов"
 
@@ -394,8 +381,7 @@ msgid ""
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,create_date:0
+#: view:hr.applicant:0 field:hr.applicant,create_date:0
 #: view:hr.recruitment.report:0
 msgid "Creation Date"
 msgstr "Дата на създаване"
@@ -412,8 +398,7 @@ msgid "Planned Date"
 msgstr "Планирана дата"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,priority:0
+#: view:hr.applicant:0 field:hr.applicant,priority:0
 #: field:hr.recruitment.report,priority:0
 msgid "Appreciation"
 msgstr ""
@@ -429,20 +414,15 @@ msgid "Print Interview"
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,stage_id:0
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,stage_id:0
+#: view:hr.applicant:0 field:hr.applicant,stage_id:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,stage_id:0
 #: view:hr.recruitment.stage:0
 msgid "Stage"
 msgstr "Етап"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: selection:hr.applicant,state:0
-#: view:hr.recruitment.report:0
-#: selection:hr.recruitment.report,state:0
-#: selection:hr.recruitment.stage,state:0
+#: view:hr.applicant:0 selection:hr.applicant,state:0
+#: view:hr.recruitment.report:0 selection:hr.recruitment.report,state:0
 msgid "Pending"
 msgstr "Висящи"
 
@@ -463,7 +443,6 @@ msgstr "Юли"
 
 #. module: hr_recruitment
 #: view:hr.applicant:0
-#: field:hr.applicant,name:0
 msgid "Subject"
 msgstr "Относно"
 
@@ -474,6 +453,8 @@ msgstr ""
 
 #. module: hr_recruitment
 #: view:hr.applicant:0
+#: model:ir.actions.act_window,name:hr_recruitment.crm_case_categ0_act_job
+#: model:ir.ui.menu,name:hr_recruitment.menu_crm_case_categ0_act_job
 msgid "Applicants"
 msgstr ""
 
@@ -516,9 +497,7 @@ msgid "Gives the sequence order when displaying a list of stages."
 msgstr ""
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:347
-#: field:hr.applicant,partner_id:0
-#, python-format
+#: view:hr.applicant:0
 msgid "Contact"
 msgstr "За контакт"
 
@@ -533,7 +512,7 @@ msgid "Qualification"
 msgstr "Квалификация"
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,partner_id:0 view:hr.recruitment.report:0
 #: field:hr.recruitment.report,partner_id:0
 msgid "Partner"
 msgstr "Контрагент"
@@ -606,8 +585,7 @@ msgid "Recruitment during last month"
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,month:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,month:0
 msgid "Month"
 msgstr "Месец"
 
@@ -637,8 +615,7 @@ msgid "Yes"
 msgstr ""
 
 #. module: hr_recruitment
-#: field:hr.applicant,salary_proposed:0
-#: view:hr.recruitment.report:0
+#: field:hr.applicant,salary_proposed:0 view:hr.recruitment.report:0
 msgid "Proposed Salary"
 msgstr ""
 
@@ -684,9 +661,7 @@ msgid "Group By ..."
 msgstr "Групиране по..."
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: selection:hr.applicant,state:0
-#: selection:hr.recruitment.stage,state:0
+#: view:hr.applicant:0 selection:hr.applicant,state:0
 msgid "In Progress"
 msgstr "В развитие"
 
@@ -719,8 +694,7 @@ msgid "Degrees"
 msgstr ""
 
 #. module: hr_recruitment
-#: field:hr.applicant,date_closed:0
-#: field:hr.recruitment.report,date_closed:0
+#: field:hr.applicant,date_closed:0 field:hr.recruitment.report,date_closed:0
 msgid "Closed"
 msgstr "Приключено"
 
@@ -750,15 +724,13 @@ msgid "Meeting"
 msgstr "Среща"
 
 #. module: hr_recruitment
-#: code:addons/hr_recruitment/hr_recruitment.py:360
+#: code:addons/hr_recruitment/hr_recruitment.py:347
 #, python-format
 msgid "No Subject"
 msgstr ""
 
 #. module: hr_recruitment
-#: field:hr.applicant,state:0
-#: field:hr.recruitment.report,state:0
-#: field:hr.recruitment.stage,state:0
+#: view:hr.applicant:0
 msgid "Status"
 msgstr "Статус"
 
@@ -773,10 +745,8 @@ msgid "August"
 msgstr "Август"
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,type_id:0
-#: view:hr.recruitment.degree:0
-#: view:hr.recruitment.report:0
+#: view:hr.applicant:0 field:hr.applicant,type_id:0
+#: view:hr.recruitment.degree:0 view:hr.recruitment.report:0
 #: field:hr.recruitment.report,type_id:0
 #: model:ir.actions.act_window,name:hr_recruitment.hr_recruitment_degree_action
 msgid "Degree"
@@ -872,8 +842,7 @@ msgid "Not Good"
 msgstr ""
 
 #. module: hr_recruitment
-#: field:hr.applicant,date:0
-#: field:hr.recruitment.report,date:0
+#: field:hr.applicant,date:0 field:hr.recruitment.report,date:0
 msgid "Date"
 msgstr "Дата"
 
@@ -949,13 +918,12 @@ msgid "The name of the Degree of Recruitment must be unique!"
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.recruitment.report:0
-#: field:hr.recruitment.report,year:0
+#: view:hr.recruitment.report:0 field:hr.recruitment.report,year:0
 msgid "Year"
 msgstr "Година"
 
 #. module: hr_recruitment
-#: view:hired.employee:0
+#: view:hired.employee:0 view:hr.recruitment.job2phonecall:0
 #: view:hr.recruitment.partner.create:0
 msgid "Cancel"
 msgstr "Отмяна"
@@ -987,8 +955,7 @@ msgid "Gives the sequence order when displaying a list of degrees."
 msgstr ""
 
 #. module: hr_recruitment
-#: view:hr.applicant:0
-#: field:hr.applicant,user_id:0
+#: view:hr.applicant:0 field:hr.applicant,user_id:0
 #: view:hr.recruitment.report:0
 msgid "Responsible"
 msgstr "Отговорник"
@@ -1026,8 +993,7 @@ msgid "Reply"
 msgstr "Отговор"
 
 #. module: hr_recruitment
-#: model:crm.meeting.type,name:hr_recruitment.categ_meet_interview
-#: view:hr.job:0
+#: view:hr.applicant:0
 msgid "Interview"
 msgstr "Интервю"
 
@@ -1057,10 +1023,8 @@ msgid "Word of Mouth"
 msgstr ""
 
 #. module: hr_recruitment
-#: selection:hr.applicant,state:0
-#: selection:hr.recruitment.report,state:0
+#: selection:hr.applicant,state:0 selection:hr.recruitment.report,state:0
 #: model:hr.recruitment.stage,name:hr_recruitment.stage_job6
-#: selection:hr.recruitment.stage,state:0
 msgid "Refused"
 msgstr "Отказан"
 
@@ -1071,10 +1035,8 @@ msgid "Applicant '%s' is being hired."
 msgstr ""
 
 #. module: hr_recruitment
-#: selection:hr.applicant,state:0
-#: view:hr.recruitment.report:0
+#: selection:hr.applicant,state:0 view:hr.recruitment.report:0
 #: selection:hr.recruitment.report,state:0
-#: selection:hr.recruitment.stage,state:0
 msgid "Hired"
 msgstr "Нает"
 
@@ -1100,8 +1062,7 @@ msgid "February"
 msgstr "Февруари"
 
 #. module: hr_recruitment
-#: field:hr.applicant_category,name:0
-#: field:hr.recruitment.degree,name:0
+#: field:hr.applicant,name:0 field:hr.recruitment.degree,name:0
 #: field:hr.recruitment.stage,name:0
 msgid "Name"
 msgstr "Име"
@@ -1180,6 +1141,7 @@ msgstr ""
 
 #. module: hr_recruitment
 #: help:hr.recruitment.report,delay_close:0
+#: help:hr.recruitment.report,delay_open:0
 msgid "Number of Days to close the project issue"
 msgstr ""
 

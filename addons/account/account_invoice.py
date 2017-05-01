@@ -1141,7 +1141,8 @@ class account_invoice(osv.osv):
                 'number': False,
                 'invoice_line': invoice_lines,
                 'tax_line': tax_lines,
-                'journal_id': refund_journal_ids
+                'journal_id': refund_journal_ids,
+                'origin': invoice.origin,
             })
             if period_id:
                 invoice.update({
@@ -1365,12 +1366,6 @@ class account_invoice_line(osv.osv):
             a = res.product_tmpl_id.property_account_expense.id
             if not a:
                 a = res.categ_id.property_account_expense_categ.id
-
-        if context.get('account_id',False):
-            # this is set by onchange_account_id() to force the account choosen by the
-            # user - to get defaults taxes when product have no tax defined.
-            a = context['account_id']
-
         a = fpos_obj.map_account(cr, uid, fpos, a)
         if a:
             result['account_id'] = a
@@ -1499,22 +1494,16 @@ class account_invoice_line(osv.osv):
     def onchange_account_id(self, cr, uid, ids, product_id, partner_id, inv_type, fposition_id, account_id):
         if not account_id:
             return {}
-        unique_tax_ids = []
+        taxes = self.pool.get('account.account').browse(cr, uid, account_id).tax_ids
         fpos = fposition_id and self.pool.get('account.fiscal.position').browse(cr, uid, fposition_id) or False
-        account = self.pool.get('account.account').browse(cr, uid, account_id)
-        if not product_id:
-            taxes = account.tax_ids
-            unique_tax_ids = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, taxes)
-        else:
-            # force user choosen account in context to allow product_id_change()
-            # to fallback to the this accounts in case product has no taxes defined.
-            context = {'account_id': account_id}
-            product_change_result = self.product_id_change(cr, uid, ids, product_id, False, type=inv_type,
-                partner_id=partner_id, fposition_id=fposition_id, context=context,
-                company_id=account.company_id.id)
-            if product_change_result and 'value' in product_change_result and 'invoice_line_tax_id' in product_change_result['value']:
-                unique_tax_ids = product_change_result['value']['invoice_line_tax_id']
-        return {'value':{'invoice_line_tax_id': unique_tax_ids}}
+        tax_ids = self.pool.get('account.fiscal.position').map_tax(cr, uid, fpos, taxes)
+
+        product_change_result = self.product_id_change(cr, uid, ids, product_id, False, type=inv_type,
+                                                       partner_id=partner_id, fposition_id=fposition_id)
+        unique_tax_ids = set(tax_ids)
+        if product_change_result and 'value' in product_change_result and 'invoice_line_tax_id' in product_change_result['value']:
+            unique_tax_ids |= set(product_change_result['value']['invoice_line_tax_id'])
+        return {'value':{'invoice_line_tax_id': list(unique_tax_ids)}}
 
 account_invoice_line()
 
@@ -1573,13 +1562,14 @@ class account_invoice_tax(osv.osv):
         cur_obj = self.pool.get('res.currency')
         company_obj = self.pool.get('res.company')
         company_currency = False
-        factor = 1
-        if ids:
-            factor = self.read(cr, uid, ids[0], ['factor_tax'])['factor_tax']
+        #factor = 1
+        #if ids:
+        #    factor = self.read(cr, uid, ids[0], ['factor_tax'])['factor_tax']
         if company_id:
             company_currency = company_obj.read(cr, uid, [company_id], ['currency_id'])[0]['currency_id'][0]
         if currency_id and company_currency:
-            amount = cur_obj.compute(cr, uid, currency_id, company_currency, amount*factor, context={'date': date_invoice or time.strftime('%Y-%m-%d')}, round=False)
+            #amount = cur_obj.compute(cr, uid, currency_id, company_currency, amount*factor, context={'date': date_invoice or time.strftime('%Y-%m-%d')}, round=False)
+            amount = cur_obj.compute(cr, uid, currency_id, company_currency, amount, context={'date': date_invoice or time.strftime('%Y-%m-%d')}, round=False)
         return {'value': {'tax_amount': amount}}
 
     _order = 'sequence'

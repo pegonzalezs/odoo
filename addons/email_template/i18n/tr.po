@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:58+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-02 04:55+0000\n"
+"X-Generator: Launchpad (build 15890)\n"
 
 #. module: email_template
 #: field:email.template,subtype:0
@@ -27,7 +27,7 @@ msgstr "Mesaj tipi"
 #: field:email.template,report_name:0
 #: field:email_template.preview,report_name:0
 msgid "Report Filename"
-msgstr "Rapor Dosyası Adı"
+msgstr "Rapor Dosyasının adı"
 
 #. module: email_template
 #: view:email.template:0
@@ -43,12 +43,12 @@ msgstr "İlgili dokümanlarda gösterilen kenar çubuğu butonunu kaldır"
 #: field:email.template,ref_ir_act_window:0
 #: field:email_template.preview,ref_ir_act_window:0
 msgid "Sidebar action"
-msgstr "Kenar Çubuğu yylemi"
+msgstr "Kenar Çubuğu Eylemi"
 
 #. module: email_template
 #: view:mail.compose.message:0
 msgid "Save as a new template"
-msgstr "Yeni bir şablon olarak kaydet"
+msgstr "Yeni şablon olarak kaydet"
 
 #. module: email_template
 #: help:email.template,subject:0
@@ -105,7 +105,7 @@ msgstr "İptal edildi"
 #: field:email.template,reply_to:0
 #: field:email_template.preview,reply_to:0
 msgid "Reply-To"
-msgstr "Buna Yanıtla"
+msgstr "Yanıtla"
 
 #. module: email_template
 #: field:email.template,auto_delete:0
@@ -114,7 +114,7 @@ msgid "Auto Delete"
 msgstr "Otomatik Sil"
 
 #. module: email_template
-#: code:addons/email_template/email_template.py:231
+#: code:addons/email_template/email_template.py:218
 #, python-format
 msgid "Warning"
 msgstr "Uyarı"
@@ -122,7 +122,7 @@ msgstr "Uyarı"
 #. module: email_template
 #: model:ir.model,name:email_template.model_res_partner
 msgid "Partner"
-msgstr "İş Ortağı"
+msgstr "Cari"
 
 #. module: email_template
 #: field:email.template,subject:0
@@ -134,12 +134,12 @@ msgstr "Konu"
 #: field:email.template,email_from:0
 #: field:email_template.preview,email_from:0
 msgid "From"
-msgstr "Kimden"
+msgstr "Gönderen"
 
 #. module: email_template
 #: field:mail.compose.message,template_id:0
 msgid "Template"
-msgstr "Şablon"
+msgstr "Taslak"
 
 #. module: email_template
 #: field:email.template,partner_id:0
@@ -151,7 +151,7 @@ msgstr "İlgili Cari"
 #: field:email.template,sub_model_object_field:0
 #: field:email_template.preview,sub_model_object_field:0
 msgid "Sub-field"
-msgstr "Alt-aan"
+msgstr "Alt-Alan"
 
 #. module: email_template
 #: view:email.template:0
@@ -249,7 +249,7 @@ msgstr "Boş değer"
 #: field:email.template,sub_object:0
 #: field:email_template.preview,sub_object:0
 msgid "Sub-model"
-msgstr "Alt-model"
+msgstr "Alt-Model"
 
 #. module: email_template
 #: help:email.template,track_campaign_item:0
@@ -298,8 +298,8 @@ msgid ""
 "If checked, this partner will not receive any automated email notifications, "
 "such as the availability of invoices."
 msgstr ""
-"Eğer işaretlenirse, bu iş ortağı kesilen fatura bildirimleri gibi otomatik "
-"eposta bildirimleri almayacaktır."
+"Eğer işaretlenirse, Cari mesela kesilen fatura bildirimleri gibi otomatik e-"
+"posta bildirimleri almayacaktır."
 
 #. module: email_template
 #: view:email.template:0
@@ -309,7 +309,7 @@ msgstr "Not: Bu ham HTML kodudur."
 #. module: email_template
 #: view:email.template:0
 msgid "Group by..."
-msgstr "Gruplandır..."
+msgstr "Grupla ..."
 
 #. module: email_template
 #: field:email.template,user_signature:0
@@ -318,8 +318,8 @@ msgid "Add Signature"
 msgstr "İmza Ekle"
 
 #. module: email_template
-#: help:email.template,body:0
-#: help:email_template.preview,body:0
+#: help:email.template,body_text:0
+#: help:email_template.preview,body_text:0
 msgid "Plaintext version of the message (placeholders may be used here)"
 msgstr "Mesajın düz metin biçimi (burada yer tutucular kullanılabilir)"
 
@@ -352,9 +352,7 @@ msgstr "Bir mesaj şablonu kullan"
 msgid ""
 "If checked, the user's signature will be appended to the text version of the "
 "message"
-msgstr ""
-"Eğer işaretlenirse, kullanıcının imzası mesajın metin sürümünün altına "
-"eklenecektir"
+msgstr "Eğer işaretlenirse, kullanıcının imzası mesajın altına eklenecektir"
 
 #. module: email_template
 #: view:email.template:0
@@ -375,7 +373,7 @@ msgstr ""
 #. module: email_template
 #: model:ir.model,name:email_template.model_email_template
 msgid "Email Templates"
-msgstr "Eposta Şablonları"
+msgstr "E-Posta Şablonları"
 
 #. module: email_template
 #: field:email.template,date:0
@@ -411,7 +409,7 @@ msgid "Advanced Options"
 msgstr "Gelişmiş Seçenekler"
 
 #. module: email_template
-#: code:addons/email_template/email_template.py:196
+#: code:addons/email_template/email_template.py:183
 #, python-format
 msgid "Send Mail (%s)"
 msgstr "İletiyi Gönder (%s)"
@@ -449,15 +447,14 @@ msgstr ""
 "Son yer tutucu tanımı, istenen şablon alanına kopyalanıp-yapıştırılmak üzere."
 
 #. module: email_template
-#: field:email.template,attachment_ids:0
-#: field:email_template.preview,attachment_ids:0
+#: view:email.template:0
 msgid "Attachments"
 msgstr "Ekler"
 
 #. module: email_template
 #: view:email.template:0
 msgid "Email Details"
-msgstr "Eposta Ayrıntıları"
+msgstr "E-posta Ayrıntıları"
 
 #. module: email_template
 #: field:email.template,email_cc:0
@@ -475,7 +472,7 @@ msgstr "Metin içeriği"
 #: help:email.template,auto_delete:0
 #: help:email_template.preview,auto_delete:0
 msgid "Permanently delete this email after sending it, to save space"
-msgstr "Bu mesajı gönderdikten sonra yer kazanmak için kalıcı olarak sil"
+msgstr "Bu mesajı gönderdikten sonra yerden kazanmak için sil"
 
 #. module: email_template
 #: field:email.template,references:0
@@ -576,7 +573,7 @@ msgstr ""
 #. module: email_template
 #: field:email_template.preview,res_id:0
 msgid "Sample Document"
-msgstr "Örnek Belge"
+msgstr "Örnek Döküman"
 
 #. module: email_template
 #: help:email.template,email_to:0
@@ -588,7 +585,7 @@ msgstr "Virgülle ayrılmış alıcı adresleri (burada yertutucular kullanılı
 #: field:email.template,name:0
 #: field:email_template.preview,name:0
 msgid "Name"
-msgstr "Adı"
+msgstr "Ad"
 
 #. module: email_template
 #: field:email.template,track_campaign_item:0
@@ -599,12 +596,12 @@ msgstr "Kaynak İzleme"
 #. module: email_template
 #: model:ir.model,name:email_template.model_email_template_preview
 msgid "Email Template Preview"
-msgstr "E-posta Şablonu Önizleme"
+msgstr "E-posta Şablonu Ön izleme"
 
 #. module: email_template
 #: view:email_template.preview:0
 msgid "Email Preview"
-msgstr "Eposta Önizle"
+msgstr "Eposta Ön izleme"
 
 #. module: email_template
 #: help:email.template,message_id:0
@@ -673,10 +670,10 @@ msgid "Error ! You cannot create recursive associated members."
 msgstr "Hata ! kendini çağıran ilişkili üyeler oluşturamazsınız."
 
 #. module: email_template
-#: code:addons/email_template/email_template.py:231
+#: code:addons/email_template/email_template.py:218
 #, python-format
 msgid "Deletion of the action record failed."
-msgstr "Eylem kaydı silinemedi."
+msgstr "Eylem kaydının silinemedi."
 
 #. module: email_template
 #: help:email.template,mail_server_id:0
@@ -713,7 +710,7 @@ msgstr "Rapor Ekle"
 #: field:email.template,report_template:0
 #: field:email_template.preview,report_template:0
 msgid "Optional report to print and attach"
-msgstr "Yazdırıp eklemek için seçmeli rapor"
+msgstr "Yazdırıp eklemek için opsiyonel rapor"
 
 #. module: email_template
 #: help:email.template,body_html:0

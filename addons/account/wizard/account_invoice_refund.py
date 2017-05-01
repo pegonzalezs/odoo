@@ -180,7 +180,7 @@ class account_invoice_refund(osv.osv_memory):
                                     'partner_insite', 'partner_contact',
                                     'partner_ref', 'payment_term', 'account_id',
                                     'currency_id', 'invoice_line', 'tax_line',
-                                    'journal_id', 'period_id'], context=context)
+                                    'journal_id', 'period_id','origin'], context=context)
                         invoice = invoice[0]
                         del invoice['id']
                         invoice_lines = inv_line_obj.read(cr, uid, invoice['invoice_line'], context=context)
@@ -198,7 +198,7 @@ class account_invoice_refund(osv.osv_memory):
                             'name': description
                         })
                         for field in ('address_contact_id', 'address_invoice_id', 'partner_id',
-                                'account_id', 'currency_id', 'payment_term', 'journal_id'):
+                                'account_id', 'currency_id', 'payment_term', 'journal_id','origin'):
                                 invoice[field] = invoice[field] and invoice[field][0]
                         inv_id = inv_obj.create(cr, uid, invoice, {})
                         if inv.payment_term.id:

@@ -13,8 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:52+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:37+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: base_setup
 #: field:user.preferences.config,menu_tips:0
@@ -63,7 +63,7 @@ msgstr "İçe Aktar"
 #. module: base_setup
 #: selection:base.setup.terminology,partner:0
 msgid "Donor"
-msgstr "Bağışçı"
+msgstr "Verici"
 
 #. module: base_setup
 #: model:ir.actions.act_window,name:base_setup.action_base_setup_company
@@ -139,6 +139,7 @@ msgstr ""
 
 #. module: base_setup
 #: view:base.setup.terminology:0
+#: view:user.preferences.config:0
 msgid "res_config_contents"
 msgstr "res_config_contents"
 
@@ -158,8 +159,8 @@ msgid ""
 "You can use this wizard to change the terminologies for customers in the "
 "whole application."
 msgstr ""
-"Bu sihirbazı kullanarak tüm uygulamanın içinde müşteri terminolojilerini "
-"değiştirebilirsiniz."
+"Bu sihirbazı kullanarak uygulamanın içinde müşterileriniz için farklı "
+"terimler atayabilirsiniz. (Hasta, cari, müşteri,iş ortağı gibi)"
 
 #. module: base_setup
 #: selection:base.setup.terminology,partner:0
@@ -200,7 +201,7 @@ msgstr ""
 #. module: base_setup
 #: field:base.setup.terminology,partner:0
 msgid "How do you call a Customer"
-msgstr "Müşterilerinize nasıl isimlendiriyorsunuz ?"
+msgstr "Müşterilerinize ne isim veriyorsunuz ?"
 
 #. module: base_setup
 #: field:migrade.application.installer.modules,quickbooks_ippids:0
@@ -286,12 +287,12 @@ msgstr "SugarCRM'den almak için"
 #. module: base_setup
 #: selection:base.setup.terminology,partner:0
 msgid "Partner"
-msgstr "İş Ortağı"
+msgstr "Cari"
 
 #. module: base_setup
 #: view:base.setup.terminology:0
 msgid "Specify Your Terminology"
-msgstr "Terminolojinizi Belirtin"
+msgstr "Terminolojinizi Belirleyin"
 
 #. module: base_setup
 #: help:migrade.application.installer.modules,sync_google_contact:0

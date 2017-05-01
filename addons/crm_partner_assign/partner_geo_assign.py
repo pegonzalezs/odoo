@@ -19,36 +19,29 @@
 #
 ##############################################################################
 
-import urllib
-import random
-
-try:
-    import simplejson as json
-except ImportError:
-    import json     # noqa
-
 from osv import osv
 from osv import fields
+import urllib,re
+import random, time
 from tools.translate import _
 import tools
 
 def geo_find(addr):
-    url = 'https://maps.googleapis.com/maps/api/geocode/json?sensor=false&address='
-    url += urllib.quote(addr.encode('utf8'))
-
+    addr = addr.encode('utf8')
+    regex = '<coordinates>([+-]?[0-9\.]+),([+-]?[0-9\.]+),([+-]?[0-9\.]+)</coordinates>'
+    url = 'http://maps.google.com/maps/geo?q=' + urllib.quote(addr) + '&output=xml&oe=utf8&sensor=false'
     try:
-        result = json.load(urllib.urlopen(url))
+        xml = urllib.urlopen(url).read()
     except Exception, e:
         raise osv.except_osv(_('Network error'),
                              _('Could not contact geolocation servers, please make sure you have a working internet connection (%s)') % e)
-    if result['status'] != 'OK':
-        return None
 
-    try:
-        geo = result['results'][0]['geometry']['location']
-        return float(geo['lat']), float(geo['lng'])
-    except (KeyError, ValueError):
+    if '<error>' in xml:
         return None
+    result = re.search(regex, xml, re.M|re.I)
+    if not result:
+        return None
+    return float(result.group(2)),float(result.group(1))
 
 def geo_query_address(street=None, zip=None, city=None, state=None, country=None):
     if country and ',' in country and (country.endswith(' of') or country.endswith(' of the')):

@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:00+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr
 #: model:process.node,name:hr.process_node_openerpuser0
@@ -23,9 +23,9 @@ msgid "Openerp user"
 msgstr "Open ERP naudotojas"
 
 #. module: hr
-#: field:hr.job,requirements:0
+#: view:hr.job:0 field:hr.job,requirements:0
 msgid "Requirements"
-msgstr "Reikalavimai"
+msgstr ""
 
 #. module: hr
 #: constraint:hr.department:0
@@ -43,25 +43,21 @@ msgid "SIN No"
 msgstr "Soc.draud.nr"
 
 #. module: hr
-#: model:ir.actions.act_window,name:hr.open_board_hr
-#: model:ir.ui.menu,name:hr.menu_hr_dashboard
 #: model:ir.ui.menu,name:hr.menu_hr_main
-#: model:ir.ui.menu,name:hr.menu_hr_reporting
+#: model:ir.ui.menu,name:hr.menu_hr_management
 #: model:ir.ui.menu,name:hr.menu_hr_root
-#: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 msgid "Human Resources"
 msgstr "Personalas"
 
 #. module: hr
-#: view:hr.employee:0
-#: view:hr.job:0
+#: view:hr.employee:0 view:hr.job:0
 msgid "Group By..."
-msgstr "Grupuoti pagal..."
+msgstr ""
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.view_department_form_installer
 msgid "Create Your Departments"
-msgstr "Sukurkite padalinius"
+msgstr ""
 
 #. module: hr
 #: model:ir.actions.act_window,help:hr.action_hr_job
@@ -74,34 +70,28 @@ msgid ""
 msgstr ""
 
 #. module: hr
-#: view:hr.department:0
-#: view:hr.employee:0
-#: field:hr.employee,department_id:0
-#: view:hr.job:0
-#: field:hr.job,department_id:0
-#: model:ir.model,name:hr.model_hr_department
+#: view:hr.employee:0 field:hr.employee,department_id:0 view:hr.job:0
+#: field:hr.job,department_id:0 view:res.users:0
 msgid "Department"
 msgstr "Padalinys"
 
 #. module: hr
 #: view:hr.job:0
 msgid "Mark as Old"
-msgstr "Pažymeti kaip sena"
+msgstr ""
 
 #. module: hr
 #: view:hr.job:0
 msgid "Jobs"
-msgstr "Darbai"
+msgstr ""
 
 #. module: hr
 #: view:hr.job:0
 msgid "In Recruitment"
-msgstr "Įdarbinama"
+msgstr ""
 
 #. module: hr
-#: field:hr.department,company_id:0
-#: view:hr.employee:0
-#: view:hr.job:0
+#: field:hr.department,company_id:0 view:hr.employee:0 view:hr.job:0
 #: field:hr.job,company_id:0
 msgid "Company"
 msgstr "Įmonė"
@@ -109,12 +99,12 @@ msgstr "Įmonė"
 #. module: hr
 #: field:hr.job,no_of_recruitment:0
 msgid "Expected in Recruitment"
-msgstr "Planuojama įdarbinti"
+msgstr ""
 
 #. module: hr
 #: model:ir.actions.todo.category,name:hr.category_hr_management_config
 msgid "HR Management"
-msgstr "Žmogiškųjų išteklių valdymas"
+msgstr ""
 
 #. module: hr
 #: help:hr.employee,partner_id:0
@@ -134,14 +124,14 @@ msgid "Parent Department"
 msgstr "Aukštesnysis padalinys"
 
 #. module: hr
-#: field:hr.employee,notes:0
+#: view:hr.employee:0 field:hr.employee,notes:0
 msgid "Notes"
 msgstr "Pastabos"
 
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Married"
-msgstr "Susituokęs/-usi"
+msgstr ""
 
 #. module: hr
 #: model:ir.actions.act_window,help:hr.action_create_hr_employee_installer
@@ -163,7 +153,7 @@ msgstr ""
 #. module: hr
 #: field:hr.employee,color:0
 msgid "Color Index"
-msgstr "Spalvos indeksas"
+msgstr ""
 
 #. module: hr
 #: model:process.transition,note:hr.process_transition_employeeuser0
@@ -180,7 +170,7 @@ msgstr ""
 #. module: hr
 #: field:hr.employee,identification_id:0
 msgid "Identification No"
-msgstr "Asmens kodas"
+msgstr ""
 
 #. module: hr
 #: selection:hr.employee,gender:0
@@ -195,12 +185,12 @@ msgstr ""
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_open_view_attendance_reason_new_config
 msgid "Attendance"
-msgstr "Lankomumas"
+msgstr ""
 
 #. module: hr
 #: view:hr.employee:0
 msgid "Social IDs"
-msgstr "SODRA Nr."
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,work_phone:0
@@ -210,13 +200,13 @@ msgstr "Darbo telefonas"
 #. module: hr
 #: field:hr.employee.category,child_ids:0
 msgid "Child Categories"
-msgstr "Vaikinės kategorijos"
+msgstr "Žemesniosios kategorijos"
 
 #. module: hr
-#: field:hr.job,description:0
+#: view:hr.job:0 field:hr.job,description:0
 #: model:ir.model,name:hr.model_hr_job
 msgid "Job Description"
-msgstr "Pareigybių aprašymas"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,work_location:0
@@ -229,8 +219,7 @@ msgid "My Departments Employee"
 msgstr ""
 
 #. module: hr
-#: view:hr.employee:0
-#: model:ir.model,name:hr.model_hr_employee
+#: view:hr.employee:0 model:ir.model,name:hr.model_hr_employee
 #: model:process.node,name:hr.process_node_employee0
 msgid "Employee"
 msgstr "Darbuotojas"
@@ -238,17 +227,17 @@ msgstr "Darbuotojas"
 #. module: hr
 #: model:process.node,note:hr.process_node_employeecontact0
 msgid "Other information"
-msgstr "Kita informacija"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,work_email:0
 msgid "Work E-mail"
-msgstr "Darbinis el. paštas"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,birthday:0
 msgid "Date of Birth"
-msgstr "Gimimo data"
+msgstr ""
 
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_reporting
@@ -256,16 +245,15 @@ msgid "Reporting"
 msgstr "Ataskaitos"
 
 #. module: hr
-#: view:board.board:0
+#: model:ir.actions.act_window,name:hr.open_board_hr
+#: model:ir.ui.menu,name:hr.menu_hr_dashboard_user
 msgid "Human Resources Dashboard"
 msgstr ""
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,job_id:0
-#: view:hr.job:0
+#: view:hr.employee:0 field:hr.employee,job_id:0 view:hr.job:0
 msgid "Job"
-msgstr "Pareigybės"
+msgstr ""
 
 #. module: hr
 #: field:hr.department,member_ids:0
@@ -280,7 +268,7 @@ msgstr "Nustatymai"
 #. module: hr
 #: view:hr.employee:0 field:hr.employee,category_ids:0
 msgid "Categories"
-msgstr "Kategorijos"
+msgstr ""
 
 #. module: hr
 #: field:hr.job,expected_employees:0
@@ -295,7 +283,7 @@ msgstr "Išsiskyręs/-usi"
 #. module: hr
 #: field:hr.employee.category,parent_id:0
 msgid "Parent Category"
-msgstr "Tėvinė kategorija"
+msgstr "Aukštesnioji kategorija"
 
 #. module: hr
 #: constraint:hr.employee.category:0
@@ -306,6 +294,7 @@ msgstr ""
 #: view:hr.department:0
 #: model:ir.actions.act_window,name:hr.open_module_tree_department
 #: model:ir.ui.menu,name:hr.menu_hr_department_tree
+#: field:res.users,context_department_id:0
 msgid "Departments"
 msgstr "Padaliniai"
 
@@ -374,7 +363,7 @@ msgstr ""
 #. module: hr
 #: help:hr.employee,bank_account_id:0
 msgid "Employee bank salary account"
-msgstr "Banko sąskaita, į kurią pervesti atlyginimą"
+msgstr ""
 
 #. module: hr
 #: field:hr.department,note:0
@@ -414,8 +403,6 @@ msgstr "Žemesnieji padaliniai"
 
 #. module: hr
 #: view:hr.employee:0
-#: view:hr.job:0
-#: field:hr.job,state:0
 msgid "Status"
 msgstr "Būsena"
 
@@ -466,7 +453,7 @@ msgstr ""
 #. module: hr
 #: field:hr.employee,bank_account_id:0
 msgid "Bank Account Number"
-msgstr "Banko sąskaita"
+msgstr ""
 
 #. module: hr
 #: view:hr.department:0
@@ -516,9 +503,9 @@ msgid "Employee form and structure"
 msgstr ""
 
 #. module: hr
-#: field:hr.employee,image:0
+#: field:hr.employee,photo:0
 msgid "Photo"
-msgstr "Nuotrauka"
+msgstr ""
 
 #. module: hr
 #: model:ir.model,name:hr.model_res_users
@@ -533,17 +520,17 @@ msgstr "Asmeninė informacija"
 #. module: hr
 #: field:hr.employee,city:0
 msgid "City"
-msgstr "Miestas"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,passport_id:0
 msgid "Passport No"
-msgstr "Paso Nr"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,mobile_phone:0
 msgid "Work Mobile"
-msgstr "Darbo mob. telefonas"
+msgstr ""
 
 #. module: hr
 #: view:hr.employee.category:0
@@ -563,17 +550,17 @@ msgstr ""
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Single"
-msgstr "Nesusituokęs/-usi"
+msgstr ""
 
 #. module: hr
 #: field:hr.job,name:0
 msgid "Job Name"
-msgstr "Pareigybių pavadinimas"
+msgstr ""
 
 #. module: hr
-#: view:hr.job:0
+#: view:hr.job:0 selection:hr.job,state:0
 msgid "In Position"
-msgstr "Neįdarbinama"
+msgstr ""
 
 #. module: hr
 #: view:hr.department:0
@@ -588,7 +575,7 @@ msgstr "Tautybė"
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_open_view_attendance_reason_config
 msgid "Leaves"
-msgstr "Atostogos"
+msgstr ""
 
 #. module: hr
 #: view:board.board:0
@@ -598,11 +585,10 @@ msgstr ""
 #. module: hr
 #: field:hr.employee,resource_id:0
 msgid "Resource"
-msgstr "Resursas"
+msgstr ""
 
 #. module: hr
 #: field:hr.department,complete_name:0
-#: field:hr.employee,name_related:0
 #: field:hr.employee.category,complete_name:0
 msgid "Name"
 msgstr "Pavadinimas"
@@ -613,13 +599,14 @@ msgid "Gender"
 msgstr "Lytis"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee.category,employee_ids:0
+#: view:hr.employee:0 view:hr.employee.category:0
+#: field:hr.employee.category,employee_ids:0 view:hr.job:0
 #: field:hr.job,employee_ids:0
 #: model:ir.actions.act_window,name:hr.hr_employee_normal_action_tree
 #: model:ir.actions.act_window,name:hr.open_view_employee_list
 #: model:ir.actions.act_window,name:hr.open_view_employee_list_my
 #: model:ir.ui.menu,name:hr.menu_open_view_employee_list_my
+#: model:ir.ui.menu,name:hr.menu_view_employee_category_configuration_form
 msgid "Employees"
 msgstr "Darbuotojai"
 
@@ -646,7 +633,7 @@ msgstr ""
 #. module: hr
 #: field:hr.employee,login:0
 msgid "Login"
-msgstr "Prisijungimas"
+msgstr ""
 
 #. module: hr
 #: view:hr.employee:0
@@ -657,18 +644,17 @@ msgstr "Darbo informacija"
 #: model:ir.actions.act_window,name:hr.action_hr_job
 #: model:ir.ui.menu,name:hr.menu_hr_job
 msgid "Job Positions"
-msgstr "Darbo vietos"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,otherid:0
 msgid "Other Id"
-msgstr "Kitas ID"
+msgstr ""
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,coach_id:0
+#: view:hr.employee:0 field:hr.employee,coach_id:0
 msgid "Coach"
-msgstr "Mentorius"
+msgstr ""
 
 #. module: hr
 #: sql_constraint:hr.job:0
@@ -681,8 +667,7 @@ msgid "My Departments Jobs"
 msgstr ""
 
 #. module: hr
-#: field:hr.department,manager_id:0
-#: view:hr.employee:0
+#: field:hr.department,manager_id:0 view:hr.employee:0
 #: field:hr.employee,parent_id:0
 msgid "Manager"
 msgstr "Vadovas"
@@ -690,7 +675,7 @@ msgstr "Vadovas"
 #. module: hr
 #: selection:hr.employee,marital:0
 msgid "Widower"
-msgstr "Našlys/-ė"
+msgstr ""
 
 #. module: hr
 #: field:hr.employee,child_ids:0

@@ -1059,9 +1059,6 @@ class account_period(osv.osv):
 
     def action_draft(self, cr, uid, ids, *args):
         mode = 'draft'
-        for period in self.browse(cr, uid, ids):
-            if period.fiscalyear_id.state == 'done':
-                raise osv.except_osv(_('Warning !'), _('You can not re-open a period which belongs to closed fiscal year'))
         cr.execute('update account_journal_period set state=%s where period_id in %s', (mode, tuple(ids),))
         cr.execute('update account_period set state=%s where id in %s', (mode, tuple(ids),))
         return True
@@ -1184,19 +1181,6 @@ class account_move(osv.osv):
     _name = "account.move"
     _description = "Account Entry"
     _order = 'id desc'
-
-    def account_assert_balanced(self, cr, uid, context=None):
-        cr.execute("""\
-            SELECT      move_id
-            FROM        account_move_line
-            WHERE       state = 'valid'
-            GROUP BY    move_id
-            HAVING      abs(sum(debit) - sum(credit)) > 0.00001
-            """)
-        assert len(cr.fetchall()) == 0, \
-            "For all Journal Items, the state is valid implies that the sum " \
-            "of credits equals the sum of debits"
-        return True
 
     def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=80):
         """
@@ -1383,10 +1367,9 @@ class account_move(osv.osv):
 
     def onchange_line_id(self, cr, uid, ids, line_ids, context=None):
         balance = 0.0
-        line_ids = [ line for line in line_ids if not (isinstance(line, (tuple, list)) and line and line[0] == 2) ]
-        line_ids = self.resolve_o2m_commands_to_record_dicts(cr, uid, 'line_id', line_ids, context=context)
         for line in line_ids:
-            balance += (line['debit'] or 0.00)- (line['credit'] or 0.00)
+            if line[2]:
+                balance += (line[2]['debit'] or 0.00)- (line[2]['credit'] or 0.00)
         return {'value': {'balance': balance}}
 
     def write(self, cr, uid, ids, vals, context=None):
@@ -1750,7 +1733,7 @@ class account_tax_code(osv.osv):
             def _rec_get(record):
                 amount = res.get(record.id, 0.0)
                 for rec in record.child_ids:
-                    amount += _rec_get(rec) * rec.sign
+                    amount += _rec_get(rec)  #* rec.sign
                 return amount
             res2[record.id] = round(_rec_get(record), obj_precision.precision_get(cr, uid, 'Account'))
         return res2

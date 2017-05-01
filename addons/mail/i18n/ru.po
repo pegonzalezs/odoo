@@ -8,30 +8,30 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2012-02-09 00:36+0000\n"
-"PO-Revision-Date: 2012-10-25 10:00+0000\n"
-"Last-Translator: Chertykov Denis <chertykov@gmail.com>\n"
+"PO-Revision-Date: 2012-02-17 09:10+0000\n"
+"Last-Translator: Alexey Y. Fedotov <Unknown>\n"
 "Language-Team: Russian <ru@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:07+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:50+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: mail
 #: field:mail.compose.message,subtype:0 field:mail.message,subtype:0
 #: field:mail.message.common,subtype:0
 msgid "Message type"
-msgstr "Тип сообщения"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,auto_delete:0
 msgid "Permanently delete emails after sending"
-msgstr "Не сохранять сообщения после отправки"
+msgstr ""
 
 #. module: mail
 #: view:mail.message:0
 msgid "Open Related Document"
-msgstr "Открыть связанный документ"
+msgstr ""
 
 #. module: mail
 #: view:mail.message:0
@@ -39,101 +39,100 @@ msgid "Open Attachments"
 msgstr "Открыть вложения"
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Message Details"
 msgstr "Подробности сообщения"
 
 #. module: mail
 #: view:mail.thread:0
 msgid "Communication History"
-msgstr "История общения"
+msgstr ""
 
 #. module: mail
-#: view:mail.alias:0
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Group By..."
-msgstr "Группировать по ..."
+msgstr "Объеденить по..."
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_email_compose_message_wizard
 #: view:mail.compose.message:0
 msgid "Compose Email"
-msgstr "Написать письмо"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,body_text:0 help:mail.message,body_text:0
 #: help:mail.message.common,body_text:0
 msgid "Plain-text version of the message"
-msgstr "Простая текстовая версия сообщения"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.compose.message:0
 msgid "Body"
-msgstr "Содержимое"
+msgstr ""
 
 #. module: mail
-#: help:mail.mail,email_to:0
+#: help:mail.compose.message,email_to:0 help:mail.message,email_to:0
+#: help:mail.message.common,email_to:0
 msgid "Message recipients"
-msgstr "Получатели сообщения"
+msgstr ""
 
 #. module: mail
 #: field:mail.compose.message,body_text:0 field:mail.message,body_text:0
 #: field:mail.message.common,body_text:0
 msgid "Text contents"
-msgstr "Текстовое содержимое"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
-#: selection:mail.mail,state:0
+#: view:mail.message:0 selection:mail.message,state:0
 msgid "Received"
-msgstr "Получено"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Thread"
 msgstr "Цепочка"
 
 #. module: mail
-#: field:mail.mail,mail_server_id:0
+#: field:mail.message,mail_server_id:0
 msgid "Outgoing mail server"
-msgstr "Сервер исходящей почты"
+msgstr ""
 
 #. module: mail
-#: selection:mail.mail,state:0
+#: selection:mail.message,state:0
 msgid "Cancelled"
-msgstr "Отменено"
+msgstr ""
 
 #. module: mail
-#: field:mail.mail,reply_to:0
+#: field:mail.compose.message,reply_to:0 field:mail.message,reply_to:0
+#: field:mail.message.common,reply_to:0
 msgid "Reply-To"
-msgstr "Адрес ответа"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,body_html:0 help:mail.message,body_html:0
 #: help:mail.message.common,body_html:0
 msgid "Rich-text/HTML version of the message"
-msgstr "Форматный текст/HTML версия сообщения"
+msgstr ""
 
 #. module: mail
-#: field:mail.mail,auto_delete:0
+#: field:mail.compose.message,auto_delete:0 field:mail.message,auto_delete:0
 msgid "Auto Delete"
-msgstr "Авто удаление"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,email_bcc:0 help:mail.message,email_bcc:0
 #: help:mail.message.common,email_bcc:0
 msgid "Blind carbon copy message recipients"
-msgstr "Получатели скрытой копии сообщения"
+msgstr ""
 
 #. module: mail
-#: model:ir.model,name:mail.model_res_partner
-#: view:mail.mail:0
+#: model:ir.model,name:mail.model_res_partner view:mail.message:0
 msgid "Partner"
-msgstr "Партнёр"
+msgstr "Контрагент"
 
 #. module: mail
-#: field:mail.compose.message,subject:0
-#: field:mail.message,subject:0
+#: field:mail.compose.message,subject:0 field:mail.message,subject:0
+#: field:mail.message.common,subject:0
 msgid "Subject"
 msgstr "Тема"
 
@@ -141,52 +140,43 @@ msgstr "Тема"
 #: code:addons/mail/wizard/mail_compose_message.py:152
 #, python-format
 msgid "On %(date)s, "
-msgstr "За %(date)s, "
+msgstr ""
 
 #. module: mail
-#: field:mail.compose.message,email_from:0
-#: field:mail.mail,email_from:0
-#: field:mail.message,email_from:0
+#: field:mail.compose.message,email_from:0 field:mail.message,email_from:0
+#: field:mail.message.common,email_from:0
 msgid "From"
 msgstr "От"
 
 #. module: mail
-#: view:mail.mail:0
-#: view:mail.message.subtype:0
+#: view:mail.message:0
 msgid "Email message"
-msgstr "Сообщение эл. почты"
+msgstr ""
 
 #. module: mail
-#. openerp-web
-#: code:addons/mail/static/src/xml/mail.xml:36
 #: view:mail.compose.message:0
-#, python-format
 msgid "Send"
-msgstr "Отправить"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Failed"
-msgstr "Ошибка"
+msgstr ""
 
 #. module: mail
 #: view:mail.message:0 field:mail.message,state:0
 msgid "State"
-msgstr "Состояние"
+msgstr ""
 
 #. module: mail
-#. openerp-web
-#: code:addons/mail/static/src/xml/mail.xml:245
-#: view:mail.mail:0
-#, python-format
+#: view:mail.message:0
 msgid "Reply"
-msgstr "Ответить"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
-#: selection:mail.mail,state:0
+#: view:mail.message:0 selection:mail.message,state:0
 msgid "Sent"
-msgstr "Отправлено"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,subtype:0 help:mail.message,subtype:0
@@ -195,119 +185,112 @@ msgid ""
 "Type of message, usually 'html' or 'plain', used to select plaintext or rich "
 "text contents accordingly"
 msgstr ""
-"Тип сообщения, обычно 'html' или 'простой', используемый для выбора "
-"содержимого соответственно простого текста или форматного текста"
 
 #. module: mail
-#: view:mail.compose.message:0
-#: field:mail.message,partner_ids:0
+#: view:mail.message:0
 msgid "Recipients"
-msgstr "Получатели"
+msgstr ""
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_compose_message
 msgid "E-mail composition wizard"
-msgstr "Мастер создания электронной почты"
+msgstr ""
 
 #. module: mail
-#: field:mail.compose.message,res_id:0
-#: field:mail.followers,res_id:0
-#: field:mail.message,res_id:0
-#: field:mail.wizard.invite,res_id:0
+#: field:mail.compose.message,res_id:0 field:mail.message,res_id:0
+#: field:mail.message.common,res_id:0
 msgid "Related Document ID"
-msgstr "ID связанного документа"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Advanced"
-msgstr "Дополнительно"
+msgstr ""
 
 #. module: mail
-#: code:addons/mail/wizard/mail_compose_message.py:165
+#: code:addons/mail/wizard/mail_compose_message.py:157
 #, python-format
 msgid "Re:"
-msgstr "Ответ:"
+msgstr ""
 
 #. module: mail
 #: field:mail.compose.message,model:0 field:mail.message,model:0
 #: field:mail.message.common,model:0
 msgid "Related Document model"
-msgstr "Модель связанного документа"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Month"
 msgstr "Месяц"
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Email Search"
 msgstr "Искать эл. почту"
 
 #. module: mail
 #: help:mail.message,original:0
 msgid "Original version of the message, as it was sent on the network"
-msgstr "Оригинальная версия сообщения, как было отправлено в сеть"
+msgstr ""
 
 #. module: mail
 #: view:mail.message:0
 msgid "Partner Name"
-msgstr "Название партнера"
+msgstr "Имя партнера"
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Retry"
-msgstr "Повторить"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
-#: selection:mail.mail,state:0
+#: view:mail.message:0 selection:mail.message,state:0
 msgid "Outgoing"
-msgstr "Исходящее"
+msgstr ""
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Send Now"
-msgstr "Отправить сейчас"
+msgstr ""
 
 #. module: mail
 #: field:mail.message,partner_id:0
 msgid "Related partner"
-msgstr "Связанный партнер"
+msgstr ""
 
 #. module: mail
-#: view:mail.alias:0
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "User"
-msgstr "Пользователь"
+msgstr ""
 
 #. module: mail
-#: field:mail.compose.message,date:0
-#: field:mail.message,date:0
+#: field:mail.compose.message,date:0 field:mail.message,date:0
+#: field:mail.message.common,date:0
 msgid "Date"
 msgstr "Дата"
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Extended Filters..."
-msgstr "Расширенные фильтры..."
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/wizard/mail_compose_message.py:153
 #, python-format
 msgid "%(sender_name)s wrote:"
-msgstr "%(sender_name)s написал:"
+msgstr ""
 
 #. module: mail
 #: field:mail.compose.message,body_html:0 field:mail.message,body_html:0
 #: field:mail.message.common,body_html:0
 msgid "Rich-text contents"
-msgstr "Форматное текстовое сообщение"
+msgstr ""
 
 #. module: mail
 #: field:mail.message,original:0
 msgid "Original"
-msgstr "Оригинал"
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/mail_thread.py:247 view:res.partner:0
@@ -316,20 +299,20 @@ msgid "History"
 msgstr "История"
 
 #. module: mail
-#: field:mail.compose.message,message_id:0
-#: field:mail.message,message_id:0
+#: field:mail.compose.message,message_id:0 field:mail.message,message_id:0
+#: field:mail.message.common,message_id:0
 msgid "Message-Id"
-msgstr "ID сообщения"
+msgstr ""
 
 #. module: mail
-#: field:mail.compose.message,attachment_ids:0
-#: view:mail.mail:0
-#: field:mail.message,attachment_ids:0
+#: view:mail.compose.message:0 field:mail.compose.message,attachment_ids:0
+#: view:mail.message:0 field:mail.message,attachment_ids:0
 msgid "Attachments"
-msgstr "Вложения"
+msgstr "Прикрепленные файлы"
 
 #. module: mail
-#: field:mail.mail,email_cc:0
+#: field:mail.compose.message,email_cc:0 field:mail.message,email_cc:0
+#: field:mail.message.common,email_cc:0
 msgid "Cc"
 msgstr "Копия"
 
@@ -340,12 +323,13 @@ msgid " on "
 msgstr " на "
 
 #. module: mail
-#: help:mail.mail,auto_delete:0
+#: help:mail.message,auto_delete:0
 msgid "Permanently delete this email after sending it, to save space"
-msgstr "Навсегда удалить это письмо после отправки, для экономии места"
+msgstr ""
 
 #. module: mail
-#: field:mail.mail,references:0
+#: field:mail.compose.message,references:0 field:mail.message,references:0
+#: field:mail.message.common,references:0
 msgid "References"
 msgstr "Ссылки"
 
@@ -355,26 +339,25 @@ msgid "Display Text"
 msgstr "Вывести текст"
 
 #. module: mail
-#: view:mail.compose.message:0
-#: view:mail.wizard.invite:0
+#: view:mail.compose.message:0 view:mail.message:0
 msgid "Cancel"
-msgstr "Отмена"
+msgstr ""
 
 #. module: mail
 #: view:mail.message:0
 msgid "Open"
-msgstr "Открыть"
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/mail_thread.py:434
 #, python-format
 msgid "[OpenERP-Forward-Failed] %s"
-msgstr "[OpenERP-Forward-Failed] %s"
+msgstr ""
 
 #. module: mail
 #: field:mail.message,user_id:0
 msgid "Related user"
-msgstr "Связанный пользователь"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,headers:0 help:mail.message,headers:0
@@ -383,16 +366,15 @@ msgid ""
 "Full message headers, e.g. SMTP session headers (usually available on "
 "inbound messages only)"
 msgstr ""
-"Полные заголовки сообщения, т.е. заголовки сессии SMTP (обычно доступные "
-"только во входящих сообщениях)"
 
 #. module: mail
-#: view:mail.mail:0
+#: view:mail.message:0
 msgid "Creation Month"
-msgstr "Месяц создания"
+msgstr ""
 
 #. module: mail
-#: field:mail.mail,email_to:0
+#: field:mail.compose.message,email_to:0 field:mail.message,email_to:0
+#: field:mail.message.common,email_to:0
 msgid "To"
 msgstr "Кому"
 
@@ -405,7 +387,7 @@ msgstr "Подробности"
 #: model:ir.actions.act_window,name:mail.action_view_mailgate_thread
 #: view:mail.thread:0
 msgid "Email Threads"
-msgstr "Цепочки эл.писем"
+msgstr ""
 
 #. module: mail
 #: help:mail.compose.message,email_from:0 help:mail.message,email_from:0
@@ -414,30 +396,28 @@ msgid ""
 "Message sender, taken from user preferences. If empty, this is not a mail "
 "but a message."
 msgstr ""
-"Отправитель сообщения, взятый из параметров пользователя. Если пусто, то это "
-"не почта, а сообщение."
 
 #. module: mail
 #: view:mail.message:0
 msgid "Body (Plain)"
-msgstr "Текст (простой)"
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/wizard/mail_compose_message.py:153
 #, python-format
 msgid "You"
-msgstr "Вы"
+msgstr ""
 
 #. module: mail
-#: help:mail.compose.message,message_id:0
-#: help:mail.message,message_id:0
+#: help:mail.compose.message,message_id:0 help:mail.message,message_id:0
+#: help:mail.message.common,message_id:0
 msgid "Message unique identifier"
-msgstr "Уникальный идентификатор сообщения"
+msgstr ""
 
 #. module: mail
 #: view:mail.message:0
 msgid "Body (Rich)"
-msgstr "Текст (форматный)"
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/mail_message.py:155
@@ -447,25 +427,17 @@ msgid ""
 " Subject: %s \n"
 "\t"
 msgstr ""
-"%s написал на %s: \n"
-" Тема: %s \n"
-"\t"
 
 #. module: mail
-#: model:ir.actions.act_window,name:mail.action_view_mail_mail
-#: model:ir.ui.menu,name:mail.menu_mail_mail
-#: view:mail.mail:0
-#: view:mail.message:0
+#: model:ir.actions.act_window,name:mail.act_res_partner_emails
+#: view:mail.message:0 field:res.partner,emails:0
 msgid "Emails"
 msgstr "Эл. почта"
 
 #. module: mail
 #: model:ir.actions.act_window,name:mail.action_view_mail_message
-#: model:ir.ui.menu,name:mail.menu_mail_message
-#: field:mail.group,message_ids:0
-#: view:mail.message:0
+#: model:ir.ui.menu,name:mail.menu_email_message
 #: field:mail.thread,message_ids:0
-#: field:res.partner,message_ids:0
 msgid "Messages"
 msgstr "Сообщения"
 
@@ -473,7 +445,7 @@ msgstr "Сообщения"
 #: field:mail.compose.message,headers:0 field:mail.message,headers:0
 #: field:mail.message.common,headers:0
 msgid "Message headers"
-msgstr "Заголовки сообщения"
+msgstr ""
 
 #. module: mail
 #: field:mail.compose.message,email_bcc:0 field:mail.message,email_bcc:0
@@ -484,50 +456,53 @@ msgstr "Скрытая копия"
 #. module: mail
 #: model:ir.model,name:mail.model_mail_message_common
 msgid "mail.message.common"
-msgstr "mail.message.common"
+msgstr ""
 
 #. module: mail
-#: help:mail.mail,references:0
+#: help:mail.compose.message,references:0 help:mail.message,references:0
+#: help:mail.message.common,references:0
 msgid "Message references, such as identifiers of previous messages"
-msgstr "Ссылки сообщения, такие как идентификаторы предыдущих сообщений"
+msgstr ""
 
 #. module: mail
 #: constraint:res.partner:0
 msgid "Error ! You cannot create recursive associated members."
-msgstr "Ошибка! Вы не можете создавать рекурсивные ссылки на участников."
+msgstr ""
 
 #. module: mail
-#: help:mail.mail,email_cc:0
+#: help:mail.compose.message,email_cc:0 help:mail.message,email_cc:0
+#: help:mail.message.common,email_cc:0
 msgid "Carbon copy message recipients"
-msgstr "Получатели скрытой копии сообщения"
+msgstr ""
 
 #. module: mail
-#: selection:mail.mail,state:0
+#: selection:mail.message,state:0
 msgid "Delivery Failed"
-msgstr "Доставка не удалась"
+msgstr ""
 
 #. module: mail
 #: model:ir.model,name:mail.model_mail_message
 msgid "Email Message"
-msgstr "Сообщение эл.почты"
+msgstr ""
 
 #. module: mail
-#: model:ir.model,name:mail.model_mail_thread
+#: model:ir.model,name:mail.model_mail_thread view:mail.thread:0
 msgid "Email Thread"
-msgstr "Цепочка эл.почты"
+msgstr ""
 
 #. module: mail
 #: field:mail.compose.message,filter_id:0
 msgid "Filters"
-msgstr "Фильтры"
+msgstr ""
 
 #. module: mail
 #: code:addons/mail/mail_thread.py:220
 #, python-format
 msgid "Mail attachment"
-msgstr "Почтовое вложение"
+msgstr ""
 
 #. module: mail
-#: help:mail.mail,reply_to:0
+#: help:mail.compose.message,reply_to:0 help:mail.message,reply_to:0
+#: help:mail.message.common,reply_to:0
 msgid "Preferred response address for the message"
-msgstr "Предпочтительный адрес ответа для сообщения"
+msgstr ""

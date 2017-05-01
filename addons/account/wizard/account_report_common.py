@@ -49,7 +49,7 @@ class account_common_report(osv.osv_memory):
                                         ], 'Target Moves', required=True),
 
         }
-
+        
     def _check_company_id(self, cr, uid, ids, context=None):
         for wiz in self.browse(cr, uid, ids, context=context):
             company_id = wiz.company_id.id
@@ -110,12 +110,14 @@ class account_common_report(osv.osv_memory):
         return res
 
     def _get_account(self, cr, uid, context=None):
-        accounts = self.pool.get('account.account').search(cr, uid, [('parent_id', '=', False)], limit=1)
+        company_id = self.pool.get('res.company')._company_default_get(cr, uid, 'account.common.report',context=context)
+        accounts = self.pool.get('account.account').search(cr, uid, [('company_id','=',company_id),('parent_id', '=', False)], limit=1)
         return accounts and accounts[0] or False
 
     def _get_fiscalyear(self, cr, uid, context=None):
         now = time.strftime('%Y-%m-%d')
-        fiscalyears = self.pool.get('account.fiscalyear').search(cr, uid, [('date_start', '<', now), ('date_stop', '>', now)], limit=1 )
+        company_id = self.pool.get('res.company')._company_default_get(cr, uid, 'account.common.report',context=context)
+        fiscalyears = self.pool.get('account.fiscalyear').search(cr, uid, [('company_id','=',company_id),('date_start', '<', now), ('date_stop', '>', now)], limit=1 )
         return fiscalyears and fiscalyears[0] or False
 
     def _get_all_journal(self, cr, uid, context=None):
@@ -134,6 +136,7 @@ class account_common_report(osv.osv_memory):
         if context is None:
             context = {}
         result = {}
+        result['account_report_common'] = True
         result['fiscalyear'] = 'fiscalyear_id' in data['form'] and data['form']['fiscalyear_id'] or False
         result['journal_ids'] = 'journal_ids' in data['form'] and data['form']['journal_ids'] or False
         result['chart_account_id'] = 'chart_account_id' in data['form'] and data['form']['chart_account_id'] or False

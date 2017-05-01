@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:26+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 10:07+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: survey
 #: view:survey.print:0
@@ -24,7 +24,7 @@ msgid "Print Option"
 msgstr "打印选项"
 
 #. module: survey
-#: code:addons/survey/survey.py:471
+#: code:addons/survey/survey.py:417
 #, python-format
 msgid ""
 "Minimum Required Answer you                                     entered is "
@@ -44,7 +44,7 @@ msgid "Text Validation"
 msgstr "文本验证"
 
 #. module: survey
-#: code:addons/survey/survey.py:483
+#: code:addons/survey/survey.py:429
 #, python-format
 msgid ""
 "Maximum Required Answer you                                     entered for "
@@ -65,6 +65,8 @@ msgstr "属性"
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_form1
+#: model:ir.ui.menu,name:survey.menu_print_survey_form
+#: model:ir.ui.menu,name:survey.menu_reporting
 #: model:ir.ui.menu,name:survey.menu_survey_form
 #: model:ir.ui.menu,name:survey.menu_surveys
 msgid "Surveys"
@@ -179,7 +181,7 @@ msgid "Add Comment Field"
 msgstr "增加注释字段"
 
 #. module: survey
-#: code:addons/survey/survey.py:450
+#: code:addons/survey/survey.py:396
 #, python-format
 msgid ""
 "#Required Answer you entered                                     is greater "
@@ -213,7 +215,7 @@ msgid "Matrix of Choices (Only One Answers Per Row)"
 msgstr "选项矩阵（每行只有一个答案）"
 
 #. module: survey
-#: code:addons/survey/survey.py:525
+#: code:addons/survey/survey.py:470
 #, python-format
 msgid ""
 "Maximum Required Answer you entered for your maximum is greater than the "
@@ -221,6 +223,7 @@ msgid ""
 msgstr "你输入用于最多答案数的最多需要的答案数大于答案的总数。请用小于%d的数量。"
 
 #. module: survey
+#: model:ir.actions.act_window,name:survey.action_view_survey_question_message
 #: model:ir.model,name:survey.model_survey_question
 #: view:survey:0
 #: view:survey.page:0
@@ -311,6 +314,7 @@ msgstr "调查统计"
 
 #. module: survey
 #: selection:survey,state:0
+#: view:survey.request:0
 #: selection:survey.request,state:0
 msgid "Cancelled"
 msgstr "已取消"
@@ -411,7 +415,6 @@ msgstr "最多"
 
 #. module: survey
 #: view:survey:0
-#: view:survey.request:0
 msgid "My Survey(s)"
 msgstr ""
 
@@ -493,7 +496,7 @@ msgstr "必须是一个整数"
 
 #. module: survey
 #: field:survey.answer,question_id:0
-#: view:survey.question:0
+#: field:survey.page,question_ids:0
 #: field:survey.question,question:0
 #: field:survey.question.column.heading,question_id:0
 #: field:survey.response.line,question_id:0
@@ -559,7 +562,7 @@ msgstr "打印"
 #. module: survey
 #: view:survey:0
 msgid "New"
-msgstr "新建"
+msgstr ""
 
 #. module: survey
 #: field:survey.question,make_comment_field:0
@@ -574,7 +577,6 @@ msgstr "类型"
 
 #. module: survey
 #: selection:survey.answer,type:0
-#: field:survey.request,email:0
 msgid "Email"
 msgstr "电子邮箱"
 
@@ -695,10 +697,9 @@ msgstr "列头"
 #. module: survey
 #: field:survey.question,is_require_answer:0
 msgid "Require Answer to Question"
-msgstr "需要回答的问题"
+msgstr "需要答案"
 
 #. module: survey
-#: model:ir.actions.act_window,name:survey.act_survey_request
 #: model:ir.actions.act_window,name:survey.action_survey_request_tree
 #: model:ir.ui.menu,name:survey.menu_survey_type_form1
 msgid "Survey Requests"
@@ -729,7 +730,7 @@ msgid "Paragraph of Text"
 msgstr "文本段落"
 
 #. module: survey
-#: code:addons/survey/survey.py:477
+#: code:addons/survey/survey.py:423
 #, python-format
 msgid ""
 "Maximum Required Answer you                                     entered for "
@@ -803,7 +804,7 @@ msgstr "手工"
 #. module: survey
 #: view:survey.send.invitation:0
 msgid "_Send"
-msgstr "发送(_S)"
+msgstr ""
 
 #. module: survey
 #: help:survey,responsible_id:0
@@ -812,7 +813,6 @@ msgstr "问卷的用户职责"
 
 #. module: survey
 #: field:survey,page_ids:0
-#: view:survey.page:0
 #: view:survey.question:0
 #: field:survey.response.line,page_id:0
 msgid "Page"
@@ -852,7 +852,6 @@ msgstr "你不能再次回复。请联系此问卷的作者获取更多的帮助
 #. module: survey
 #: model:ir.actions.act_window,name:survey.act_survey_page_question
 #: model:ir.actions.act_window,name:survey.act_survey_question
-#: field:survey.page,question_ids:0
 msgid "Questions"
 msgstr "问题"
 
@@ -862,7 +861,6 @@ msgid "Set to one if  you require only one Answer per user"
 msgstr "如果你需要每个用户只提供一份答案，把它设为1"
 
 #. module: survey
-#: model:ir.model,name:survey.model_res_users
 #: field:survey,users:0
 msgid "Users"
 msgstr "用户"
@@ -1016,10 +1014,7 @@ msgid "Date and Time"
 msgstr "日期和时间"
 
 #. module: survey
-#: view:survey:0
 #: field:survey,state:0
-#: view:survey.request:0
-#: field:survey.request,state:0
 #: field:survey.response,state:0
 #: field:survey.response.line,state:0
 msgid "Status"
@@ -1070,6 +1065,7 @@ msgstr "行号"
 
 #. module: survey
 #: view:survey:0
+#: view:survey.name.wiz:0
 msgid "Survey Details"
 msgstr "问卷详情"
 
@@ -1293,12 +1289,12 @@ msgid "Allow Only One Answer per Column (Forced Ranking)"
 msgstr "每个栏位只允许一个答复（强制性排名）"
 
 #. module: survey
+#: view:survey:0
 #: view:survey.browse.answer:0
 #: view:survey.name.wiz:0
 #: view:survey.print:0
 #: view:survey.print.answer:0
 #: view:survey.print.statistics:0
-#: view:survey.send.invitation:0
 msgid "Cancel"
 msgstr "取消"
 
@@ -1325,7 +1321,7 @@ msgid "Total Started Survey"
 msgstr "已开始的文件总数"
 
 #. module: survey
-#: code:addons/survey/survey.py:517
+#: code:addons/survey/survey.py:462
 #, python-format
 msgid ""
 "#Required Answer you entered is greater than the number of answer. Please "
@@ -1379,7 +1375,7 @@ msgid "Answered"
 msgstr "已答复"
 
 #. module: survey
-#: code:addons/survey/wizard/survey_answer.py:445
+#: code:addons/survey/wizard/survey_answer.py:425
 #, python-format
 msgid "Complete Survey Answer"
 msgstr "完成问卷回复"
@@ -1427,6 +1423,7 @@ msgid "Single Textbox"
 msgstr "单行文本框"
 
 #. module: survey
+#: view:survey:0
 #: field:survey,note:0
 #: field:survey.name.wiz,note:0
 #: view:survey.page:0
@@ -1478,7 +1475,7 @@ msgid "Required Answer"
 msgstr "需要的答复"
 
 #. module: survey
-#: code:addons/survey/survey.py:523
+#: code:addons/survey/survey.py:468
 #, python-format
 msgid ""
 "Minimum Required Answer you entered is greater than the number of answer. "
@@ -1494,7 +1491,7 @@ msgstr "必须输入一个或多个答复。"
 #. module: survey
 #: view:survey:0
 msgid "All Open Survey"
-msgstr "所有开放的调查"
+msgstr ""
 
 #. module: survey
 #: model:ir.actions.report.xml,name:survey.survey_browse_response
@@ -1518,7 +1515,7 @@ msgid "Pages"
 msgstr "页面"
 
 #. module: survey
-#: code:addons/survey/survey.py:455
+#: code:addons/survey/survey.py:401
 #, python-format
 msgid ""
 "#Required Answer you entered is                                     greater "
@@ -1574,7 +1571,7 @@ msgid "You must enter one or more Answer."
 msgstr "你必须输入一个或多个答复。"
 
 #. module: survey
-#: code:addons/survey/survey.py:465
+#: code:addons/survey/survey.py:411
 #, python-format
 msgid ""
 "Minimum Required Answer                                     you entered is "
@@ -1590,10 +1587,10 @@ msgstr "菜单选项"
 #. module: survey
 #: field:survey,id:0
 msgid "ID"
-msgstr "编号"
+msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:487
+#: code:addons/survey/survey.py:433
 #, python-format
 msgid ""
 "Maximum Required Answer is greater                                     than "
@@ -1693,7 +1690,7 @@ msgid "Table"
 msgstr "表格(Table)"
 
 #. module: survey
-#: code:addons/survey/survey.py:685
+#: code:addons/survey/survey.py:630
 #, python-format
 msgid "You cannot duplicate the resource!"
 msgstr "无法复制资源！"

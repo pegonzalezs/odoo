@@ -14,37 +14,35 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:17+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:58+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: project_long_term
-#: field:account.analytic.account,use_phases:0
 #: model:ir.actions.act_window,name:project_long_term.act_project_phases
-#: view:project.project:0
 msgid "Phases"
-msgstr "Evreler"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: field:project.phase,next_phase_ids:0
 msgid "Next Phases"
-msgstr "Sonraki Evreler"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Project's Tasks"
-msgstr "Proje Görevleri"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: view:project.user.allocation:0
 msgid "Group By..."
-msgstr "Grupla İle..."
+msgstr "Grupla..."
 
 #. module: project_long_term
 #: field:project.phase,user_ids:0
 msgid "Assigned Users"
-msgstr "Atanan Kullanıcılar"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,progress:0
@@ -59,7 +57,7 @@ msgstr "Hata! Proje başlangıç tarihi bitiş tarihinden sonra olamaz."
 #. module: project_long_term
 #: view:project.phase:0
 msgid "In Progress Phases"
-msgstr "DevamEden Evreler"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
@@ -90,12 +88,12 @@ msgstr ""
 #. module: project_long_term
 #: model:ir.model,name:project_long_term.model_project_user_allocation
 msgid "Phase User Allocation"
-msgstr "Evre Kullanıcı Tahsisi"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.model,name:project_long_term.model_project_task
 msgid "Task"
-msgstr "Görev"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.actions.act_window,help:project_long_term.act_project_phase
@@ -111,13 +109,13 @@ msgstr ""
 #. module: project_long_term
 #: selection:project.compute.phases,target_project:0
 msgid "Compute a Single Project"
-msgstr "Tek Proje Hesapla"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: field:project.phase,previous_phase_ids:0
 msgid "Previous Phases"
-msgstr "Önceki Evreleri"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,product_uom:0
@@ -137,8 +135,6 @@ msgstr ""
 msgid ""
 " It's computed by the scheduler according to the start date and the duration."
 msgstr ""
-" Bu başlangıç ​​tarihi ve süresine göre zamanlayıcı tarafından hesaplanan "
-"edilir."
 
 #. module: project_long_term
 #: model:ir.model,name:project_long_term.model_project_project
@@ -150,33 +146,33 @@ msgstr ""
 #: view:project.user.allocation:0
 #: field:project.user.allocation,project_id:0
 msgid "Project"
-msgstr "Proje"
+msgstr ""
 
 #. module: project_long_term
 #: code:addons/project_long_term/wizard/project_compute_phases.py:48
 #, python-format
 msgid "Error!"
-msgstr "Hata!"
+msgstr ""
 
 #. module: project_long_term
 #: selection:project.phase,state:0
 msgid "Cancelled"
-msgstr "İptalEdilen"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.user.allocation,date_end:0
 msgid "Ending Date"
-msgstr "Bitirme Tarihi"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,constraint_date_end:0
 msgid "Deadline"
-msgstr "ZamanSınırı"
+msgstr ""
 
 #. module: project_long_term
 #: selection:project.compute.phases,target_project:0
 msgid "Compute All My Projects"
-msgstr "Hesapla Benim Bütün Projelerimi"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.compute.phases:0
@@ -193,7 +189,7 @@ msgstr ""
 #. module: project_long_term
 #: view:project.user.allocation:0
 msgid "Project User Allocation"
-msgstr "Proje Kullanıcı Paylaşımı"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
@@ -205,18 +201,18 @@ msgstr ""
 #: view:project.compute.phases:0
 #: view:project.compute.tasks:0
 msgid "C_ompute"
-msgstr "H_esapla"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: selection:project.phase,state:0
 msgid "New"
-msgstr "Yeni"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,progress:0
 msgid "Computed based on related tasks"
-msgstr "Hesaplanan ilgili görevleri bazında"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,product_uom:0
@@ -226,49 +222,49 @@ msgstr ""
 #. module: project_long_term
 #: field:project.phase,constraint_date_start:0
 msgid "Minimum Start Date"
-msgstr "Minimum Başlangıç Tarihi"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.ui.menu,name:project_long_term.menu_pm_users_project1
 #: model:ir.ui.menu,name:project_long_term.menu_view_resource
 msgid "Resources"
-msgstr "Kaynaklar"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "My Projects"
-msgstr "Projelerim"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.user.allocation,date_start:0
 msgid "Starting Date"
-msgstr "Başlama Tarihi"
+msgstr ""
 
 #. module: project_long_term
-#: view:project.phase:0
+#: model:ir.actions.act_window,name:project_long_term.project_phase_task_list
 msgid "Related Tasks"
-msgstr "İlgili Görevler"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "New Phases"
-msgstr "Yeni Evre"
+msgstr ""
 
 #. module: project_long_term
 #: code:addons/project_long_term/wizard/project_compute_phases.py:48
 #, python-format
 msgid "Please specify a project to schedule."
-msgstr "Zamanlama için bir proje belirtin."
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,constraint_date_start:0
 msgid "force the phase to start after this date"
-msgstr "evere bu tarihten sonra başlatılmasını zorlama"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,task_ids:0
 msgid "Project Tasks"
-msgstr "Proje Görevleri"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,date_start:0
@@ -276,34 +272,32 @@ msgid ""
 "It's computed by the scheduler according the project date or the end date of "
 "the previous phase."
 msgstr ""
-"Planlamacı tarafından proje tarihine göre ya da önceki aşamanın bitiş "
-"tarihine göre hesaplanmıştır."
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Month"
-msgstr "Ay"
+msgstr ""
 
 #. module: project_long_term
 #: constraint:project.phase:0
 msgid "Phase start-date must be lower than phase end-date."
-msgstr "Evre başlangıç ​​tarihi evre bitiş tarihi daha düşük olmalıdır."
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Start Month"
-msgstr "Başlangıç Ayı"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,date_start:0
 #: field:project.user.allocation,date_start:0
 msgid "Start Date"
-msgstr "Başlam Tarihi"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,constraint_date_end:0
 msgid "force the phase to finish before this date"
-msgstr "Evereyi bu tarihten önce bitirme zorlama"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,user_ids:0
@@ -314,39 +308,39 @@ msgstr ""
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Draft"
-msgstr "Taslak"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Pending Phases"
-msgstr "Bekleyen Evreler"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: selection:project.phase,state:0
 msgid "Pending"
-msgstr "Bekleyen"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.user.allocation:0
 #: field:project.user.allocation,user_id:0
 msgid "User"
-msgstr "Kullanıcı"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.model,name:project_long_term.model_project_compute_tasks
 msgid "Project Compute Tasks"
-msgstr "Proje Hesaplama Görevleri"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Constraints"
-msgstr "Kısıtlamalar"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,sequence:0
 msgid "Gives the sequence order when displaying a list of phases."
-msgstr "Evreleri bir listesini görüntülerken sıralamasını verir."
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.actions.act_window,name:project_long_term.act_project_phase
@@ -356,30 +350,29 @@ msgstr "Evreleri bir listesini görüntülerken sıralamasını verir."
 #: view:project.phase:0
 #: field:project.project,phase_ids:0
 msgid "Project Phases"
-msgstr "Proje Evreleri"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: selection:project.phase,state:0
 msgid "Done"
-msgstr "Biten"
+msgstr ""
 
 #. module: project_long_term
-#: view:project.compute.phases:0
-#: view:project.compute.tasks:0
+#: view:project.phase:0
 msgid "Cancel"
-msgstr "İptal"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 #: selection:project.phase,state:0
 msgid "In Progress"
-msgstr "DevamEden"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Remaining Hours"
-msgstr "Kalan Saatleri"
+msgstr ""
 
 #. module: project_long_term
 #: constraint:project.task:0
@@ -389,35 +382,34 @@ msgstr ""
 #. module: project_long_term
 #: model:ir.ui.menu,name:project_long_term.menu_view_resource_calendar
 msgid "Working Time"
-msgstr "Çalışma Zamanı"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.actions.act_window,name:project_long_term.action_project_compute_phases
 #: model:ir.ui.menu,name:project_long_term.menu_compute_phase
 #: view:project.compute.phases:0
 msgid "Schedule Phases"
-msgstr "Zamanlanan Evreler"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Start Phase"
-msgstr "Başlayan Evre"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Total Hours"
-msgstr "Toplam Saat"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.user.allocation:0
 msgid "Users"
-msgstr "Kullanıcılar"
+msgstr ""
 
 #. module: project_long_term
-#: view:project.project:0
 #: view:project.user.allocation:0
 msgid "Phase"
-msgstr "Evre"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,state:0
@@ -433,28 +425,27 @@ msgstr ""
 #: field:project.phase,date_end:0
 #: field:project.user.allocation,date_end:0
 msgid "End Date"
-msgstr "Bitiş Tarihi"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,name:0
 msgid "Name"
-msgstr "Adı"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Tasks Details"
-msgstr "Görev Detayları"
+msgstr ""
 
 #. module: project_long_term
-#: view:project.phase:0
 #: field:project.phase,duration:0
 msgid "Duration"
-msgstr "Süre"
+msgstr ""
 
 #. module: project_long_term
 #: view:project.phase:0
 msgid "Project Users"
-msgstr "Proje Kullanıcıları"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.model,name:project_long_term.model_project_phase
@@ -463,7 +454,7 @@ msgstr "Proje Kullanıcıları"
 #: field:project.task,phase_id:0
 #: field:project.user.allocation,phase_id:0
 msgid "Project Phase"
-msgstr "Proje Evresi"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.actions.act_window,help:project_long_term.action_project_compute_phases
@@ -472,48 +463,46 @@ msgid ""
 "view.\n"
 "               "
 msgstr ""
-"Tamamının veya belirli bir projenin evreleri planlamak için. Daha sonra bir "
-"gantt görünümünü açma.\n"
-"               "
 
 #. module: project_long_term
 #: model:ir.model,name:project_long_term.model_project_compute_phases
 msgid "Project Compute Phases"
-msgstr "Proje Evreleri Hesapla"
+msgstr ""
 
 #. module: project_long_term
 #: constraint:project.phase:0
 msgid "Loops in phases not allowed"
-msgstr "evrelereki Döngülere izin verilmedi"
+msgstr ""
 
 #. module: project_long_term
 #: field:project.phase,sequence:0
 msgid "Sequence"
-msgstr "Sıralama"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.ui.menu,name:project_long_term.menu_view_resource_calendar_leaves
 msgid "Resource Leaves"
-msgstr "Kayanak İzinleri"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.actions.act_window,name:project_long_term.action_project_compute_tasks
 #: model:ir.ui.menu,name:project_long_term.menu_compute_tasks
 #: view:project.compute.tasks:0
 msgid "Schedule Tasks"
-msgstr "Zamanlanan Görevler"
+msgstr ""
 
 #. module: project_long_term
 #: help:project.phase,duration:0
 msgid "By default in days"
-msgstr "Gün içinde varsayılan olarak"
+msgstr ""
 
 #. module: project_long_term
+#: view:project.phase:0
 #: field:project.phase,user_force_ids:0
 msgid "Force Assigned Users"
-msgstr "Kullacılar Atamaya zorla"
+msgstr ""
 
 #. module: project_long_term
 #: model:ir.ui.menu,name:project_long_term.menu_phase_schedule
 msgid "Scheduling"
-msgstr "Zamanlama"
+msgstr ""

@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:00+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_attendance
 #: model:ir.ui.menu,name:hr_attendance.menu_hr_time_tracking
@@ -123,7 +123,9 @@ msgid "Define attendance reason"
 msgstr "Defina motivo ausencia"
 
 #. module: hr_attendance
+#: code:addons/hr_attendance/report/attendance_by_month.py:184
 #: model:ir.actions.act_window,name:hr_attendance.action_hr_attendance_month
+#, python-format
 msgid "Attendances By Month"
 msgstr "Asistencias por Mes"
 
@@ -155,7 +157,7 @@ msgid "Ending Date"
 msgstr "Fecha final"
 
 #. module: hr_attendance
-#: code:addons/hr_attendance/hr_attendance.py:161
+#: code:addons/hr_attendance/hr_attendance.py:140
 #, python-format
 msgid "Warning"
 msgstr "Alerta"
@@ -173,7 +175,6 @@ msgid "A sign-in must be right after a sign-out !"
 msgstr "¡Un registro de entrada debe estar después de un registro de salida!"
 
 #. module: hr_attendance
-#: view:hr.attendance:0
 #: field:hr.employee,state:0
 #: model:ir.model,name:hr_attendance.model_hr_attendance
 msgid "Attendance"
@@ -231,10 +232,8 @@ msgid "Min Delay"
 msgstr "Mín. retraso"
 
 #. module: hr_attendance
-#: code:addons/hr_attendance/hr_attendance.py:154
 #: selection:hr.attendance,action:0
 #: view:hr.employee:0
-#, python-format
 msgid "Sign In"
 msgstr "Registrar entrada"
 
@@ -367,6 +366,8 @@ msgstr "Enero"
 
 #. module: hr_attendance
 #: selection:hr.action.reason,action_type:0
+#: view:hr.sign.in.out:0
+#: view:hr.sign.in.out.ask:0
 msgid "Sign in"
 msgstr "Registrar entrada"
 
@@ -419,6 +420,8 @@ msgstr "ID empleado"
 #: view:hr.attendance.error:0
 #: view:hr.attendance.month:0
 #: view:hr.attendance.week:0
+#: view:hr.sign.in.out:0
+#: view:hr.sign.in.out.ask:0
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -442,6 +445,8 @@ msgstr "Imprimir informe de asistencia mensuales"
 
 #. module: hr_attendance
 #: selection:hr.action.reason,action_type:0
+#: view:hr.sign.in.out:0
+#: view:hr.sign.in.out.ask:0
 msgid "Sign out"
 msgstr "Registrar salida"
 
@@ -452,7 +457,6 @@ msgstr "Retraso"
 
 #. module: hr_attendance
 #: view:hr.attendance:0
-#: field:hr.attendance,employee_id:0
 #: model:ir.model,name:hr_attendance.model_hr_employee
 msgid "Employee"
 msgstr "Empleado"
@@ -497,10 +501,8 @@ msgid "Your last sign in"
 msgstr "Su último registro entrada"
 
 #. module: hr_attendance
-#: code:addons/hr_attendance/hr_attendance.py:154
 #: selection:hr.attendance,action:0
 #: view:hr.employee:0
-#, python-format
 msgid "Sign Out"
 msgstr "Registrar salida"
 

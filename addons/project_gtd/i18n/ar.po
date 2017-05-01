@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.4\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-11-16 19:10+0000\n"
+"PO-Revision-Date: 2012-04-06 07:52+0000\n"
 "Last-Translator: kifcaliph <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:16+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:57+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: project_gtd
 #: view:project.task:0
@@ -24,7 +24,7 @@ msgstr "قيد التقدم"
 #. module: project_gtd
 #: view:project.task:0
 msgid "Show only tasks having a deadline"
-msgstr "اظهار المهام فقط التي لها زمن نهائي"
+msgstr ""
 
 #. module: project_gtd
 #: view:project.task:0
@@ -54,7 +54,7 @@ msgstr "تايم بوكس فارغ تم اكتمال العملية بنجاح"
 #. module: project_gtd
 #: view:project.task:0
 msgid "Pending Tasks"
-msgstr "مهام قيد الإنتظار"
+msgstr ""
 
 #. module: project_gtd
 #: view:project.task:0
@@ -93,9 +93,8 @@ msgid "Pending"
 msgstr "معلّق"
 
 #. module: project_gtd
-#: view:project.gtd.timebox:0
-#: field:project.gtd.timebox,name:0
-#: field:project.task,timebox_id:0
+#: view:project.gtd.timebox:0 field:project.gtd.timebox,name:0
+#: view:project.task:0 field:project.task,timebox_id:0
 msgid "Timebox"
 msgstr "الوقت الزمني"
 
@@ -214,8 +213,7 @@ msgstr ""
 
 #. module: project_gtd
 #: model:ir.model,name:project_gtd.model_project_gtd_context
-#: view:project.gtd.context:0
-#: field:project.gtd.context,name:0
+#: view:project.gtd.context:0 field:project.gtd.context,name:0
 #: field:project.task,context_id:0
 msgid "Context"
 msgstr "السياق"
@@ -237,8 +235,7 @@ msgid "Office"
 msgstr "مكتب"
 
 #. module: project_gtd
-#: field:project.gtd.context,sequence:0
-#: field:project.gtd.timebox,sequence:0
+#: field:project.gtd.context,sequence:0 field:project.gtd.timebox,sequence:0
 msgid "Sequence"
 msgstr "مسلسل"
 

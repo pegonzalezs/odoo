@@ -181,13 +181,8 @@ class WebKitParser(report_sxw):
     def translate_call(self, src):
         """Translate String."""
         ir_translation = self.pool.get('ir.translation')
-        name = self.tmpl and 'addons/' + self.tmpl or None
         res = ir_translation._get_source(self.parser_instance.cr, self.parser_instance.uid,
-                                         name, 'report', self.parser_instance.localcontext.get('lang', 'en_US'), src)
-        if res == src:
-            # no translation defined, fallback on None (backward compatibility)
-            res = ir_translation._get_source(self.parser_instance.cr, self.parser_instance.uid,
-                                             None, 'report', self.parser_instance.localcontext.get('lang', 'en_US'), src)
+                                         None, 'report', self.parser_instance.localcontext.get('lang', 'en_US'), src)
         if not res :
             return src
         return res
@@ -215,7 +210,7 @@ class WebKitParser(report_sxw):
 
         if report_xml.report_file :
             path = addons.get_module_resource(report_xml.report_file)
-            if path and os.path.exists(path) :
+            if os.path.exists(path) :
                 template = file(path).read()
         if not template and report_xml.report_webkit_data :
             template =  report_xml.report_webkit_data

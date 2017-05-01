@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:25+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-09 05:08+0000\n"
+"X-Generator: Launchpad (build 15914)\n"
 
 #. module: survey
 #: view:survey.print:0
@@ -24,7 +24,7 @@ msgid "Print Option"
 msgstr "خيار الطباعة"
 
 #. module: survey
-#: code:addons/survey/survey.py:471
+#: code:addons/survey/survey.py:417
 #, python-format
 msgid ""
 "Minimum Required Answer you                                     entered is "
@@ -44,7 +44,7 @@ msgid "Text Validation"
 msgstr "تصحيح النص"
 
 #. module: survey
-#: code:addons/survey/survey.py:483
+#: code:addons/survey/survey.py:429
 #, python-format
 msgid ""
 "Maximum Required Answer you                                     entered for "
@@ -65,6 +65,8 @@ msgstr "حرف"
 
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_form1
+#: model:ir.ui.menu,name:survey.menu_print_survey_form
+#: model:ir.ui.menu,name:survey.menu_reporting
 #: model:ir.ui.menu,name:survey.menu_survey_form
 #: model:ir.ui.menu,name:survey.menu_surveys
 msgid "Surveys"
@@ -178,10 +180,10 @@ msgstr "حفظ كمسودة"
 #. module: survey
 #: field:survey.question,is_comment_require:0
 msgid "Add Comment Field"
-msgstr "اضف حقل الملاحظة"
+msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:450
+#: code:addons/survey/survey.py:396
 #, python-format
 msgid ""
 "#Required Answer you entered                                     is greater "
@@ -192,12 +194,12 @@ msgstr ""
 #. module: survey
 #: field:survey.question,tot_resp:0
 msgid "Total Answer"
-msgstr "مجموع الإجابة"
+msgstr ""
 
 #. module: survey
 #: field:survey.tbl.column.heading,name:0
 msgid "Row Number"
-msgstr "رقم الصف"
+msgstr ""
 
 #. module: survey
 #: model:ir.model,name:survey.model_survey_name_wiz
@@ -207,15 +209,15 @@ msgstr "survey.name.wiz"
 #. module: survey
 #: model:ir.actions.act_window,name:survey.action_survey_question_form
 msgid "Survey Questions"
-msgstr "أسئلة المسح"
+msgstr ""
 
 #. module: survey
 #: selection:survey.question,type:0
 msgid "Matrix of Choices (Only One Answers Per Row)"
-msgstr "مصفوفة من الخيارات (إجابات واحدة فقط في كل صف )"
+msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:525
+#: code:addons/survey/survey.py:470
 #, python-format
 msgid ""
 "Maximum Required Answer you entered for your maximum is greater than the "
@@ -223,12 +225,13 @@ msgid ""
 msgstr ""
 
 #. module: survey
+#: model:ir.actions.act_window,name:survey.action_view_survey_question_message
 #: model:ir.model,name:survey.model_survey_question
 #: view:survey:0
 #: view:survey.page:0
 #: view:survey.question:0
 msgid "Survey Question"
-msgstr "سؤال المسح"
+msgstr ""
 
 #. module: survey
 #: view:survey.question.column.heading:0
@@ -239,7 +242,7 @@ msgstr ""
 #: field:survey.print,page_number:0
 #: field:survey.print.answer,page_number:0
 msgid "Include Page Number"
-msgstr "متضمن رقم الصفحة"
+msgstr ""
 
 #. module: survey
 #: view:survey.page:0
@@ -260,7 +263,7 @@ msgstr ""
 #. module: survey
 #: model:ir.model,name:survey.model_survey_history
 msgid "Survey History"
-msgstr "تاريخ المسح"
+msgstr ""
 
 #. module: survey
 #: field:survey.response.answer,comment:0
@@ -272,7 +275,7 @@ msgstr "ملاحظات"
 #: view:survey:0
 #: view:survey.request:0
 msgid "Search Survey"
-msgstr "البحث عن مسح"
+msgstr ""
 
 #. module: survey
 #: field:survey.response.answer,answer:0
@@ -299,7 +302,7 @@ msgstr "خطأ!"
 #. module: survey
 #: field:survey,tot_comp_survey:0
 msgid "Total Completed Survey"
-msgstr "مجموع كامل المسح"
+msgstr ""
 
 #. module: survey
 #: view:survey.response.answer:0
@@ -309,10 +312,11 @@ msgstr ""
 #. module: survey
 #: model:ir.actions.report.xml,name:survey.survey_analysis
 msgid "Survey Statistics"
-msgstr "إحصائيات المسح"
+msgstr ""
 
 #. module: survey
 #: selection:survey,state:0
+#: view:survey.request:0
 #: selection:survey.request,state:0
 msgid "Cancelled"
 msgstr "ملغي"
@@ -325,7 +329,7 @@ msgstr ""
 #. module: survey
 #: field:survey.question,comment_field_type:0
 msgid "Comment Field Type"
-msgstr "نوع حقل الملاحظة"
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/survey.py:370
@@ -389,22 +393,22 @@ msgstr ""
 #. module: survey
 #: selection:survey.question,type:0
 msgid "Multiple Choice (Multiple Answer)"
-msgstr "اختيارات متعددة (إجابات متعددة)"
+msgstr ""
 
 #. module: survey
 #: view:survey:0
 msgid "Edit Survey"
-msgstr "تعديل المسح"
+msgstr ""
 
 #. module: survey
 #: view:survey.response.line:0
 msgid "Survey Answer Line"
-msgstr "خط إجابة المسح"
+msgstr ""
 
 #. module: survey
 #: field:survey.question.column.heading,menu_choice:0
 msgid "Menu Choice"
-msgstr "إختيار القائمة"
+msgstr ""
 
 #. module: survey
 #: selection:survey.question,required_type:0
@@ -413,7 +417,6 @@ msgstr "على الأكثر"
 
 #. module: survey
 #: view:survey:0
-#: view:survey.request:0
 msgid "My Survey(s)"
 msgstr ""
 
@@ -442,7 +445,7 @@ msgstr ""
 #: selection:survey.print,paper_size:0
 #: selection:survey.print.answer,paper_size:0
 msgid "Letter (8.5\" x 11\")"
-msgstr "رسالة (8.5\"× 11\")"
+msgstr ""
 
 #. module: survey
 #: view:survey:0
@@ -496,7 +499,7 @@ msgstr ""
 
 #. module: survey
 #: field:survey.answer,question_id:0
-#: view:survey.question:0
+#: field:survey.page,question_ids:0
 #: field:survey.question,question:0
 #: field:survey.question.column.heading,question_id:0
 #: field:survey.response.line,question_id:0
@@ -575,7 +578,6 @@ msgstr "نوع"
 
 #. module: survey
 #: selection:survey.answer,type:0
-#: field:survey.request,email:0
 msgid "Email"
 msgstr "بريد إلكتروني"
 
@@ -592,17 +594,17 @@ msgstr ""
 #. module: survey
 #: view:survey.print:0
 msgid "Survey Print"
-msgstr "طباعة المسح"
+msgstr ""
 
 #. module: survey
 #: view:survey.send.invitation:0
 msgid "Select Partner"
-msgstr "اختار شريك"
+msgstr ""
 
 #. module: survey
 #: field:survey.question,type:0
 msgid "Question Type"
-msgstr "نوع السؤال"
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/wizard/survey_answer.py:126
@@ -631,7 +633,7 @@ msgstr "رابط"
 #: model:ir.model,name:survey.model_survey_type
 #: view:survey.type:0
 msgid "Survey Type"
-msgstr "نوع المسح"
+msgstr ""
 
 #. module: survey
 #: field:survey.page,sequence:0
@@ -650,7 +652,7 @@ msgstr ""
 #. module: survey
 #: field:survey.question,minimum_req_ans:0
 msgid "Minimum Required Answer"
-msgstr "أقل إجابة مطلوبة"
+msgstr ""
 
 #. module: survey
 #: code:addons/survey/survey.py:479
@@ -699,7 +701,6 @@ msgid "Require Answer to Question"
 msgstr ""
 
 #. module: survey
-#: model:ir.actions.act_window,name:survey.act_survey_request
 #: model:ir.actions.act_window,name:survey.action_survey_request_tree
 #: model:ir.ui.menu,name:survey.menu_survey_type_form1
 msgid "Survey Requests"
@@ -730,7 +731,7 @@ msgid "Paragraph of Text"
 msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:477
+#: code:addons/survey/survey.py:423
 #, python-format
 msgid ""
 "Maximum Required Answer you                                     entered for "
@@ -813,7 +814,6 @@ msgstr ""
 
 #. module: survey
 #: field:survey,page_ids:0
-#: view:survey.page:0
 #: view:survey.question:0
 #: field:survey.response.line,page_id:0
 msgid "Page"
@@ -853,7 +853,6 @@ msgstr ""
 #. module: survey
 #: model:ir.actions.act_window,name:survey.act_survey_page_question
 #: model:ir.actions.act_window,name:survey.act_survey_question
-#: field:survey.page,question_ids:0
 msgid "Questions"
 msgstr "أسئلة"
 
@@ -863,7 +862,6 @@ msgid "Set to one if  you require only one Answer per user"
 msgstr ""
 
 #. module: survey
-#: model:ir.model,name:survey.model_res_users
 #: field:survey,users:0
 msgid "Users"
 msgstr "مستخدمين"
@@ -1017,10 +1015,7 @@ msgid "Date and Time"
 msgstr "التاريخ و الوقت"
 
 #. module: survey
-#: view:survey:0
 #: field:survey,state:0
-#: view:survey.request:0
-#: field:survey.request,state:0
 #: field:survey.response,state:0
 #: field:survey.response.line,state:0
 msgid "Status"
@@ -1071,6 +1066,7 @@ msgstr ""
 
 #. module: survey
 #: view:survey:0
+#: view:survey.name.wiz:0
 msgid "Survey Details"
 msgstr ""
 
@@ -1294,12 +1290,12 @@ msgid "Allow Only One Answer per Column (Forced Ranking)"
 msgstr ""
 
 #. module: survey
+#: view:survey:0
 #: view:survey.browse.answer:0
 #: view:survey.name.wiz:0
 #: view:survey.print:0
 #: view:survey.print.answer:0
 #: view:survey.print.statistics:0
-#: view:survey.send.invitation:0
 msgid "Cancel"
 msgstr "إلغاء"
 
@@ -1326,7 +1322,7 @@ msgid "Total Started Survey"
 msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:517
+#: code:addons/survey/survey.py:462
 #, python-format
 msgid ""
 "#Required Answer you entered is greater than the number of answer. Please "
@@ -1380,7 +1376,7 @@ msgid "Answered"
 msgstr "مجابة"
 
 #. module: survey
-#: code:addons/survey/wizard/survey_answer.py:445
+#: code:addons/survey/wizard/survey_answer.py:425
 #, python-format
 msgid "Complete Survey Answer"
 msgstr ""
@@ -1428,6 +1424,7 @@ msgid "Single Textbox"
 msgstr ""
 
 #. module: survey
+#: view:survey:0
 #: field:survey,note:0
 #: field:survey.name.wiz,note:0
 #: view:survey.page:0
@@ -1479,7 +1476,7 @@ msgid "Required Answer"
 msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:523
+#: code:addons/survey/survey.py:468
 #, python-format
 msgid ""
 "Minimum Required Answer you entered is greater than the number of answer. "
@@ -1519,7 +1516,7 @@ msgid "Pages"
 msgstr "صفحات"
 
 #. module: survey
-#: code:addons/survey/survey.py:455
+#: code:addons/survey/survey.py:401
 #, python-format
 msgid ""
 "#Required Answer you entered is                                     greater "
@@ -1575,7 +1572,7 @@ msgid "You must enter one or more Answer."
 msgstr ""
 
 #. module: survey
-#: code:addons/survey/survey.py:465
+#: code:addons/survey/survey.py:411
 #, python-format
 msgid ""
 "Minimum Required Answer                                     you entered is "
@@ -1594,7 +1591,7 @@ msgid "ID"
 msgstr "معرّف"
 
 #. module: survey
-#: code:addons/survey/survey.py:487
+#: code:addons/survey/survey.py:433
 #, python-format
 msgid ""
 "Maximum Required Answer is greater                                     than "
@@ -1694,7 +1691,7 @@ msgid "Table"
 msgstr "جدول"
 
 #. module: survey
-#: code:addons/survey/survey.py:685
+#: code:addons/survey/survey.py:630
 #, python-format
 msgid "You cannot duplicate the resource!"
 msgstr ""

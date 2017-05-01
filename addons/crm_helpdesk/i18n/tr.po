@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:56+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:40+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: crm_helpdesk
 #: field:crm.helpdesk.report,delay_close:0
@@ -25,13 +25,13 @@ msgstr "Kapanmada gecikme"
 #. module: crm_helpdesk
 #: field:crm.helpdesk.report,nbr:0
 msgid "# of Cases"
-msgstr "# nın Vakkaları"
+msgstr "Vak'aların sayısı"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 #: view:crm.helpdesk.report:0
 msgid "Group By..."
-msgstr "Grupla İle..."
+msgstr "Grupla..."
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -53,7 +53,7 @@ msgstr "Bu yıl oluşturulan Destek talepleri"
 #: view:crm.helpdesk.report:0
 #: field:crm.helpdesk.report,company_id:0
 msgid "Company"
-msgstr "Firma"
+msgstr "Şirket"
 
 #. module: crm_helpdesk
 #: field:crm.helpdesk,email_cc:0
@@ -107,7 +107,7 @@ msgstr "İptal Edildi"
 #: model:ir.actions.act_window,name:crm_helpdesk.action_report_crm_helpdesk
 #: model:ir.ui.menu,name:crm_helpdesk.menu_report_crm_helpdesks_tree
 msgid "Helpdesk Analysis"
-msgstr "DanışmaMasası Analizi"
+msgstr "Danışma Masası Analizi"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk.report:0
@@ -128,12 +128,12 @@ msgstr "Sonraki İşlem"
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 msgid "Helpdesk Supports"
-msgstr "DanışmaMasası Desteği"
+msgstr "Danışma Masası Desteği"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 msgid "Extra Info"
-msgstr "Ekstra Bilgisi"
+msgstr "İlave Bilgi"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -141,7 +141,7 @@ msgstr "Ekstra Bilgisi"
 #: view:crm.helpdesk.report:0
 #: field:crm.helpdesk.report,partner_id:0
 msgid "Partner"
-msgstr "Partner"
+msgstr "İş ortağı"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -201,9 +201,10 @@ msgstr "En düşük"
 #. module: crm_helpdesk
 #: view:crm.helpdesk.report:0
 msgid "# Mails"
-msgstr "# Postaları"
+msgstr "Posta sayısı"
 
 #. module: crm_helpdesk
+#: view:crm.helpdesk:0
 #: view:crm.helpdesk.report:0
 msgid "My Sales Team(s)"
 msgstr "Satış Ekiplerim"
@@ -212,7 +213,7 @@ msgstr "Satış Ekiplerim"
 #: field:crm.helpdesk,create_date:0
 #: field:crm.helpdesk.report,create_date:0
 msgid "Creation Date"
-msgstr "Oluşturma Tarihi"
+msgstr "Oluşturulma Tarihi"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -224,14 +225,14 @@ msgstr "Taslağa Geri Dönüştür"
 #: selection:crm.helpdesk,state:0
 #: selection:crm.helpdesk.report,state:0
 msgid "Pending"
-msgstr "Bekleyen"
+msgstr "Bekliyor"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 #: field:crm.helpdesk,date_deadline:0
 #: field:crm.helpdesk.report,date_deadline:0
 msgid "Deadline"
-msgstr "ZamanSınırı"
+msgstr "Son Teslim Tarihi"
 
 #. module: crm_helpdesk
 #: selection:crm.helpdesk.report,month:0
@@ -241,7 +242,7 @@ msgstr "Temmuz"
 #. module: crm_helpdesk
 #: model:ir.actions.act_window,name:crm_helpdesk.crm_helpdesk_categ_action
 msgid "Helpdesk Categories"
-msgstr "DanışmaMasası Kategorileri"
+msgstr "Danışma Masası Kategorileri"
 
 #. module: crm_helpdesk
 #: model:ir.ui.menu,name:crm_helpdesk.menu_crm_case_helpdesk-act
@@ -269,7 +270,7 @@ msgid "Month of helpdesk requests"
 msgstr "Destek taleplerinin ayı"
 
 #. module: crm_helpdesk
-#: code:addons/crm_helpdesk/crm_helpdesk.py:104
+#: code:addons/crm_helpdesk/crm_helpdesk.py:101
 #, python-format
 msgid "No Subject"
 msgstr "Konu Yok"
@@ -277,7 +278,7 @@ msgstr "Konu Yok"
 #. module: crm_helpdesk
 #: view:crm.helpdesk.report:0
 msgid "#Helpdesk"
-msgstr "# DanışmaMasası"
+msgstr "# Danışma Masası"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -313,7 +314,7 @@ msgstr "Ay"
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 msgid "Escalate"
-msgstr "Artırma"
+msgstr "Önem sırasını artır"
 
 #. module: crm_helpdesk
 #: field:crm.helpdesk,write_date:0
@@ -349,7 +350,7 @@ msgstr "Sorumlu Kullanıcı"
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 msgid "Helpdesk Support"
-msgstr "DanışmaMasası Desteği"
+msgstr "Danışma Masası Desteği"
 
 #. module: crm_helpdesk
 #: field:crm.helpdesk,planned_cost:0
@@ -445,7 +446,7 @@ msgstr "Kullanıcı"
 #. module: crm_helpdesk
 #: field:crm.helpdesk,active:0
 msgid "Active"
-msgstr "Etkin"
+msgstr "Aktif"
 
 #. module: crm_helpdesk
 #: selection:crm.helpdesk.report,month:0
@@ -460,12 +461,12 @@ msgstr "Genişletilmiş Filtreler..."
 #. module: crm_helpdesk
 #: model:ir.actions.act_window,name:crm_helpdesk.crm_case_helpdesk_act111
 msgid "Helpdesk Requests"
-msgstr "DanışmaMasası Talepleri"
+msgstr "Danışma Masası Talepleri"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk.report:0
 msgid "Search"
-msgstr "Arama"
+msgstr "Ara"
 
 #. module: crm_helpdesk
 #: selection:crm.helpdesk.report,month:0
@@ -568,12 +569,12 @@ msgstr "Aç"
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
 msgid "Helpdesk Support Tree"
-msgstr "DanışmaMasası Destek Ağacı"
+msgstr "Danışma Masası Destek Ağacı"
 
 #. module: crm_helpdesk
 #: selection:crm.helpdesk,state:0
 msgid "In Progress"
-msgstr "DevamEden"
+msgstr "Sürüyor"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -585,7 +586,7 @@ msgstr "Sınıflandırma"
 #: model:ir.model,name:crm_helpdesk.model_crm_helpdesk
 #: model:ir.ui.menu,name:crm_helpdesk.menu_config_helpdesk
 msgid "Helpdesk"
-msgstr "DanışmaMasası"
+msgstr "Danışma Masası"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -596,7 +597,7 @@ msgstr "Sorumlu"
 #. module: crm_helpdesk
 #: field:crm.helpdesk.report,delay_expected:0
 msgid "Overpassed Deadline"
-msgstr "ZamanSınırını Aşan"
+msgstr "Teslim Tarihi Geçen"
 
 #. module: crm_helpdesk
 #: field:crm.helpdesk,description:0
@@ -656,7 +657,7 @@ msgstr "Şubat"
 #. module: crm_helpdesk
 #: field:crm.helpdesk,name:0
 msgid "Name"
-msgstr "Adı"
+msgstr "Ad"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk.report:0
@@ -666,7 +667,7 @@ msgstr "Ay-1"
 #. module: crm_helpdesk
 #: model:ir.ui.menu,name:crm_helpdesk.menu_help_support_main
 msgid "Helpdesk and Support"
-msgstr "Yardım Masası ve Destek"
+msgstr "Danışma Masası ve Destek"
 
 #. module: crm_helpdesk
 #: selection:crm.helpdesk.report,month:0
@@ -676,7 +677,7 @@ msgstr "Nisan"
 #. module: crm_helpdesk
 #: view:crm.helpdesk.report:0
 msgid "My Case(s)"
-msgstr "Benim Vakka(lar)"
+msgstr "Benim takip ettiğim vaka(lar)"
 
 #. module: crm_helpdesk
 #: view:crm.helpdesk:0
@@ -686,7 +687,7 @@ msgstr "Soru"
 #. module: crm_helpdesk
 #: field:crm.helpdesk,id:0
 msgid "ID"
-msgstr "ID"
+msgstr "Kimlik"
 
 #. module: crm_helpdesk
 #: model:ir.actions.act_window,help:crm_helpdesk.crm_helpdesk_categ_action
@@ -723,7 +724,7 @@ msgstr "Yüksek"
 #: field:crm.helpdesk,section_id:0
 #: view:crm.helpdesk.report:0
 msgid "Sales Team"
-msgstr "Satış Takımı"
+msgstr "Satış Birimi/ Personeli"
 
 #. module: crm_helpdesk
 #: field:crm.helpdesk,date_action_last:0

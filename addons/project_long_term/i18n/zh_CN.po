@@ -14,13 +14,11 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:17+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:58+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: project_long_term
-#: field:account.analytic.account,use_phases:0
 #: model:ir.actions.act_window,name:project_long_term.act_project_phases
-#: view:project.project:0
 msgid "Phases"
 msgstr "阶段"
 
@@ -245,7 +243,7 @@ msgid "Starting Date"
 msgstr "开始日期"
 
 #. module: project_long_term
-#: view:project.phase:0
+#: model:ir.actions.act_window,name:project_long_term.project_phase_task_list
 msgid "Related Tasks"
 msgstr "相关任务"
 
@@ -363,8 +361,7 @@ msgid "Done"
 msgstr "已完成"
 
 #. module: project_long_term
-#: view:project.compute.phases:0
-#: view:project.compute.tasks:0
+#: view:project.phase:0
 msgid "Cancel"
 msgstr "取消(&C)"
 
@@ -412,7 +409,6 @@ msgid "Users"
 msgstr "用户"
 
 #. module: project_long_term
-#: view:project.project:0
 #: view:project.user.allocation:0
 msgid "Phase"
 msgstr "阶段"
@@ -448,7 +444,6 @@ msgid "Tasks Details"
 msgstr "任务详情"
 
 #. module: project_long_term
-#: view:project.phase:0
 #: field:project.phase,duration:0
 msgid "Duration"
 msgstr "时长"
@@ -510,6 +505,7 @@ msgid "By default in days"
 msgstr "默认按天"
 
 #. module: project_long_term
+#: view:project.phase:0
 #: field:project.phase,user_force_ids:0
 msgid "Force Assigned Users"
 msgstr "强制分配的用户"

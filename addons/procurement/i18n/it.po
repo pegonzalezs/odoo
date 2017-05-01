@@ -8,15 +8,14 @@ msgstr ""
 "Project-Id-Version: openobject-addons\n"
 "Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
 "POT-Creation-Date: 2012-02-08 00:37+0000\n"
-"PO-Revision-Date: 2012-12-05 11:28+0000\n"
-"Last-Translator: Leonardo Pistone - Agile BG - Domsense "
-"<leonardo.pistone@agilebg.com>\n"
+"PO-Revision-Date: 2012-02-17 09:10+0000\n"
+"Last-Translator: Nicola Riolini - Micronaet <Unknown>\n"
 "Language-Team: Italian <it@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:12+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:54+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: procurement
 #: view:make.procurement:0
@@ -55,20 +54,18 @@ msgid "Draft procurement of the product and location of that orderpoint"
 msgstr ""
 
 #. module: procurement
-#: code:addons/procurement/procurement.py:290
+#: code:addons/procurement/procurement.py:291
 #, python-format
 msgid "No supplier defined for this product !"
 msgstr "Nessun fornitore definito per questo prodotto !"
 
 #. module: procurement
 #: field:make.procurement,uom_id:0
-#: view:procurement.order:0
 msgid "Unit of Measure"
 msgstr "Unità di misura"
 
 #. module: procurement
 #: field:procurement.order,procure_method:0
-#: field:product.template,procure_method:0
 msgid "Procurement Method"
 msgstr "Metodo approvvigionamento"
 
@@ -101,6 +98,7 @@ msgstr "Quantità U.V."
 
 #. module: procurement
 #: view:procurement.order:0
+#: field:procurement.order,name:0
 msgid "Reason"
 msgstr "Ragione"
 
@@ -267,7 +265,7 @@ msgid "Error! You can not create recursive companies."
 msgstr "Errore ! Non si possono creare aziende ricorsive."
 
 #. module: procurement
-#: code:addons/procurement/procurement.py:370
+#: code:addons/procurement/procurement.py:386
 #, python-format
 msgid "Procurement '%s' is in exception: "
 msgstr ""
@@ -308,7 +306,7 @@ msgid "Best price (not yet active!)"
 msgstr "Prezzo migliore (non ancora attivo!)"
 
 #. module: procurement
-#: code:addons/procurement/schedulers.py:110
+#: code:addons/procurement/schedulers.py:111
 #, python-format
 msgid "PROC %d: from stock - %3.2f %-5s - %s"
 msgstr ""
@@ -361,10 +359,11 @@ msgid "Quantity"
 msgstr "Quantità"
 
 #. module: procurement
-#: code:addons/procurement/procurement.py:365
+#: code:addons/procurement/procurement.py:379
 #, python-format
 msgid "Not enough stock and no minimum orderpoint rule defined."
-msgstr "Giacenza insufficiente e nessuna regola di riordino definita."
+msgstr ""
+"Giacenza insufficiente e nessuna regola di punto di riordino minimo definita."
 
 #. module: procurement
 #: code:addons/procurement/procurement.py:137
@@ -474,7 +473,7 @@ msgstr "Servizio"
 #. module: procurement
 #: field:stock.warehouse.orderpoint,procurement_draft_ids:0
 msgid "Related Procurement Orders"
-msgstr "Ordini di Approvvigionamento relativi"
+msgstr ""
 
 #. module: procurement
 #: view:procurement.orderpoint.compute:0
@@ -543,6 +542,7 @@ msgstr ""
 "dover aspettare qualche minuto prima che finisca il calcolo."
 
 #. module: procurement
+#: view:procurement.order:0
 #: field:procurement.order,note:0
 msgid "Note"
 msgstr "Nota"
@@ -559,7 +559,6 @@ msgstr "Questo wizard pianificherà approvvigionamenti."
 
 #. module: procurement
 #: view:procurement.order:0
-#: field:procurement.order,state:0
 msgid "Status"
 msgstr "Stato"
 
@@ -575,7 +574,7 @@ msgstr ""
 "Si sta cercando di assegnare un lotto che non viene dallo stesso prodotto"
 
 #. module: procurement
-#: code:addons/procurement/procurement.py:367
+#: code:addons/procurement/procurement.py:383
 #, python-format
 msgid "Not enough stock."
 msgstr ""
@@ -607,7 +606,7 @@ msgid "No minimum orderpoint rule defined."
 msgstr ""
 
 #. module: procurement
-#: code:addons/procurement/schedulers.py:133
+#: code:addons/procurement/schedulers.py:151
 #, python-format
 msgid "Automatic OP: %s"
 msgstr "OA automatico: %s"
@@ -678,7 +677,7 @@ msgid "Properties composition"
 msgstr "Carattere delle proprietà"
 
 #. module: procurement
-#: code:addons/procurement/procurement.py:311
+#: code:addons/procurement/procurement.py:327
 #, python-format
 msgid "Data Insufficient !"
 msgstr "Dati insufficienti !"
@@ -722,6 +721,8 @@ msgstr "Fatto"
 
 #. module: procurement
 #: view:make.procurement:0
+#: view:procurement.order:0
+#: selection:procurement.order,state:0
 #: view:procurement.order.compute:0
 #: view:procurement.order.compute.all:0
 #: view:procurement.orderpoint.compute:0
@@ -774,7 +775,13 @@ msgid "Procurement Exceptions"
 msgstr "Errori approvvigionamenti"
 
 #. module: procurement
-#: field:product.product,orderpoint_ids:0
+#: model:ir.actions.act_window,name:procurement.act_procurement_2_stock_warehouse_orderpoint
+#: model:ir.actions.act_window,name:procurement.act_product_product_2_stock_warehouse_orderpoint
+#: model:ir.actions.act_window,name:procurement.act_stock_warehouse_2_stock_warehouse_orderpoint
+#: model:ir.actions.act_window,name:procurement.action_orderpoint_form
+#: model:ir.ui.menu,name:procurement.menu_stock_order_points
+#: view:product.product:0
+#: view:stock.warehouse.orderpoint:0
 msgid "Minimum Stock Rules"
 msgstr "Regole di giacenza minima"
 
@@ -810,7 +817,6 @@ msgstr "Temporaneo"
 #. module: procurement
 #: field:mrp.property,description:0
 #: field:mrp.property.group,description:0
-#: field:procurement.order,name:0
 msgid "Description"
 msgstr "Descrizione"
 
@@ -836,8 +842,6 @@ msgstr "Unità di misura del prodotto"
 
 #. module: procurement
 #: model:process.node,name:procurement.process_node_serviceonorder0
-#: selection:procurement.order,procure_method:0
-#: selection:product.template,procure_method:0
 msgid "Make to Order"
 msgstr "Produrre su ordine"
 
@@ -861,12 +865,6 @@ msgid ""
 "will generate a procurement request to increase the stock up to the maximum "
 "quantity."
 msgstr ""
-"È possibile definire le regole di scorta minima, così OpenERP creerà "
-"automaticamente gli ordini di produzione o preventivi d'acquisto in "
-"relazione al livello delle scorte. Una volta che il magazzino virtuale di un "
-"prodotto (= magazzino effettivo meno tutti gli ordini confermati e "
-"prenotazioni) è al di sotto della quantità minima, OpenERP genererà una "
-"richiesta di acquisto per aumentare lo stock fino al quantitativo massimo."
 
 #. module: procurement
 #: field:procurement.order,move_id:0
@@ -992,13 +990,13 @@ msgid "Error: Invalid ean code"
 msgstr ""
 
 #. module: procurement
-#: code:addons/procurement/schedulers.py:134
+#: code:addons/procurement/schedulers.py:152
 #, python-format
 msgid "SCHEDULER"
 msgstr "PIANIFICATORE"
 
 #. module: procurement
-#: code:addons/procurement/schedulers.py:87
+#: code:addons/procurement/schedulers.py:88
 #, python-format
 msgid "PROC %d: on order - %3.2f %-5s - %s"
 msgstr ""

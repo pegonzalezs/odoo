@@ -15,19 +15,19 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:55+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-16 04:55+0000\n"
+"X-Generator: Launchpad (build 15944)\n"
 
 #. module: crm_claim
 #: field:crm.claim.report,nbr:0
 msgid "# of Cases"
-msgstr "# de Casos"
+msgstr "Nº de Casos"
 
 #. module: crm_claim
 #: view:crm.claim:0
 #: view:crm.claim.report:0
 msgid "Group By..."
-msgstr "Agrupar por..."
+msgstr "Agrupar Por..."
 
 #. module: crm_claim
 #: view:crm.claim:0
@@ -37,7 +37,7 @@ msgstr "Responsabilidades"
 #. module: crm_claim
 #: field:crm.claim,date_action_next:0
 msgid "Next Action Date"
-msgstr "Data da Próxima Ação"
+msgstr "Data da próxima ação"
 
 #. module: crm_claim
 #: selection:crm.claim.report,month:0
@@ -69,7 +69,7 @@ msgstr "Emails dos Observadores"
 #. module: crm_claim
 #: view:crm.claim.report:0
 msgid "#Claim"
-msgstr "# Solicitação"
+msgstr "Nº da Solicitação"
 
 #. module: crm_claim
 #: model:ir.actions.act_window,help:crm_claim.crm_claim_stage_act
@@ -131,7 +131,6 @@ msgstr "Solicitações com Fatos"
 #. module: crm_claim
 #: selection:crm.claim,state:0
 #: selection:crm.claim.report,state:0
-#: selection:crm.claim.stage,state:0
 msgid "Cancelled"
 msgstr "Cancelada"
 
@@ -205,12 +204,12 @@ msgstr "Seção"
 #. module: crm_claim
 #: view:crm.claim:0
 msgid "Root Causes"
-msgstr "Origens da Solicitação"
+msgstr "Origens do Problema"
 
 #. module: crm_claim
 #: field:crm.claim,user_fault:0
 msgid "Trouble Responsible"
-msgstr "Responsável pela Solicitação"
+msgstr "Responsável pelo Problema"
 
 #. module: crm_claim
 #: field:crm.claim,priority:0
@@ -228,8 +227,6 @@ msgstr "Enviar Novo Email"
 #: view:crm.claim:0
 #: selection:crm.claim,state:0
 #: view:crm.claim.report:0
-#: model:crm.claim.stage,name:crm_claim.stage_claim1
-#: selection:crm.claim.stage,state:0
 msgid "New"
 msgstr "Nova"
 
@@ -248,7 +245,7 @@ msgstr "Email"
 #: selection:crm.claim,priority:0
 #: selection:crm.claim.report,priority:0
 msgid "Lowest"
-msgstr "Mínima"
+msgstr "Mais Baixa"
 
 #. module: crm_claim
 #: field:crm.claim,action_next:0
@@ -290,7 +287,6 @@ msgid "July"
 msgstr "Julho"
 
 #. module: crm_claim
-#: view:crm.claim.stage:0
 #: model:ir.actions.act_window,name:crm_claim.crm_claim_stage_act
 msgid "Claim Stages"
 msgstr "Estágios da Solicitação"
@@ -435,7 +431,6 @@ msgstr "Baixa"
 #: field:crm.claim,date_closed:0
 #: selection:crm.claim,state:0
 #: selection:crm.claim.report,state:0
-#: selection:crm.claim.stage,state:0
 msgid "Closed"
 msgstr "Fechada"
 
@@ -449,7 +444,6 @@ msgstr "Responder"
 #: selection:crm.claim,state:0
 #: view:crm.claim.report:0
 #: selection:crm.claim.report,state:0
-#: selection:crm.claim.stage,state:0
 msgid "Pending"
 msgstr "Pendente"
 
@@ -549,9 +543,9 @@ msgstr "Categorias de Solicitações"
 #: view:crm.claim:0
 #: view:crm.claim.report:0
 #: model:ir.actions.act_window,name:crm_claim.act_claim_partner
+#: model:ir.actions.act_window,name:crm_claim.act_claim_partner_address
 #: model:ir.actions.act_window,name:crm_claim.crm_case_categ_claim0
 #: model:ir.ui.menu,name:crm_claim.menu_crm_case_claims
-#: view:res.partner:0
 #: field:res.partner,claims_ids:0
 msgid "Claims"
 msgstr "Solicitações"
@@ -573,7 +567,6 @@ msgid "History"
 msgstr "Histórico"
 
 #. module: crm_claim
-#: view:crm.claim:0
 #: model:ir.model,name:crm_claim.model_crm_claim
 #: model:ir.ui.menu,name:crm_claim.menu_config_claim
 msgid "Claim"
@@ -583,7 +576,7 @@ msgstr "Solicitação"
 #: selection:crm.claim,priority:0
 #: selection:crm.claim.report,priority:0
 msgid "Highest"
-msgstr "Máxima"
+msgstr "Maior"
 
 #. module: crm_claim
 #: field:crm.claim,partner_address_id:0
@@ -599,6 +592,7 @@ msgid "State"
 msgstr "Situação"
 
 #. module: crm_claim
+#: view:crm.claim:0
 #: view:crm.claim.report:0
 msgid "Done"
 msgstr "Concluído"
@@ -609,6 +603,7 @@ msgid "Claim Reporter"
 msgstr "Solicitante"
 
 #. module: crm_claim
+#: view:crm.claim:0
 #: view:crm.claim.report:0
 msgid "Cancel"
 msgstr "Cancelar"
@@ -619,6 +614,7 @@ msgid "Close"
 msgstr "Concluir"
 
 #. module: crm_claim
+#: view:crm.claim:0
 #: view:crm.claim.report:0
 #: selection:crm.claim.report,state:0
 msgid "Open"
@@ -632,10 +628,8 @@ msgstr "Novas Solicitações"
 #. module: crm_claim
 #: view:crm.claim:0
 #: selection:crm.claim,state:0
-#: model:crm.claim.stage,name:crm_claim.stage_claim5
-#: selection:crm.claim.stage,state:0
 msgid "In Progress"
-msgstr "Em Andamento"
+msgstr "Em Progresso"
 
 #. module: crm_claim
 #: view:crm.claim:0
@@ -666,7 +660,7 @@ msgstr "Prazo Ultrapassado"
 #. module: crm_claim
 #: field:crm.claim,cause:0
 msgid "Root Cause"
-msgstr "Origem"
+msgstr "Origem do Problema"
 
 #. module: crm_claim
 #: view:crm.claim:0
@@ -717,7 +711,7 @@ msgstr ""
 #. module: crm_claim
 #: field:crm.claim.report,email:0
 msgid "# Emails"
-msgstr "# Emails"
+msgstr "Nº de Emails"
 
 #. module: crm_claim
 #: model:crm.case.stage,name:crm_claim.stage_claim2

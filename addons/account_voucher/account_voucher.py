@@ -600,7 +600,11 @@ class account_voucher(osv.osv):
             account_type = 'receivable'
 
         if not context.get('move_line_ids', False):
-            ids = move_line_pool.search(cr, uid, [('state','=','valid'), ('account_id.type', '=', account_type), ('reconcile_id', '=', False), ('partner_id', '=', partner_id)], context=context)
+            if context.get('invoice_id',False):
+                invoice_id = context.get('invoice_id')
+                ids = move_line_pool.search(cr, uid, [('state','=','valid'), ('account_id.type', '=', account_type), ('invoice','=',invoice_id), ('reconcile_id', '=', False), ('partner_id', '=', partner_id)], context=context)
+            else:
+                ids = move_line_pool.search(cr, uid, [('state','=','valid'), ('account_id.type', '=', account_type), ('reconcile_id', '=', False), ('partner_id', '=', partner_id)], context=context)
         else:
             ids = context['move_line_ids']
         invoice_id = context.get('invoice_id', False)
@@ -612,8 +616,9 @@ class account_voucher(osv.osv):
         account_move_lines = move_line_pool.browse(cr, uid, ids, context=context)
 
         for line in account_move_lines:
-            if line.reconcile_partial_id and line.amount_residual_currency < 0:
-                # skip line that are totally used within partial reconcile
+            if line.credit and line.reconcile_partial_id and ttype == 'receipt':
+                continue
+            if line.debit and line.reconcile_partial_id and ttype == 'payment':
                 continue
             if invoice_id:
                 if line.invoice.id == invoice_id:
@@ -640,8 +645,9 @@ class account_voucher(osv.osv):
 
         #voucher line creation
         for line in account_move_lines:
-            if line.reconcile_partial_id and line.amount_residual_currency < 0:
-                # skip line that are totally used within partial reconcile
+            if line.credit and line.reconcile_partial_id and ttype == 'receipt':
+                continue
+            if line.debit and line.reconcile_partial_id and ttype == 'payment':
                 continue
             if line.currency_id and currency_id==line.currency_id.id:
                 amount_original = abs(line.amount_currency)
@@ -1446,6 +1452,13 @@ account_bank_statement()
 
 class account_bank_statement_line(osv.osv):
     _inherit = 'account.bank.statement.line'
+    
+    def onchange_line_date(self, cr, uid, ids, date, context=None):
+        voucher_obj = self.pool.get('account.voucher')
+        for statement_line in self.browse(cr, uid, ids, context=context):
+            if statement_line.voucher_id:
+                voucher_obj.write(cr, uid, [statement_line.voucher_id.id], {'date': date}, context=context)
+        return {}
 
     def _amount_reconciled(self, cursor, user, ids, name, args, context=None):
         if not ids:

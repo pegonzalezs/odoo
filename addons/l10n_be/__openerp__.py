@@ -19,7 +19,7 @@
 #
 ##############################################################################
 {   'name': 'Belgium - Accounting',
-    'version': '1.1',
+    'version': '1.1a',
     'category': 'Localization/Account Charts',
     'description': """
 This is the base module to manage the accounting chart for Belgium in OpenERP.
@@ -62,7 +62,8 @@ Wizards provided by this module:
         'fiscal_templates.xml',
         'account_fiscal_position_tax_template.xml',
         'security/ir.model.access.csv',
-        'l10n_be_wizard.yml'
+        'l10n_be_wizard.xml',
+        #'l10n_be_wizard.yml'       
     ],
     'demo_xml': [],
     'installable': True,

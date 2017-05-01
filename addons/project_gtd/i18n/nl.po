@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 6.0dev\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 01:37+0100\n"
-"PO-Revision-Date: 2012-11-07 13:21+0000\n"
-"Last-Translator: Erwin van der Ploeg (Endian Solutions) <Unknown>\n"
+"PO-Revision-Date: 2012-02-28 17:57+0000\n"
+"Last-Translator: Erwin <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:16+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:57+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: project_gtd
 #: view:project.task:0
@@ -54,7 +54,7 @@ msgstr "Timebox legen proces met succes afgerond."
 #. module: project_gtd
 #: view:project.task:0
 msgid "Pending Tasks"
-msgstr "Taken in afwachting"
+msgstr "Lopende taken"
 
 #. module: project_gtd
 #: view:project.task:0
@@ -90,12 +90,11 @@ msgstr "Project timebox legen"
 #. module: project_gtd
 #: view:project.task:0
 msgid "Pending"
-msgstr "In afwachting"
+msgstr "In behandeling"
 
 #. module: project_gtd
-#: view:project.gtd.timebox:0
-#: field:project.gtd.timebox,name:0
-#: field:project.task,timebox_id:0
+#: view:project.gtd.timebox:0 field:project.gtd.timebox,name:0
+#: view:project.task:0 field:project.task,timebox_id:0
 msgid "Timebox"
 msgstr "Timebox"
 
@@ -214,8 +213,7 @@ msgstr "Taken in behandeling en in concept"
 
 #. module: project_gtd
 #: model:ir.model,name:project_gtd.model_project_gtd_context
-#: view:project.gtd.context:0
-#: field:project.gtd.context,name:0
+#: view:project.gtd.context:0 field:project.gtd.context,name:0
 #: field:project.task,context_id:0
 msgid "Context"
 msgstr "Context"
@@ -237,8 +235,7 @@ msgid "Office"
 msgstr "Kantoor"
 
 #. module: project_gtd
-#: field:project.gtd.context,sequence:0
-#: field:project.gtd.timebox,sequence:0
+#: field:project.gtd.context,sequence:0 field:project.gtd.timebox,sequence:0
 msgid "Sequence"
 msgstr "Reeks"
 

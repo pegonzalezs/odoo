@@ -14,22 +14,23 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:09+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:52+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_wc_action_form
+#: model:ir.ui.menu,name:mrp_operations.menu_mrp_production_wc_action_planning
 #: model:ir.ui.menu,name:mrp_operations.menu_mrp_production_wc_order
 #: view:mrp.production.workcenter.line:0
 #: view:mrp.workorder:0
 msgid "Work Orders"
-msgstr "Munka megrendelések"
+msgstr ""
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:484
+#: code:addons/mrp_operations/mrp_operations.py:489
 #, python-format
 msgid "Operation is already finished!"
-msgstr "A művelet már elvégezve!"
+msgstr ""
 
 #. module: mrp_operations
 #: model:process.node,note:mrp_operations.process_node_canceloperation0
@@ -50,7 +51,7 @@ msgstr "Csoportosítás..."
 #. module: mrp_operations
 #: model:process.node,note:mrp_operations.process_node_workorder0
 msgid "Information from the routing definition."
-msgstr "Információ az útvonal meghatározásról."
+msgstr ""
 
 #. module: mrp_operations
 #: selection:mrp.workorder,month:0
@@ -59,8 +60,9 @@ msgstr "Március"
 
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_wc_resource_planning
+#: model:ir.ui.menu,name:mrp_operations.menu_mrp_production_wc_resource_planning
 msgid "Work Centers"
-msgstr "Munkaállomások"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.production:0
@@ -77,22 +79,22 @@ msgstr "("
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
 msgid "Product to Produce"
-msgstr "Gyártandó termék"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp_operations.operation:0
 msgid "Production Operation"
-msgstr "Termelési művelet"
+msgstr "Gyártási művelet"
 
 #. module: mrp_operations
 #: view:mrp.production:0
 msgid "Set to Draft"
-msgstr "Beállítás tervezetnek"
+msgstr ""
 
 #. module: mrp_operations
 #: field:mrp.production,allow_reorder:0
 msgid "Free Serialisation"
-msgstr "Szabad sorozatosítás"
+msgstr ""
 
 #. module: mrp_operations
 #: model:ir.model,name:mrp_operations.model_mrp_production
@@ -102,7 +104,7 @@ msgstr "Gyártási rendelés"
 #. module: mrp_operations
 #: model:process.process,name:mrp_operations.process_process_mrpoperationprocess0
 msgid "Mrp Operations"
-msgstr "Mrp műveletek"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.workorder:0
@@ -113,12 +115,12 @@ msgstr "Nap"
 #. module: mrp_operations
 #: view:mrp.production:0
 msgid "Cancel Order"
-msgstr "Rendelés visszavonása"
+msgstr ""
 
 #. module: mrp_operations
 #: model:process.node,name:mrp_operations.process_node_productionorder0
 msgid "Production Order"
-msgstr "Termelési megrendelés"
+msgstr "Gyártási rendelés"
 
 #. module: mrp_operations
 #: selection:mrp.production.workcenter.line,production_state:0
@@ -128,7 +130,7 @@ msgstr "Kiszedési kivétel"
 #. module: mrp_operations
 #: model:process.transition,name:mrp_operations.process_transition_productionstart0
 msgid "Creation of the work order"
-msgstr "Munka megrendelés létrehozása"
+msgstr ""
 
 #. module: mrp_operations
 #: help:mrp.production.workcenter.line,state:0
@@ -145,14 +147,14 @@ msgstr ""
 #. module: mrp_operations
 #: model:process.transition,note:mrp_operations.process_transition_productionstart0
 msgid "The work orders are created on the basis of the production order."
-msgstr "A munka megrendelés létrehozva a termelési megbízás alapján."
+msgstr ""
 
 #. module: mrp_operations
 #: code:addons/mrp_operations/mrp_operations.py:134
-#: code:addons/mrp_operations/mrp_operations.py:465
-#: code:addons/mrp_operations/mrp_operations.py:469
-#: code:addons/mrp_operations/mrp_operations.py:481
-#: code:addons/mrp_operations/mrp_operations.py:484
+#: code:addons/mrp_operations/mrp_operations.py:470
+#: code:addons/mrp_operations/mrp_operations.py:474
+#: code:addons/mrp_operations/mrp_operations.py:486
+#: code:addons/mrp_operations/mrp_operations.py:489
 #, python-format
 msgid "Error!"
 msgstr "Hiba!"
@@ -171,10 +173,10 @@ msgid "There is no Operation to be cancelled!"
 msgstr ""
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:477
+#: code:addons/mrp_operations/mrp_operations.py:482
 #, python-format
 msgid "Operation is Already Cancelled!"
-msgstr "A műveletet már visszavonták!"
+msgstr ""
 
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_operation_action
@@ -188,12 +190,11 @@ msgid "Stock Move"
 msgstr "Készletmozgás"
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:474
+#: code:addons/mrp_operations/mrp_operations.py:479
 #, python-format
 msgid ""
 "In order to Finish the operation, it must be in the Start or Resume state!"
 msgstr ""
-"A művelet elvégzéséhez, annak Induló vagy Folytatás állapotúnak kell lennie!"
 
 #. module: mrp_operations
 #: field:mrp.workorder,nbr:0
@@ -202,8 +203,9 @@ msgstr "Sorok száma"
 
 #. module: mrp_operations
 #: view:mrp.production:0
+#: view:mrp.production.workcenter.line:0
 msgid "Finish Order"
-msgstr "Megrendelés elvégzése"
+msgstr ""
 
 #. module: mrp_operations
 #: field:mrp.production.workcenter.line,date_finished:0
@@ -215,7 +217,7 @@ msgstr "Befejezés dátuma"
 #. module: mrp_operations
 #: selection:mrp.production.workcenter.line,production_state:0
 msgid "In Production"
-msgstr "Termelésben"
+msgstr "Gyártás alatt"
 
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
@@ -237,7 +239,7 @@ msgstr "Tervezet"
 #: model:ir.actions.act_window,name:mrp_operations.action_report_mrp_workorder
 #: model:ir.model,name:mrp_operations.model_mrp_production_workcenter_line
 msgid "Work Order"
-msgstr "Munka megrendelés"
+msgstr ""
 
 #. module: mrp_operations
 #: model:process.transition,note:mrp_operations.process_transition_workstartoperation0
@@ -245,8 +247,6 @@ msgid ""
 "There is 1 work order per work center. The information about the number of "
 "cycles or the cycle time."
 msgstr ""
-"Itt egy munka megrendelés van egy munkaállomáshoz. Az információ a ciklus "
-"szám vagy ciklus idő."
 
 #. module: mrp_operations
 #: view:mrp.workorder:0
@@ -278,7 +278,7 @@ msgstr "Termékmenny."
 #: code:addons/mrp_operations/mrp_operations.py:134
 #, python-format
 msgid "Manufacturing order cannot start in state \"%s\"!"
-msgstr "Gyártási megrendelést nem lehewt elindítani a \"%s\" állapotban!"
+msgstr ""
 
 #. module: mrp_operations
 #: selection:mrp.workorder,month:0
@@ -291,10 +291,6 @@ msgid "Operation Name"
 msgstr "Művelet neve"
 
 #. module: mrp_operations
-#: view:mrp.production.workcenter.line:0
-#: field:mrp.production.workcenter.line,state:0
-#: view:mrp.workorder:0
-#: field:mrp.workorder,state:0
 #: field:mrp_operations.operation.code,start_stop:0
 msgid "Status"
 msgstr "Státusz"
@@ -312,7 +308,7 @@ msgstr ""
 #. module: mrp_operations
 #: view:mrp.workorder:0
 msgid "Planned Year"
-msgstr "Tervezett év"
+msgstr ""
 
 #. module: mrp_operations
 #: field:mrp_operations.operation,order_date:0
@@ -322,7 +318,7 @@ msgstr "Rendelés időpontja"
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_wc_draft_action
 msgid "Future Work Orders"
-msgstr "Jövőbeni munka megrendelések"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.workorder:0
@@ -332,7 +328,7 @@ msgstr ""
 #. module: mrp_operations
 #: help:mrp.production.workcenter.line,delay:0
 msgid "The elapsed time between operation start and stop in this Work Center"
-msgstr "A munka állomás elindítása és leállása közt eltelt idő"
+msgstr ""
 
 #. module: mrp_operations
 #: model:process.node,name:mrp_operations.process_node_canceloperation0
@@ -341,8 +337,9 @@ msgstr "Törölt műveletek"
 
 #. module: mrp_operations
 #: view:mrp.production:0
+#: view:mrp.production.workcenter.line:0
 msgid "Pause Work Order"
-msgstr "Munka megrendelés megállítása"
+msgstr ""
 
 #. module: mrp_operations
 #: selection:mrp.workorder,month:0
@@ -373,7 +370,7 @@ msgstr "mrp_operations.operation"
 #. module: mrp_operations
 #: model:ir.model,name:mrp_operations.model_mrp_workorder
 msgid "Work Order Report"
-msgstr "Munka megrendelés jelentés"
+msgstr ""
 
 #. module: mrp_operations
 #: constraint:mrp.production:0
@@ -382,6 +379,7 @@ msgstr ""
 
 #. module: mrp_operations
 #: field:mrp.production.workcenter.line,date_start:0
+#: field:mrp.production.workcenter.line,date_start_date:0
 #: field:mrp_operations.operation,date_start:0
 msgid "Start Date"
 msgstr "Kezdő dátum"
@@ -410,21 +408,17 @@ msgid "In Progress"
 msgstr "Folyamatban"
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:465
+#: code:addons/mrp_operations/mrp_operations.py:470
 #, python-format
 msgid ""
 "In order to Pause the operation, it must be in the Start or Resume state!"
 msgstr ""
-"Ahhoz, hogy a művelet megállítsa, annak Elindított vagy folytatás "
-"állapotúnak kell lennie!"
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:469
+#: code:addons/mrp_operations/mrp_operations.py:474
 #, python-format
 msgid "In order to Resume the operation, it must be in the Pause state!"
 msgstr ""
-"Ahhoz, hogy a művelet Folytathassa, annak Megállított állapotúnak kell "
-"lennie!"
 
 #. module: mrp_operations
 #: view:mrp.production:0
@@ -444,7 +438,6 @@ msgid ""
 "When the operation needs to be cancelled, you can do it in the work order "
 "form."
 msgstr ""
-"Ha egy műveletet vissza akar vonni, azt megteheti a munka megrendelés lapon."
 
 #. module: mrp_operations
 #: view:mrp.production:0
@@ -462,7 +455,7 @@ msgstr "Függőben lévő"
 #. module: mrp_operations
 #: view:mrp_operations.operation.code:0
 msgid "Production Operation Code"
-msgstr "Termelés műveleti kód"
+msgstr ""
 
 #. module: mrp_operations
 #: code:addons/mrp_operations/mrp_operations.py:466
@@ -485,12 +478,12 @@ msgstr "Indított"
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
 msgid "Production started late"
-msgstr "A termelés késve indított"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.workorder:0
 msgid "Planned Day"
-msgstr "Tervezett nap"
+msgstr ""
 
 #. module: mrp_operations
 #: selection:mrp.workorder,month:0
@@ -506,7 +499,7 @@ msgstr "Összes ciklus"
 #. module: mrp_operations
 #: selection:mrp.production.workcenter.line,production_state:0
 msgid "Ready to Produce"
-msgstr "Gyártásra kész"
+msgstr ""
 
 #. module: mrp_operations
 #: field:stock.move,move_dest_id_lines:0
@@ -516,7 +509,7 @@ msgstr "Almozgások"
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_wc_action_planning
 msgid "Work Orders Planning"
-msgstr "Munka megrendelés tervezés"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
@@ -546,8 +539,9 @@ msgstr "Január"
 
 #. module: mrp_operations
 #: view:mrp.production:0
+#: view:mrp.production.workcenter.line:0
 msgid "Resume Work Order"
-msgstr "Munka megrendelés folytatás"
+msgstr ""
 
 #. module: mrp_operations
 #: model:process.node,note:mrp_operations.process_node_doneoperation0
@@ -555,7 +549,7 @@ msgid "Finish the operation."
 msgstr "Művelet befejezése"
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:454
+#: code:addons/mrp_operations/mrp_operations.py:459
 #, python-format
 msgid "Operation is not started yet !"
 msgstr "A művelet még nem kezdődött el !"
@@ -563,7 +557,7 @@ msgstr "A művelet még nem kezdődött el !"
 #. module: mrp_operations
 #: model:process.node,note:mrp_operations.process_node_productionorder0
 msgid "Information from the production order."
-msgstr "Információ a termelési megbízásból"
+msgstr ""
 
 #. module: mrp_operations
 #: sql_constraint:mrp.production:0
@@ -571,13 +565,13 @@ msgid "Reference must be unique per Company!"
 msgstr ""
 
 #. module: mrp_operations
-#: code:addons/mrp_operations/mrp_operations.py:454
-#: code:addons/mrp_operations/mrp_operations.py:461
-#: code:addons/mrp_operations/mrp_operations.py:474
-#: code:addons/mrp_operations/mrp_operations.py:477
+#: code:addons/mrp_operations/mrp_operations.py:459
+#: code:addons/mrp_operations/mrp_operations.py:466
+#: code:addons/mrp_operations/mrp_operations.py:479
+#: code:addons/mrp_operations/mrp_operations.py:482
 #, python-format
 msgid "Sorry!"
-msgstr "Bocsánat!"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.workorder:0
@@ -593,7 +587,7 @@ msgstr "Kód"
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_wc_confirm_action
 msgid "Confirmed Work Orders"
-msgstr "Munka megrendelés visszaigazolás"
+msgstr ""
 
 #. module: mrp_operations
 #: model:ir.actions.act_window,name:mrp_operations.mrp_production_code_action
@@ -620,12 +614,13 @@ msgstr "Kész"
 #. module: mrp_operations
 #: model:ir.actions.report.xml,name:mrp_operations.report_code_barcode
 msgid "Start/Stop Barcode"
-msgstr "Start/Stop Barcode"
+msgstr ""
 
 #. module: mrp_operations
+#: view:mrp.production:0
 #: view:mrp.production.workcenter.line:0
 msgid "Cancel"
-msgstr "Visszavonás"
+msgstr ""
 
 #. module: mrp_operations
 #: model:ir.actions.act_window,help:mrp_operations.mrp_production_wc_action_form
@@ -650,7 +645,7 @@ msgstr "Információ"
 #. module: mrp_operations
 #: model:ir.actions.report.xml,name:mrp_operations.report_wc_barcode
 msgid "Work Centers Barcode"
-msgstr "Munka állomás Barcode"
+msgstr ""
 
 #. module: mrp_operations
 #: constraint:stock.move:0
@@ -673,12 +668,12 @@ msgstr "Késleltetés"
 #: field:mrp.workorder,production_id:0
 #: field:mrp_operations.operation,production_id:0
 msgid "Production"
-msgstr "Termelés"
+msgstr "Gyártás"
 
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
 msgid "Search Work Orders"
-msgstr "Munka állomások keresése"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
@@ -687,7 +682,7 @@ msgstr "Munka állomások keresése"
 #: field:mrp_operations.operation,workcenter_id:0
 #: model:process.node,name:mrp_operations.process_node_workorder0
 msgid "Work Center"
-msgstr "Munkaállomás"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
@@ -718,8 +713,6 @@ msgid ""
 "Check this to be able to move independently all production orders, without "
 "moving dependent ones."
 msgstr ""
-"Jelölje be ezt, hogy  a termelési megrendeléseken a függetleneket "
-"mozgathassa, a kapcsolódók nélkül."
 
 #. module: mrp_operations
 #: report:mrp.code.barcode:0
@@ -729,7 +722,7 @@ msgstr ")"
 #. module: mrp_operations
 #: model:ir.ui.menu,name:mrp_operations.menu_report_mrp_workorders_tree
 msgid "Work Order Analysis"
-msgstr "Munka megrendelés elemzés"
+msgstr ""
 
 #. module: mrp_operations
 #: view:mrp.production:0
@@ -742,7 +735,7 @@ msgstr "Befejezett"
 #. module: mrp_operations
 #: view:mrp.production.workcenter.line:0
 msgid "Hours by Work Center"
-msgstr "Munka állomáson eltöltött idők"
+msgstr ""
 
 #. module: mrp_operations
 #: field:mrp.production.workcenter.line,delay:0
@@ -752,7 +745,7 @@ msgstr "Munkaórák"
 #. module: mrp_operations
 #: view:mrp.workorder:0
 msgid "Planned Month"
-msgstr "Havi tervezet"
+msgstr ""
 
 #. module: mrp_operations
 #: selection:mrp.workorder,month:0
@@ -791,8 +784,9 @@ msgstr "Rendelési sorok száma"
 
 #. module: mrp_operations
 #: view:mrp.production:0
+#: view:mrp.production.workcenter.line:0
 msgid "Start Working"
-msgstr "Munka kezdése"
+msgstr ""
 
 #. module: mrp_operations
 #: model:process.transition,note:mrp_operations.process_transition_startdoneoperation0
@@ -800,8 +794,6 @@ msgid ""
 "When the operation is finished, the operator updates the system by finishing "
 "the work order."
 msgstr ""
-"Ha a művelet elvégzett, akkor a kezelő frissíti a rendszert a munka "
-"megrendelés elvégzésével."
 
 #. module: mrp_operations
 #: selection:mrp.workorder,month:0
@@ -811,7 +803,7 @@ msgstr "Május"
 #. module: mrp_operations
 #: model:process.transition,name:mrp_operations.process_transition_workstartoperation0
 msgid "Details of the work order"
-msgstr "A munka megrendelés részletei"
+msgstr ""
 
 #. module: mrp_operations
 #: field:mrp.production.workcenter.line,production_state:0

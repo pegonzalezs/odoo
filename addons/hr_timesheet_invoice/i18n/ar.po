@@ -7,14 +7,14 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.4\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 00:36+0000\n"
-"PO-Revision-Date: 2012-11-16 19:36+0000\n"
-"Last-Translator: kifcaliph <Unknown>\n"
+"PO-Revision-Date: 2012-08-05 05:42+0000\n"
+"Last-Translator: almodhesh <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:03+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:47+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_timesheet_invoice
 #: view:report.timesheet.line:0
@@ -96,7 +96,7 @@ msgstr ""
 "الموجودة على المنتج."
 
 #. module: hr_timesheet_invoice
-#: code:addons/hr_timesheet_invoice/hr_timesheet_invoice.py:144
+#: code:addons/hr_timesheet_invoice/hr_timesheet_invoice.py:129
 #, python-format
 msgid "You cannot modify an invoiced analytic line!"
 msgstr "لا يمكن التعديل في خط الفاتورة التحليلي!"
@@ -143,6 +143,7 @@ msgstr "حساب"
 
 #. module: hr_timesheet_invoice
 #: field:hr.timesheet.invoice.create,time:0
+#: field:hr.timesheet.invoice.create.final,time:0
 msgid "Time spent"
 msgstr "الوقت المستغرق"
 
@@ -159,7 +160,7 @@ msgstr "خط بدون الفاتورة مع معدل الفواتير"
 #. module: hr_timesheet_invoice
 #: sql_constraint:account.invoice:0
 msgid "Invoice Number must be unique per Company!"
-msgstr "رقم الفاتورة يجب أن يكون فريداً داخل المشأة !"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: field:report_timesheet.invoice,account_id:0
@@ -174,7 +175,7 @@ msgstr "المقدار"
 #. module: hr_timesheet_invoice
 #: sql_constraint:account.move.line:0
 msgid "Wrong credit or debit value in accounting entry !"
-msgstr "قيمة دائنة أو مدينة خاطئة في القيد المحاسبي !"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: help:hr.timesheet.invoice.create,name:0
@@ -185,7 +186,7 @@ msgstr "سيتم عرض تفاصيل كل عمل مكتمل على الفاتو�
 #: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:209
 #, python-format
 msgid "Warning !"
-msgstr "تحذير !"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: model:ir.model,name:hr_timesheet_invoice.model_hr_timesheet_invoice_create
@@ -215,7 +216,7 @@ msgstr "تجميع حسب..."
 #. module: hr_timesheet_invoice
 #: constraint:account.invoice:0
 msgid "Invalid BBA Structured Communication !"
-msgstr "خطأ في إتصال قاعدة البيانات"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: view:hr.timesheet.invoice.create:0
@@ -321,6 +322,7 @@ msgid "Debit"
 msgstr "مدين"
 
 #. module: hr_timesheet_invoice
+#: view:hr.timesheet.analytic.cost.ledger:0
 #: view:hr.timesheet.analytic.profit:0
 msgid "Print"
 msgstr "طباعة"
@@ -361,8 +363,6 @@ msgstr "الخطوط - مجاني"
 
 #. module: hr_timesheet_invoice
 #: view:account.analytic.line:0
-#: view:hr.analytic.timesheet:0
-#: model:ir.actions.act_window,name:hr_timesheet_invoice.act_acc_analytic_acc_2_report_acc_analytic_line_to_invoice
 msgid "To Invoice"
 msgstr "في انتظار الفوترة"
 
@@ -431,7 +431,7 @@ msgstr "نظري"
 #: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:132
 #, python-format
 msgid "Configuration Error"
-msgstr "خطأ في الإعدادات"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: model:ir.model,name:hr_timesheet_invoice.model_report_account_analytic_line_to_invoice
@@ -470,8 +470,8 @@ msgid "Yes (100%)"
 msgstr "نعم (%100)"
 
 #. module: hr_timesheet_invoice
-#: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_final_invoice_create.py:58
-#: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:68
+#: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_final_invoice_create.py:55
+#: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:220
 #, python-format
 msgid "Invoices"
 msgstr "الفواتير"
@@ -497,8 +497,6 @@ msgid ""
 "currency. You should remove the secondary currency on the account or select "
 "a multi-currency view on the journal."
 msgstr ""
-"الحساب المحدد لقيد اليومية يجبرك علي توفير عملة ثانوية. يجب إزالة العملة "
-"الثانوية على الحساب أو تحديد طريقة عرض العملات في اليومية."
 
 #. module: hr_timesheet_invoice
 #: field:report.account.analytic.line.to.invoice,month:0
@@ -518,7 +516,7 @@ msgstr "العملة"
 #. module: hr_timesheet_invoice
 #: model:ir.model,name:hr_timesheet_invoice.model_account_move_line
 msgid "Journal Items"
-msgstr "عناصر دفتر اليومية"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: help:hr.timesheet.invoice.create,product:0
@@ -541,7 +539,6 @@ msgstr "لم يتم تعيين سجلات دوام للمستخدمين"
 
 #. module: hr_timesheet_invoice
 #: view:account.analytic.line:0
-#: view:hr.analytic.timesheet:0
 #: field:report.timesheet.line,invoice_id:0
 msgid "Invoiced"
 msgstr "مفوتر"
@@ -557,8 +554,6 @@ msgid ""
 "The date of your Journal Entry is not in the defined period! You should "
 "change the date or remove this constraint from the journal."
 msgstr ""
-"تاريخ قيد اليومية غير معرف الفترة! يجب تغيير التاريخ أو إزالة هذا الشرط من "
-"اليومية."
 
 #. module: hr_timesheet_invoice
 #: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:132
@@ -573,7 +568,6 @@ msgstr "مبلغ ميزانية الفاتورة"
 
 #. module: hr_timesheet_invoice
 #: view:report_timesheet.account:0
-#: view:report_timesheet.account.date:0
 msgid "Timesheet by account"
 msgstr "سجل الدوام للحساب"
 
@@ -722,7 +716,7 @@ msgstr "يناير"
 #. module: hr_timesheet_invoice
 #: constraint:account.move.line:0
 msgid "You can not create journal items on closed account."
-msgstr "لا يمنك إنشاء عناصر يومية في حساب مغلق."
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: report:hr.timesheet.invoice.account.analytic.account.cost_ledger:0
@@ -746,6 +740,7 @@ msgid "Do you want to display work details on the invoice ?"
 msgstr "هل تريد عرض تفاصيل العمل في الفاتورة؟"
 
 #. module: hr_timesheet_invoice
+#: report:hr.timesheet.invoice.account.analytic.account.cost_ledger:0
 #: field:report.analytic.account.close,balance:0
 msgid "Balance"
 msgstr "رصيد"
@@ -753,11 +748,16 @@ msgstr "رصيد"
 #. module: hr_timesheet_invoice
 #: constraint:account.move.line:0
 msgid "You can not create journal items on an account of type view."
-msgstr "لا يمكنك إنشاء عناصر يومية علي حساب من نوع ’عرض’."
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: field:report.analytic.account.close,quantity:0
 #: view:report.timesheet.line:0
+#: field:report.timesheet.line,quantity:0
+#: field:report_timesheet.account,quantity:0
+#: field:report_timesheet.account.date,quantity:0
+#: field:report_timesheet.invoice,quantity:0
+#: field:report_timesheet.user,quantity:0
 msgid "Quantity"
 msgstr "الكمية"
 
@@ -808,7 +808,7 @@ msgstr "سبتمبر"
 #. module: hr_timesheet_invoice
 #: constraint:account.analytic.line:0
 msgid "You can not create analytic line on view account."
-msgstr "لا يمكنك إنشاء سطر تحليلي في حساب للعرض."
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: field:account.analytic.line,invoice_id:0
@@ -820,9 +820,11 @@ msgstr "فاتورة"
 #. module: hr_timesheet_invoice
 #: constraint:hr.analytic.timesheet:0
 msgid "You cannot modify an entry in a Confirmed/Done timesheet !."
-msgstr "لا يمكنك تعديل عملية مؤكدة أو تمت في الجدول الزمني !."
+msgstr ""
 
 #. module: hr_timesheet_invoice
+#: view:account.analytic.account:0
+#: view:hr.timesheet.analytic.cost.ledger:0
 #: view:hr.timesheet.analytic.profit:0
 #: view:hr.timesheet.invoice.create:0
 #: view:hr.timesheet.invoice.create.final:0
@@ -877,7 +879,7 @@ msgstr ""
 #. module: hr_timesheet_invoice
 #: constraint:account.move.line:0
 msgid "Company must be the same for its related account and period."
-msgstr "يجب ان تكون الشركة هي نفسها لها الصلة بحسابها و فترتها."
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: help:hr_timesheet_invoice.factor,customer_name:0
@@ -895,7 +897,7 @@ msgstr "إلى"
 #: model:ir.actions.act_window,name:hr_timesheet_invoice.action_hr_timesheet_invoice_create
 #: model:ir.actions.act_window,name:hr_timesheet_invoice.action_hr_timesheet_invoice_create_final
 msgid "Create Invoice"
-msgstr "إنشاء فاتورة"
+msgstr ""
 
 #. module: hr_timesheet_invoice
 #: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:108
@@ -929,6 +931,7 @@ msgid "Daily Timesheet by Account"
 msgstr "سجل الدوام اليومي للحاسب"
 
 #. module: hr_timesheet_invoice
+#: field:hr.timesheet.invoice.create,product:0
 #: field:hr.timesheet.invoice.create.final,product:0
 #: field:report.account.analytic.line.to.invoice,product_id:0
 #: view:report.timesheet.line:0
@@ -1068,7 +1071,7 @@ msgid "Discount in percentage"
 msgstr "الخصم بالنسبة المئوية"
 
 #. module: hr_timesheet_invoice
-#: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:56
+#: code:addons/hr_timesheet_invoice/wizard/hr_timesheet_invoice_create.py:209
 #, python-format
 msgid "Invoice is already linked to some of the analytic line(s)!"
 msgstr ""
@@ -1105,7 +1108,6 @@ msgid "Type of Invoicing"
 msgstr "نوع الفاتورة"
 
 #. module: hr_timesheet_invoice
-#: model:ir.actions.act_window,name:hr_timesheet_invoice.action_account_analytic_line_to_invoice
 #: view:report.account.analytic.line.to.invoice:0
 msgid "Analytic Lines to Invoice"
 msgstr "الخطوط التحليلية للفاتورة"

@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:56+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:41+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: crm_partner_assign
 #: field:crm.lead.forward.to.partner,send_to:0
@@ -56,7 +56,7 @@ msgstr "Vak'aların sayısı"
 #: view:crm.lead.report.assign:0
 #: view:crm.partner.report.assign:0
 msgid "Group By..."
-msgstr "Grupla İle..."
+msgstr "Grupla..."
 
 #. module: crm_partner_assign
 #: field:crm.lead.forward.to.partner,template_id:0
@@ -74,7 +74,7 @@ msgid "Geo Localize"
 msgstr "Coğrafi konumlama"
 
 #. module: crm_partner_assign
-#: help:crm.lead.forward.to.partner,body:0
+#: help:crm.lead.forward.to.partner,body_text:0
 msgid "Plain-text version of the message"
 msgstr "Mesajın düz-metin versiyonu"
 
@@ -91,7 +91,7 @@ msgstr "Mart"
 #. module: crm_partner_assign
 #: selection:crm.lead.report.assign,type:0
 msgid "Lead"
-msgstr "Aday"
+msgstr "Talep"
 
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0
@@ -104,7 +104,7 @@ msgid "#Partner"
 msgstr "#Paydaş"
 
 #. module: crm_partner_assign
-#: selection:crm.lead.forward.to.partner,history_mode:0
+#: selection:crm.lead.forward.to.partner,history:0
 msgid "Whole Story"
 msgstr "Bütün Hikaye"
 
@@ -112,7 +112,7 @@ msgstr "Bütün Hikaye"
 #: view:crm.lead.report.assign:0
 #: field:crm.lead.report.assign,company_id:0
 msgid "Company"
-msgstr "Firma"
+msgstr "Şirket"
 
 #. module: crm_partner_assign
 #: code:addons/crm_partner_assign/partner_geo_assign.py:37
@@ -127,7 +127,7 @@ msgstr ""
 #. module: crm_partner_assign
 #: field:crm.lead.report.assign,date_assign:0
 msgid "Partner Date"
-msgstr "Partner Tarihi"
+msgstr "İş Ortağı Tarihi"
 
 #. module: crm_partner_assign
 #: selection:crm.lead.report.assign,priority:0
@@ -135,7 +135,7 @@ msgid "Highest"
 msgstr "En yüksek"
 
 #. module: crm_partner_assign
-#: field:crm.lead.forward.to.partner,body:0
+#: field:crm.lead.forward.to.partner,body_text:0
 msgid "Text contents"
 msgstr "Metin içeriği"
 
@@ -151,7 +151,7 @@ msgid "Message unique identifier"
 msgstr "Benzersiz mesaj tanımlayıcısı"
 
 #. module: crm_partner_assign
-#: selection:crm.lead.forward.to.partner,history_mode:0
+#: selection:crm.lead.forward.to.partner,history:0
 msgid "Latest email"
 msgstr "En son gelen e-posta"
 
@@ -172,7 +172,7 @@ msgstr ""
 #. module: crm_partner_assign
 #: selection:crm.lead.report.assign,state:0
 msgid "Cancelled"
-msgstr "İptalEdildi"
+msgstr "İptal Edildi"
 
 #. module: crm_partner_assign
 #: view:crm.lead:0
@@ -208,13 +208,13 @@ msgid "Blind carbon copy message recipients"
 msgstr "Mesaj alıcıları görünmeyen mektup kopyası"
 
 #. module: crm_partner_assign
+#: field:crm.lead.forward.to.partner,partner_id:0
+#: selection:crm.lead.forward.to.partner,send_to:0
 #: view:crm.lead.report.assign:0
 #: field:crm.lead.report.assign,partner_assigned_id:0
-#: view:crm.partner.report.assign:0
-#: field:crm.partner.report.assign,partner_id:0
 #: model:ir.model,name:crm_partner_assign.model_res_partner
 msgid "Partner"
-msgstr "Partner"
+msgstr "İş ortağı"
 
 #. module: crm_partner_assign
 #: field:crm.lead.report.assign,probability:0
@@ -240,9 +240,10 @@ msgstr "Gönderen"
 #. module: crm_partner_assign
 #: model:ir.actions.act_window,name:crm_partner_assign.res_partner_grade_action
 #: model:ir.ui.menu,name:crm_partner_assign.menu_res_partner_grade_action
+#: field:res.partner,grade_id:0
 #: view:res.partner.grade:0
 msgid "Partner Grade"
-msgstr "Partner Derecesi"
+msgstr "İş Ortağı Derecesi"
 
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0
@@ -275,16 +276,15 @@ msgstr "Durum"
 #. module: crm_partner_assign
 #: field:crm.lead.report.assign,delay_expected:0
 msgid "Overpassed Deadline"
-msgstr "ZamanSınırını Aşan"
+msgstr "Teslim Tarihi Geçen"
 
 #. module: crm_partner_assign
-#: field:crm.lead.forward.to.partner,type:0
 #: field:crm.lead.report.assign,type:0
 msgid "Type"
 msgstr "Tür"
 
 #. module: crm_partner_assign
-#: field:res.partner.activation,name:0
+#: view:crm.partner.report.assign:0
 msgid "Name"
 msgstr "Adı"
 
@@ -305,12 +305,12 @@ msgstr ""
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0
 msgid "Assign Date"
-msgstr "Tarih Atama"
+msgstr "Tarih Ata"
 
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0
 msgid "Leads Analysis"
-msgstr "aday Analizi"
+msgstr "Talep Analizi"
 
 #. module: crm_partner_assign
 #: field:crm.lead.report.assign,creation_date:0
@@ -330,7 +330,7 @@ msgstr "7 Gün"
 #. module: crm_partner_assign
 #: view:crm.lead:0
 msgid "Partner Assignation"
-msgstr "Partner Atama"
+msgstr "İş Ortağı Atama"
 
 #. module: crm_partner_assign
 #: help:crm.lead.report.assign,type:0
@@ -354,7 +354,7 @@ msgid "Related Document model"
 msgstr "İlgili Döküman Modeli"
 
 #. module: crm_partner_assign
-#: code:addons/crm_partner_assign/wizard/crm_forward_to_partner.py:74
+#: code:addons/crm_partner_assign/wizard/crm_forward_to_partner.py:192
 #, python-format
 msgid "Fwd"
 msgstr "İlet"
@@ -371,13 +371,12 @@ msgid "Opportunities Assignment Analysis"
 msgstr "Fırsat Atamaları Analizi"
 
 #. module: crm_partner_assign
-#: view:crm.lead.forward.to.partner:0
 #: view:res.partner:0
 msgid "Cancel"
 msgstr "İptal"
 
 #. module: crm_partner_assign
-#: field:crm.lead.forward.to.partner,history_mode:0
+#: field:crm.lead.forward.to.partner,history:0
 msgid "Send history"
 msgstr "Geçmişi Gönder"
 
@@ -387,6 +386,7 @@ msgid "Contact"
 msgstr "İletişim"
 
 #. module: crm_partner_assign
+#: view:crm.lead.forward.to.partner:0
 #: view:res.partner:0
 msgid "Close"
 msgstr "Kapat"
@@ -492,7 +492,7 @@ msgstr "Kapandı"
 #. module: crm_partner_assign
 #: model:ir.actions.act_window,name:crm_partner_assign.action_crm_send_mass_forward
 msgid "Mass forward to partner"
-msgstr "Partner toplu iletme"
+msgstr "Paydaşa toplu iletme"
 
 #. module: crm_partner_assign
 #: view:res.partner:0
@@ -523,7 +523,7 @@ msgstr "Normal"
 #. module: crm_partner_assign
 #: view:res.partner:0
 msgid "Escalate"
-msgstr "Artırma"
+msgstr "Önem sırasını artır"
 
 #. module: crm_partner_assign
 #: selection:crm.lead.report.assign,month:0
@@ -541,6 +541,8 @@ msgid "Delay to Open"
 msgstr "Açmada Gecikme"
 
 #. module: crm_partner_assign
+#: selection:crm.lead.forward.to.partner,send_to:0
+#: field:crm.lead.forward.to.partner,user_id:0
 #: field:crm.lead.report.assign,user_id:0
 #: field:crm.partner.report.assign,user_id:0
 msgid "User"
@@ -559,7 +561,7 @@ msgstr "Kasım"
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0
 msgid "Extended Filters..."
-msgstr "Genişletilmiş Filtreler..."
+msgstr "Genişletilmiş Süzgeçler..."
 
 #. module: crm_partner_assign
 #: field:crm.lead,partner_longitude:0
@@ -570,7 +572,7 @@ msgstr "Coğ Boylam"
 #. module: crm_partner_assign
 #: field:crm.partner.report.assign,opp:0
 msgid "# of Opportunity"
-msgstr "# nın Fırsat"
+msgstr "# Fırsat"
 
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0
@@ -711,7 +713,7 @@ msgstr "Paydaş #"
 #: view:crm.lead.forward.to.partner:0
 #: model:ir.actions.act_window,name:crm_partner_assign.crm_lead_forward_to_partner_act
 msgid "Forward to Partner"
-msgstr "Partnere İlet"
+msgstr "Paydaşa İlet"
 
 #. module: crm_partner_assign
 #: field:crm.partner.report.assign,name:0
@@ -734,10 +736,9 @@ msgid "Reply-To"
 msgstr "Yanıtla"
 
 #. module: crm_partner_assign
-#: view:crm.lead:0
 #: field:crm.lead,partner_assigned_id:0
 msgid "Assigned Partner"
-msgstr "Atanmış Partner"
+msgstr "Atanmış Paydaş"
 
 #. module: crm_partner_assign
 #: field:crm.lead.forward.to.partner,address_id:0
@@ -816,12 +817,12 @@ msgstr "miy.aday"
 #. module: crm_partner_assign
 #: selection:crm.lead.report.assign,state:0
 msgid "Pending"
-msgstr "Bekleyen"
+msgstr "Bekliyor"
 
 #. module: crm_partner_assign
 #: view:crm.partner.report.assign:0
 msgid "Partner assigned Analysis"
-msgstr "Partner Analiz Atanan"
+msgstr "İncelenmeye atanmış Aday"
 
 #. module: crm_partner_assign
 #: model:ir.model,name:crm_partner_assign.model_crm_lead_report_assign
@@ -839,20 +840,19 @@ msgid "Error ! You cannot create recursive associated members."
 msgstr "Hata ! yinelenen ilişkili üyeler oluşturamazsınız."
 
 #. module: crm_partner_assign
-#: selection:crm.lead.forward.to.partner,history_mode:0
+#: selection:crm.lead.forward.to.partner,history:0
 msgid "Case Information"
-msgstr "Vakka Bilgisi"
+msgstr "Durum Bilgisi"
 
 #. module: crm_partner_assign
-#: field:res.partner.activation,sequence:0
 #: field:res.partner.grade,sequence:0
 msgid "Sequence"
-msgstr "Sıralama"
+msgstr "Dizi"
 
 #. module: crm_partner_assign
 #: model:ir.model,name:crm_partner_assign.model_crm_partner_report_assign
 msgid "CRM Partner Report"
-msgstr "CRM Partner Raporu"
+msgstr "CRM Paydaş Raporu"
 
 #. module: crm_partner_assign
 #: model:ir.model,name:crm_partner_assign.model_crm_lead_forward_to_partner
@@ -878,7 +878,7 @@ msgstr "Tarih Oluştur"
 #. module: crm_partner_assign
 #: field:crm.lead.forward.to.partner,filter_id:0
 msgid "Filters"
-msgstr "Filtreler"
+msgstr "Süzgeçler"
 
 #. module: crm_partner_assign
 #: view:crm.lead.report.assign:0

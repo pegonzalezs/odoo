@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 06:43+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:28+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
@@ -32,7 +32,7 @@ msgstr "Onaylandı"
 #: view:account.bank.statement:0
 #: view:account.bank.statement.line:0
 msgid "Glob. Id"
-msgstr "Gen. Id"
+msgstr "Glob. Id"
 
 #. module: account_bank_statement_extensions
 #: selection:account.bank.statement.line.global,type:0
@@ -54,7 +54,7 @@ msgstr "Borç"
 #: model:ir.actions.act_window,name:account_bank_statement_extensions.action_cancel_statement_line
 #: model:ir.model,name:account_bank_statement_extensions.model_cancel_statement_line
 msgid "Cancel selected statement lines"
-msgstr "Seçili hesap ekstresi kalemlerini iptal et"
+msgstr "Seçili hesap özeti satırlarını sil"
 
 #. module: account_bank_statement_extensions
 #: constraint:res.partner.bank:0
@@ -80,14 +80,14 @@ msgstr "Taslak"
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Statement"
-msgstr "Hesap özeti"
+msgstr "Hesap Özeti"
 
 #. module: account_bank_statement_extensions
 #: view:confirm.statement.line:0
 #: model:ir.actions.act_window,name:account_bank_statement_extensions.action_confirm_statement_line
 #: model:ir.model,name:account_bank_statement_extensions.model_confirm_statement_line
 msgid "Confirm selected statement lines"
-msgstr "Seçili hesap özeti kalemlerini onayla"
+msgstr "Seçili hesap özeti satırlarını onayla"
 
 #. module: account_bank_statement_extensions
 #: report:bank.statement.balance.report:0
@@ -98,7 +98,7 @@ msgstr "Banka Durumu Raporu"
 #. module: account_bank_statement_extensions
 #: view:cancel.statement.line:0
 msgid "Cancel Lines"
-msgstr "Kalemleri İptal et"
+msgstr "Satırları İptal et"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line.global:0
@@ -109,7 +109,7 @@ msgstr "Toplu Ödeme Bilgisi"
 #. module: account_bank_statement_extensions
 #: view:confirm.statement.line:0
 msgid "Confirm Lines"
-msgstr "Kalemleri Onayla"
+msgstr "Satırları Onayla"
 
 #. module: account_bank_statement_extensions
 #: code:addons/account_bank_statement_extensions/account_bank_statement.py:130
@@ -124,10 +124,11 @@ msgstr ""
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line.global,type:0
 msgid "Type"
-msgstr "Tip"
+msgstr "Tür"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
+#: field:account.bank.statement.line,journal_id:0
 #: report:bank.statement.balance.report:0
 msgid "Journal"
 msgstr "Günlük"
@@ -135,17 +136,17 @@ msgstr "Günlük"
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Confirmed Statement Lines."
-msgstr "Onaylanmış Hesap Özeti Kalemleri."
+msgstr "Onayl Hesap Özeti Satırları."
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Credit Transactions."
-msgstr "Alacak İşlemleri."
+msgstr "Krdei İşlemleri"
 
 #. module: account_bank_statement_extensions
 #: model:ir.actions.act_window,help:account_bank_statement_extensions.action_cancel_statement_line
 msgid "cancel selected statement lines."
-msgstr "Seçili hesap özeti kalemlerini iptal et."
+msgstr "Seçili hesap özeti satırlarını iptal et."
 
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line,counterparty_number:0
@@ -177,7 +178,7 @@ msgstr "Tarih"
 #: view:account.bank.statement.line:0
 #: field:account.bank.statement.line,globalisation_amount:0
 msgid "Glob. Amount"
-msgstr "Gen. Tutar"
+msgstr "Glob. Tutar"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
@@ -187,12 +188,12 @@ msgstr "Borç İşlemleri."
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Extended Filters..."
-msgstr "Genişletişmiş Süzgeçler..."
+msgstr "Genişletilmiş Süzgeçler..."
 
 #. module: account_bank_statement_extensions
 #: view:confirm.statement.line:0
 msgid "Confirmed lines cannot be changed anymore."
-msgstr "Onaylı kalemler artık değiştirilemez."
+msgstr "Onaylı satırlar artık değiştirilemez."
 
 #. module: account_bank_statement_extensions
 #: constraint:res.partner.bank:0
@@ -219,7 +220,7 @@ msgstr "Seçili hesap özeti satırlarını onayla."
 #: view:cancel.statement.line:0
 msgid "Are you sure you want to cancel the selected Bank Statement lines ?"
 msgstr ""
-"Seçili Banka Hesap Özeti kalemlerini iptal etmek istediğinizden emin misiniz?"
+"Seçili Banka Hesap Özeti satırlarını iptal etmek istediğinizden emin misiniz?"
 
 #. module: account_bank_statement_extensions
 #: report:bank.statement.balance.report:0
@@ -254,7 +255,7 @@ msgstr "Tutar"
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Fin.Account"
-msgstr "Fin.Hesabı"
+msgstr "Fin.Hesap"
 
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line,counterparty_currency:0
@@ -264,7 +265,7 @@ msgstr "Karşı Taraf Para Birimi"
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line,counterparty_bic:0
 msgid "Counterparty BIC"
-msgstr "Karşı Taraf BIC"
+msgstr "Karşı Tarafı BIC"
 
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line.global,child_ids:0
@@ -275,7 +276,7 @@ msgstr "Alt Kodlar"
 #: view:confirm.statement.line:0
 msgid "Are you sure you want to confirm the selected Bank Statement lines ?"
 msgstr ""
-"Seçili Banka Hesap Özeti kalemlerini onaylamak istediğinizden emin misiniz?"
+"Seçili Banka Hesap Özeti satırlarını onaylamak istediğinizden emin misiniz?"
 
 #. module: account_bank_statement_extensions
 #: constraint:account.bank.statement.line:0
@@ -290,22 +291,22 @@ msgid ""
 "Code to identify transactions belonging to the same globalisation level "
 "within a batch payment"
 msgstr ""
-"Bir toplu ödemede aynı genelleştirme seviyesine ait işlemlerin tanımlama Kodu"
+"Bir toplu ödemede aynı küreselleşme seviyesine ait işlemlerin tanımlama Kodu"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Draft Statement Lines."
-msgstr "Taslak Hesap Özeti kalemleri"
+msgstr "Taslak Hesap Özeti satırları"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Glob. Am."
-msgstr "Gen. Tut."
+msgstr "Glob. Am."
 
 #. module: account_bank_statement_extensions
 #: model:ir.model,name:account_bank_statement_extensions.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr "Banka Hesap Özeti Kalemi"
+msgstr "Banka Hesap Özeti Satırı"
 
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line.global,code:0
@@ -340,7 +341,7 @@ msgstr "Banka Hesap Özeti"
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Statement Line"
-msgstr "Hesap Özeti Kalemi"
+msgstr "Hesap Özeti Satırı"
 
 #. module: account_bank_statement_extensions
 #: sql_constraint:account.bank.statement.line.global:0
@@ -352,7 +353,7 @@ msgstr "Kod eşsiz olamlı!"
 #: model:ir.actions.act_window,name:account_bank_statement_extensions.action_bank_statement_line
 #: model:ir.ui.menu,name:account_bank_statement_extensions.bank_statement_line
 msgid "Bank Statement Lines"
-msgstr "Banka Hesap Özeti Kalemleri"
+msgstr "Banka Hesap Özeti Satırları"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line.global:0
@@ -360,14 +361,15 @@ msgid "Child Batch Payments"
 msgstr "Alt Toplu Ödemeler"
 
 #. module: account_bank_statement_extensions
+#: view:cancel.statement.line:0
 #: view:confirm.statement.line:0
 msgid "Cancel"
-msgstr "İptal"
+msgstr "Vazgeç"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
 msgid "Statement Lines"
-msgstr "Hesap Özeti Kalemleri"
+msgstr "Hesap Özeti Satırları"
 
 #. module: account_bank_statement_extensions
 #: view:account.bank.statement.line:0
@@ -377,4 +379,4 @@ msgstr "Toplam Tutar"
 #. module: account_bank_statement_extensions
 #: field:account.bank.statement.line,globalisation_id:0
 msgid "Globalisation ID"
-msgstr "Genelleştirme ID"
+msgstr "Küreselleşme ID"

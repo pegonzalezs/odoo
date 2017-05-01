@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:08+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:51+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 "Language: lt\n"
 
 #. module: mrp
@@ -36,12 +36,12 @@ msgstr ""
 #. module: mrp
 #: help:mrp.production,location_src_id:0
 msgid "Location where the system will look for components."
-msgstr "Atsargų vieta, iš kurios bus imamos žaliavos."
+msgstr ""
 
 #. module: mrp
 #: field:mrp.production,workcenter_lines:0
 msgid "Work Centers Utilisation"
-msgstr "Darbo centrų panaudojimas"
+msgstr ""
 
 #. module: mrp
 #: model:product.template,name:mrp.product_sugar_product_template
@@ -54,11 +54,9 @@ msgid "No. Of Cycles"
 msgstr "Ciklų skaičius"
 
 #. module: mrp
-#: field:mrp.production.workcenter.line,cycle:0
 #: field:mrp.routing.workcenter,cycle_nbr:0
-#: field:report.workcenter.load,cycle:0
 msgid "Number of Cycles"
-msgstr "Ciklų skaičius"
+msgstr ""
 
 #. module: mrp
 #: model:product.uom.categ,name:mrp.product_uom_categ_fluid
@@ -92,7 +90,7 @@ msgstr ""
 #. module: mrp
 #: view:mrp.production:0
 msgid "Scrap Products"
-msgstr "Nurašyti produktus"
+msgstr ""
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.mrp_routing_action
@@ -103,7 +101,7 @@ msgstr "Technologinės kortelės"
 #. module: mrp
 #: field:mrp.workcenter,product_id:0
 msgid "Work Center Product"
-msgstr "Darbo centro produktas"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.bom:0
@@ -126,15 +124,14 @@ msgid ""
 "Number of iterations this work center has to do in the specified operation "
 "of the routing."
 msgstr ""
-"Pakartojimų skaičius, kurį darbo centras atliks vykdant šią technologinės "
-"kortelės operaciją."
 
 #. module: mrp
 #: view:mrp.bom:0
 #: field:mrp.bom,code:0
+#: view:mrp.production:0
 #: field:mrp.production,name:0
 msgid "Reference"
-msgstr "Numeris"
+msgstr "Nuoroda"
 
 #. module: mrp
 #: view:mrp.production:0
@@ -144,7 +141,7 @@ msgstr "Pabaigti produktai"
 #. module: mrp
 #: view:mrp.production:0
 msgid "Manufacturing Orders which are currently in production."
-msgstr "Šiuo metu vykdomi gamybos užsakymai."
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_servicerfq0
@@ -176,7 +173,7 @@ msgstr ""
 #. module: mrp
 #: field:mrp.workcenter,costs_hour:0
 msgid "Cost per hour"
-msgstr "Kaštai per valandą"
+msgstr "Savikaina per valandą"
 
 #. module: mrp
 #: model:product.template,name:mrp.product_orange_product_template
@@ -197,6 +194,9 @@ msgstr "Mat. vnt."
 
 #. module: mrp
 #: field:change.production.qty,product_qty:0
+#: field:mrp.bom,product_qty:0
+#: field:mrp.production,product_qty:0
+#: field:mrp.production.product.line,product_qty:0
 msgid "Product Qty"
 msgstr "Produkto kiekis"
 
@@ -232,7 +232,7 @@ msgstr ""
 #. module: mrp
 #: field:mrp.workcenter,costs_cycle_account_id:0
 msgid "Cycle Account"
-msgstr "Ciklinių kaštų sąskaita"
+msgstr "Ciklo sąskaita"
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:130
@@ -256,10 +256,9 @@ msgid "Capacity Information"
 msgstr "Užimtumo informacija"
 
 #. module: mrp
-#: view:mrp.production:0
 #: field:mrp.production,move_created_ids2:0
 msgid "Produced Products"
-msgstr "Pagaminti produktai"
+msgstr ""
 
 #. module: mrp
 #: report:mrp.production.order:0
@@ -267,9 +266,9 @@ msgid "Destination Location"
 msgstr "Tikslo vieta"
 
 #. module: mrp
-#: view:mrp.config.settings:0
+#: model:ir.ui.menu,name:mrp.menu_mrp_bom
 msgid "Master Data"
-msgstr "Produktų duomenys"
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,note:mrp.process_transition_stockmts0
@@ -281,13 +280,13 @@ msgstr ""
 #. module: mrp
 #: report:mrp.production.order:0
 msgid "Partner Ref"
-msgstr "Partnerio ident."
+msgstr "Partnerio nuoroda"
 
 #. module: mrp
 #: field:mrp.production,origin:0
 #: report:mrp.production.order:0
 msgid "Source Document"
-msgstr "Susijęs dokumentas"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.production,product_lines:0
@@ -297,13 +296,12 @@ msgstr "Suplanuotos žaliavos"
 #. module: mrp
 #: selection:mrp.bom,type:0
 msgid "Sets / Phantom"
-msgstr "Rinkinys"
+msgstr "Nustatytas"
 
 #. module: mrp
 #: help:mrp.bom,position:0
 msgid "Reference to a position in an external plan."
-msgstr ""
-"Tai gali būti numeris nurodytas išoriniame dokumente (gamybos plane)."
+msgstr "Nuoroda į poziciją išoriniame plane."
 
 #. module: mrp
 #: constraint:stock.move:0
@@ -342,15 +340,14 @@ msgstr ""
 
 #. module: mrp
 #: sql_constraint:mrp.production:0
+#: sql_constraint:stock.picking:0
 msgid "Reference must be unique per Company!"
 msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:139
 #: report:bom.structure:0
-#: view:mrp.bom:0
 #: field:mrp.product_price,number:0
-#: view:mrp.production:0
 #: report:mrp.production.order:0
 #, python-format
 msgid "Quantity"
@@ -364,7 +361,7 @@ msgstr ""
 #. module: mrp
 #: view:mrp.production:0
 msgid "Confirm Production"
-msgstr "Patvirtinti užsakymą"
+msgstr "Patvirtinti gamybą"
 
 #. module: mrp
 #: model:process.transition,note:mrp.process_transition_stockproduct0
@@ -396,8 +393,6 @@ msgid ""
 "This is the Internal Picking List that brings the finished product to the "
 "production plan"
 msgstr ""
-"Vidinis perkėlimas naudojamas pagamintų produktų perkėlimui į baigtos "
-"produkcijos vietą."
 
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_view_resource_calendar_search_mrp
@@ -407,14 +402,14 @@ msgstr "Darbo laikas"
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action_report_in_out_picking_tree
 msgid "Weekly Stock Value Variation"
-msgstr "Savaitinis atsargų lygio pokytis"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
-#: field:mrp.production,date_planned:0
+#: field:mrp.production,date_planned_date:0
 #: report:mrp.production.order:0
 msgid "Scheduled Date"
-msgstr "Suplanuota data"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.bom:0
@@ -422,7 +417,6 @@ msgid "Component Product"
 msgstr ""
 
 #. module: mrp
-#: view:mrp.bom:0
 #: report:mrp.production.order:0
 msgid "Bill Of Material"
 msgstr "Komplektavimo specifikacija"
@@ -434,14 +428,14 @@ msgid ""
 "needed.Set a location if you produce at a fixed location. This can be a "
 "partner location if you subcontract the manufacturing operations."
 msgstr ""
-"Palikite tuščią lauką, jeigu gamybos ir baigtos produkcijos vietos sutampa. "
-"Nurodykite, jeigu gaminama fiksuotoje vietoje. Tai gali būti ir kontakto "
-"vieta, jeigu gamyba atliekama subrangos būdu."
+"Nepildykite, jeigu gamybos vieta, ir galutinė produkcijos vieta sutampa. "
+"Vietos nurodomos, jeigu gaminama fiksuotoje vietoje. Tai gali būti ir "
+"kontrahento vieta, jeigu jūsų tiekėjai atlieka gamybos operacijas."
 
 #. module: mrp
 #: view:board.board:0
 msgid "Stock Value Variation"
-msgstr "Atsargų lygio pokytis"
+msgstr ""
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action2
@@ -468,7 +462,7 @@ msgstr ""
 #. module: mrp
 #: help:mrp.workcenter,costs_cycle:0
 msgid "Specify Cost of Work Center per cycle."
-msgstr "Įveskite darbo centro patiriamus kaštus per ciklą."
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_bom0
@@ -504,7 +498,7 @@ msgstr ""
 #: model:process.node,note:mrp.process_node_orderrfq0
 #: model:process.node,note:mrp.process_node_rfq0
 msgid "Request for Quotation."
-msgstr "Kainos paklausimas."
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,note:mrp.process_transition_billofmaterialrouting0
@@ -519,10 +513,9 @@ msgid "Error: Invalid ean code"
 msgstr ""
 
 #. module: mrp
-#: view:mrp.production:0
 #: field:mrp.production,move_created_ids:0
 msgid "Products to Produce"
-msgstr "Gaminami produktai"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.routing:0
@@ -553,7 +546,7 @@ msgstr "Autorius"
 #. module: mrp
 #: field:report.mrp.inout,value:0
 msgid "Stock value"
-msgstr "Atsargų lygis"
+msgstr ""
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action_product_bom_structure
@@ -575,7 +568,7 @@ msgstr ""
 #: help:mrp.routing.workcenter,sequence:0
 msgid ""
 "Gives the sequence order when displaying a list of routing Work Centers."
-msgstr "Eilės tvarka, pagal kurią išdėstomas darbo centrų operacijų sąrašas."
+msgstr ""
 
 #. module: mrp
 #: constraint:stock.move:0
@@ -607,7 +600,7 @@ msgstr "KS eilutės"
 #. module: mrp
 #: field:mrp.workcenter,time_start:0
 msgid "Time before prod."
-msgstr "Pasiruošimo laikas"
+msgstr "Laikas prieš gaminimą"
 
 #. module: mrp
 #: help:mrp.routing,active:0
@@ -615,8 +608,6 @@ msgid ""
 "If the active field is set to False, it will allow you to hide the routing "
 "without removing it."
 msgstr ""
-"Nebenaudojamos technologinės kortelės gali būti paslėptos, vietoj to, kad "
-"būtų pašalintos."
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_billofmaterialrouting0
@@ -628,17 +619,17 @@ msgstr ""
 #: field:mrp.production,move_lines2:0
 #: report:mrp.production.order:0
 msgid "Consumed Products"
-msgstr "Sunaudotos žaliavos"
+msgstr "Suvartojami produktai"
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.action_mrp_workcenter_load_wizard
 #: model:ir.model,name:mrp.model_mrp_workcenter_load
 #: model:ir.model,name:mrp.model_report_workcenter_load
 msgid "Work Center Load"
-msgstr "Darbo centro užimtumas"
+msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/procurement.py:50
+#: code:addons/mrp/procurement.py:43
 #, python-format
 msgid "No BoM defined for this product !"
 msgstr "Šiam produktui nenustatyta komplektavimo specifikacija!"
@@ -647,23 +638,22 @@ msgstr "Šiam produktui nenustatyta komplektavimo specifikacija!"
 #: model:ir.actions.act_window,name:mrp.mrp_bom_form_action2
 #: model:ir.ui.menu,name:mrp.menu_mrp_bom_form_action2
 msgid "Bill of Material Components"
-msgstr "Komplektavimo specifikacijos komponentai"
+msgstr ""
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_move
 msgid "Stock Move"
-msgstr "Atsargų judėjimas"
+msgstr ""
 
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_mrp_planning
-#: view:mrp.config.settings:0
 msgid "Planning"
-msgstr "Planavimas"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
 msgid "Ready"
-msgstr "Paruošta"
+msgstr ""
 
 #. module: mrp
 #: model:product.template,name:mrp.product_buttons_product_template
@@ -678,14 +668,11 @@ msgid ""
 "operations and to plan future loads on work centers based on production "
 "plannification."
 msgstr ""
-"Sąrašas darbų (darbo centrų sąrašas) atliekamų gaminant produktą. "
-"Technologinės kortelės dažniausiai naudojamos apskaičiuoti darbo centrų "
-"veiklos sąnaudoms bei planuoti darbo centrų užimtumą."
 
 #. module: mrp
 #: help:mrp.workcenter,time_cycle:0
 msgid "Time in hours for doing one cycle."
-msgstr "Užtrunkamas laikas valandomis vieno ciklo įvykdymui."
+msgstr "Vieno ciklo laikas valandomis."
 
 #. module: mrp
 #: constraint:mrp.bom:0
@@ -708,8 +695,6 @@ msgid ""
 "Product UOS (Unit of Sale) is the unit of measurement for the invoicing and "
 "promotion of stock."
 msgstr ""
-"Pardavimo matai yra matavimo vientai naudojami sąskaitų išrašymui bei "
-"pasiūlymų formavimui."
 
 #. module: mrp
 #: view:mrp.product_price:0
@@ -755,14 +740,13 @@ msgstr "Neleistinas veiksmas!"
 #: help:mrp.bom,product_efficiency:0
 msgid "A factor of 0.9 means a loss of 10% within the production process."
 msgstr ""
-"Pasirinkus 0.9 koeficientą reikš, kad 10% žaliavų prarandama gamybos metu."
 
 #. module: mrp
-#: code:addons/mrp/mrp.py:737
-#: code:addons/mrp/mrp.py:765
+#: code:addons/mrp/mrp.py:734
+#: code:addons/mrp/mrp.py:762
 #, python-format
 msgid "Warning!"
-msgstr "Įspėjimas!"
+msgstr ""
 
 #. module: mrp
 #: report:mrp.production.order:0
@@ -783,7 +767,7 @@ msgstr ""
 #. module: mrp
 #: view:mrp.production:0
 msgid "Partial"
-msgstr "Galima dalimis"
+msgstr ""
 
 #. module: mrp
 #: report:mrp.production.order:0
@@ -806,7 +790,7 @@ msgstr "Skubu"
 #. module: mrp
 #: view:mrp.production:0
 msgid "Manufacturing Orders which are waiting for raw materials."
-msgstr "Gamybos užsakymai, kurių vykdymui laukiama žaliavų."
+msgstr ""
 
 #. module: mrp
 #: model:ir.actions.act_window,help:mrp.mrp_workcenter_action
@@ -820,12 +804,8 @@ msgstr ""
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production
-#: view:mrp.config.settings:0
-#: view:mrp.production:0
-#: field:mrp.production.workcenter.line,production_id:0
-#: field:procurement.order,production_id:0
 msgid "Manufacturing Order"
-msgstr "Gamybos užsakymas"
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_productionprocureproducts0
@@ -852,7 +832,7 @@ msgstr "Modifikavimo pavadinimas"
 #: view:mrp.bom:0
 #: view:mrp.production:0
 msgid "Date"
-msgstr "Data"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.bom,type:0
@@ -860,7 +840,7 @@ msgid "BoM Type"
 msgstr "KS tipas"
 
 #. module: mrp
-#: code:addons/mrp/procurement.py:52
+#: code:addons/mrp/procurement.py:45
 #, python-format
 msgid ""
 "Procurement '%s' has an exception: 'No BoM defined for this product !'"
@@ -869,7 +849,7 @@ msgstr ""
 #. module: mrp
 #: view:mrp.property:0
 msgid "Search"
-msgstr "Paieška"
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/mrp.py:626
@@ -885,10 +865,10 @@ msgstr "Ciklų sk."
 #. module: mrp
 #: model:ir.model,name:mrp.model_res_company
 msgid "Companies"
-msgstr "Įmonės"
+msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/mrp.py:634
+#: code:addons/mrp/mrp.py:627
 #, python-format
 msgid ""
 "You must first cancel related internal picking attached to this "
@@ -917,14 +897,14 @@ msgstr ""
 #: code:addons/mrp/report/price.py:211
 #, python-format
 msgid "Total Cost of %s %s"
-msgstr "Bendra savikaina - %s %s"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_stockproduct0
 #: model:process.node,name:mrp.process_node_stockproduct1
 #: model:process.process,name:mrp.process_process_stockableproductprocess0
 msgid "Stockable Product"
-msgstr "Sandėliuojamas produktas"
+msgstr "Savikaina per valandą"
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:130
@@ -944,8 +924,9 @@ msgstr "Valandų skaičius"
 
 #. module: mrp
 #: view:mrp.property:0
+#: view:mrp.property.group:0
 msgid "Property Group"
-msgstr "Savybių grupė"
+msgstr "Ypatybių grupė"
 
 #. module: mrp
 #: view:mrp.production:0
@@ -961,13 +942,13 @@ msgstr ""
 #: view:mrp.routing:0
 #: view:mrp.workcenter:0
 msgid "Inactive"
-msgstr "Neaktyvus"
+msgstr ""
 
 #. module: mrp
 #: view:change.production.qty:0
-#: view:mrp.config.settings:0
 #: view:mrp.product.produce:0
 #: view:mrp.product_price:0
+#: view:mrp.production:0
 #: view:mrp.workcenter.load:0
 msgid "Cancel"
 msgstr "Atšaukti"
@@ -993,17 +974,17 @@ msgstr "Perduotas produktas"
 #. module: mrp
 #: view:mrp.production:0
 msgid "Late"
-msgstr "Pavėluota"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_servicemts0
 msgid "Make to stock"
-msgstr "Iš atsargų"
+msgstr "Iš sandėlio"
 
 #. module: mrp
 #: report:bom.structure:0
 msgid "BOM Name"
-msgstr "KS pavadinimas"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1019,7 +1000,7 @@ msgstr ""
 #. module: mrp
 #: model:res.groups,name:mrp.group_mrp_manager
 msgid "Manager"
-msgstr "Vadovas"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1029,7 +1010,7 @@ msgstr ""
 #. module: mrp
 #: field:mrp.bom,position:0
 msgid "Internal Reference"
-msgstr "Vidinis numeris"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,note:mrp.process_node_billofmaterial0
@@ -1040,7 +1021,6 @@ msgstr ""
 #: field:mrp.bom,name:0
 #: report:mrp.production.order:0
 #: field:mrp.production.product.line,name:0
-#: view:mrp.property:0
 #: field:mrp.routing,name:0
 #: field:mrp.routing.workcenter,name:0
 msgid "Name"
@@ -1049,7 +1029,7 @@ msgstr "Pavadinimas"
 #. module: mrp
 #: field:mrp.product.produce,mode:0
 msgid "Mode"
-msgstr "Būdas"
+msgstr ""
 
 #. module: mrp
 #: report:bom.structure:0
@@ -1080,7 +1060,7 @@ msgstr ""
 #. module: mrp
 #: help:mrp.workcenter,costs_hour:0
 msgid "Specify Cost of Work Center per hour."
-msgstr "Įveskite darbo centro patiriamus kaštus per valandą."
+msgstr ""
 
 #. module: mrp
 #: help:mrp.workcenter,capacity_per_cycle:0
@@ -1088,9 +1068,6 @@ msgid ""
 "Number of operations this Work Center can do in parallel. If this Work "
 "Center represents a team of 5 workers, the capacity per cycle is 5."
 msgstr ""
-"Operacijų skaičius, kurias lygiagrečiai, per vieną ciklą, gali atlikti šis "
-"darbo centras. Jeigu darbo centras atvaizduoja komandą iš 5 darbuotojų, tai "
-"pajėgumas per ciklą bus lygus 5."
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.mrp_production_action3
@@ -1104,7 +1081,7 @@ msgstr ""
 #: view:mrp.routing:0
 #: view:mrp.workcenter:0
 msgid "Group By..."
-msgstr "Grupuoti pagal..."
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/report/price.py:130
@@ -1125,7 +1102,7 @@ msgstr "Baigtos produkcijos vieta"
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_pm_resources_config
 msgid "Resources"
-msgstr "Resursai"
+msgstr ""
 
 #. module: mrp
 #: help:mrp.routing.workcenter,hour_nbr:0
@@ -1133,8 +1110,6 @@ msgid ""
 "Time in hours for this Work Center to achieve the operation of the specified "
 "routing."
 msgstr ""
-"Valandų skaičius, per kurias darbo centras atliks šią technologinės kortelės "
-"operaciją."
 
 #. module: mrp
 #: field:mrp.workcenter,costs_journal_id:0
@@ -1142,9 +1117,11 @@ msgid "Analytic Journal"
 msgstr "Analitinis žurnalas"
 
 #. module: mrp
+#: model:ir.actions.act_window,name:mrp.mrp_workcenter_action
+#: model:ir.ui.menu,name:mrp.menu_view_resource_search_mrp
 #: field:mrp.routing,workcenter_lines:0
 msgid "Work Centers"
-msgstr "Darbo centrai"
+msgstr ""
 
 #. module: mrp
 #: selection:mrp.workcenter.load,time_unit:0
@@ -1173,7 +1150,7 @@ msgstr "Valandų sk."
 #. module: mrp
 #: view:mrp.routing:0
 msgid "Work Center Operations"
-msgstr "Darbo centrų operacijos"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.routing:0
@@ -1183,7 +1160,7 @@ msgstr "Pastabos"
 #. module: mrp
 #: view:mrp.production:0
 msgid "Manufacturing Orders which are ready to start production."
-msgstr "Gamybos užsakymai paruošti pradėti gamybą."
+msgstr ""
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_bom
@@ -1201,12 +1178,12 @@ msgstr "Pasirinkti laiko vienetą"
 #. module: mrp
 #: view:report.workcenter.load:0
 msgid "Work Center load"
-msgstr "Darbo centro užimtumas"
+msgstr ""
 
 #. module: mrp
 #: help:mrp.production,location_dest_id:0
 msgid "Location where the system will stock the finished products."
-msgstr "Atsargų vieta, kurioje talpinami pabaigti produktai ."
+msgstr "Vieta, kurioje talpinami pabaigti produktai ."
 
 #. module: mrp
 #: help:mrp.routing.workcenter,routing_id:0
@@ -1252,9 +1229,8 @@ msgstr "Svarbumas"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_stock_picking
-#: field:mrp.production,picking_id:0
 msgid "Picking List"
-msgstr "Siunta"
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/mrp.py:1000
@@ -1287,7 +1263,7 @@ msgstr ""
 #. module: mrp
 #: help:res.company,manufacturing_lead:0
 msgid "Security days for each manufacturing operation."
-msgstr "Atsarga dėl galimo vėlavimo vykdant gamybos operacijas."
+msgstr "Saugios dienos kiekvienai gamybos operacijai."
 
 #. module: mrp
 #: model:product.template,name:mrp.product_water_product_template
@@ -1304,7 +1280,7 @@ msgstr ""
 #: model:process.transition,name:mrp.process_transition_servicemts0
 #: model:process.transition,name:mrp.process_transition_stockmts0
 msgid "Make to Stock"
-msgstr "Iš atsargų"
+msgstr ""
 
 #. module: mrp
 #: constraint:mrp.production:0
@@ -1343,7 +1319,7 @@ msgstr "Produkto savikainos struktūra"
 #: code:addons/mrp/report/price.py:139
 #, python-format
 msgid "Components suppliers"
-msgstr "Komponentų tiekėjai"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1373,12 +1349,12 @@ msgstr "Pradžios data"
 #. module: mrp
 #: field:mrp.workcenter,costs_hour_account_id:0
 msgid "Hour Account"
-msgstr "Valandinių kaštų sąskaita"
+msgstr "Valandos sąskaita"
 
 #. module: mrp
 #: view:mrp.production:0
 msgid "Destination Loc."
-msgstr "Pristatymo vieta"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.bom,method:0
@@ -1388,7 +1364,7 @@ msgstr "Metodas"
 #. module: mrp
 #: view:mrp.production:0
 msgid "Pending"
-msgstr "Laukianti"
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/mrp.py:603
@@ -1410,7 +1386,7 @@ msgstr "Užsakyti produktus"
 #. module: mrp
 #: view:report.workcenter.load:0
 msgid "Work Center Loads"
-msgstr "Darbo centrų užimtumas"
+msgstr ""
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_bom_revision
@@ -1421,7 +1397,7 @@ msgstr ""
 #: help:mrp.production,origin:0
 msgid ""
 "Reference of the document that generated this production order request."
-msgstr "Dokumento numeris, pagal kurį sugeneruotas šis gamybos užsakymas."
+msgstr ""
 
 #. module: mrp
 #: sql_constraint:mrp.bom:0
@@ -1449,7 +1425,7 @@ msgstr ""
 #. module: mrp
 #: field:mrp.workcenter,costs_general_account_id:0
 msgid "General Account"
-msgstr "Finansinė sąskaita"
+msgstr "Bendroji sąskaita"
 
 #. module: mrp
 #: report:mrp.production.order:0
@@ -1474,7 +1450,7 @@ msgstr "Neskubu"
 #. module: mrp
 #: field:mrp.production,user_id:0
 msgid "Responsible"
-msgstr "Atsakingas asmuo"
+msgstr ""
 
 #. module: mrp
 #: model:ir.actions.act_window,name:mrp.mrp_production_action2
@@ -1482,20 +1458,18 @@ msgid "Manufacturing Orders To Start"
 msgstr ""
 
 #. module: mrp
-#: model:ir.actions.act_window,name:mrp.mrp_workcenter_action
 #: model:ir.model,name:mrp.model_mrp_workcenter
-#: model:ir.ui.menu,name:mrp.menu_view_resource_search_mrp
 #: field:mrp.production.workcenter.line,workcenter_id:0
 #: field:mrp.routing.workcenter,workcenter_id:0
 #: view:mrp.workcenter:0
 #: field:report.workcenter.load,workcenter_id:0
 msgid "Work Center"
-msgstr "Darbo centras"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.workcenter,capacity_per_cycle:0
 msgid "Capacity per Cycle"
-msgstr "Pajėgumas per ciklą"
+msgstr "Užimtumas per ciklą"
 
 #. module: mrp
 #: model:ir.model,name:mrp.model_product_product
@@ -1522,13 +1496,13 @@ msgstr "Žaliavų vieta"
 #. module: mrp
 #: view:mrp.product_price:0
 msgid "Print Cost Structure of Product."
-msgstr "Spausdinti produkto savikainos struktūrą"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.bom,product_uos:0
 #: field:mrp.production.product.line,product_uos:0
 msgid "Product UOS"
-msgstr "Pardavimo matai"
+msgstr "Produkto mat. vnt."
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1540,14 +1514,14 @@ msgstr ""
 #: view:mrp.product.produce:0
 #: view:mrp.production:0
 msgid "Produce"
-msgstr "Gaminti"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_stock0
 #: model:process.transition,name:mrp.process_transition_servicemto0
 #: model:process.transition,name:mrp.process_transition_stockproduct0
 msgid "Make to Order"
-msgstr "Pateikus užsakymą"
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/mrp.py:358
@@ -1561,7 +1535,6 @@ msgid ""
 "Description of the Work Center. Explain here what's a cycle according to "
 "this Work Center."
 msgstr ""
-"Darbo centro aprašymas. Paaiškinkite ką reiškia ciklas pagal šį darbo centrą."
 
 #. module: mrp
 #: view:mrp.production.lot.line:0
@@ -1576,18 +1549,19 @@ msgstr "Pabaigos data"
 #. module: mrp
 #: field:mrp.workcenter,resource_id:0
 msgid "Resource"
-msgstr "Resursas"
+msgstr ""
 
 #. module: mrp
 #: help:mrp.bom,date_start:0
 #: help:mrp.bom,date_stop:0
 msgid "Validity of this BoM or component. Keep empty if it's always valid."
-msgstr "Šios komplektavimo specifikacijos ar KS komponento galiojimas."
+msgstr ""
+"KS ar jos komponenčių galiojimas. Palikti tuščią, jeigu visada galioja."
 
 #. module: mrp
 #: field:mrp.production,product_uos:0
 msgid "Product UoS"
-msgstr "Pardavimo matai"
+msgstr "Pardavimo vnt."
 
 #. module: mrp
 #: selection:mrp.production,priority:0
@@ -1602,24 +1576,21 @@ msgid ""
 "operations and to plan future loads on work centers based on production "
 "planning."
 msgstr ""
-"Sąrašas darbų (darbo centrų sąrašas) atliekamų gaminant produktą. "
-"Technologinės kortelės dažniausiai naudojamos apskaičiuoti darbo centrų "
-"veiklos sąnaudoms bei planuoti darbo centrų užimtumą."
 
 #. module: mrp
 #: view:change.production.qty:0
 msgid "Approve"
-msgstr "Patvirtinti"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.property.group:0
 msgid "Properties categories"
-msgstr "Savybių kategorijos"
+msgstr "Ypatybių kategorijos"
 
 #. module: mrp
 #: help:mrp.production.workcenter.line,sequence:0
 msgid "Gives the sequence order when displaying a list of work orders."
-msgstr "Eilės tvarka, pagal kurią išdėstomas darbų sekos sąrašas."
+msgstr ""
 
 #. module: mrp
 #: report:mrp.production.order:0
@@ -1642,9 +1613,10 @@ msgstr "Gamybos produktų vartojimas"
 #: model:ir.actions.act_window,name:mrp.mrp_production_action
 #: model:ir.actions.act_window,name:mrp.mrp_production_action_planning
 #: model:ir.ui.menu,name:mrp.menu_mrp_production_action
+#: model:ir.ui.menu,name:mrp.menu_mrp_production_order_action
 #: view:mrp.production:0
 msgid "Manufacturing Orders"
-msgstr "Gamybos užsakymai"
+msgstr ""
 
 #. module: mrp
 #: help:mrp.product.produce,mode:0
@@ -1655,33 +1627,28 @@ msgid ""
 "the quantity selected and it will finish the production order when total "
 "ordered quantities are produced."
 msgstr ""
-"„Tik sunaudoti žaliavas“ rėžime bus tik sunaudotos žaliavos pasirinktam "
-"kiekiui gaminių.\n"
-"„Sunaudoti žaliavas ir pagaminti“ rėžime bus sunaudotos žaliavos bei "
-"pagamintas pasirinktas kiekis gaminių. Gamybos užsakymas bus baigtas "
-"pagaminus visą užsakymo kiekį."
 
 #. module: mrp
 #: view:mrp.production:0
 #: report:mrp.production.order:0
 msgid "Work Orders"
-msgstr "Darbų seka"
+msgstr "Darbo užsakymai"
 
 #. module: mrp
 #: field:mrp.workcenter,costs_cycle:0
 msgid "Cost per cycle"
-msgstr "Kaštai per ciklą"
+msgstr "Savikaina per ciklą"
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_serviceproduct0
 #: model:process.node,name:mrp.process_node_serviceproduct1
 msgid "Service"
-msgstr "Paslauga"
+msgstr ""
 
 #. module: mrp
 #: selection:mrp.production,state:0
 msgid "Cancelled"
-msgstr "Atšauktas"
+msgstr ""
 
 #. module: mrp
 #: help:mrp.bom,product_uom:0
@@ -1690,7 +1657,7 @@ msgid ""
 msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/mrp.py:737
+#: code:addons/mrp/mrp.py:734
 #, python-format
 msgid ""
 "You are going to consume total %s quantities of \"%s\".\n"
@@ -1712,7 +1679,7 @@ msgstr ""
 #: field:mrp.routing.workcenter,company_id:0
 #: view:mrp.workcenter:0
 msgid "Company"
-msgstr "Įmonė"
+msgstr ""
 
 #. module: mrp
 #: selection:mrp.workcenter.load,measure_unit:0
@@ -1722,11 +1689,12 @@ msgstr "Suma valandomis"
 #. module: mrp
 #: field:mrp.workcenter,time_cycle:0
 msgid "Time for 1 cycle (hour)"
-msgstr "Ciklo vykdymo laikas"
+msgstr "Laikas vienam ciklui (valandomis)"
 
 #. module: mrp
 #: model:ir.actions.report.xml,name:mrp.report_mrp_production_report
 #: field:mrp.production.product.line,production_id:0
+#: field:mrp.production.workcenter.line,production_id:0
 #: model:process.node,name:mrp.process_node_production0
 #: model:process.node,name:mrp.process_node_productionorder0
 msgid "Production Order"
@@ -1752,7 +1720,7 @@ msgstr "Produkto kiekis vnt."
 #: view:mrp.bom:0
 #, python-format
 msgid "Components"
-msgstr "Komponentai"
+msgstr ""
 
 #. module: mrp
 #: report:bom.structure:0
@@ -1778,12 +1746,13 @@ msgstr "Įprastas KS"
 #. module: mrp
 #: field:res.company,manufacturing_lead:0
 msgid "Manufacturing Lead Time"
-msgstr "Pagaminimo terminas"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.bom,product_uos_qty:0
+#: field:mrp.production.product.line,product_uos_qty:0
 msgid "Product UOS Qty"
-msgstr "Kiekis pardavimo matais"
+msgstr "Produkto mat. vnt. kiekis"
 
 #. module: mrp
 #: model:ir.actions.act_window,help:mrp.action_report_in_out_picking_tree
@@ -1801,7 +1770,7 @@ msgstr "Patvirtinti"
 #. module: mrp
 #: field:mrp.bom,product_efficiency:0
 msgid "Manufacturing Efficiency"
-msgstr "Gamybos našumas"
+msgstr ""
 
 #. module: mrp
 #: constraint:res.company:0
@@ -1814,23 +1783,21 @@ msgid ""
 "If the active field is set to False, it will allow you to hide the bills of "
 "material without removing it."
 msgstr ""
-"Nebenaudojamos komplektavimo specifikacijos gali būti paslėptos, vietoj to, "
-"kad būtų pašalintos."
 
 #. module: mrp
 #: field:mrp.bom,product_rounding:0
 msgid "Product Rounding"
-msgstr "Kiekio apvalinimas"
+msgstr "Produkto apvalinimas"
 
 #. module: mrp
 #: selection:mrp.production,state:0
 msgid "New"
-msgstr "Naujas"
+msgstr ""
 
 #. module: mrp
 #: selection:mrp.product.produce,mode:0
 msgid "Consume Only"
-msgstr "Tik sunaudoti žaliavas"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
@@ -1866,18 +1833,19 @@ msgstr "Užsakant"
 
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_mrp_configuration
+#: view:res.company:0
 msgid "Configuration"
 msgstr "Nustatymai"
 
 #. module: mrp
 #: view:mrp.bom:0
 msgid "Starting Date"
-msgstr "Pradžios data"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.workcenter,time_stop:0
 msgid "Time after prod."
-msgstr "Užbaigimo laikas"
+msgstr "Laikas po gaminimo"
 
 #. module: mrp
 #: field:mrp.workcenter.load,time_unit:0
@@ -1890,16 +1858,14 @@ msgid "Total Qty"
 msgstr "Kiek iš viso"
 
 #. module: mrp
-#: field:mrp.production.workcenter.line,hour:0
 #: field:mrp.routing.workcenter,hour_nbr:0
-#: field:report.workcenter.load,hour:0
 msgid "Number of Hours"
-msgstr "Valandų skaičius"
+msgstr "Valandų kiekis"
 
 #. module: mrp
 #: view:mrp.workcenter:0
 msgid "Costing Information"
-msgstr "Kaštai"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,name:mrp.process_node_purchaseprocure0
@@ -1909,7 +1875,7 @@ msgstr "Planiniai užsakymai"
 #. module: mrp
 #: help:mrp.bom,product_rounding:0
 msgid "Rounding applied on the product quantity."
-msgstr "Produktų kiekio apvalinimo koeficientas."
+msgstr ""
 
 #. module: mrp
 #: model:process.node,note:mrp.process_node_stock0
@@ -1924,7 +1890,7 @@ msgstr "Tėvinė techn. kortelė"
 #. module: mrp
 #: help:mrp.workcenter,time_start:0
 msgid "Time in hours for the setup."
-msgstr "Užtrunkamas laikas valandomis pasiruošimui prieš pradedant gamybą."
+msgstr "Laikas valandomis pradėti gamybai"
 
 #. module: mrp
 #: model:product.template,name:mrp.product_orangejuice_product_template
@@ -1932,6 +1898,7 @@ msgid "Orange Juice"
 msgstr ""
 
 #. module: mrp
+#: field:mrp.bom.revision,bom_id:0
 #: field:procurement.order,bom_id:0
 msgid "BoM"
 msgstr "KS"
@@ -1940,7 +1907,7 @@ msgstr "KS"
 #: model:ir.model,name:mrp.model_report_mrp_inout
 #: view:report.mrp.inout:0
 msgid "Stock value variation"
-msgstr "Atsargų lygio pokytis"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,note:mrp.process_node_mts0
@@ -1966,20 +1933,19 @@ msgstr "KS revizijos"
 
 #. module: mrp
 #: field:report.mrp.inout,date:0
-#: view:report.workcenter.load:0
 #: field:report.workcenter.load,name:0
 msgid "Week"
-msgstr "Savaitė"
+msgstr ""
 
 #. module: mrp
 #: selection:mrp.production,priority:0
 msgid "Normal"
-msgstr "Įprasta"
+msgstr ""
 
 #. module: mrp
 #: view:mrp.production:0
 msgid "Production started late"
-msgstr "Pavėluotai pradėta gamyba"
+msgstr ""
 
 #. module: mrp
 #: model:process.node,note:mrp.process_node_routing0
@@ -1991,17 +1957,17 @@ msgstr ""
 #: model:ir.actions.report.xml,name:mrp.report_cost_structure
 #, python-format
 msgid "Cost Structure"
-msgstr "Savikainos struktūra"
+msgstr ""
 
 #. module: mrp
 #: model:res.groups,name:mrp.group_mrp_user
 msgid "User"
-msgstr "Naudotojas"
+msgstr ""
 
 #. module: mrp
 #: selection:mrp.product.produce,mode:0
 msgid "Consume & Produce"
-msgstr "Sunaudoti žaliavas ir pagaminti"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.bom,bom_id:0
@@ -2011,7 +1977,7 @@ msgstr "Tėvinė KS"
 #. module: mrp
 #: report:bom.structure:0
 msgid "BOM Ref"
-msgstr "KS nr."
+msgstr ""
 
 #. module: mrp
 #: model:ir.actions.act_window,help:mrp.mrp_bom_form_action2
@@ -2027,7 +1993,7 @@ msgid "Litre"
 msgstr ""
 
 #. module: mrp
-#: code:addons/mrp/mrp.py:765
+#: code:addons/mrp/mrp.py:762
 #, python-format
 msgid ""
 "You are going to produce total %s quantities of \"%s\".\n"
@@ -2050,19 +2016,17 @@ msgstr ""
 #. module: mrp
 #: selection:mrp.production,state:0
 msgid "Production Started"
-msgstr "Pradėta gamyba"
+msgstr ""
 
 #. module: mrp
 #: field:mrp.product.produce,product_qty:0
 msgid "Select Quantity"
-msgstr "Gaminamas kiekis"
+msgstr ""
 
 #. module: mrp
+#: model:ir.actions.act_window,name:mrp.act_product_product_2_mrp_bom
 #: model:ir.actions.act_window,name:mrp.mrp_bom_form_action
-#: model:ir.actions.act_window,name:mrp.product_open_bom
 #: model:ir.ui.menu,name:mrp.menu_mrp_bom_form_action
-#: view:mrp.bom:0
-#: view:product.product:0
 #: field:product.product,bom_ids:0
 msgid "Bill of Materials"
 msgstr "Komplektavimo specifikacijos"
@@ -2073,9 +2037,10 @@ msgstr "Komplektavimo specifikacijos"
 #: view:mrp.bom:0
 #: field:mrp.bom,property_ids:0
 #: view:mrp.property:0
+#: view:procurement.order:0
 #: field:procurement.order,property_ids:0
 msgid "Properties"
-msgstr "Savybės"
+msgstr "Ypatybės"
 
 #. module: mrp
 #: view:mrp.routing.workcenter:0
@@ -2110,7 +2075,6 @@ msgid "You must assign a production lot for this product"
 msgstr ""
 
 #. module: mrp
-#: view:mrp.production:0
 #: field:stock.move,production_id:0
 msgid "Production"
 msgstr "Gamyba"
@@ -2119,12 +2083,12 @@ msgstr "Gamyba"
 #: model:ir.model,name:mrp.model_mrp_production_workcenter_line
 #: field:mrp.production.workcenter.line,name:0
 msgid "Work Order"
-msgstr "Užduoties pavadinimas"
+msgstr ""
 
 #. module: mrp
 #: view:board.board:0
 msgid "Procurements in Exception"
-msgstr "Neįvykdyti planiniai užsakymai"
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_minimumstockprocure0
@@ -2153,8 +2117,14 @@ msgid "Change Product Qty"
 msgstr "Pakeisti produkto kiekį"
 
 #. module: mrp
+#: view:mrp.bom.revision:0
+#: field:mrp.bom.revision,description:0
+#: view:mrp.property:0
+#: view:mrp.property.group:0
 #: field:mrp.routing,note:0
+#: view:mrp.routing.workcenter:0
 #: field:mrp.routing.workcenter,note:0
+#: view:mrp.workcenter:0
 #: field:mrp.workcenter,note:0
 msgid "Description"
 msgstr "Aprašymas"
@@ -2175,10 +2145,7 @@ msgid "The way to procurement depends on the product type."
 msgstr ""
 
 #. module: mrp
-#: model:ir.actions.act_window,name:mrp.open_board_manufacturing
-#: model:ir.ui.menu,name:mrp.menu_board_manufacturing
 #: model:ir.ui.menu,name:mrp.menu_mrp_manufacturing
-#: model:ir.ui.menu,name:mrp.next_id_77
 msgid "Manufacturing"
 msgstr "Gamyba"
 
@@ -2191,7 +2158,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:mrp.mrp_property_group_action
 #: model:ir.ui.menu,name:mrp.menu_mrp_property_group_action
 msgid "Property Groups"
-msgstr "Savybių grupės"
+msgstr ""
 
 #. module: mrp
 #: model:process.transition,note:mrp.process_transition_procurestockableproduct0
@@ -2211,9 +2178,7 @@ msgstr ""
 #. module: mrp
 #: help:mrp.workcenter,time_stop:0
 msgid "Time in hours for the cleaning."
-msgstr ""
-"Užtrunkamas laikas valandomis darbo vietos valymui ar įrengimų tvarkymui "
-"pabaigus gamybą."
+msgstr "Laikas valandomis pasiruošimui."
 
 #. module: mrp
 #: model:process.transition,name:mrp.process_transition_purchaseprocure0
@@ -2241,8 +2206,6 @@ msgid ""
 "Specify quantity of products to produce or buy. Report of Cost structure "
 "will be displayed base on this quantity."
 msgstr ""
-"Nurodykite gaminamą ar perkamą produktų kiekį. Produkto savikainos "
-"struktūros ataskaita bus paruošta pagal šį kiekį."
 
 #. module: mrp
 #: selection:mrp.bom,method:0
@@ -2260,17 +2223,16 @@ msgstr "Seka"
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_view_resource_calendar_leaves_search_mrp
 msgid "Resource Leaves"
-msgstr "Resursų prastovos"
+msgstr ""
 
 #. module: mrp
 #: help:mrp.bom,sequence:0
 msgid "Gives the sequence order when displaying a list of bills of material."
 msgstr ""
-"Eilės tvarka, pagal kurią išdėstomas komplektavimo specifikacijos sąrašas."
 
 #. module: mrp
 #: view:mrp.production:0
 #: field:mrp.production,move_lines:0
 #: report:mrp.production.order:0
 msgid "Products to Consume"
-msgstr "Naudojamos žaliavos"
+msgstr ""

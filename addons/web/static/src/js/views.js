@@ -313,8 +313,8 @@ session.web.ViewManager =  session.web.OldWidget.extend(/** @lends session.web.V
             var container = $("#" + this.element_id + '_view_' + view_type);
             view_promise = controller.appendTo(container);
             this.views[view_type].controller = controller;
+            this.views[view_type].deferred.resolve(view_type);
             $.when(view_promise).then(function() {
-                self.views[view_type].deferred.resolve(view_type);
                 self.on_controller_inited(view_type, controller);
                 if (self.searchview
                         && self.flags.auto_search
@@ -701,7 +701,7 @@ session.web.ViewManagerAction = session.web.ViewManager.extend(/** @lends oepner
             );
         } 
 
-        $.when(this.views[this.active_view] ? this.views[this.active_view].deferred : $.when(), defs).then(function() {
+        $.when(defs).then(function() {
             self.views[self.active_view].controller.do_load_state(state, warm);
         });
     },
@@ -1050,14 +1050,12 @@ session.web.TranslateDialog = session.web.Dialog.extend({
         var trads = {},
             self = this,
             trads_mutex = new $.Mutex();
-        self.$fields_form.find('.oe_trad_field.touched').parents('tr').each(function() {
-            $(this).find('.oe_trad_field').each(function() {
-                var field = $(this).attr('name').split('-');
-                if (!trads[field[0]]) {
-                    trads[field[0]] = {};
-                }
-                trads[field[0]][field[1]] = $(this).val();
-            });
+        self.$fields_form.find('.oe_trad_field.touched').each(function() {
+            var field = $(this).attr('name').split('-');
+            if (!trads[field[0]]) {
+                trads[field[0]] = {};
+            }
+            trads[field[0]][field[1]] = $(this).val();
         });
         _.each(trads, function(data, code) {
             if (code === self.view_language) {
@@ -1066,7 +1064,8 @@ session.web.TranslateDialog = session.web.Dialog.extend({
                 });
             }
             trads_mutex.exec(function() {
-                return self.view.dataset.write(self.view.datarecord.id, data, { context : { 'lang': code } });
+                //return self.view.dataset.write(self.view.datarecord.id, data, { context : { 'lang': code } });
+                return new session.web.DataSet(self, self.view.dataset.model, self.view.dataset.get_context()).write(self.view.datarecord.id, data, { context : { 'lang': code }})
             });
         });
         this.close();

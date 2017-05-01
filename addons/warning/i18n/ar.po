@@ -7,20 +7,20 @@ msgstr ""
 "Project-Id-Version: OpenERP Server 5.0.4\n"
 "Report-Msgid-Bugs-To: support@openerp.com\n"
 "POT-Creation-Date: 2012-02-08 00:37+0000\n"
-"PO-Revision-Date: 2012-11-16 19:18+0000\n"
-"Last-Translator: kifcaliph <Unknown>\n"
+"PO-Revision-Date: 2012-09-08 18:13+0000\n"
+"Last-Translator: almodhesh <Unknown>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:26+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-09 05:08+0000\n"
+"X-Generator: Launchpad (build 15914)\n"
 
 #. module: warning
 #: sql_constraint:purchase.order:0
 #: sql_constraint:sale.order:0
 msgid "Order Reference must be unique per Company!"
-msgstr "مرجع الأمر يجب أن يكون فريداً لكل شركة علي حدا!"
+msgstr ""
 
 #. module: warning
 #: model:ir.model,name:warning.model_purchase_order_line
@@ -133,10 +133,8 @@ msgstr "أمر الشراء"
 
 #. module: warning
 #: sql_constraint:stock.picking:0
-#: sql_constraint:stock.picking.in:0
-#: sql_constraint:stock.picking.out:0
 msgid "Reference must be unique per Company!"
-msgstr "المرجع يجب أن يكون فريداً لكل شركة علي حدا!"
+msgstr ""
 
 #. module: warning
 #: field:res.partner,sale_warn_msg:0
@@ -166,12 +164,10 @@ msgstr ""
 #. module: warning
 #: code:addons/warning/warning.py:67
 #: code:addons/warning/warning.py:96
-#: code:addons/warning/warning.py:130
-#: code:addons/warning/warning.py:162
-#: code:addons/warning/warning.py:192
-#: code:addons/warning/warning.py:218
-#: code:addons/warning/warning.py:266
-#: code:addons/warning/warning.py:299
+#: code:addons/warning/warning.py:132
+#: code:addons/warning/warning.py:163
+#: code:addons/warning/warning.py:213
+#: code:addons/warning/warning.py:246
 #, python-format
 msgid "Alert for %s !"
 msgstr ""
@@ -179,7 +175,7 @@ msgstr ""
 #. module: warning
 #: sql_constraint:account.invoice:0
 msgid "Invoice Number must be unique per Company!"
-msgstr "رقم الفاتورة يجب أن يكون فريداً داخل المشأة !"
+msgstr ""
 
 #. module: warning
 #: constraint:res.partner:0
@@ -189,7 +185,7 @@ msgstr "خطأ ! لا يمكنك إنشاء أعضاء مرتبطين و متد�
 #. module: warning
 #: constraint:account.invoice:0
 msgid "Invalid BBA Structured Communication !"
-msgstr "خطأ في إتصال قاعدة البيانات"
+msgstr ""
 
 #. module: warning
 #: view:res.partner:0
@@ -204,12 +200,10 @@ msgstr ""
 #. module: warning
 #: code:addons/warning/warning.py:68
 #: code:addons/warning/warning.py:97
-#: code:addons/warning/warning.py:132
-#: code:addons/warning/warning.py:163
-#: code:addons/warning/warning.py:193
-#: code:addons/warning/warning.py:219
-#: code:addons/warning/warning.py:267
-#: code:addons/warning/warning.py:300
+#: code:addons/warning/warning.py:134
+#: code:addons/warning/warning.py:164
+#: code:addons/warning/warning.py:214
+#: code:addons/warning/warning.py:247
 #, python-format
 msgid "Warning for %s"
 msgstr "تحذير لـ %s"
@@ -220,7 +214,7 @@ msgid "Warning on the Sale Order"
 msgstr "تحذير على طلب البيع"
 
 #. module: warning
-#: constraint:res.partner:0
+#: constraint:product.product:0
 msgid "Error: Invalid ean code"
 msgstr "خطأ: كود إين غير صالح"
 
@@ -236,12 +230,10 @@ msgstr "شريك"
 
 #. module: warning
 #: model:ir.model,name:warning.model_sale_order
-#: field:res.partner,sale_warn:0
 msgid "Sales Order"
 msgstr "أمر المبيعات"
 
 #. module: warning
 #: model:ir.model,name:warning.model_sale_order_line
-#: field:product.product,sale_line_warn:0
 msgid "Sales Order Line"
 msgstr "سطر أمر المبيعات"

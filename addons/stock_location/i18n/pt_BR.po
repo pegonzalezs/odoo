@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:25+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-09-17 04:59+0000\n"
+"X-Generator: Launchpad (build 15944)\n"
 
 #. module: stock_location
 #: selection:product.pulled.flow,picking_type:0
@@ -90,8 +90,6 @@ msgid ""
 "Pulled procurement coming from original location %s, pull rule %s, via "
 "original Procurement %s (#%d)"
 msgstr ""
-"Aquisição Puxada proveniente da localização original %s, regra de puxamento "
-"%s, via Aquisição original %s (#%d)"
 
 #. module: stock_location
 #: model:ir.model,name:stock_location.model_stock_location
@@ -149,7 +147,7 @@ msgstr "Comprar"
 #. module: stock_location
 #: view:product.product:0
 msgid "Pushed flows"
-msgstr "Fluxos Empurrados"
+msgstr ""
 
 #. module: stock_location
 #: model:stock.location,name:stock_location.location_dispatch_zone
@@ -164,7 +162,7 @@ msgstr "Movimentação do Estoque"
 #. module: stock_location
 #: view:product.product:0
 msgid "Pulled flows"
-msgstr "Fluxos Puxados"
+msgstr ""
 
 #. module: stock_location
 #: field:product.pulled.flow,company_id:0
@@ -192,12 +190,12 @@ msgstr "Produzir"
 #. module: stock_location
 #: selection:product.pulled.flow,procure_method:0
 msgid "Make to Order"
-msgstr "Fabricar para Pedido"
+msgstr "Adquirir Sempre"
 
 #. module: stock_location
 #: selection:product.pulled.flow,procure_method:0
 msgid "Make to Stock"
-msgstr "Fabricar para Estoque"
+msgstr "Avaliar Estoque"
 
 #. module: stock_location
 #: field:product.pulled.flow,partner_address_id:0
@@ -279,9 +277,9 @@ msgid ""
 "supplying. 'Make to Order': When needed, purchase or produce for the "
 "procurement request."
 msgstr ""
-"'Fazer para Estoque': Quando é necessário obter do estoque ou aguardar "
-"reposição. 'Fazer para Pedido': Quando é necessário adquirir ou produzir de "
-"acordo com a requisição."
+"'Avaliar Estoque': Quando necessário, obter do estoque ou aguardar "
+"reposição. 'Adquirir Sempre': Quando necessário, adquirir ou produzir de "
+"acordo com a requisição"
 
 #. module: stock_location
 #: help:product.pulled.flow,location_id:0
@@ -322,13 +320,11 @@ msgid ""
 "Picking for pulled procurement coming from original location %s, pull rule "
 "%s, via original Procurement %s (#%d)"
 msgstr ""
-"Separação Puxada vindo da localização original %s, regra de puxamento %s, "
-"via Aquisição original %s (#%d)"
 
 #. module: stock_location
 #: field:product.product,path_ids:0
 msgid "Pushed Flow"
-msgstr "Fluxo Empurrado"
+msgstr ""
 
 #. module: stock_location
 #: code:addons/stock_location/procurement_pull.py:89
@@ -337,8 +333,6 @@ msgid ""
 "Move for pulled procurement coming from original location %s, pull rule %s, "
 "via original Procurement %s (#%d)"
 msgstr ""
-"Movimento para Aquisição Puxada vindo da localização original %s, regra de "
-"arrasto %s, via Aquisição original %s (#%d)"
 
 #. module: stock_location
 #: constraint:stock.move:0

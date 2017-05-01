@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:00+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:44+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr
 #: model:process.node,name:hr.process_node_openerpuser0
@@ -23,9 +23,9 @@ msgid "Openerp user"
 msgstr "Usuário Openerp"
 
 #. module: hr
-#: field:hr.job,requirements:0
+#: view:hr.job:0 field:hr.job,requirements:0
 msgid "Requirements"
-msgstr "Pré-requisitos"
+msgstr "Requisitos"
 
 #. module: hr
 #: constraint:hr.department:0
@@ -35,7 +35,7 @@ msgstr "Erro! Voce não pode criar departamentos recursivos."
 #. module: hr
 #: model:process.transition,name:hr.process_transition_contactofemployee0
 msgid "Link the employee to information"
-msgstr "Associar o funcionário a informação"
+msgstr "Ligar o funcionário à informação"
 
 #. module: hr
 #: field:hr.employee,sinid:0
@@ -43,18 +43,14 @@ msgid "SIN No"
 msgstr "No SIN"
 
 #. module: hr
-#: model:ir.actions.act_window,name:hr.open_board_hr
-#: model:ir.ui.menu,name:hr.menu_hr_dashboard
 #: model:ir.ui.menu,name:hr.menu_hr_main
-#: model:ir.ui.menu,name:hr.menu_hr_reporting
+#: model:ir.ui.menu,name:hr.menu_hr_management
 #: model:ir.ui.menu,name:hr.menu_hr_root
-#: model:ir.ui.menu,name:hr.menu_human_resources_configuration
 msgid "Human Resources"
-msgstr "Recursos Humanos"
+msgstr "Recursos humanos"
 
 #. module: hr
-#: view:hr.employee:0
-#: view:hr.job:0
+#: view:hr.employee:0 view:hr.job:0
 msgid "Group By..."
 msgstr "Agrupar Por..."
 
@@ -79,12 +75,8 @@ msgstr ""
 "este cargo."
 
 #. module: hr
-#: view:hr.department:0
-#: view:hr.employee:0
-#: field:hr.employee,department_id:0
-#: view:hr.job:0
-#: field:hr.job,department_id:0
-#: model:ir.model,name:hr.model_hr_department
+#: view:hr.employee:0 field:hr.employee,department_id:0 view:hr.job:0
+#: field:hr.job,department_id:0 view:res.users:0
 msgid "Department"
 msgstr "Departamento"
 
@@ -104,9 +96,7 @@ msgid "In Recruitment"
 msgstr "Em Recrutamento"
 
 #. module: hr
-#: field:hr.department,company_id:0
-#: view:hr.employee:0
-#: view:hr.job:0
+#: field:hr.department,company_id:0 view:hr.employee:0 view:hr.job:0
 #: field:hr.job,company_id:0
 msgid "Company"
 msgstr "Empresa"
@@ -141,9 +131,9 @@ msgid "Parent Department"
 msgstr "Departamento pai"
 
 #. module: hr
-#: field:hr.employee,notes:0
+#: view:hr.employee:0 field:hr.employee,notes:0
 msgid "Notes"
-msgstr "Observações"
+msgstr "Notas"
 
 #. module: hr
 #: selection:hr.employee,marital:0
@@ -229,7 +219,7 @@ msgid "Child Categories"
 msgstr "Categorias Filha"
 
 #. module: hr
-#: field:hr.job,description:0
+#: view:hr.job:0 field:hr.job,description:0
 #: model:ir.model,name:hr.model_hr_job
 msgid "Job Description"
 msgstr "Descrição da função"
@@ -245,11 +235,10 @@ msgid "My Departments Employee"
 msgstr "Meus Departamentos de Funcionário"
 
 #. module: hr
-#: view:hr.employee:0
-#: model:ir.model,name:hr.model_hr_employee
+#: view:hr.employee:0 model:ir.model,name:hr.model_hr_employee
 #: model:process.node,name:hr.process_node_employee0
 msgid "Employee"
-msgstr "Funcionário"
+msgstr "Colaborador"
 
 #. module: hr
 #: model:process.node,note:hr.process_node_employeecontact0
@@ -272,14 +261,13 @@ msgid "Reporting"
 msgstr "Relatórios"
 
 #. module: hr
-#: view:board.board:0
+#: model:ir.actions.act_window,name:hr.open_board_hr
+#: model:ir.ui.menu,name:hr.menu_hr_dashboard_user
 msgid "Human Resources Dashboard"
 msgstr "Painel de Recursos Humanos"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,job_id:0
-#: view:hr.job:0
+#: view:hr.employee:0 field:hr.employee,job_id:0 view:hr.job:0
 msgid "Job"
 msgstr "Função"
 
@@ -291,7 +279,7 @@ msgstr "Membros"
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_hr_configuration
 msgid "Configuration"
-msgstr "Configuração"
+msgstr "Configuração."
 
 #. module: hr
 #: view:hr.employee:0 field:hr.employee,category_ids:0
@@ -322,6 +310,7 @@ msgstr "Erro ! Você não pode criar Categorias recursivas."
 #: view:hr.department:0
 #: model:ir.actions.act_window,name:hr.open_module_tree_department
 #: model:ir.ui.menu,name:hr.menu_hr_department_tree
+#: field:res.users,context_department_id:0
 msgid "Departments"
 msgstr "Departamentos"
 
@@ -350,7 +339,7 @@ msgstr "Categorias de Colaboradores"
 #: view:hr.employee.category:0
 #: model:ir.model,name:hr.model_hr_employee_category
 msgid "Employee Category"
-msgstr "Categoria de Funcionários"
+msgstr "Categoria de Colaborador"
 
 #. module: hr
 #: model:process.process,name:hr.process_process_employeecontractprocess0
@@ -401,17 +390,17 @@ msgstr ""
 #. module: hr
 #: help:hr.employee,bank_account_id:0
 msgid "Employee bank salary account"
-msgstr "Conta Bancária para Salário do Funcionário"
+msgstr "Conta Salário bancária do Funcionário"
 
 #. module: hr
 #: field:hr.department,note:0
 msgid "Note"
-msgstr "Observação"
+msgstr "Nota"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_view_employee_tree
 msgid "Employees Structure"
-msgstr "Estrutura de Funcionários"
+msgstr "Estrutura de Funcional"
 
 #. module: hr
 #: constraint:res.users:0
@@ -442,10 +431,8 @@ msgstr "Departamentos filho (Subordinados)"
 
 #. module: hr
 #: view:hr.employee:0
-#: view:hr.job:0
-#: field:hr.job,state:0
 msgid "Status"
-msgstr "Situação"
+msgstr "Situação atual"
 
 #. module: hr
 #: model:ir.actions.act_window,name:hr.open_view_categ_tree
@@ -549,7 +536,7 @@ msgid "Employee form and structure"
 msgstr "Formulário de Funcionários e estrutura"
 
 #. module: hr
-#: field:hr.employee,image:0
+#: field:hr.employee,photo:0
 msgid "Photo"
 msgstr "Foto"
 
@@ -581,7 +568,7 @@ msgstr "Celular Comercial"
 #. module: hr
 #: view:hr.employee.category:0
 msgid "Employees Categories"
-msgstr "Categorias de Funcionários"
+msgstr "Categorias de Colaboradores"
 
 #. module: hr
 #: field:hr.employee,address_home_id:0
@@ -604,7 +591,7 @@ msgid "Job Name"
 msgstr "Nome da Função"
 
 #. module: hr
-#: view:hr.job:0
+#: view:hr.job:0 selection:hr.job,state:0
 msgid "In Position"
 msgstr "Em Posição"
 
@@ -621,7 +608,7 @@ msgstr "Nacionalidade"
 #. module: hr
 #: model:ir.ui.menu,name:hr.menu_open_view_attendance_reason_config
 msgid "Leaves"
-msgstr "Folgas"
+msgstr "Faltas"
 
 #. module: hr
 #: view:board.board:0
@@ -635,7 +622,6 @@ msgstr "Recurso"
 
 #. module: hr
 #: field:hr.department,complete_name:0
-#: field:hr.employee,name_related:0
 #: field:hr.employee.category,complete_name:0
 msgid "Name"
 msgstr "Nome"
@@ -646,15 +632,16 @@ msgid "Gender"
 msgstr "Sexo"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee.category,employee_ids:0
+#: view:hr.employee:0 view:hr.employee.category:0
+#: field:hr.employee.category,employee_ids:0 view:hr.job:0
 #: field:hr.job,employee_ids:0
 #: model:ir.actions.act_window,name:hr.hr_employee_normal_action_tree
 #: model:ir.actions.act_window,name:hr.open_view_employee_list
 #: model:ir.actions.act_window,name:hr.open_view_employee_list_my
 #: model:ir.ui.menu,name:hr.menu_open_view_employee_list_my
+#: model:ir.ui.menu,name:hr.menu_view_employee_category_configuration_form
 msgid "Employees"
-msgstr "Funcionários"
+msgstr "Colaboradores"
 
 #. module: hr
 #: help:hr.employee,sinid:0
@@ -698,8 +685,7 @@ msgid "Other Id"
 msgstr "Outro ID"
 
 #. module: hr
-#: view:hr.employee:0
-#: field:hr.employee,coach_id:0
+#: view:hr.employee:0 field:hr.employee,coach_id:0
 msgid "Coach"
 msgstr "Treinador"
 
@@ -714,11 +700,10 @@ msgid "My Departments Jobs"
 msgstr "Cargos do meu Departamento"
 
 #. module: hr
-#: field:hr.department,manager_id:0
-#: view:hr.employee:0
+#: field:hr.department,manager_id:0 view:hr.employee:0
 #: field:hr.employee,parent_id:0
 msgid "Manager"
-msgstr "Gerente"
+msgstr "Gestor"
 
 #. module: hr
 #: selection:hr.employee,marital:0

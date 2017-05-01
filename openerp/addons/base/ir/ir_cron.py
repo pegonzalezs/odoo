@@ -26,13 +26,11 @@ import threading
 import psycopg2
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import pytz
 
 import netsvc
 import openerp
 import pooler
 import tools
-from openerp import SUPERUSER_ID
 from openerp.cron import WAKE_UP_NOW
 from osv import fields, osv
 from tools import DEFAULT_SERVER_DATETIME_FORMAT
@@ -163,8 +161,7 @@ class ir_cron(osv.osv):
 
         """
         try:
-            now = fields.datetime.context_timestamp(cr, job['user_id'], now)
-            nextcall = fields.datetime.context_timestamp(cr, job['user_id'], datetime.strptime(job['nextcall'], DEFAULT_SERVER_DATETIME_FORMAT))
+            nextcall = datetime.strptime(job['nextcall'], DEFAULT_SERVER_DATETIME_FORMAT)
             numbercall = job['numbercall']
 
             ok = False
@@ -180,7 +177,7 @@ class ir_cron(osv.osv):
             if not numbercall:
                 addsql = ', active=False'
             cr.execute("UPDATE ir_cron SET nextcall=%s, numbercall=%s"+addsql+" WHERE id=%s",
-                       (nextcall.astimezone(pytz.UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT), numbercall, job['id']))
+                       (nextcall.strftime(DEFAULT_SERVER_DATETIME_FORMAT), numbercall, job['id']))
 
             if numbercall:
                 # Reschedule our own main cron thread if necessary.
@@ -244,11 +241,6 @@ class ir_cron(osv.osv):
                         # we're exiting due to an exception while acquiring the lot
                         task_cr.close()
 
-                # Force call to strptime just before starting the cron thread
-                # to prevent time.strptime AttributeError within the thread.
-                # See: http://bugs.python.org/issue7980
-                datetime.strptime('2012-01-01', '%Y-%m-%d')
-
                 # Got the lock on the job row, now spawn a thread to execute it in the transaction with the lock
                 task_thread = threading.Thread(target=self._run_job, name=job['name'], args=(task_cr, job, now))
                 # force non-daemon task threads (the runner thread must be daemon, and this property is inherited by default)
@@ -290,8 +282,8 @@ class ir_cron(osv.osv):
         :param job: job to be run (as a dictionary).
         """
         try:
-            now = fields.datetime.context_timestamp(cr, job['user_id'], now)
-            nextcall = fields.datetime.context_timestamp(cr, job['user_id'], datetime.strptime(job['nextcall'], DEFAULT_SERVER_DATETIME_FORMAT))
+            now = datetime.now() 
+            nextcall = datetime.strptime(job['nextcall'], DEFAULT_SERVER_DATETIME_FORMAT)
             numbercall = job['numbercall']
 
             ok = False
@@ -307,7 +299,7 @@ class ir_cron(osv.osv):
             if not numbercall:
                 addsql = ', active=False'
             cr.execute("UPDATE ir_cron SET nextcall=%s, numbercall=%s"+addsql+" WHERE id=%s",
-                       (nextcall.astimezone(pytz.UTC).strftime(DEFAULT_SERVER_DATETIME_FORMAT), numbercall, job['id']))
+                       (nextcall.strftime(DEFAULT_SERVER_DATETIME_FORMAT), numbercall, job['id']))
 
         finally:
             cr.commit()
@@ -412,7 +404,7 @@ class ir_cron(osv.osv):
                             class W(object):
                                 alive = True
                             worker = W()
-                            openerp.wsgi.core.post_request(worker, 'dummy')
+                            openerp.wsgi.core.post_request(worker, 'dummy', 'dummy')
                             if not worker.alive:
                                 return
                         if not acquired:

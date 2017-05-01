@@ -199,15 +199,6 @@ class res_partner_address(osv.osv):
         'city': fields.related('location_id', 'city', string='City', type="char", store=True, size=128),
         'state_id': fields.related('location_id', 'state_id', relation="res.country.state", string='Fed. State', type="many2one", store=True, domain="[('country_id','=',country_id)]"),
         'country_id': fields.related('location_id', 'country_id', type='many2one', string='Country', store=True, relation='res.country'),
-
-        'phone': fields.char('Phone', size=64),
-        'fax': fields.char('Fax', size=64),
-        'email': fields.char('E-Mail', size=240),
-
-        # fields from contact
-        'mobile' : fields.related('contact_id', 'mobile', type='char', size=64, string='Mobile'),
-        'name' : fields.related('contact_id', 'name', type='char', size=64, string="Contact Name", store=True),
-        'title' : fields.related('contact_id', 'title', type='many2one', relation='res.partner.title', string="Title", store=True),
     }
     def create(self, cr, uid, data, context={}):
         if not data.get('location_id', False):

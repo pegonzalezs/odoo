@@ -894,7 +894,6 @@ form: module.record_id""" % (xml_id,)
                                       rec.sourceline,
                                       etree.tostring(rec).strip(), exc_info=True)
                         self.cr.rollback()
-                        self.pool.clear_caches()
                         raise
         return True
 

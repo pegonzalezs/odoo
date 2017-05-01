@@ -3,7 +3,7 @@
 #
 #    OpenERP, Open Source Management Solution
 #    
-#    Copyright (c) 2011 Noviat nv/sa (www.noviat.be). All rights reserved.
+#    Copyright (c) 2012 Noviat nv/sa (www.noviat.be). All rights reserved.
 # 
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@
 ##############################################################################
 
 import account_coda
+import res_bank
 import wizard
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:

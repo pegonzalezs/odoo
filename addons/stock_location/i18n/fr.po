@@ -13,8 +13,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:24+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 10:05+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: stock_location
 #: selection:product.pulled.flow,picking_type:0
@@ -56,8 +56,7 @@ msgstr "Emplacement source"
 #. module: stock_location
 #: help:product.pulled.flow,cancel_cascade:0
 msgid "Allow you to cancel moves related to the product pull flow"
-msgstr ""
-"Autorise l'annulation des mouvements liés au flux de marchandises tiré"
+msgstr "Autorise l'annulation d'un mouvement lié au produit en flux tiré"
 
 #. module: stock_location
 #: model:ir.model,name:stock_location.model_product_pulled_flow
@@ -113,13 +112,13 @@ msgid ""
 "move has to be validated by a worker. With 'Automatic No Step Added', the "
 "location is replaced in the original move."
 msgstr ""
-"C'est utilisé pour définir des chemins que l'article devra suivre dans "
-"l'arborescence des emplacements.\n"
-"La valeur \"Mouvement Automatique\" créera un mouvement de stock après le "
+"C'est utilisé pour définir des chemins que le produit devra suivre dans "
+"l'arbre des emplacements.\n"
+"La valeur 'Mouvement Automatique' créera un mouvement de stock après le "
 "mouvement courant qui sera automatiquement validé.\n"
-"Avec \"Opération Manuelle\", le mouvement de stock doit être validé par "
-"l'opérateur.\n"
-"Avec \"Automatique sans étape ajoutée\", l'emplacement est remplacé dans le "
+"Avec 'Opération Manuelle', le mouvement de stock doit être validé par le "
+"travailleur.\n"
+"Avec 'Automatique aucune étape ajoutée', l'emplacement est remplacé dans le "
 "mouvement original."
 
 #. module: stock_location
@@ -243,8 +242,8 @@ msgstr "Nom"
 msgid ""
 "These rules set the right path of the product in the whole location tree."
 msgstr ""
-"Ces règles définissent le chemin correct de l'article dans toute "
-"l'arborescence des emplacements."
+"Ces règles placent le chemin correct du produit dans l'arbre complet des "
+"emplacements."
 
 #. module: stock_location
 #: constraint:stock.move:0
@@ -260,7 +259,7 @@ msgstr "Opération manuelle"
 #: model:ir.model,name:stock_location.model_product_product
 #: field:product.pulled.flow,product_id:0
 msgid "Product"
-msgstr "Article"
+msgstr "Produit"
 
 #. module: stock_location
 #: field:product.pulled.flow,procure_method:0
@@ -280,8 +279,8 @@ msgid ""
 "supplying. 'Make to Order': When needed, purchase or produce for the "
 "procurement request."
 msgstr ""
-"\"Production sur stock\" : quand il y a une demande, on prend du stock ou on "
-"attend jusqu'au prochain réapprovisionnement. \"Production à la demande\" : "
+"'Production sur stock' : quand il y a une demande, on prend du stock ou on "
+"attend jusqu'au prochain réapprovisionnement. 'Production à la demande' : "
 "quand il y a une demande, on achète ou on fabrique selon cette demande."
 
 #. module: stock_location
@@ -293,7 +292,7 @@ msgstr ""
 #. module: stock_location
 #: field:stock.location.path,product_id:0
 msgid "Products"
-msgstr "Articles"
+msgstr "Produits"
 
 #. module: stock_location
 #: code:addons/stock_location/procurement_pull.py:118
@@ -311,7 +310,7 @@ msgstr "Contrôle qualité"
 #: selection:product.pulled.flow,invoice_state:0
 #: selection:stock.location.path,invoice_state:0
 msgid "Not Applicable"
-msgstr "Sans objet"
+msgstr "Non applicable"
 
 #. module: stock_location
 #: field:stock.location.path,delay:0
@@ -391,7 +390,7 @@ msgid ""
 "products"
 msgstr ""
 "En fonction de la société, choisissez si vous voulez envoyer ou recevoir les "
-"articles"
+"produits"
 
 #. module: stock_location
 #: model:stock.location,name:stock_location.location_order

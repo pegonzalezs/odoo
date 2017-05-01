@@ -14,14 +14,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:02+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 09:46+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: hr_payroll
 #: field:hr.payslip.line,condition_select:0
 #: field:hr.salary.rule,condition_select:0
 msgid "Condition Based on"
-msgstr "Koşu Bazında"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
@@ -29,19 +29,17 @@ msgid "Monthly"
 msgstr "Aylık"
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: field:hr.payslip,line_ids:0
-#: view:hr.payslip.line:0
+#: view:hr.payslip:0 field:hr.payslip,line_ids:0
 #: model:ir.actions.act_window,name:hr_payroll.act_contribution_reg_payslip_lines
 msgid "Payslip Lines"
-msgstr "Maaş bordrosu Satırları"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip.line:0
 #: model:ir.model,name:hr_payroll.model_hr_salary_rule_category
 #: report:paylip.details:0
 msgid "Salary Rule Category"
-msgstr "Maaş Kural Kategorisi"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.salary.rule.category,parent_id:0
@@ -51,45 +49,39 @@ msgid ""
 msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: view:hr.payslip.line:0
-#: view:hr.salary.rule:0
+#: view:hr.payslip:0 view:hr.payslip.line:0 view:hr.salary.rule:0
 msgid "Group By..."
-msgstr "Grupla İle..."
+msgstr "Grupla..."
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "States"
-msgstr "Durumu"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.line,input_ids:0
-#: view:hr.salary.rule:0
+#: field:hr.payslip.line,input_ids:0 view:hr.salary.rule:0
 #: field:hr.salary.rule,input_ids:0
 msgid "Inputs"
-msgstr "Girişler"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,parent_rule_id:0
 #: field:hr.salary.rule,parent_rule_id:0
 msgid "Parent Salary Rule"
-msgstr "Esas Maaş Kural"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.employee:0
-#: field:hr.employee,slip_ids:0
-#: view:hr.payslip:0
-#: view:hr.payslip.run:0
+#: field:hr.employee,slip_ids:0 view:hr.payslip:0 view:hr.payslip.run:0
 #: field:hr.payslip.run,slip_ids:0
 #: model:ir.actions.act_window,name:hr_payroll.act_hr_employee_payslip_list
 msgid "Payslips"
-msgstr "Maaş Bordroları"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payroll.structure,parent_id:0
 #: field:hr.salary.rule.category,parent_id:0
 msgid "Parent"
-msgstr "Ana"
+msgstr ""
 
 #. module: hr_payroll
 #: report:paylip.details:0 report:payslip:0
@@ -98,13 +90,11 @@ msgstr ""
 
 #. module: hr_payroll
 #: field:hr.contribution.register,company_id:0
-#: field:hr.payroll.structure,company_id:0
-#: field:hr.payslip,company_id:0
-#: field:hr.payslip.line,company_id:0
-#: field:hr.salary.rule,company_id:0
+#: field:hr.payroll.structure,company_id:0 field:hr.payslip,company_id:0
+#: field:hr.payslip.line,company_id:0 field:hr.salary.rule,company_id:0
 #: field:hr.salary.rule.category,company_id:0
 msgid "Company"
-msgstr "Firma"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
@@ -117,10 +107,9 @@ msgid ","
 msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: view:hr.payslip.run:0
+#: view:hr.payslip:0 view:hr.payslip.run:0
 msgid "Set to Draft"
-msgstr "Taslağa Ayarlayın"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.model,name:hr_payroll.model_hr_salary_rule
@@ -129,7 +118,6 @@ msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip,payslip_run_id:0
-#: view:hr.payslip.run:0
 #: model:ir.model,name:hr_payroll.model_hr_payslip_run
 msgid "Payslip Batches"
 msgstr ""
@@ -142,25 +130,22 @@ msgid ""
 msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: report:paylip.details:0
+#: report:contribution.register.lines:0 report:paylip.details:0
 #: report:payslip:0
 msgid "Quantity/Rate"
-msgstr "Miktar/Oran"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.input,payslip_id:0
-#: field:hr.payslip.line,slip_id:0
+#: field:hr.payslip.input,payslip_id:0 field:hr.payslip.line,slip_id:0
 #: field:hr.payslip.worked_days,payslip_id:0
-#: model:ir.model,name:hr_payroll.model_hr_payslip
-#: report:payslip:0
+#: model:ir.model,name:hr_payroll.model_hr_payslip report:payslip:0
 msgid "Pay Slip"
-msgstr "Makbuz"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip.employees:0
 msgid "Generate"
-msgstr "Genel"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.line,amount_percentage_base:0
@@ -171,132 +156,121 @@ msgstr ""
 #. module: hr_payroll
 #: report:contribution.register.lines:0
 msgid "Total:"
-msgstr "Toplam:"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.act_window,name:hr_payroll.act_children_salary_rules
 msgid "All Children Rules"
-msgstr "Tüm Alt Kurallar"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: view:hr.salary.rule:0
+#: view:hr.payslip:0 view:hr.salary.rule:0
 msgid "Input Data"
-msgstr "Data Giriş"
+msgstr ""
 
 #. module: hr_payroll
 #: constraint:hr.payslip:0
 msgid "Payslip 'Date From' must be before 'Date To'."
-msgstr "Maaş bordrosu 'Gönderen: Tarih' önce 'Tarihine' olmalıdır."
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.salary.rule.category:0
+#: view:hr.payslip:0 view:hr.salary.rule.category:0
 msgid "Notes"
-msgstr "Notlar"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Salary Computation"
-msgstr "Maaş Hesaplama"
+msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: field:hr.payslip.input,amount:0
-#: field:hr.payslip.line,amount:0
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:contribution.register.lines:0 field:hr.payslip.input,amount:0
+#: field:hr.payslip.line,amount:0 report:paylip.details:0 report:payslip:0
 msgid "Amount"
-msgstr "Tutar"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: view:hr.payslip.line:0
+#: view:hr.payslip:0 view:hr.payslip.line:0
 #: model:ir.model,name:hr_payroll.model_hr_payslip_line
 msgid "Payslip Line"
-msgstr "Maaş bordrosu Satır"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Other Information"
-msgstr "Diğer Bilgisi"
+msgstr ""
 
 #. module: hr_payroll
-#: help:hr.payslip.line,amount_select:0
-#: help:hr.salary.rule,amount_select:0
+#: help:hr.payslip.line,amount_select:0 help:hr.salary.rule,amount_select:0
 msgid "The computation method for the rule amount."
-msgstr "Kural miktarı hesaplama yöntemi."
+msgstr ""
 
 #. module: hr_payroll
 #: view:payslip.lines.contribution.register:0
 msgid "Contribution Register's Payslip Lines"
-msgstr "Destek Kayıtlı kullanıcısının maaş bordro Satırları"
+msgstr ""
 
 #. module: hr_payroll
 #: code:addons/hr_payroll/wizard/hr_payroll_payslips_by_employees.py:52
 #, python-format
 msgid "Warning !"
-msgstr "Uyarı!"
+msgstr ""
 
 #. module: hr_payroll
 #: report:paylip.details:0
 msgid "Details by Salary Rule Category:"
-msgstr "Maaş Kural Kategori Detayları:"
+msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Note"
-msgstr "Not"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payroll.structure,code:0
-#: field:hr.payslip,number:0
-#: report:paylip.details:0
-#: report:payslip:0
+#: field:hr.payroll.structure,code:0 field:hr.payslip,number:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Reference"
-msgstr "Referans"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Draft Slip"
-msgstr "Taslak Fiş"
+msgstr ""
 
 #. module: hr_payroll
-#: code:addons/hr_payroll/hr_payroll.py:427
+#: code:addons/hr_payroll/hr_payroll.py:422
 #, python-format
 msgid "Normal Working Days paid at 100%"
-msgstr "Normal Çalışma Günleri %100 ödenmektedir"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,condition_range_max:0
 #: field:hr.salary.rule,condition_range_max:0
 msgid "Maximum Range"
-msgstr "Maksimum Aralık"
+msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Identification No"
-msgstr "Kimlik No"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip,struct_id:0
 msgid "Structure"
-msgstr "Yapı"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.employee,total_wage:0
 msgid "Sum of all current contract's wage of employee."
-msgstr "Presonelin tüm mevcut sözleşmenin ücret toplamı."
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Total Working Days"
-msgstr "Toplam Çalışma Günleri"
+msgstr ""
 
 #. module: hr_payroll
-#: help:hr.payslip.line,code:0
-#: help:hr.salary.rule,code:0
+#: help:hr.payslip.line,code:0 help:hr.salary.rule,code:0
 msgid ""
 "The code of salary rules can be used as reference in computation of other "
 "rules. In that case, it is case sensitive."
@@ -305,17 +279,17 @@ msgstr ""
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
 msgid "Weekly"
-msgstr "Haftalık"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,rate:0
 msgid "Rate (%)"
-msgstr "Oran (%)"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Confirm"
-msgstr "Onaylamak"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.report.xml,name:hr_payroll.payslip_report
@@ -326,7 +300,7 @@ msgstr ""
 #: help:hr.payslip.line,condition_range_max:0
 #: help:hr.salary.rule,condition_range_max:0
 msgid "The maximum amount, applied for this rule."
-msgstr "Bu kural için uygulanan azami tutar."
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.line,condition_python:0
@@ -339,12 +313,12 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.payslip.employees:0
 msgid "Payslips by Employees"
-msgstr "Personel maaş bordroları"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
 msgid "Quarterly"
-msgstr "Çeyrek"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip,state:0 field:hr.payslip.run,state:0
@@ -362,19 +336,18 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.salary.rule:0
 msgid "Search Salary Rule"
-msgstr "Maaş Arama Kuralı"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip,employee_id:0
-#: field:hr.payslip.line,employee_id:0
+#: field:hr.payslip,employee_id:0 field:hr.payslip.line,employee_id:0
 #: model:ir.model,name:hr_payroll.model_hr_employee
 msgid "Employee"
-msgstr "Personel"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
 msgid "Semi-annually"
-msgstr "Yarı-yıllık"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule:0
@@ -382,21 +355,20 @@ msgid "Children definition"
 msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Email"
-msgstr "Email"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip.run:0
 msgid "Search Payslip Batches"
-msgstr "Maaş bordrosu Toplu işlemi Arama"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,amount_percentage_base:0
 #: field:hr.salary.rule,amount_percentage_base:0
 msgid "Percentage based on"
-msgstr "Yüzde Bazında"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.line,amount_percentage:0
@@ -407,7 +379,7 @@ msgstr ""
 #. module: hr_payroll
 #: field:hr.payslip,paid:0
 msgid "Made Payment Order ? "
-msgstr "Ödeme Sipariş yapılır? "
+msgstr ""
 
 #. module: hr_payroll
 #: report:contribution.register.lines:0
@@ -427,27 +399,26 @@ msgstr ""
 #. module: hr_payroll
 #: field:hr.payslip.worked_days,number_of_days:0
 msgid "Number of Days"
-msgstr "Gün Sayısı"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.payslip,state:0
 msgid "Rejected"
-msgstr "Reddedildi"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payroll.structure:0
-#: field:hr.payroll.structure,rule_ids:0
+#: view:hr.payroll.structure:0 field:hr.payroll.structure,rule_ids:0
 #: view:hr.salary.rule:0
 #: model:ir.actions.act_window,name:hr_payroll.action_salary_rule_form
 #: model:ir.ui.menu,name:hr_payroll.menu_action_hr_salary_rule_form
 msgid "Salary Rules"
-msgstr "Maaş Kuralları"
+msgstr ""
 
 #. module: hr_payroll
-#: code:addons/hr_payroll/hr_payroll.py:336
+#: code:addons/hr_payroll/hr_payroll.py:337
 #, python-format
 msgid "Refund: "
-msgstr "İade: "
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.model,name:hr_payroll.model_payslip_lines_contribution_register
@@ -455,29 +426,25 @@ msgid "PaySlip Lines by Contribution Registers"
 msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: selection:hr.payslip,state:0
-#: view:hr.payslip.run:0
+#: view:hr.payslip:0 selection:hr.payslip,state:0 view:hr.payslip.run:0
 msgid "Done"
-msgstr "Biten"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,appears_on_payslip:0
 #: field:hr.salary.rule,appears_on_payslip:0
 msgid "Appears on Payslip"
-msgstr "Maaş bordrosu üzerinde Görünüyor"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,amount_fix:0
-#: selection:hr.payslip.line,amount_select:0
-#: field:hr.salary.rule,amount_fix:0
+#: selection:hr.payslip.line,amount_select:0 field:hr.salary.rule,amount_fix:0
 #: selection:hr.salary.rule,amount_select:0
 msgid "Fixed Amount"
-msgstr "Sabit Tutar"
+msgstr ""
 
 #. module: hr_payroll
-#: help:hr.payslip.line,active:0
-#: help:hr.salary.rule,active:0
+#: help:hr.payslip.line,active:0 help:hr.salary.rule,active:0
 msgid ""
 "If the active field is set to false, it will allow you to hide the salary "
 "rule without removing it."
@@ -486,72 +453,67 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Worked Days & Inputs"
-msgstr "Çalışılan Gün ve Girişler"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip,details_by_salary_rule_category:0
 msgid "Details by Salary Rule Category"
-msgstr "Maaş Kural Kategori Detayları"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.act_window,name:hr_payroll.action_payslip_lines_contribution_register
 msgid "PaySlip Lines"
-msgstr "Maaş Bordrosu Satırları"
+msgstr ""
 
 #. module: hr_payroll
-#: help:hr.payslip.line,register_id:0
-#: help:hr.salary.rule,register_id:0
+#: help:hr.payslip.line,register_id:0 help:hr.salary.rule,register_id:0
 msgid "Eventual third party involved in the salary payment of the employees."
-msgstr "Nihai üçüncü parti Personellerin maaş ödemeleri dahil."
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.worked_days,number_of_hours:0
 msgid "Number of Hours"
-msgstr "Saat Sayısı"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "PaySlip Batch"
-msgstr "Maaş Bordrosu Toplu İş"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,condition_range_min:0
 #: field:hr.salary.rule,condition_range_min:0
 msgid "Minimum Range"
-msgstr "Minimum Aralık"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.line,child_ids:0
-#: field:hr.salary.rule,child_ids:0
+#: field:hr.payslip.line,child_ids:0 field:hr.salary.rule,child_ids:0
 msgid "Child Salary Rule"
-msgstr "Alt Maaş Kural"
+msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: field:hr.payslip,date_to:0
-#: field:hr.payslip.run,date_end:0
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:contribution.register.lines:0 field:hr.payslip,date_to:0
+#: field:hr.payslip.run,date_end:0 report:paylip.details:0 report:payslip:0
 #: field:payslip.lines.contribution.register,date_to:0
 msgid "Date To"
-msgstr "için Tarihi"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.payslip.line,condition_select:0
 #: selection:hr.salary.rule,condition_select:0
 msgid "Range"
-msgstr "Aralık"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.act_window,name:hr_payroll.action_view_hr_payroll_structure_tree
 #: model:ir.ui.menu,name:hr_payroll.menu_hr_payroll_structure_tree
 msgid "Salary Structures Hierarchy"
-msgstr "Maaş Yapı Hiyerarşi"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Payslip"
-msgstr "Maaş Bordrosu"
+msgstr ""
 
 #. module: hr_payroll
 #: constraint:hr.contract:0
@@ -564,10 +526,9 @@ msgid "Payslip Info"
 msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
 #: model:ir.actions.act_window,name:hr_payroll.act_payslip_lines
 msgid "Payslip Computation Details"
-msgstr "Maaş Bordrosu Hesaplama Ayrıntıları"
+msgstr ""
 
 #. module: hr_payroll
 #: code:addons/hr_payroll/hr_payroll.py:872
@@ -578,25 +539,25 @@ msgstr ""
 #. module: hr_payroll
 #: model:ir.model,name:hr_payroll.model_hr_payslip_input
 msgid "Payslip Input"
-msgstr "Maaş Bordro Girdisi"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule.category:0
 #: model:ir.actions.act_window,name:hr_payroll.action_hr_salary_rule_category
 #: model:ir.ui.menu,name:hr_payroll.menu_hr_salary_rule_category
 msgid "Salary Rule Categories"
-msgstr "Maaş Kural Kategoriler"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.input,contract_id:0
 #: help:hr.payslip.worked_days,contract_id:0
 msgid "The contract for which applied this input"
-msgstr "Sözleşme bu giriş uygulandı"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule:0
 msgid "Computation"
-msgstr "Hesaplama"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.input,amount:0
@@ -607,18 +568,16 @@ msgid ""
 msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip.line:0
-#: field:hr.payslip.line,amount_select:0
+#: view:hr.payslip.line:0 field:hr.payslip.line,amount_select:0
 #: field:hr.salary.rule,amount_select:0
 msgid "Amount Type"
-msgstr "Tutar Türü"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.line,category_id:0
-#: view:hr.salary.rule:0
+#: field:hr.payslip.line,category_id:0 view:hr.salary.rule:0
 #: field:hr.salary.rule,category_id:0
 msgid "Category"
-msgstr "Kategori"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.run,credit_note:0
@@ -631,7 +590,7 @@ msgstr ""
 #: model:ir.actions.act_window,name:hr_payroll.action_view_hr_payroll_structure_list_form
 #: model:ir.ui.menu,name:hr_payroll.menu_hr_payroll_structure_view
 msgid "Salary Structures"
-msgstr "Maaş Yapısı"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip.run:0
@@ -639,19 +598,14 @@ msgid "Draft Payslip Batches"
 msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: selection:hr.payslip,state:0
-#: view:hr.payslip.run:0
+#: view:hr.payslip:0 selection:hr.payslip,state:0 view:hr.payslip.run:0
 #: selection:hr.payslip.run,state:0
 msgid "Draft"
-msgstr "Taslak"
+msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: field:hr.payslip,date_from:0
-#: field:hr.payslip.run,date_start:0
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:contribution.register.lines:0 field:hr.payslip,date_from:0
+#: field:hr.payslip.run,date_start:0 report:paylip.details:0 report:payslip:0
 #: field:payslip.lines.contribution.register,date_from:0
 msgid "Date From"
 msgstr ""
@@ -669,7 +623,7 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.salary.rule:0
 msgid "Conditions"
-msgstr "Koşullar"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,amount_percentage:0
@@ -677,7 +631,7 @@ msgstr "Koşullar"
 #: field:hr.salary.rule,amount_percentage:0
 #: selection:hr.salary.rule,amount_select:0
 msgid "Percentage (%)"
-msgstr "Yüzde (%)"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
@@ -690,10 +644,9 @@ msgid "Employee Function"
 msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip,credit_note:0
-#: field:hr.payslip.run,credit_note:0
+#: field:hr.payslip,credit_note:0 field:hr.payslip.run,credit_note:0
 msgid "Credit Note"
-msgstr "Alack Notu"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
@@ -701,15 +654,14 @@ msgid "Compute Sheet"
 msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.line,active:0
-#: field:hr.salary.rule,active:0
+#: field:hr.payslip.line,active:0 field:hr.salary.rule,active:0
 msgid "Active"
-msgstr "Etkin"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule:0
 msgid "Child Rules"
-msgstr "Alt Kurallar"
+msgstr ""
 
 #. module: hr_payroll
 #: constraint:hr.employee:0
@@ -734,10 +686,9 @@ msgid "Python Expression"
 msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Designation"
-msgstr "Atama"
+msgstr ""
 
 #. module: hr_payroll
 #: code:addons/hr_payroll/wizard/hr_payroll_payslips_by_employees.py:52
@@ -754,28 +705,25 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Companies"
-msgstr "Şirketler"
+msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Authorized Signature"
-msgstr "Yetkili İmza"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip,contract_id:0
-#: field:hr.payslip.input,contract_id:0
+#: field:hr.payslip,contract_id:0 field:hr.payslip.input,contract_id:0
 #: field:hr.payslip.line,contract_id:0
 #: field:hr.payslip.worked_days,contract_id:0
 #: model:ir.model,name:hr_payroll.model_hr_contract
 msgid "Contract"
-msgstr "Sözleşme"
+msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Credit"
-msgstr "Alacak"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.contract,schedule_pay:0
@@ -804,16 +752,16 @@ msgid "Contribution"
 msgstr ""
 
 #. module: hr_payroll
-#: code:addons/hr_payroll/hr_payroll.py:346
+#: code:addons/hr_payroll/hr_payroll.py:347
 #, python-format
 msgid "Refund Payslip"
-msgstr "Maaş Bordrosu İade"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.rule.input,input_id:0
 #: model:ir.model,name:hr_payroll.model_hr_rule_input
 msgid "Salary Rule Input"
-msgstr "Maaş Kural Girdisi"
+msgstr ""
 
 #. module: hr_payroll
 #: code:addons/hr_payroll/hr_payroll.py:895
@@ -822,15 +770,14 @@ msgid "Wrong python condition defined for salary rule %s (%s)"
 msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.line,quantity:0
-#: field:hr.salary.rule,quantity:0
+#: field:hr.payslip.line,quantity:0 field:hr.salary.rule,quantity:0
 msgid "Quantity"
-msgstr "Miktar"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Refund"
-msgstr "İadesi"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule:0
@@ -838,17 +785,13 @@ msgid "Company contribution"
 msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: field:hr.payslip.input,code:0
-#: field:hr.payslip.line,code:0
-#: field:hr.payslip.worked_days,code:0
-#: field:hr.rule.input,code:0
-#: field:hr.salary.rule,code:0
-#: field:hr.salary.rule.category,code:0
-#: report:paylip.details:0
+#: report:contribution.register.lines:0 field:hr.payslip.input,code:0
+#: field:hr.payslip.line,code:0 field:hr.payslip.worked_days,code:0
+#: field:hr.rule.input,code:0 field:hr.salary.rule,code:0
+#: field:hr.salary.rule.category,code:0 report:paylip.details:0
 #: report:payslip:0
 msgid "Code"
-msgstr "Kod"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,amount_python_compute:0
@@ -859,26 +802,23 @@ msgid "Python Code"
 msgstr ""
 
 #. module: hr_payroll
-#: field:hr.payslip.input,sequence:0
-#: field:hr.payslip.line,sequence:0
-#: field:hr.payslip.worked_days,sequence:0
-#: field:hr.salary.rule,sequence:0
+#: field:hr.payslip.input,sequence:0 field:hr.payslip.line,sequence:0
+#: field:hr.payslip.worked_days,sequence:0 field:hr.salary.rule,sequence:0
 msgid "Sequence"
-msgstr "Sıralama"
+msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: report:paylip.details:0
+#: report:contribution.register.lines:0 report:paylip.details:0
 msgid "Register Name"
-msgstr "Kayıt Adı"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule:0
 msgid "General"
-msgstr "Genel"
+msgstr ""
 
 #. module: hr_payroll
-#: code:addons/hr_payroll/hr_payroll.py:669
+#: code:addons/hr_payroll/hr_payroll.py:664
 #, python-format
 msgid "Salary Slip of %s for %s"
 msgstr ""
@@ -886,32 +826,30 @@ msgstr ""
 #. module: hr_payroll
 #: model:ir.model,name:hr_payroll.model_hr_payslip_employees
 msgid "Generate payslips for all selected employees"
-msgstr "Seçilen tüm çalışanlar için maaş bordroları üret"
+msgstr ""
 
 #. module: hr_payroll
-#: field:hr.contract,struct_id:0
-#: view:hr.payroll.structure:0
-#: view:hr.payslip:0
+#: field:hr.contract,struct_id:0 view:hr.payroll.structure:0 view:hr.payslip:0
 #: view:hr.payslip.line:0
 #: model:ir.model,name:hr_payroll.model_hr_payroll_structure
 msgid "Salary Structure"
-msgstr "Maaş Yapısı"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.contribution.register,register_line_ids:0
 msgid "Register Line"
-msgstr "Kayıt Satırı"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
+#: view:hr.payslip:0 view:hr.payslip.employees:0
+#: view:payslip.lines.contribution.register:0
 msgid "Cancel"
-msgstr "İptal"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip.run:0
-#: selection:hr.payslip.run,state:0
+#: view:hr.payslip.run:0 selection:hr.payslip.run,state:0
 msgid "Close"
-msgstr "Kapalı"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip,struct_id:0
@@ -926,32 +864,31 @@ msgstr ""
 #: field:hr.payroll.structure,children_ids:0
 #: field:hr.salary.rule.category,children_ids:0
 msgid "Children"
-msgstr "Alt"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip,credit_note:0
 msgid "Indicates this payslip has a refund of another"
-msgstr "Bu maaş bordrosu başka bir geri ödeme var gösterir"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
 msgid "Bi-monthly"
-msgstr "İki Aylık"
+msgstr ""
 
 #. module: hr_payroll
 #: report:paylip.details:0
 msgid "Pay Slip Details"
-msgstr "Öde Fiş Detaylar"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.act_window,name:hr_payroll.action_view_hr_payslip_form
 #: model:ir.ui.menu,name:hr_payroll.menu_department_tree
 msgid "Employee Payslips"
-msgstr "Personel maaş bordroları"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip.line:0
-#: field:hr.payslip.line,register_id:0
+#: view:hr.payslip.line:0 field:hr.payslip.line,register_id:0
 #: field:hr.salary.rule,register_id:0
 #: model:ir.model,name:hr_payroll.model_hr_contribution_register
 msgid "Contribution Register"
@@ -960,7 +897,7 @@ msgstr ""
 #. module: hr_payroll
 #: view:payslip.lines.contribution.register:0
 msgid "Print"
-msgstr "Yazıcı"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.act_window,help:hr_payroll.action_contribution_register_form
@@ -979,40 +916,35 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.payslip.line:0
 msgid "Calculations"
-msgstr "Hesaplamalar"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Worked Days"
-msgstr "Çalışılan Günler"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Search Payslips"
-msgstr "Arama MaaşBordroları"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip.run:0
 #: model:ir.actions.act_window,name:hr_payroll.action_hr_payslip_run_tree
 #: model:ir.ui.menu,name:hr_payroll.menu_hr_payslip_run
 msgid "Payslips Batches"
-msgstr "MaaşBordroları Toplu-İşlemi"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.contribution.register:0
-#: field:hr.contribution.register,note:0
-#: field:hr.payroll.structure,note:0
-#: field:hr.payslip,name:0
-#: field:hr.payslip,note:0
-#: field:hr.payslip.input,name:0
-#: field:hr.payslip.line,note:0
-#: field:hr.payslip.worked_days,name:0
-#: field:hr.rule.input,name:0
-#: view:hr.salary.rule:0
-#: field:hr.salary.rule,note:0
+#: view:hr.contribution.register:0 field:hr.contribution.register,note:0
+#: field:hr.payroll.structure,note:0 field:hr.payslip,name:0
+#: field:hr.payslip,note:0 field:hr.payslip.input,name:0
+#: view:hr.payslip.line:0 field:hr.payslip.line,note:0
+#: field:hr.payslip.worked_days,name:0 field:hr.rule.input,name:0
+#: view:hr.salary.rule:0 field:hr.salary.rule,note:0
 #: field:hr.salary.rule.category,note:0
 msgid "Description"
-msgstr "Açıklama"
+msgstr ""
 
 #. module: hr_payroll
 #: report:paylip.details:0 report:payslip:0
@@ -1031,7 +963,7 @@ msgstr ""
 #: model:ir.ui.menu,name:hr_payroll.menu_hr_root_payroll
 #: model:ir.ui.menu,name:hr_payroll.payroll_configure
 msgid "Payroll"
-msgstr "Bordro"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.report.xml,name:hr_payroll.contribution_register
@@ -1041,13 +973,12 @@ msgstr ""
 #. module: hr_payroll
 #: selection:hr.payslip,state:0
 msgid "Waiting"
-msgstr "Bekleyen"
+msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Address"
-msgstr "adres"
+msgstr ""
 
 #. module: hr_payroll
 #: code:addons/hr_payroll/hr_payroll.py:866
@@ -1059,50 +990,42 @@ msgstr ""
 #: field:hr.payslip,worked_days_line_ids:0
 #: model:ir.model,name:hr_payroll.model_hr_payslip_worked_days
 msgid "Payslip Worked Days"
-msgstr "Maaş Bordrosu Çalışılan Günler"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.salary.rule.category:0
 msgid "Salary Categories"
-msgstr "Maaş Kategoriler"
+msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: field:hr.contribution.register,name:0
-#: field:hr.payroll.structure,name:0
-#: field:hr.payslip.line,name:0
-#: field:hr.payslip.run,name:0
-#: field:hr.salary.rule,name:0
-#: field:hr.salary.rule.category,name:0
-#: report:paylip.details:0
+#: report:contribution.register.lines:0 field:hr.contribution.register,name:0
+#: field:hr.payroll.structure,name:0 field:hr.payslip.line,name:0
+#: field:hr.payslip.run,name:0 field:hr.salary.rule,name:0
+#: field:hr.salary.rule.category,name:0 report:paylip.details:0
 #: report:payslip:0
 msgid "Name"
-msgstr "Adı"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payroll.structure:0
 msgid "Payroll Structures"
-msgstr "Bordro Yapısı"
+msgstr ""
 
 #. module: hr_payroll
-#: view:hr.payslip:0
-#: view:hr.payslip.employees:0
-#: field:hr.payslip.employees,employee_ids:0
-#: view:hr.payslip.line:0
+#: view:hr.payslip:0 view:hr.payslip.employees:0
+#: field:hr.payslip.employees,employee_ids:0 view:hr.payslip.line:0
 msgid "Employees"
-msgstr "Personeller"
+msgstr ""
 
 #. module: hr_payroll
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Bank Account"
-msgstr "Banka Hesabı"
+msgstr ""
 
 #. module: hr_payroll
-#: help:hr.payslip.line,sequence:0
-#: help:hr.salary.rule,sequence:0
+#: help:hr.payslip.line,sequence:0 help:hr.salary.rule,sequence:0
 msgid "Use to arrange calculation sequence"
-msgstr "Hesaplama sırasını düzenlemek için kullanın"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.line,condition_range:0
@@ -1116,17 +1039,17 @@ msgstr ""
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
 msgid "Annually"
-msgstr "Yıllık"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip,input_line_ids:0
 msgid "Payslip Inputs"
-msgstr "Maaş Bordrosu Girdileri"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,salary_rule_id:0
 msgid "Rule"
-msgstr "Kural"
+msgstr ""
 
 #. module: hr_payroll
 #: model:ir.actions.act_window,name:hr_payroll.action_hr_salary_rule_category_tree_view
@@ -1135,12 +1058,10 @@ msgid "Salary Rule Categories Hierarchy"
 msgstr ""
 
 #. module: hr_payroll
-#: report:contribution.register.lines:0
-#: field:hr.payslip.line,total:0
-#: report:paylip.details:0
-#: report:payslip:0
+#: report:contribution.register.lines:0 field:hr.payslip.line,total:0
+#: report:paylip.details:0 report:payslip:0
 msgid "Total"
-msgstr "Toplam"
+msgstr ""
 
 #. module: hr_payroll
 #: help:hr.payslip.line,appears_on_payslip:0
@@ -1151,16 +1072,15 @@ msgstr ""
 #. module: hr_payroll
 #: view:hr.payslip.line:0
 msgid "Search Payslip Lines"
-msgstr "Arama MaaşBordro Satırları"
+msgstr ""
 
 #. module: hr_payroll
 #: view:hr.payslip:0
 msgid "Details By Salary Rule Category"
-msgstr "Maaş Kural Kategori Detayları"
+msgstr ""
 
 #. module: hr_payroll
-#: help:hr.payslip.input,code:0
-#: help:hr.payslip.worked_days,code:0
+#: help:hr.payslip.input,code:0 help:hr.payslip.worked_days,code:0
 #: help:hr.rule.input,code:0
 msgid "The code that can be used in the salary rules"
 msgstr ""
@@ -1169,31 +1089,31 @@ msgstr ""
 #: view:hr.payslip.run:0
 #: model:ir.actions.act_window,name:hr_payroll.action_hr_payslip_by_employees
 msgid "Generate Payslips"
-msgstr "MaaşBordroları Oluştur"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.contract,schedule_pay:0
 msgid "Bi-weekly"
-msgstr "İki haftalık"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.employee,total_wage:0
 msgid "Total Basic Salary"
-msgstr "Toplam Temel Maaş"
+msgstr ""
 
 #. module: hr_payroll
 #: selection:hr.payslip.line,condition_select:0
 #: selection:hr.salary.rule,condition_select:0
 msgid "Always True"
-msgstr "Daima Gerçek"
+msgstr ""
 
 #. module: hr_payroll
 #: report:contribution.register.lines:0
 msgid "PaySlip Name"
-msgstr "MaaşBordro Adı"
+msgstr ""
 
 #. module: hr_payroll
 #: field:hr.payslip.line,condition_range:0
 #: field:hr.salary.rule,condition_range:0
 msgid "Range Based on"
-msgstr "Aralığı Bazında"
+msgstr ""

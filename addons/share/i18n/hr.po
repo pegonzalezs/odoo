@@ -14,8 +14,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Launchpad-Export-Date: 2013-05-29 07:22+0000\n"
-"X-Generator: Launchpad (build 16640)\n"
+"X-Launchpad-Export-Date: 2012-08-28 10:03+0000\n"
+"X-Generator: Launchpad (build 15864)\n"
 
 #. module: share
 #: field:share.wizard,embed_option_title:0
@@ -53,13 +53,13 @@ msgid "Share Access URL"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:886
+#: code:addons/share/wizard/share_wizard.py:782
 #, python-format
 msgid "You may use your current login (%s) and password to view them.\n"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:620
+#: code:addons/share/wizard/share_wizard.py:601
 #, python-format
 msgid "(Modified)"
 msgstr ""
@@ -75,20 +75,18 @@ msgstr ""
 "serveru:"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:598
+#: code:addons/share/wizard/share_wizard.py:579
 #, python-format
 msgid "Sharing filter created by user %s (%s) for group %s"
 msgstr "Filtar dijeljenja je kreiran od strane korisnika %s (%s) za grupu %s"
 
 #. module: share
-#: field:share.wizard,embed_url:0
-#: field:share.wizard.result.line,share_url:0
+#: field:share.wizard,embed_url:0 field:share.wizard.result.line,share_url:0
 msgid "Share URL"
 msgstr "Share URL"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:848
-#: code:addons/share/wizard/share_wizard.py:880
+#: code:addons/share/wizard/share_wizard.py:776
 #, python-format
 msgid "These are your credentials to access this protected area:\n"
 msgstr ""
@@ -105,15 +103,12 @@ msgid "Access info"
 msgstr "Access info"
 
 #. module: share
-#. openerp-web
-#: code:addons/share/static/src/js/share.js:60
 #: view:share.wizard:0
-#, python-format
 msgid "Share"
 msgstr "Podjeli"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:570
+#: code:addons/share/wizard/share_wizard.py:551
 #, python-format
 msgid "(Duplicated for modified sharing permissions)"
 msgstr ""
@@ -139,8 +134,7 @@ msgid "Next"
 msgstr "Next"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:849
-#: code:addons/share/wizard/share_wizard.py:881
+#: code:addons/share/wizard/share_wizard.py:777
 #, python-format
 msgid "Username"
 msgstr "Korisničko ime"
@@ -177,7 +171,7 @@ msgstr ""
 "to share."
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:885
+#: code:addons/share/wizard/share_wizard.py:781
 #, python-format
 msgid ""
 "The documents have been automatically added to your current OpenERP "
@@ -195,8 +189,7 @@ msgid "Share Group"
 msgstr "Grupa dijeljenja"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid "Email required"
 msgstr "Obavezan e-mail"
@@ -226,8 +219,7 @@ msgid "Regular groups only (no share groups"
 msgstr "Regular groups only (no share groups"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:855
-#: code:addons/share/wizard/share_wizard.py:889
+#: code:addons/share/wizard/share_wizard.py:787
 #, python-format
 msgid ""
 "OpenERP is a powerful and user-friendly suite of Business Applications (CRM, "
@@ -257,7 +249,7 @@ msgid "Please indicate the emails of the persons to share with, one per line"
 msgstr ""
 
 #. module: share
-#: field:share.wizard.result.line,user_id:0
+#: field:share.wizard,embed_code:0 field:share.wizard.result.line,user_id:0
 msgid "unknown"
 msgstr ""
 
@@ -280,7 +272,7 @@ msgstr ""
 "Odabrana organizacija nije među dozvoljenim organizacijama za ovog korisnika"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:545
+#: code:addons/share/wizard/share_wizard.py:526
 #, python-format
 msgid "(Copy for sharing)"
 msgstr "(Kopiraj za dijeljenje)"
@@ -291,7 +283,7 @@ msgid "Newly created"
 msgstr "Newly created"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:635
+#: code:addons/share/wizard/share_wizard.py:616
 #, python-format
 msgid "Indirect sharing filter created by user %s (%s) for group %s"
 msgstr ""
@@ -325,7 +317,7 @@ msgid "Groups"
 msgstr "Grupe"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:657
+#: code:addons/share/wizard/share_wizard.py:636
 #, python-format
 msgid ""
 "Sorry, the current screen and filter you are trying to share are not "
@@ -342,8 +334,7 @@ msgid "Use this link"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:851
-#: code:addons/share/wizard/share_wizard.py:883
+#: code:addons/share/wizard/share_wizard.py:779
 #, python-format
 msgid "Database"
 msgstr "Baza podataka"
@@ -354,13 +345,12 @@ msgid "Domain"
 msgstr "Domena"
 
 #. module: share
-#: view:share.wizard:0
-#: field:share.wizard,result_line_ids:0
+#: view:share.wizard:0 field:share.wizard,result_line_ids:0
 msgid "Summary"
 msgstr "Sažetak"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:512
+#: code:addons/share/wizard/share_wizard.py:493
 #, python-format
 msgid "Copied access for sharing"
 msgstr "Kopiran pristup za dijeljenje"
@@ -442,7 +432,7 @@ msgid "Share Wizard"
 msgstr "Asistent dijeljenja"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:792
+#: code:addons/share/wizard/share_wizard.py:740
 #, python-format
 msgid "Shared access created!"
 msgstr ""
@@ -461,17 +451,14 @@ msgid "Access Groups"
 msgstr "Access Groups"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:850
-#: code:addons/share/wizard/share_wizard.py:882
+#: code:addons/share/wizard/share_wizard.py:778
 #: field:share.wizard.result.line,password:0
 #, python-format
 msgid "Password"
 msgstr "Lozinka"
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:77
 #: field:share.wizard,new_users:0
-#, python-format
 msgid "Emails"
 msgstr ""
 
@@ -492,8 +479,7 @@ msgid "Personal Message"
 msgstr ""
 
 #. module: share
-#: code:addons/share/wizard/share_wizard.py:834
-#: code:addons/share/wizard/share_wizard.py:865
+#: code:addons/share/wizard/share_wizard.py:763
 #, python-format
 msgid ""
 "The current user must have an email address configured in User Preferences "
