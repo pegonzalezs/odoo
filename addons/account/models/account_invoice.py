@@ -42,7 +42,7 @@ class AccountInvoice(models.Model):
     _order = "date_invoice desc, number desc, id desc"
 
     @api.one
-    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id', 'date_invoice')
+    @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'currency_id', 'company_id', 'date_invoice', 'type')
     def _compute_amount(self):
         self.amount_untaxed = sum(line.price_subtotal for line in self.invoice_line_ids)
         self.amount_tax = sum(line.amount for line in self.tax_line_ids)
@@ -74,7 +74,7 @@ class AccountInvoice(models.Model):
     @api.model
     def _default_currency(self):
         journal = self._default_journal()
-        return journal.currency_id or journal.company_id.currency_id
+        return journal.currency_id or journal.company_id.currency_id or self.env.user.company_id.currency_id
 
     @api.model
     def _get_reference_type(self):
@@ -313,7 +313,7 @@ class AccountInvoice(models.Model):
         default=lambda self: self.env.user)
     fiscal_position_id = fields.Many2one('account.fiscal.position', string='Fiscal Position', oldname='fiscal_position',
         readonly=True, states={'draft': [('readonly', False)]})
-    commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity',
+    commercial_partner_id = fields.Many2one('res.partner', string='Commercial Entity', compute_sudo=True,
         related='partner_id.commercial_partner_id', store=True, readonly=True,
         help="The commercial entity that will be used on Journal Entries for this invoice")
 
@@ -488,7 +488,8 @@ class AccountInvoice(models.Model):
             else:
                 account_id = pay_account.id
                 payment_term_id = p.property_supplier_payment_term_id.id
-            fiscal_position = p.property_account_position_id.id
+            addr = p.address_get(['delivery'])
+            fiscal_position = self.env['account.fiscal.position'].get_fiscal_position(p.id, delivery_id=addr['delivery'])
 
         self.account_id = account_id
         self.payment_term_id = payment_term_id
@@ -968,7 +969,7 @@ class AccountInvoice(models.Model):
 
         values['invoice_line_ids'] = self._refund_cleanup_lines(invoice.invoice_line_ids)
 
-        tax_lines = filter(lambda l: l.manual, invoice.tax_line_ids)
+        tax_lines = invoice.tax_line_ids
         values['tax_line_ids'] = self._refund_cleanup_lines(tax_lines)
 
         if journal_id:
@@ -1153,11 +1154,11 @@ class AccountInvoiceLine(models.Model):
     account_analytic_id = fields.Many2one('account.analytic.account',
         string='Analytic Account')
     company_id = fields.Many2one('res.company', string='Company',
-        related='invoice_id.company_id', store=True, readonly=True)
+        related='invoice_id.company_id', store=True, readonly=True, related_sudo=False)
     partner_id = fields.Many2one('res.partner', string='Partner',
-        related='invoice_id.partner_id', store=True, readonly=True)
-    currency_id = fields.Many2one('res.currency', related='invoice_id.currency_id', store=True)
-    company_currency_id = fields.Many2one('res.currency', related='invoice_id.company_currency_id', readonly=True)
+        related='invoice_id.partner_id', store=True, readonly=True, related_sudo=False)
+    currency_id = fields.Many2one('res.currency', related='invoice_id.currency_id', store=True, related_sudo=False)
+    company_currency_id = fields.Many2one('res.currency', related='invoice_id.company_currency_id', readonly=True, related_sudo=False)
 
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
