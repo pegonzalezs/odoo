@@ -224,8 +224,8 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('name', 'New') == 'New':
-            vals['name'] = self.env['ir.sequence'].next_by_code('sale.order') or 'New'
+        if vals.get('name', _('New')) == _('New'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
 
         # Makes sure partner_invoice_id', 'partner_shipping_id' and 'pricelist_id' are defined
         if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
@@ -596,7 +596,7 @@ class SaleOrderLine(models.Model):
 
             vals = line._prepare_order_line_procurement(group_id=line.order_id.procurement_group_id.id)
             vals['product_qty'] = line.product_uom_qty - qty
-            new_proc = self.env["procurement.order"].create(vals)
+            new_proc = self.env["procurement.order"].with_context(procurement_autorun_defer=True).create(vals)
             new_procs += new_proc
         new_procs.run()
         return new_procs
@@ -901,7 +901,7 @@ class ProductTemplate(models.Model):
     def action_view_sales(self):
         self.ensure_one()
         action = self.env.ref('sale.action_product_sale_list')
-        product_ids = self.product_variant_ids.ids
+        product_ids = self.with_context(active_test=False).product_variant_ids.ids
 
         return {
             'name': action.name,
