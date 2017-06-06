@@ -67,7 +67,7 @@ options.registry.gallery = options.Class.extend({
     },
     bind_change: function () {
         var self = this;
-        return this.$target.find("img").off('saved').on('saved', function (event, img) {
+        return this.$target.find("img").off('save').on('save', function (event, img) {
                 var $parent = $(img).parent();
                 $parent.addClass("saved_active");
                 var index = self.$target.find(".item.saved_active").index();
@@ -76,7 +76,7 @@ options.registry.gallery = options.Class.extend({
             });
     },
     get_imgs: function () {
-        var imgs = this.$target.find("img").addClass("img img-thumbnail img-responsive mb8 mt8").detach().get();
+        var imgs = this.$target.find("img").addClass("img img-responsive mb8 mt8").detach().get();
         imgs.sort(function (a,b) { return $(a).data('index')-$(b).data('index'); });
         return imgs;
     },
@@ -174,7 +174,6 @@ options.registry.gallery = options.Class.extend({
         $imgs.each(function (index) { // 0 based index
             $img = $(this);
             $col = $img.wrap('<div>').parent();
-            self.img_preserve_styles($img);
             self.img_responsive($img);
             $col.addClass(colClass);
             $col.appendTo($row);
@@ -186,6 +185,7 @@ options.registry.gallery = options.Class.extend({
         this.$target.css("height", "");
     },
     slideshow :function (type) {
+        var imgStyle = this.$el.find('li.active[data-styling]').data('styling') || '';
         if (type !== "reapply" && this.$target.hasClass('o_slideshow')) return;
 
         var self = this,
@@ -196,7 +196,8 @@ options.registry.gallery = options.Class.extend({
                 index: 0,
                 title: "",
                 interval : this.$target.data("interval") || false,
-                id: "slideshow_" + new Date().getTime()
+                id: "slideshow_" + new Date().getTime(),
+                userStyle: imgStyle,
             },
             $slideshow = $(qweb.render('website.gallery.slideshow', params));
         this.replace($slideshow);
@@ -228,7 +229,7 @@ options.registry.gallery = options.Class.extend({
         var $container = this.$target.find(".container:first");
         var editor = new widget.MediaDialog(null, {select_images: true}, this.$target.closest('.o_editable'), null).open();
         var index = Math.max(0, _.max(_.map(this.$target.find("img").get(), function (img) { return img.dataset.index | 0; })) + 1);
-        editor.on('saved', this, function (attachments) {
+        editor.on('save', this, function (attachments) {
             for (var i = 0 ; i < attachments.length; i++) {
                 $('<img class="img img-responsive mb8 mt8"/>')
                     .attr("src", attachments[i].src)
@@ -251,23 +252,6 @@ options.registry.gallery = options.Class.extend({
     /*
      *  helpers
      */
-    styles_to_preserve : function ($img) {
-        var styles = [ 'img-rounded', 'img-thumbnail', 'img-circle', 'shadow', 'fa-spin' ];
-        var preserved = [];
-
-        for (var style in styles) {
-            if ($img.hasClass(style)) {
-                preserved.push(style);
-            }
-        }
-        return preserved.join(' ');
-    },
-    img_preserve_styles : function ($img) {
-        var classes = this.styles_to_preserve($img);
-        $img.removeAttr("class");
-        $img.addClass(classes);
-        return $img;
-    },
     img_responsive : function (img) {
         img.addClass("img img-responsive");
         return img;
@@ -354,19 +338,22 @@ options.registry.gallery_img = options.Class.extend({
             editor.reapply();
         },0);
     },
-    remove: function (type) {
-        if (type !== "click") return;
-
-        var self = this;
+    on_remove: function () {
         var $parent = snippet_editor.globalSelector.closest(this.$target.parent());
-        this.buildingBlock.make_active(false);
-        this.$target.remove();
-        setTimeout(function () {
-            self.buildingBlock.make_active($parent);
-            var gallery = $parent.data('snippet-editor').styles.gallery;
-            gallery.reapply();
-        }, 0);
-    }
+        _.defer((function () {
+            this.buildingBlock.make_active($parent);
+            $parent.data('snippet-editor').styles.gallery.reapply();
+        }).bind(this));
+    },
+    on_focus: function () {
+        this._super.apply(this, arguments);
+        if (this._current_src && this._current_src !== this.$target.attr("src")) {
+            _.defer((function () {
+                snippet_editor.globalSelector.closest(this.$target.parent()).data('snippet-editor').styles.gallery.reapply();
+            }).bind(this));
+        }
+        this._current_src = this.$target.attr("src");
+    },
 });
 
 

@@ -9,7 +9,6 @@ from odoo.tests.common import TransactionCase, can_import
 from odoo.modules.module import get_module_resource
 from odoo.tools import mute_logger
 
-
 ID_FIELD = {
     'id': 'id',
     'name': 'id',
@@ -99,7 +98,7 @@ class TestO2M(BaseImportCase):
         self.assertEqualFields(self.get_fields('o2m'), make_field(field_type='one2many', fields=[
             ID_FIELD,
             # FIXME: should reverse field be ignored?
-            {'id': 'parent_id', 'name': 'parent_id', 'string': 'Parent id', 'type': 'many2one', 'required': False, 'fields': [
+            {'id': 'parent_id', 'name': 'parent_id', 'string': 'Parent', 'type': 'many2one', 'required': False, 'fields': [
                 {'id': 'parent_id', 'name': 'id', 'string': 'External ID', 'required': False, 'fields': [], 'type': 'id'},
                 {'id': 'parent_id', 'name': '.id', 'string': 'Database ID', 'required': False, 'fields': [], 'type': 'id'},
             ]},
@@ -202,7 +201,7 @@ class TestPreview(TransactionCase):
         })
         return import_wizard
 
-    @mute_logger('openerp.addons.base_import.models.base_import')
+    @mute_logger('odoo.addons.base_import.models.base_import')
     def test_encoding(self):
         import_wizard = self.make_import()
         result = import_wizard.parse_preview({
@@ -211,7 +210,7 @@ class TestPreview(TransactionCase):
         })
         self.assertTrue('error' in result)
 
-    @mute_logger('openerp.addons.base_import.models.base_import')
+    @mute_logger('odoo.addons.base_import.models.base_import')
     def test_csv_errors(self):
         import_wizard = self.make_import()
 
@@ -260,7 +259,7 @@ class TestPreview(TransactionCase):
             ['qux', '5', '6'],
         ])
         # Ensure we only have the response fields we expect
-        self.assertItemsEqual(result.keys(), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'debug'])
+        self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'advanced_mode', 'debug'])
 
     @unittest.skipUnless(can_import('xlrd'), "XLRD module not available")
     def test_xls_success(self):
@@ -290,7 +289,7 @@ class TestPreview(TransactionCase):
             ['qux', '5', '6'],
         ])
         # Ensure we only have the response fields we expect
-        self.assertItemsEqual(result.keys(), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'debug'])
+        self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'advanced_mode', 'debug'])
 
     @unittest.skipUnless(can_import('xlrd.xlsx'), "XLRD/XLSX not available")
     def test_xlsx_success(self):
@@ -320,7 +319,7 @@ class TestPreview(TransactionCase):
             ['qux', '5', '6'],
         ])
         # Ensure we only have the response fields we expect
-        self.assertItemsEqual(result.keys(), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'debug'])
+        self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options','advanced_mode', 'debug'])
 
     @unittest.skipUnless(can_import('odf'), "ODFPY not available")
     def test_ods_success(self):
@@ -350,7 +349,7 @@ class TestPreview(TransactionCase):
             ['aux', '5', '6'],
         ])
         # Ensure we only have the response fields we expect
-        self.assertItemsEqual(result.keys(), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'debug'])
+        self.assertItemsEqual(list(result), ['matches', 'headers', 'fields', 'preview', 'headers_type', 'options', 'advanced_mode', 'debug'])
 
 
 class test_convert_import_data(TransactionCase):
@@ -378,6 +377,31 @@ class test_convert_import_data(TransactionCase):
             ['bar', '3', '4'],
             ['qux', '5', '6'],
         ])
+
+    def test_date_fields(self):
+        import_wizard = self.env['base_import.import'].create({
+            'res_model': 'res.partner',
+            'file': 'name,date,create_date\n'
+                    '"foo","2013年07月18日","2016-10-12 06:06"\n',
+            'file_type': 'text/csv'
+
+        })
+
+        results = import_wizard.do(
+            ['name', 'date', 'create_date'],
+            {
+                'date_format': '%Y年%m月%d日',
+                'datetime_format': '%Y-%m-%d %H:%M',
+                'quoting': '"',
+                'separator': ',',
+                'headers': True
+            }
+        )
+
+        # if results empty, no errors
+        self.assertItemsEqual(results, [])
+
+
 
     def test_filtered(self):
         """ If ``False`` is provided as field mapping for a column,

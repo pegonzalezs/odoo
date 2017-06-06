@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
-import xml.etree.ElementTree as ET
+from xml.etree import ElementTree as ET
 from collections import namedtuple
 
 from odoo import api, exceptions, fields, models, _
@@ -180,7 +180,7 @@ class XmlDeclaration(models.TransientModel):
             #Check region
             #If purchase, comes from purchase order, linked to a location,
             #which is linked to the warehouse
-            #if sales, the sale order is linked to the warehouse
+            #if sales, the sales order is linked to the warehouse
             #if sales, from a delivery order, linked to a location,
             #which is linked to the warehouse
             #If none found, get the company one.
@@ -259,8 +259,10 @@ class XmlDeclaration(models.TransientModel):
 
         numlgn = 0
         for linekey in entries:
-            numlgn += 1
             amounts = entries[linekey]
+            if round(amounts[0], 0) == 0:
+                continue
+            numlgn += 1
             item = ET.SubElement(datas, 'Item')
             self._set_Dim(item, 'EXSEQCODE', unicode(numlgn))
             self._set_Dim(item, 'EXTRF', unicode(linekey.EXTRF))

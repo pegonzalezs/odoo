@@ -2,7 +2,10 @@
 
 import json
 import logging
-import urlparse
+
+import dateutil.parser
+import pytz
+from werkzeug import urls
 
 from odoo import api, fields, models, _
 from odoo.addons.payment.models.payment_acquirer import ValidationError
@@ -17,17 +20,18 @@ class AcquirerPaypal(models.Model):
     _inherit = 'payment.acquirer'
 
     provider = fields.Selection(selection_add=[('paypal', 'Paypal')])
-    paypal_email_account = fields.Char('Paypal Email ID', required_if_provider='paypal')
+    paypal_email_account = fields.Char('Paypal Email ID', required_if_provider='paypal', groups='base.group_user')
     paypal_seller_account = fields.Char(
-        'Paypal Merchant ID',
+        'Paypal Merchant ID', groups='base.group_user',
         help='The Merchant ID is used to ensure communications coming from Paypal are valid and secured.')
-    paypal_use_ipn = fields.Boolean('Use IPN', default=True, help='Paypal Instant Payment Notification')
+    paypal_use_ipn = fields.Boolean('Use IPN', default=True, help='Paypal Instant Payment Notification', groups='base.group_user')
+    paypal_pdt_token = fields.Char(string='Paypal PDT Token', required_if_provider='paypal', help='Payment Data Transfer allows you to receive notification of successful payments as they are made.', groups='base.group_user')
     # Server 2 server
     paypal_api_enabled = fields.Boolean('Use Rest API', default=False)
-    paypal_api_username = fields.Char('Rest API Username')
-    paypal_api_password = fields.Char('Rest API Password')
-    paypal_api_access_token = fields.Char('Access Token')
-    paypal_api_access_token_validity = fields.Datetime('Access Token Validity')
+    paypal_api_username = fields.Char('Rest API Username', groups='base.group_user')
+    paypal_api_password = fields.Char('Rest API Password', groups='base.group_user')
+    paypal_api_access_token = fields.Char('Access Token', groups='base.group_user')
+    paypal_api_access_token_validity = fields.Datetime('Access Token Validity', groups='base.group_user')
     # Default paypal fees
     fees_dom_fixed = fields.Float(default=0.35)
     fees_dom_var = fields.Float(default=3.4)
@@ -105,9 +109,9 @@ class AcquirerPaypal(models.Model):
             'zip_code': values.get('partner_zip'),
             'first_name': values.get('partner_first_name'),
             'last_name': values.get('partner_last_name'),
-            'paypal_return': '%s' % urlparse.urljoin(base_url, PaypalController._return_url),
-            'notify_url': '%s' % urlparse.urljoin(base_url, PaypalController._notify_url),
-            'cancel_return': '%s' % urlparse.urljoin(base_url, PaypalController._cancel_url),
+            'paypal_return': urls.url_join(base_url, PaypalController._return_url),
+            'notify_url': urls.url_join(base_url, PaypalController._notify_url),
+            'cancel_return': urls.url_join(base_url, PaypalController._cancel_url),
             'handling': '%.2f' % paypal_tx_values.pop('fees', 0.0) if self.fees_active else False,
             'custom': json.dumps({'return_url': '%s' % paypal_tx_values.pop('return_url')}) if paypal_tx_values.get('return_url') else False,
         })
@@ -193,7 +197,16 @@ class TxPaypal(models.Model):
         }
         if status in ['Completed', 'Processed']:
             _logger.info('Validated Paypal payment for tx %s: set as done' % (self.reference))
-            res.update(state='done', date_validate=data.get('payment_date', fields.datetime.now()))
+            try:
+                # dateutil and pytz don't recognize abbreviations PDT/PST
+                tzinfos = {
+                    'PST': -8 * 3600,
+                    'PDT': -7 * 3600,
+                }
+                date_validate = dateutil.parser.parse(data.get('payment_date'), tzinfos=tzinfos).astimezone(pytz.utc)
+            except:
+                date_validate = fields.Datetime.now()
+            res.update(state='done', date_validate=date_validate)
             return self.write(res)
         elif status in ['Pending', 'Expired']:
             _logger.info('Received notification for Paypal payment %s: set as pending' % (self.reference))

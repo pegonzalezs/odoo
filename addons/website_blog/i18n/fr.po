@@ -8,12 +8,11 @@
 # Olivier Dony <odo@odoo.com>, 2016
 # Fabien Bourgeois <fabien@yaltik.com>, 2016
 # Daniel & Delphine <dd2013@leschoupinous.net>, 2016
-# Frédéric LIETART <stuff@thelinuxfr.org>, 2016
+# Frédéric LIETART <stuff@tifred.fr>, 2016
 # lucasdeliege <deliegelucas@gmail.com>, 2016
 # Martin Trigaux <mat@odoo.com>, 2016
 # Florian Hatat <mininet@wanadoo.fr>, 2016
 # Leo Schmitt <inactive+lschmitt@transifex.com>, 2016
-# Quentin THEURET <quentin@theuret.net>, 2016
 # Shark McGnark <peculiarcheese@gmail.com>, 2016
 # Richard Mathot <rim@odoo.com>, 2016
 # Fabri Yohann <psn@fabri.pw>, 2016
@@ -22,10 +21,10 @@
 # Miguel Vidali <mvidali129@gmail.com>, 2016
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0alpha1e\n"
+"Project-Id-Version: Odoo Server 10.saas~14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-18 08:38+0000\n"
-"PO-Revision-Date: 2016-08-18 08:38+0000\n"
+"POT-Creation-Date: 2017-02-15 09:50+0000\n"
+"PO-Revision-Date: 2017-02-15 09:50+0000\n"
 "Last-Translator: Miguel Vidali <mvidali129@gmail.com>, 2016\n"
 "Language-Team: French (https://www.transifex.com/odoo/teams/41243/fr/)\n"
 "MIME-Version: 1.0\n"
@@ -60,7 +59,7 @@ msgstr ""
 #. openerp-web
 #: code:addons/website_blog/static/src/js/website.tour.blog.js:53
 #, python-format
-msgid "<b>Click on Save</b> to record yoru changes."
+msgid "<b>Click on Save</b> to record your changes."
 msgstr ""
 
 #. module: website_blog
@@ -136,6 +135,11 @@ msgstr "Auteur"
 #: model:ir.model.fields,field_description:website_blog.field_blog_post_author_avatar
 msgid "Avatar"
 msgstr "Avatar"
+
+#. module: website_blog
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "Black"
+msgstr "Noir"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post_blog_id
@@ -230,15 +234,14 @@ msgstr "Choisir une image depuis la librairie."
 #. openerp-web
 #: code:addons/website_blog/static/src/js/website.tour.blog.js:30
 #, python-format
-msgid "Clich here to change your post cover."
+msgid "Click here to change your post cover."
 msgstr ""
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.blog_post_short
-msgid "Click on \"Content\" on the top menu to write your first blog post."
+msgid ""
+"Click on \"New Page\" in the top-right corner to write your first blog post."
 msgstr ""
-"Cliquez sur \"Contenu\" sur le menu principal pour écrire votre premier "
-"article de blog."
 
 #. module: website_blog
 #. openerp-web
@@ -251,11 +254,6 @@ msgstr ""
 #: model:ir.actions.act_window,help:website_blog.action_blog_post
 msgid "Click to create a new blog post."
 msgstr "Cliquez pour créer un nouvel article sur le blog"
-
-#. module: website_blog
-#: model:ir.ui.view,arch_db:website_blog.website_blog
-msgid "Color"
-msgstr "Couleur"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post_content
@@ -302,14 +300,14 @@ msgid "Duplicate"
 msgstr "Dupliquer"
 
 #. module: website_blog
-#: model:ir.model,name:website_blog.model_mail_compose_message
-msgid "Email composition wizard"
-msgstr "Assistant de composition de courriel"
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "Filter Color"
+msgstr ""
 
 #. module: website_blog
-#: model:ir.model,name:website_blog.model_survey_mail_compose_message
-msgid "Email composition wizard for Survey"
-msgstr "Assistant de composition de courriel pour les sondages"
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "Filter Intensity"
+msgstr ""
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.website_blog
@@ -455,11 +453,6 @@ msgid "Once you have reviewed the content on mobile, close the preview."
 msgstr ""
 
 #. module: website_blog
-#: model:ir.ui.view,arch_db:website_blog.website_blog
-msgid "Opacity"
-msgstr "Opacité"
-
-#. module: website_blog
 #: model:blog.blog,name:website_blog.blog_blog_1
 msgid "Our Blog"
 msgstr "Notre blog"
@@ -480,7 +473,7 @@ msgid "Posts"
 msgstr "Articles"
 
 #. module: website_blog
-#: code:addons/website_blog/controllers/main.py:262
+#: code:addons/website_blog/controllers/main.py:269
 #, python-format
 msgid "Public user cannot post comments on blog post."
 msgstr ""
@@ -566,7 +559,7 @@ msgstr ""
 
 #. module: website_blog
 #. openerp-web
-#: code:addons/website_blog/models/website_blog.py:100
+#: code:addons/website_blog/models/website_blog.py:120
 #: code:addons/website_blog/static/src/js/website.tour.blog.js:52
 #, python-format
 msgid "Start writing here..."
@@ -676,12 +669,6 @@ msgstr ""
 "chemin unique;"
 
 #. module: website_blog
-#: code:addons/website_blog/models/website_blog.py:212
-#, python-format
-msgid "View Blog Post"
-msgstr "Voir l'article du blog"
-
-#. module: website_blog
 #: model:ir.model,name:website_blog.model_website
 msgid "Website"
 msgstr "Site Web"
@@ -700,6 +687,11 @@ msgstr "Messages du site web"
 #: model:ir.model.fields,help:website_blog.field_blog_post_website_message_ids
 msgid "Website communication history"
 msgstr "Historique de communication du site web"
+
+#. module: website_blog
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "White"
+msgstr "Blanc"
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.opt_blog_rc_about_us

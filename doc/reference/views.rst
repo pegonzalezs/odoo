@@ -31,7 +31,7 @@ otherwise.
 ``arch``
     the description of the view's layout
 ``groups_id``
-    :class:`~openerp.fields.Many2many` field to the groups allowed to view/use
+    :class:`~odoo.fields.Many2many` field to the groups allowed to view/use
     the current view
 ``inherit_id``
     the current view's parent view, see :ref:`reference/views/inheritance`,
@@ -97,7 +97,7 @@ how the matched node should be altered:
     the content of the inheritance spec is appended to the matched node
 ``replace``
     the content of the inheritance spec replaces the matched node.
-    Any text node containing only `$0` within the contents of the spec will
+    Any text node containing only ``$0`` within the contents of the spec will
     be replaced  by a complete copy of the matched node, effectively wrapping
     the matched node.
 ``after``
@@ -201,10 +201,6 @@ Possible children elements of the list view are:
     ``type``
         type of button, indicates how it clicking it affects Odoo:
 
-        ``workflow`` (default)
-            sends a signal to a workflow. The button's ``name`` is the
-            workflow signal, the row's record is passed as argument to the
-            signal
         ``object``
             call a method on the list's model. The button's ``name`` is the
             method, which is called with the current row's record id and the
@@ -354,7 +350,13 @@ system. Available semantic components are:
 
 ``button``
   call into the Odoo system, similar to :ref:`list view buttons
-  <reference/views/list/button>`
+  <reference/views/list/button>`. In addition, the following attribute can be
+  specified:
+
+  ``special``
+    for form views opened in dialogs: ``save`` to save the record and close the
+    dialog, ``cancel`` to close the dialog without saving.
+
 ``field``
   renders (and allow edition of, possibly) a single field of the current
   record. Possible attributes are:
@@ -363,8 +365,8 @@ system. Available semantic components are:
     the name of the field to render
   ``widget``
     fields have a default rendering based on their type
-    (e.g. :class:`~openerp.fields.Char`,
-    :class:`~openerp.fields.Many2one`). The ``widget`` attributes allows using
+    (e.g. :class:`~odoo.fields.Char`,
+    :class:`~odoo.fields.Many2one`). The ``widget`` attributes allows using
     a different rendering method and context.
 
     .. todo:: list of widgets
@@ -385,7 +387,7 @@ system. Available semantic components are:
       only displays the field in the corresponding form mode
     ``oe_no_button``
       avoids displaying the navigation button in a
-      :class:`~openerp.fields.Many2one`
+      :class:`~odoo.fields.Many2one`
     ``oe_avatar``
       for image fields, displays images as "avatar" (square, 90x90 maximum
       size, some image decorations)
@@ -397,7 +399,7 @@ system. Available semantic components are:
 
     .. deprecated:: 8.0
 
-       Use :func:`openerp.api.onchange` on the model
+       Use :func:`odoo.api.onchange` on the model
 
   ``attrs``
     dynamic meta-parameters based on record values
@@ -420,7 +422,7 @@ system. Available semantic components are:
     complex forms. *Should not* be an example of data as users are liable to
     confuse placeholder text with filled fields
   ``mode``
-    for :class:`~openerp.fields.One2many`, display mode (view type) to use for
+    for :class:`~odoo.fields.One2many`, display mode (view type) to use for
     the field's linked records. One of ``tree``, ``form``, ``kanban`` or
     ``graph``. The default is ``tree`` (a list display)
   ``help``
@@ -429,7 +431,7 @@ system. Available semantic components are:
     for binary fields, name of the related field providing the name of the
     file
   ``password``
-    indicates that a :class:`~openerp.fields.Char` field stores a password and
+    indicates that a :class:`~odoo.fields.Char` field stores a password and
     that its data shouldn't be displayed
 
 .. todo:: classes for forms
@@ -692,7 +694,7 @@ The form above contains a <sheet> element that starts with:
 Tags
 ....
 
-Most :class:`~openerp.fields.Many2many` fields, like categories, are better
+Most :class:`~odoo.fields.Many2many` fields, like categories, are better
 rendered as a list of tags. Use the widget ``many2many_tags`` for this:
 
 .. image:: forms/screenshot-04.png
@@ -823,6 +825,12 @@ attributes:
   the list view)
 ``class``
   adds HTML classes to the root HTML element of the Kanban view
+``group_create``
+  whether the "Add a new column" bar is visible or not. Default: true.
+``group_delete``
+  whether groups can be deleted via the context menu. Default: true.
+``group_edit``
+  whether groups can be edited via the context menu. Default: true.
 ``quick_create``
   whether it should be possible to create records without switching to the
   form view. By default, ``quick_create`` is enabled when the Kanban view is
@@ -864,7 +872,7 @@ Possible children of the view element are:
     an object with all the requested fields as its attributes. Each field has
     two attributes ``value`` and ``raw_value``, the former is formatted
     according to current user parameters, the latter is the direct value from
-    a :meth:`~openerp.models.Model.read` (except for date and datetime fields
+    a :meth:`~odoo.models.Model.read` (except for date and datetime fields
     that are `formatted according to user's locale
     <https://github.com/odoo/odoo/blob/a678bd4e/addons/web_kanban/static/src/js/kanban_record.js#L102>`_)
   ``formats``
@@ -934,11 +942,8 @@ Javascript API
                            caching entirely
       :returns: an image URL
 
-   .. js:function:: kanban_text_ellipsis(string[, size=160])
-
-      clips text beyond the specified size and appends an ellipsis to it. Can
-      be used to display the initial part of potentially very long fields
-      (e.g. descriptions) without the risk of unwieldy cards
+   .. warning::
+   ``kanban_text_ellipsis`` has been removed in Odoo 9. CSS ``text-overflow`` should be used instead.
 
 .. _reference/views/calendar:
 
@@ -957,24 +962,24 @@ calendar view are:
     directly in the calendar
 ``date_delay``
     alternative to ``date_stop``, provides the duration of the event instead of
-    its end date
-
-    .. todo:: what's the unit? Does it allow moving the record?
-
+    its end date (unit: day)
 ``color``
     name of a record field to use for *color segmentation*. Records in the
     same color segment are allocated the same highlight color in the calendar,
     colors are allocated semi-randomly.
+    Displayed the display_name/avatar of the visible record in the sidebar
+``readonly_form_view_id``
+    view to open in readonly mode
+``form_view_id``
+    view to open when the user create or edit an event
 ``event_open_popup``
-    opens the event in a dialog instead of switching to the form view, disabled
-    by default
+    If the option 'event_open_popup' is set to true, then the calendar view will
+    open events (or records) in a FormViewDialog. Otherwise, it will open events
+    in a new form view (with a do_action)
 ``quick_add``
     enables quick-event creation on click: only asks the user for a ``name``
     and tries to create a new event with just that and the clicked event
     time. Falls back to a full form dialog if the quick creation fails
-``display``
-    format string for event display, field names should be within brackets
-    ``[`` and ``]``
 ``all_day``
     name of a boolean field on the record indicating whether the corresponding
     event is flagged as day-long (and duration is irrelevant)
@@ -982,21 +987,49 @@ calendar view are:
     Default display mode when loading the calendar.
     Possible attributes are: ``day``, ``week``, ``month``
 
+``<field>``
+  declares fields to aggregate or to use in kanban *logic*. If the field is
+  simply displayed in the calendar cards.
 
-.. todo::
+On each field can have additional attributes:
+  ``invisible``: use "True" to hide the value in the cards
+  ``avatar_field``: only for x2many field, to display the avatar instead the
+      display_name in the cards
+  ``write_model`` and ``write_field``: you can add a filter and save the result
+      in the defined model, the filter is added in the sidebar
 
-   what's the purpose of ``<field>`` inside a calendar view?
+``templates``
+  defines the :ref:`reference/qweb` template ``calendar-box``. Cards definition
+  may be split into multiple templates for clarity which will be rendered once
+  for each record.
 
-.. todo::
+  The kanban view uses mostly-standard :ref:`javascript qweb
+  <reference/qweb/javascript>` and provides the following context variables:
 
-   calendar code is an unreadable mess, no idea what these things are:
-
-   * ``attendee``
-   * ``avatar_model``
-   * ``use_contacts``
-
-   calendar code also seems to refer to multiple additional attributes of
-   unknown purpose
+  ``instance``
+    the current :ref:`reference/javascript/client` instance
+  ``widget``
+    the current :js:class:`KanbanRecord`, can be used to fetch some
+    meta-information. These methods are also available directly in the
+    template context and don't need to be accessed via ``widget``
+    ``getColor`` to convert in a color integer
+    ``getAvatars`` to convert in an avatar image
+    ``displayFields`` list of not invisible fields
+  ``record``
+    an object with all the requested fields as its attributes. Each field has
+    two attributes ``value`` and ``raw_value``
+  ``event``
+    the calendar event object
+  ``format``
+    format method to convert values into a readable string with the user
+    parameters
+  ``fields``
+    definition of all model fields
+    parameters
+  ``user_context``
+    self-explanatory
+  ``read_only_mode``
+    self-explanatory
 
 .. _reference/views/gantt:
 
@@ -1086,10 +1119,10 @@ Possible children of the diagram view are:
     ``object`` (required)
       the edge's Odoo model
     ``source`` (required)
-      :class:`~openerp.fields.Many2one` field of the edge's model pointing to
+      :class:`~odoo.fields.Many2one` field of the edge's model pointing to
       the edge's source node record
     ``destination`` (required)
-      :class:`~openerp.fields.Many2one` field of the edge's model pointing to
+      :class:`~odoo.fields.Many2one` field of the edge's model pointing to
       the edge's destination node record
     ``label``
       Python list of attributes (as quoted strings). The corresponding
@@ -1161,10 +1194,10 @@ Possible children elements of the search view are:
     ``widget``
         use specific search widget for the field (the only use case in
         standard Odoo 8.0 is a ``selection`` widget for
-        :class:`~openerp.fields.Many2one` fields)
+        :class:`~odoo.fields.Many2one` fields)
     ``domain``
         if the field can provide an auto-completion
-        (e.g. :class:`~openerp.fields.Many2one`), filters the possible
+        (e.g. :class:`~odoo.fields.Many2one`), filters the possible
         completion results.
 
 ``filter``

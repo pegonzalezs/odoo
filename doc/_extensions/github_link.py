@@ -1,7 +1,8 @@
 import inspect
 import importlib
 import os.path
-from urlparse import urlunsplit
+
+from werkzeug import urls
 
 """
 * adds github_link(mode) context variable: provides URL (in relevant mode) of
@@ -21,7 +22,7 @@ Notes
 
 * provided ``linkcode_resolve`` only supports Python domain
 * generates https github links
-* explicitly imports ``openerp``, so useless for anyone else
+* explicitly imports ``odoo``, so useless for anyone else
 """
 
 def setup(app):
@@ -62,9 +63,9 @@ def setup(app):
             # obj doesn't have a module, or something
             return None
 
-        import openerp
+        import odoo
         # FIXME: make finding project root project-independent
-        project_root = os.path.join(os.path.dirname(openerp.__file__), '..')
+        project_root = os.path.join(os.path.dirname(odoo.__file__), '..')
         return make_github_link(
             app,
             os.path.relpath(obj_source_path, project_root),
@@ -81,7 +82,7 @@ def make_github_link(app, path, line=None, mode="blob"):
         path=path,
         mode=mode,
     )
-    return urlunsplit((
+    return urls.url_unparse((
         'https',
         'github.com',
         urlpath,

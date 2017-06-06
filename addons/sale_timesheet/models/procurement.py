@@ -25,6 +25,14 @@ class ProcurementOrder(models.Model):
     def _run(self):
         self.ensure_one()
         if self._is_procurement_task() and not self.task_id:
+            # If the SO was confirmed, cancelled, set to draft then confirmed, avoid creating a new
+            # task.
+            if self.sale_line_id:
+                existing_task = self.env['project.task'].search(
+                    [('sale_line_id', '=', self.sale_line_id.id)]
+                )
+                if existing_task:
+                    return existing_task
             # create a task for the procurement
             return self._create_service_task()
         return super(ProcurementOrder, self)._run()
@@ -39,7 +47,7 @@ class ProcurementOrder(models.Model):
 
     def _get_project(self):
         Project = self.env['project.project']
-        project = self.product_id.project_id
+        project = self.product_id.with_context(force_company=self.company_id.id).project_id
         if not project and self.sale_line_id:
             # find the project corresponding to the analytic account of the sales order
             account = self.sale_line_id.order_id.project_id
@@ -52,10 +60,10 @@ class ProcurementOrder(models.Model):
                 project = Project.browse(project_id)
         return project
 
-    def _create_service_task(self):
+    def _prepare_service_task_values(self):
         project = self._get_project()
         planned_hours = self._convert_qty_company_hours()
-        task = self.env['project.task'].create({
+        return {
             'name': '%s:%s' % (self.origin or '', self.product_id.name),
             'date_deadline': self.date_planned,
             'planned_hours': planned_hours,
@@ -63,14 +71,21 @@ class ProcurementOrder(models.Model):
             'partner_id': self.sale_line_id.order_id.partner_id.id or self.partner_dest_id.id,
             'user_id': self.env.uid,
             'procurement_id': self.id,
-            'description': self.name + '\n',
+            'description': self.name + '<br/>',
             'project_id': project.id,
             'company_id': self.company_id.id,
-        })
+        }
+
+    def _create_service_task(self):
+        task_values = self._prepare_service_task_values()
+        task = self.env['project.task'].create(task_values)
         self.write({'task_id': task.id})
 
-        self.message_post(body=_("Task created"))
+        msg_body = _("Task Created (%s): <a href=# data-oe-model=project.task data-oe-id=%d>%s</a>") % (self.product_id.name, task.id, task.name)
+        self.message_post(body=msg_body)
         if self.sale_line_id.order_id:
-            self.sale_line_id.order_id.message_post(body=_("Task created"))
+            self.sale_line_id.order_id.message_post(body=msg_body)
+            task_msg = _("This task has been created from: <a href=# data-oe-model=sale.order data-oe-id=%d>%s</a> (%s)") % (self.sale_line_id.order_id.id, self.sale_line_id.order_id.name, self.product_id.name)
+            task.message_post(body=task_msg)
 
         return task

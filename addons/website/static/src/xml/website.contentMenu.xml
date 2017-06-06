@@ -22,11 +22,13 @@
         </ul>
     </li>
 </t>
-<select t-name="website.contentMenu.dialog.select" class="form-control mb16" t-if="widget.roots">
-    <t t-foreach="widget.roots" t-as="root">
-        <option t-att-value="root.id"><t t-esc="root.name"/></option>
-    </t>
-</select>
+<div t-name="website.contentMenu.dialog.select">
+    <select class="form-control mb16" t-if="widget.roots">
+        <t t-foreach="widget.roots" t-as="root">
+            <option t-att-value="root.id"><t t-esc="root.name"/></option>
+        </t>
+    </select>
+</div>
 <div t-name="website.contentMenu.dialog.edit">
     <select class="form-control mb16" t-if="widget.roots">
         <t t-foreach="widget.roots" t-as="root">
@@ -49,4 +51,13 @@
         </div>
     </div>
 </div>
+<t t-name="website.contentMenu.dialog.edit.link_menu_options">
+    <div class="form-group">
+        <label class="control-label col-sm-3">Link</label>
+        <div class="col-sm-9">
+            <input type="radio" name="link_menu_options" id="url" value="url" checked="checked"/> <label class="control-label mr16" for="url" >URL or Email</label>
+            <input type="radio" name="link_menu_options" id="new_page" value="new_page"/> <label class="control-label" for="new_page">New Page</label>
+        </div>
+    </div>
+</t>
 </templates>

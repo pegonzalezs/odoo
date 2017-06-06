@@ -3,8 +3,12 @@ from datetime import datetime
 from odoo import api, fields, models
 from odoo.tools.float_utils import float_compare, float_round
 from odoo.tools.translate import _
-from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT, pycompat
 from odoo.exceptions import UserError
+
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class Quant(models.Model):
@@ -40,7 +44,7 @@ class Quant(models.Model):
     lot_id = fields.Many2one(
         'stock.production.lot', 'Lot/Serial Number',
         index=True, ondelete="restrict", readonly=True)
-    cost = fields.Float('Unit Cost')
+    cost = fields.Float('Unit Cost', group_operator='avg')
     owner_id = fields.Many2one(
         'res.partner', 'Owner',
         index=True, readonly=True,
@@ -82,7 +86,7 @@ class Quant(models.Model):
             if quant.company_id != self.env.user.company_id:
                 # if the company of the quant is different than the current user company, force the company in the context
                 # then re-do a browse to read the property fields for the good company.
-                quant = quant.with_context(force_company=quant.company__id.id)
+                quant = quant.with_context(force_company=quant.company_id.id)
             quant.inventory_value = quant.product_id.standard_price * quant.qty
 
     @api.model_cr
@@ -177,11 +181,13 @@ class Quant(models.Model):
 
         quants_reconcile_sudo = self.env['stock.quant'].sudo()
         quants_move_sudo = self.env['stock.quant'].sudo()
+        check_lot = False
         for quant, qty in quants:
             if not quant:
                 #If quant is None, we will create a quant to move (and potentially a negative counterpart too)
                 quant = self._quant_create_from_move(
                     qty, move, lot_id=lot_id, owner_id=owner_id, src_package_id=src_package_id, dest_package_id=dest_package_id, force_location_from=location_from, force_location_to=location_to)
+                check_lot = True
             else:
                 quant._quant_split(qty)
                 quants_move_sudo |= quant
@@ -200,6 +206,24 @@ class Quant(models.Model):
             """, (move.product_id.id, location_to.parent_left, location_to.parent_right, location_to.id))
             if self._cr.fetchone():
                 quants_reconcile_sudo._quant_reconcile_negative(move)
+
+        # In case of serial tracking, check if the product does not exist somewhere internally already
+        # Checking that a positive quant already exists in an internal location is too restrictive.
+        # Indeed, if a warehouse is configured with several steps (e.g. "Pick + Pack + Ship") and
+        # one step is forced (creates a quant of qty = -1.0), it is not possible afterwards to
+        # correct the inventory unless the product leaves the stock.
+        picking_type = move.picking_id and move.picking_id.picking_type_id or False
+        if check_lot and lot_id and move.product_id.tracking == 'serial' and (not picking_type or (picking_type.use_create_lots or picking_type.use_existing_lots)):
+            other_quants = self.search([('product_id', '=', move.product_id.id), ('lot_id', '=', lot_id),
+                                        ('qty', '>', 0.0), ('location_id.usage', '=', 'internal')])
+            if other_quants:
+                # We raise an error if:
+                # - the total quantity is strictly larger than 1.0
+                # - there are more than one negative quant, to avoid situations where the user would
+                #   force the quantity at several steps of the process
+                if sum(other_quants.mapped('qty')) > 1.0 or len([q for q in other_quants.mapped('qty') if q < 0]) > 1:
+                    lot_name = self.env['stock.production.lot'].browse(lot_id).name
+                    raise UserError(_('The serial number %s is already in stock.') % lot_name + _("Otherwise make sure the right stock/owner is set."))
 
     @api.model
     def _quant_create_from_move(self, qty, move, lot_id=False, owner_id=False,
@@ -234,21 +258,13 @@ class Quant(models.Model):
             negative_quant_id = self.sudo().create(negative_vals)
             vals.update({'propagated_from_id': negative_quant_id.id})
 
-        # In case of serial tracking, check if the product does not exist somewhere internally already
         picking_type = move.picking_id and move.picking_id.picking_type_id or False
         if lot_id and move.product_id.tracking == 'serial' and (not picking_type or (picking_type.use_create_lots or picking_type.use_existing_lots)):
             if qty != 1.0:
                 raise UserError(_('You should only receive by the piece with the same serial number'))
-            other_quants = self.search([('product_id', '=', move.product_id.id), ('lot_id', '=', lot_id),
-                                        ('qty', '>', 0.0), ('location_id.usage', '=', 'internal')])
-            if other_quants:
-                lot_name = self.env['stock.production.lot'].browse(lot_id).name
-                raise UserError(_('The serial number %s is already in stock.') % lot_name + _("Otherwise make sure the right stock/owner is set."))
 
         # create the quant as superuser, because we want to restrict the creation of quant manually: we should always use this method to create quants
         return self.sudo().create(vals)
-    # compatibility method
-    _quant_create = _quant_create_from_move
 
     @api.multi
     def _quant_update_from_move(self, move, location_dest_id, dest_package_id, lot_id=False, entire_pack=False):
@@ -261,8 +277,6 @@ class Quant(models.Model):
         if not entire_pack:
             vals.update({'package_id': dest_package_id})
         self.write(vals)
-    # compatibility method
-    move_quants_write = _quant_update_from_move
 
     @api.one
     def _quant_reconcile_negative(self, move):
@@ -423,7 +437,9 @@ class Quant(models.Model):
 
         if pack_operation_id:
             pack_operation = self.env['stock.pack.operation'].browse(pack_operation_id)
-            domain += [('owner_id', '=', pack_operation.owner_id.id), ('location_id', '=', pack_operation.location_id.id)]
+            domain += [('location_id', '=', pack_operation.location_id.id)]
+            if pack_operation.owner_id:
+                domain += [('owner_id', '=', pack_operation.owner_id.id)]
             if pack_operation.package_id and not pack_operation.product_id:
                 domain += [('package_id', 'child_of', pack_operation.package_id.id)]
             elif pack_operation.package_id and pack_operation.product_id:
@@ -431,7 +447,9 @@ class Quant(models.Model):
             else:
                 domain += [('package_id', '=', False)]
         else:
-            domain += [('owner_id', '=', move.restrict_partner_id.id), ('location_id', 'child_of', move.location_id.id)]
+            domain += [('location_id', 'child_of', move.location_id.id)]
+            if move.restrict_partner_id:
+                domain += [('owner_id', '=', move.restrict_partner_id.id)]
 
         if company_id:
             domain += [('company_id', '=', company_id)]
@@ -502,7 +520,7 @@ class Quant(models.Model):
                 if any(quant not in self for quant in package.get_content()):
                     all_in = False
                 if all_in:
-                    destinations = [product_to_location[product] for product in package.get_content().mapped('product_id')]
+                    destinations = set([product_to_location[product] for product in package.get_content().mapped('product_id')])
                     if len(destinations) > 1:
                         all_in = False
                 if all_in:
@@ -541,10 +559,7 @@ class QuantPackage(models.Model):
     """ Packages containing quants and/or other packages """
     _name = "stock.quant.package"
     _description = "Physical Packages"
-    _parent_name = "parent_id"
-    _parent_store = True
-    _parent_order = 'name'
-    _order = 'parent_left'
+    _order = 'name'
 
     name = fields.Char(
         'Package Reference', copy=False, index=True,
@@ -557,19 +572,17 @@ class QuantPackage(models.Model):
     ancestor_ids = fields.One2many('stock.quant.package', string='Ancestors', compute='_compute_ancestor_ids')
     children_quant_ids = fields.One2many('stock.quant', string='All Bulk Content', compute='_compute_children_quant_ids')
     children_ids = fields.One2many('stock.quant.package', 'parent_id', 'Contained Packages', readonly=True)
-    parent_left = fields.Integer('Left Parent', index=True)
-    parent_right = fields.Integer('Right Parent', index=True)
     packaging_id = fields.Many2one(
         'product.packaging', 'Package Type', index=True,
         help="This field should be completed only if everything inside the package share the same product, otherwise it doesn't really makes sense.")
     location_id = fields.Many2one(
-        'stock.location', 'Location', compute='_compute_package_info',
+        'stock.location', 'Location', compute='_compute_package_info', search='_search_location',
         index=True, readonly=True)
     company_id = fields.Many2one(
-        'res.company', 'Company', compute='_compute_package_info',
+        'res.company', 'Company', compute='_compute_package_info', search='_search_company',
         index=True, readonly=True)
     owner_id = fields.Many2one(
-        'res.partner', 'Owner', compute='_compute_package_info',
+        'res.partner', 'Owner', compute='_compute_package_info', search='_search_owner',
         index=True, readonly=True)
 
     @api.one
@@ -577,31 +590,28 @@ class QuantPackage(models.Model):
     def _compute_ancestor_ids(self):
         self.ancestor_ids = self.env['stock.quant.package'].search(['id', 'parent_of', self.id]).ids
 
-    @api.one
+    @api.multi
     @api.depends('parent_id', 'children_ids', 'quant_ids.package_id')
     def _compute_children_quant_ids(self):
-        res = dict.fromkeys(self.ids, self.env['stock.quant'])
-        children_quants = self.env['stock.quant'].search(['package_id', 'child_of', self.ids])
-        for quant in children_quants:
-            res[quant.package_id.id] |= quant
         for package in self:
-            package.children_quant_ids = res[package.id].ids
+            if package.id:
+                package.children_quant_ids = self.env['stock.quant'].search([('package_id', 'child_of', package.id)]).ids
 
     @api.depends('quant_ids.package_id', 'quant_ids.location_id', 'quant_ids.company_id', 'quant_ids.owner_id', 'ancestor_ids')
     def _compute_package_info(self):
-        res = {}
-        quants = self.env['stock.quant'].search([('package_id', 'in', self.ids)])  # TDE FIXME: was child_od
-        for quant in quants:
-            res[quant.package_id.id] = {'location_id': quant.location_id.id, 'owner_id': quant.owner_id.id, 'company_id': quant.company_id.id}
         for package in self:
-            values = res.get(package.id, {'location_id': False, 'company_id': self.env.user.company_id.id, 'owner_id': False})
+            quants = package.children_quant_ids
+            if quants:
+                values = quants[0]
+            else:
+                values = {'location_id': False, 'company_id': self.env.user.company_id.id, 'owner_id': False}
             package.location_id = values['location_id']
             package.company_id = values['company_id']
             package.owner_id = values['owner_id']
 
     @api.multi
     def name_get(self):
-        return self._compute_complete_name().items()
+        return list(pycompat.items(self._compute_complete_name()))
 
     def _compute_complete_name(self):
         """ Forms complete name of location from parent location to child location. """
@@ -614,6 +624,36 @@ class QuantPackage(models.Model):
                 current = current.parent_id
             res[package.id] = name
         return res
+
+    def _search_location(self, operator, value):
+        if value:
+            packs = self.search([('quant_ids.location_id', operator, value)])
+        else:
+            packs = self.search([('quant_ids', operator, value)])
+        if packs:
+            return [('id', 'parent_of', packs.ids)]
+        else:
+            return [('id', '=', False)]
+
+    def _search_company(self, operator, value):
+        if value:
+            packs = self.search([('quant_ids.company_id', operator, value)])
+        else:
+            packs = self.search([('quant_ids', operator, value)])
+        if packs:
+            return [('id', 'parent_of', packs.ids)]
+        else:
+            return [('id', '=', False)]
+
+    def _search_owner(self, operator, value):
+        if value:
+            packs = self.search([('quant_ids.owner_id', operator, value)])
+        else:
+            packs = self.search([('quant_ids', operator, value)])
+        if packs:
+            return [('id', 'parent_of', packs.ids)]
+        else:
+            return [('id', '=', False)]
 
     def _check_location_constraint(self):
         '''checks that all quants in a package are stored in the same location. This function cannot be used
@@ -635,8 +675,13 @@ class QuantPackage(models.Model):
             # TDE FIXME: why superuser ?
             package.mapped('quant_ids').sudo().write({'package_id': package.parent_id.id})
             package.mapped('children_ids').write({'parent_id': package.parent_id.id})
-        self.unlink()
         return self.env['ir.actions.act_window'].for_xml_id('stock', 'action_package_view')
+
+    def action_view_picking(self):
+        action = self.env.ref('stock.action_picking_tree_all').read()[0]
+        pickings = self.env['stock.pack.operation'].search([('result_package_id', 'in', self.ids)]).mapped('picking_id')
+        action['domain'] = [('id', 'in', pickings.ids)]
+        return action
 
     @api.multi
     def view_content_package(self):

@@ -4,6 +4,9 @@
 import json
 import werkzeug
 import itertools
+import pytz
+import babel.dates
+from collections import OrderedDict
 
 from odoo import http, fields, _
 from odoo.addons.website.controllers.main import QueryURL
@@ -19,7 +22,7 @@ class WebsiteBlog(http.Controller):
 
     def nav_list(self, blog=None):
         dom = blog and [('blog_id', '=', blog.id)] or []
-        if not request.env.user.has_group('base.group_website_designer'):
+        if not request.env.user.has_group('website.group_website_designer'):
             dom += [('post_date', '<=', fields.Datetime.now())]
         groups = request.env['blog.post']._read_group_raw(
             dom,
@@ -29,14 +32,17 @@ class WebsiteBlog(http.Controller):
             (r, label) = group['post_date']
             start, end = r.split('/')
             group['post_date'] = label
-            group['date_begin'] = fields.Date.to_string(self._to_date(start))
-            group['date_end'] = fields.Date.to_string(self._to_date(end))
-            group['month'] = self._to_date(start).strftime("%B")
-            group['year'] = self._to_date(start).strftime("%Y")
-        return {year: [m for m in months] for year, months in itertools.groupby(groups, lambda g: g['year'])}
+            group['date_begin'] = start
+            group['date_end'] = end
 
-    def _to_date(self, dt):
-        return fields.Date.from_string(dt)
+            locale = request.context.get('lang', 'en_US')
+            start = pytz.UTC.localize(fields.Datetime.from_string(start))
+            tzinfo = pytz.timezone(request.context.get('tz', 'utc') or 'utc')
+
+            group['month'] = babel.dates.format_datetime(start, format='MMMM', tzinfo=tzinfo, locale=locale)
+            group['year'] = babel.dates.format_datetime(start, format='YYYY', tzinfo=tzinfo, locale=locale)
+
+        return OrderedDict((year, [m for m in months]) for year, months in itertools.groupby(groups, lambda g: g['year']))
 
     @http.route([
         '/blog',
@@ -98,7 +104,7 @@ class WebsiteBlog(http.Controller):
         # build the domain for blog post to display
         domain = []
         # retrocompatibility to accept tag as slug
-        active_tag_ids = tag and map(int, [unslug(t)[1] for t in tag.split(',')]) or []
+        active_tag_ids = tag and [int(unslug(t)[1]) for t in tag.split(',')] or []
         if active_tag_ids:
             domain += [('tag_ids', 'in', active_tag_ids)]
         if blog:
@@ -106,7 +112,7 @@ class WebsiteBlog(http.Controller):
         if date_begin and date_end:
             domain += [("post_date", ">=", date_begin), ("post_date", "<=", date_end)]
 
-        if request.env.user.has_group('base.group_website_designer'):
+        if request.env.user.has_group('website.group_website_designer'):
             count_domain = domain + [("website_published", "=", True), ("post_date", "<=", fields.Datetime.now())]
             published_count = BlogPost.search_count(count_domain)
             unpublished_count = BlogPost.search_count(domain) - published_count
@@ -122,7 +128,7 @@ class WebsiteBlog(http.Controller):
 
         blog_posts = BlogPost.search(domain, order="post_date desc")
         pager = request.website.pager(
-            url=request.httprequest.path,
+            url=request.httprequest.path.partition('/page/')[0],
             total=len(blog_posts),
             page=page,
             step=self._blog_post_per_page,
@@ -143,7 +149,7 @@ class WebsiteBlog(http.Controller):
             else:
                 tag_ids.append(current_tag)
             tag_ids = request.env['blog.tag'].browse(tag_ids).exists()
-            return ','.join(map(slug, tag_ids))
+            return ','.join(slug(tag) for tag in tag_ids)
         values = {
             'blog': blog,
             'blogs': blogs,
@@ -166,7 +172,7 @@ class WebsiteBlog(http.Controller):
     def blog_feed(self, blog, limit='15'):
         v = {}
         v['blog'] = blog
-        v['base_url'] = request.env['ir.config_parameter'].get_param('web.base.url')
+        v['base_url'] = request.env['ir.config_parameter'].sudo().get_param('web.base.url')
         v['posts'] = request.env['blog.post'].search([('blog_id','=', blog.id)], limit=min(int(limit), 50))
         r = request.render("website_blog.blog_feed", v, headers=[('Content-Type', 'application/atom+xml')])
         return r
@@ -216,7 +222,7 @@ class WebsiteBlog(http.Controller):
 
         # Find next Post
         all_post = BlogPost.search([('blog_id', '=', blog.id)])
-        if not request.env.user.has_group('base.group_website_designer'):
+        if not request.env.user.has_group('website.group_website_designer'):
             all_post = all_post.filtered(lambda r: r.post_date <= fields.Datetime.now())
 
         if blog_post not in all_post:
@@ -292,7 +298,7 @@ class WebsiteBlog(http.Controller):
 
     @http.route(['/blog/post_discussion'], type='json', auth="public", website=True)
     def post_discussion(self, blog_post_id, **post):
-        publish = request.env.user.has_group('base.group_website_publisher')
+        publish = request.env.user.has_group('website.group_website_publisher')
         message_id = self._blog_post_message(blog_post_id, post.get('comment'), **post)
         return self._get_discussion_detail([message_id], publish, **post)
 
@@ -312,14 +318,14 @@ class WebsiteBlog(http.Controller):
 
         :return redirect to the new blog created
         """
-        new_blog_post = request.env['blog.post'].with_context(mail_create_nosubscribe=True).copy(int(blog_post_id), {})
+        new_blog_post = request.env['blog.post'].with_context(mail_create_nosubscribe=True).browse(int(blog_post_id)).copy()
         return werkzeug.utils.redirect("/blog/%s/post/%s?enable_editor=1" % (slug(new_blog_post.blog_id), slug(new_blog_post)))
 
     @http.route('/blog/post_get_discussion/', type='json', auth="public", website=True)
     def discussion(self, post_id=0, path=None, count=False, **post):
         domain = [('res_id', '=', int(post_id)), ('model', '=', 'blog.post'), ('path', '=', path)]
         #check current user belongs to website publisher group
-        publish = request.env.user.has_group('base.group_website_publisher')
+        publish = request.env.user.has_group('website.group_website_publisher')
         if not publish:
             domain.append(('website_published', '=', True))
         messages = request.env['mail.message'].sudo().search(domain, count=count)

@@ -1,25 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
 # * pos_mercury
-#
+# 
 # Translators:
 # Ademílson F. Tonato <apraqueisso@gmail.com>, 2016
-# grazziano <g.negocios@outlook.com.br>, 2015-2016
 # Mateus Lopes <mateus1@gmail.com>, 2016
-# Rodrigo Macedo <rodrigomacedo@rmsolucoeseminformatica.com>, 2015
+# grazziano <gra.negocia@gmail.com>, 2016
+# Rodrigo Macedo <rmsolucoeseminformatic4@gmail.com>, 2016
+# falexandresilva <falexandresilva@gmail.com>, 2016
+# Munique Shih <muniqueshih@hotmail.com>, 2016
+# Camila <camilamaranhao@gmail.com>, 2016
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo 9.0\n"
+"Project-Id-Version: Odoo Server 10.saas~14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-18 14:06+0000\n"
-"PO-Revision-Date: 2016-07-06 23:30+0000\n"
-"Last-Translator: Ademílson F. Tonato <apraqueisso@gmail.com>\n"
-"Language-Team: Portuguese (Brazil) (http://www.transifex.com/odoo/odoo-9/"
-"language/pt_BR/)\n"
-"Language: pt_BR\n"
+"POT-Creation-Date: 2017-02-15 09:49+0000\n"
+"PO-Revision-Date: 2017-02-15 09:49+0000\n"
+"Last-Translator: Camila <camilamaranhao@gmail.com>, 2016\n"
+"Language-Team: Portuguese (Brazil) (https://www.transifex.com/odoo/teams/41243/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
+"Language: pt_BR\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. module: pos_mercury
@@ -34,20 +36,16 @@ msgstr "&nbsp;&nbsp;CÓDIGO DE APROVAÇÃO:"
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:186
 #, python-format
 msgid "128 bit CryptoAPI failed"
-msgstr ""
+msgstr "128 bit CryptoAPI falhou"
 
 #. module: pos_mercury
 #: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "<i>Mercury Configurations</i> define what Mercury account will be used when\n"
-"                                processing credit card transactions in the "
-"Point Of Sale. Setting up a Mercury\n"
-"                                configuration will enable you to allow "
-"payments with various credit cards\n"
-"                                (eg. Visa, MasterCard, Discovery, American "
-"Express, ...). After setting up this\n"
-"                                configuration you should associate it with a "
-"Point Of Sale payment method."
+"                                processing credit card transactions in the Point Of Sale. Setting up a Mercury\n"
+"                                configuration will enable you to allow payments with various credit cards\n"
+"                                (eg. Visa, MasterCard, Discovery, American Express, ...). After setting up this\n"
+"                                configuration you should associate it with a Point Of Sale payment method."
 msgstr ""
 
 #. module: pos_mercury
@@ -80,7 +78,7 @@ msgstr "Permitir"
 #. module: pos_mercury
 #: model:ir.model,name:pos_mercury.model_account_bank_statement_line
 msgid "Bank Statement Line"
-msgstr "Linha extrato bancário"
+msgstr "Linha de Extrato Bancário"
 
 #. module: pos_mercury
 #. openerp-web
@@ -135,7 +133,7 @@ msgstr "Conexão cancelada"
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:161
 #, python-format
 msgid "Connection Lost"
-msgstr ""
+msgstr "Conexão perdida"
 
 #. module: pos_mercury
 #. openerp-web
@@ -164,7 +162,7 @@ msgid "Created on"
 msgstr "Criado em"
 
 #. module: pos_mercury
-#: code:addons/pos_mercury/models/pos_mercury.py:17
+#: code:addons/pos_mercury/models/pos_mercury.py:15
 #, python-format
 msgid "Credit Card"
 msgstr "Cartão de Crédito"
@@ -180,7 +178,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_configuration_display_name
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_mercury_transaction_display_name
 msgid "Display Name"
-msgstr "Nome de Exibição"
+msgstr "Nome para Exibição"
 
 #. module: pos_mercury
 #. openerp-web
@@ -220,10 +218,8 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
-"For quickly handling orders: just swiping a credit card when on the payment "
-"screen\n"
-"                                (without having pressed anything else) will "
-"charge the full amount of the order to\n"
+"For quickly handling orders: just swiping a credit card when on the payment screen\n"
+"                                (without having pressed anything else) will charge the full amount of the order to\n"
 "                                the card."
 msgstr ""
 
@@ -232,7 +228,7 @@ msgstr ""
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:170
 #, python-format
 msgid "General Failure"
-msgstr ""
+msgstr "Falha geral"
 
 #. module: pos_mercury
 #. openerp-web
@@ -283,10 +279,11 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
-"If you don't already have a Mercury account, contact Mercury at +1 (800) "
-"846-4472\n"
+"If you don't already have a Mercury account, contact Mercury at +1 (800) 846-4472\n"
 "                                to create one."
 msgstr ""
+"Se você ainda não tem uma conta Mercury, entre em contato com a Mercury "
+"através do número  para criar uma."
 
 #. module: pos_mercury
 #. openerp-web
@@ -413,14 +410,14 @@ msgstr ""
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:207
 #, python-format
 msgid "Invalid Expiration Date"
-msgstr ""
+msgstr "Data de expiração inválida"
 
 #. module: pos_mercury
 #. openerp-web
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:212
 #, python-format
 msgid "Invalid Gratuity Amount"
-msgstr ""
+msgstr "Valor da gorjeta inválida"
 
 #. module: pos_mercury
 #. openerp-web
@@ -534,7 +531,7 @@ msgstr "Diário"
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_configuration___last_update
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_mercury_transaction___last_update
 msgid "Last Modified on"
-msgstr "Última modificação em"
+msgstr "Última Modificação em"
 
 #. module: pos_mercury
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_configuration_write_uid
@@ -579,7 +576,7 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.model.fields,field_description:pos_mercury.field_account_journal_pos_mercury_config_id
 msgid "Mercury configuration"
-msgstr ""
+msgstr "Configuração Mercury"
 
 #. module: pos_mercury
 #: model:ir.model.fields,field_description:pos_mercury.field_account_bank_statement_line_mercury_invoice_no
@@ -594,7 +591,7 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.model.fields,field_description:pos_mercury.field_account_bank_statement_line_mercury_ref_no
 msgid "Mercury reference number"
-msgstr ""
+msgstr "Número de referência Mercury"
 
 #. module: pos_mercury
 #: model:ir.model.fields,field_description:pos_mercury.field_pos_mercury_configuration_name
@@ -748,7 +745,7 @@ msgstr ""
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:191
 #, python-format
 msgid "Server Login Failed"
-msgstr ""
+msgstr "Login no servidor falhou"
 
 #. module: pos_mercury
 #. openerp-web
@@ -814,12 +811,12 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.model.fields,help:pos_mercury.field_account_bank_statement_line_mercury_card_brand
 msgid "The brand of the payment card (e.g. Visa, AMEX, ...)"
-msgstr ""
+msgstr "A bandeira do cartão de pagamento (e.g. Visa, AMEX, ...)"
 
 #. module: pos_mercury
 #: model:ir.model.fields,help:pos_mercury.field_account_bank_statement_line_mercury_prefixed_card_number
 msgid "The card number used for the payment."
-msgstr ""
+msgstr "Numero do cartão utilizado para o pagamento."
 
 #. module: pos_mercury
 #: model:ir.model.fields,help:pos_mercury.field_account_journal_pos_mercury_config_id
@@ -829,7 +826,7 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.model.fields,help:pos_mercury.field_account_bank_statement_line_mercury_card_number
 msgid "The last 4 numbers of the card used to pay"
-msgstr ""
+msgstr "Os quatro últimos dígitos do cartão utilizado na transação. "
 
 #. module: pos_mercury
 #: model:ir.model.fields,help:pos_mercury.field_account_bank_statement_line_mercury_card_owner_name
@@ -892,7 +889,7 @@ msgstr ""
 #: code:addons/pos_mercury/static/src/js/pos_mercury.js:166
 #, python-format
 msgid "Unknown Error"
-msgstr ""
+msgstr "Erro desconhecido"
 
 #. module: pos_mercury
 #. openerp-web
@@ -905,10 +902,8 @@ msgstr ""
 #: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
 "Using the Mercury integration in the Point Of Sale is easy: just press the\n"
-"                                associated payment method. After that the "
-"amount can be adjusted (eg. for cashback)\n"
-"                                just like on any other payment line. "
-"Whenever the payment line is set up, a card\n"
+"                                associated payment method. After that the amount can be adjusted (eg. for cashback)\n"
+"                                just like on any other payment line. Whenever the payment line is set up, a card\n"
 "                                can be swiped through the card reader device."
 msgstr ""
 
@@ -929,10 +924,8 @@ msgstr ""
 #. module: pos_mercury
 #: model:ir.ui.view,arch_db:pos_mercury.view_pos_mercury_configuration_form
 msgid ""
-"We currently support the MagTek Dynamag card reader device. It can be "
-"connected\n"
-"                                directly to the Point Of Sale device or it "
-"can be connected to the POSBox."
+"We currently support the MagTek Dynamag card reader device. It can be connected\n"
+"                                directly to the Point Of Sale device or it can be connected to the POSBox."
 msgstr ""
 
 #. module: pos_mercury
@@ -960,6 +953,11 @@ msgstr "X______________________________"
 #: model:ir.model,name:pos_mercury.model_barcode_rule
 msgid "barcode.rule"
 msgstr "barcode.rule"
+
+#. module: pos_mercury
+#: model:ir.model,name:pos_mercury.model_ir_autovacuum
+msgid "ir.autovacuum"
+msgstr "ir.autovacuum"
 
 #. module: pos_mercury
 #: model:ir.model,name:pos_mercury.model_pos_mercury_configuration

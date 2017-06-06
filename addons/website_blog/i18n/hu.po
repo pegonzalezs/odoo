@@ -8,10 +8,10 @@
 # Oregional <geza.nagy@oregional.hu>, 2016
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0alpha1e\n"
+"Project-Id-Version: Odoo Server 10.saas~14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-18 08:38+0000\n"
-"PO-Revision-Date: 2016-08-18 08:38+0000\n"
+"POT-Creation-Date: 2017-02-15 09:50+0000\n"
+"PO-Revision-Date: 2017-02-15 09:50+0000\n"
 "Last-Translator: Oregional <geza.nagy@oregional.hu>, 2016\n"
 "Language-Team: Hungarian (https://www.transifex.com/odoo/teams/41243/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -46,7 +46,7 @@ msgstr ""
 #. openerp-web
 #: code:addons/website_blog/static/src/js/website.tour.blog.js:53
 #, python-format
-msgid "<b>Click on Save</b> to record yoru changes."
+msgid "<b>Click on Save</b> to record your changes."
 msgstr ""
 
 #. module: website_blog
@@ -122,6 +122,11 @@ msgstr "Szerző"
 #: model:ir.model.fields,field_description:website_blog.field_blog_post_author_avatar
 msgid "Avatar"
 msgstr "Avatár"
+
+#. module: website_blog
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "Black"
+msgstr "Fekete"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post_blog_id
@@ -216,15 +221,14 @@ msgstr ""
 #. openerp-web
 #: code:addons/website_blog/static/src/js/website.tour.blog.js:30
 #, python-format
-msgid "Clich here to change your post cover."
+msgid "Click here to change your post cover."
 msgstr ""
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.blog_post_short
-msgid "Click on \"Content\" on the top menu to write your first blog post."
+msgid ""
+"Click on \"New Page\" in the top-right corner to write your first blog post."
 msgstr ""
-"Kattintson a felső menű \"Tartalom\" gombjára az első blog bejegyzés "
-"írásához."
 
 #. module: website_blog
 #. openerp-web
@@ -237,11 +241,6 @@ msgstr ""
 #: model:ir.actions.act_window,help:website_blog.action_blog_post
 msgid "Click to create a new blog post."
 msgstr ""
-
-#. module: website_blog
-#: model:ir.ui.view,arch_db:website_blog.website_blog
-msgid "Color"
-msgstr "Szín"
 
 #. module: website_blog
 #: model:ir.model.fields,field_description:website_blog.field_blog_post_content
@@ -288,14 +287,14 @@ msgid "Duplicate"
 msgstr "Többszörözés"
 
 #. module: website_blog
-#: model:ir.model,name:website_blog.model_mail_compose_message
-msgid "Email composition wizard"
-msgstr "Email összeállító varázsló"
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "Filter Color"
+msgstr ""
 
 #. module: website_blog
-#: model:ir.model,name:website_blog.model_survey_mail_compose_message
-msgid "Email composition wizard for Survey"
-msgstr "Email összeállító varázsló a felméréshez"
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "Filter Intensity"
+msgstr ""
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.website_blog
@@ -416,7 +415,7 @@ msgstr ""
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "No blog post yet."
-msgstr "Nincs még blog belyegyzés."
+msgstr "Nincs még blog bejegyzés."
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.latest_blogs
@@ -441,11 +440,6 @@ msgid "Once you have reviewed the content on mobile, close the preview."
 msgstr ""
 
 #. module: website_blog
-#: model:ir.ui.view,arch_db:website_blog.website_blog
-msgid "Opacity"
-msgstr ""
-
-#. module: website_blog
 #: model:blog.blog,name:website_blog.blog_blog_1
 msgid "Our Blog"
 msgstr ""
@@ -466,7 +460,7 @@ msgid "Posts"
 msgstr "Bejegyzések"
 
 #. module: website_blog
-#: code:addons/website_blog/controllers/main.py:262
+#: code:addons/website_blog/controllers/main.py:269
 #, python-format
 msgid "Public user cannot post comments on blog post."
 msgstr ""
@@ -549,7 +543,7 @@ msgstr ""
 
 #. module: website_blog
 #. openerp-web
-#: code:addons/website_blog/models/website_blog.py:100
+#: code:addons/website_blog/models/website_blog.py:120
 #: code:addons/website_blog/static/src/js/website.tour.blog.js:52
 #, python-format
 msgid "Start writing here..."
@@ -657,12 +651,6 @@ msgstr ""
 "csoportban;"
 
 #. module: website_blog
-#: code:addons/website_blog/models/website_blog.py:212
-#, python-format
-msgid "View Blog Post"
-msgstr ""
-
-#. module: website_blog
 #: model:ir.model,name:website_blog.model_website
 msgid "Website"
 msgstr "Weboldal"
@@ -681,6 +669,11 @@ msgstr "Weboldal üzenetek"
 #: model:ir.model.fields,help:website_blog.field_blog_post_website_message_ids
 msgid "Website communication history"
 msgstr "Weboldal  kommunikáció történet"
+
+#. module: website_blog
+#: model:ir.ui.view,arch_db:website_blog.website_blog
+msgid "White"
+msgstr "Fehér"
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.opt_blog_rc_about_us
@@ -739,7 +732,7 @@ msgstr "húzza jobbra"
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.blog_post_short
 msgid "unpublished"
-msgstr ""
+msgstr "Nem közzétett"
 
 #. module: website_blog
 #: model:ir.ui.view,arch_db:website_blog.blog_post_short

@@ -3,8 +3,8 @@ host = https://www.transifex.com
 type = PO
 
 [odoo-master.base]
-file_filter = openerp/addons/base/i18n/<lang>.po
-source_file = openerp/addons/base/i18n/base.pot
+file_filter = odoo/addons/base/i18n/<lang>.po
+source_file = odoo/addons/base/i18n/base.pot
 source_lang = en
 
 [odoo-master.account]
@@ -47,11 +47,6 @@ file_filter = addons/account_check_printing/i18n/<lang>.po
 source_file = addons/account_check_printing/i18n/account_check_printing.pot
 source_lang = en
 
-[odoo-master.account_tax_cash_basis]
-file_filter = addons/account_tax_cash_basis/i18n/<lang>.po
-source_file = addons/account_tax_cash_basis/i18n/account_tax_cash_basis.pot
-source_lang = en
-
 [odoo-master.account_tax_python]
 file_filter = addons/account_tax_python/i18n/<lang>.po
 source_file = addons/account_tax_python/i18n/account_tax_python.pot
@@ -75,6 +70,11 @@ source_lang = en
 [odoo-master.anonymization]
 file_filter = addons/anonymization/i18n/<lang>.po
 source_file = addons/anonymization/i18n/anonymization.pot
+source_lang = en
+
+[odoo-master.association]
+file_filter = addons/association/i18n/<lang>.po
+source_file = addons/association/i18n/association.pot
 source_lang = en
 
 [odoo-master.auth_crypt]
@@ -102,9 +102,19 @@ file_filter = addons/barcodes/i18n/<lang>.po
 source_file = addons/barcodes/i18n/barcodes.pot
 source_lang = en
 
-[odoo-master.base_action_rule]
-file_filter = addons/base_action_rule/i18n/<lang>.po
-source_file = addons/base_action_rule/i18n/base_action_rule.pot
+[odoo-master.base_address_city]
+file_filter = addons/base_address_city/i18n/<lang>.po
+source_file = addons/base_address_city/i18n/base_address_city.pot
+source_lang = en
+
+[odoo-master.base_address_extended]
+file_filter = addons/base_address_extended/i18n/<lang>.po
+source_file = addons/base_address_extended/i18n/base_address_extended.pot
+source_lang = en
+
+[odoo-master.base_automation]
+file_filter = addons/base_automation/i18n/<lang>.po
+source_file = addons/base_automation/i18n/base_automation.pot
 source_lang = en
 
 [odoo-master.base_gengo]
@@ -165,6 +175,11 @@ source_lang = en
 [odoo-master.crm]
 file_filter = addons/crm/i18n/<lang>.po
 source_file = addons/crm/i18n/crm.pot
+source_lang = en
+
+[odoo-master.crm_livechat]
+file_filter = addons/crm_livechat/i18n/<lang>.po
+source_file = addons/crm_livechat/i18n/crm_livechat.pot
 source_lang = en
 
 [odoo-master.crm_project_issue]
@@ -300,11 +315,6 @@ source_lang = en
 [odoo-master.hr_timesheet_attendance]
 file_filter = addons/hr_timesheet_attendance/i18n/<lang>.po
 source_file = addons/hr_timesheet_attendance/i18n/hr_timesheet_attendance.pot
-source_lang = en
-
-[odoo-master.hr_timesheet_sheet]
-file_filter = addons/hr_timesheet_sheet/i18n/<lang>.po
-source_file = addons/hr_timesheet_sheet/i18n/hr_timesheet_sheet.pot
 source_lang = en
 
 [odoo-master.im_livechat]
@@ -447,19 +457,14 @@ file_filter = addons/point_of_sale/i18n/<lang>.po
 source_file = addons/point_of_sale/i18n/point_of_sale.pot
 source_lang = en
 
-[odoo-master.portal]
-file_filter = addons/portal/i18n/<lang>.po
-source_file = addons/portal/i18n/portal.pot
-source_lang = en
-
-[odoo-master.portal_sale]
-file_filter = addons/portal_sale/i18n/<lang>.po
-source_file = addons/portal_sale/i18n/portal_sale.pot
-source_lang = en
-
 [odoo-master.pos_cache]
 file_filter = addons/pos_cache/i18n/<lang>.po
 source_file = addons/pos_cache/i18n/pos_cache.pot
+source_lang = en
+
+[odoo-master.pos_data_drinks]
+file_filter = addons/pos_data_drinks/i18n/<lang>.po
+source_file = addons/pos_data_drinks/i18n/pos_data_drinks.pot
 source_lang = en
 
 [odoo-master.pos_discount]
@@ -480,6 +485,11 @@ source_lang = en
 [odoo-master.pos_restaurant]
 file_filter = addons/pos_restaurant/i18n/<lang>.po
 source_file = addons/pos_restaurant/i18n/pos_restaurant.pot
+source_lang = en
+
+[odoo-master.pos_sale]
+file_filter = addons/pos_sale/i18n/<lang>.po
+source_file = addons/pos_sale/i18n/pos_sale.pot
 source_lang = en
 
 [odoo-master.procurement]
@@ -515,11 +525,6 @@ source_lang = en
 [odoo-master.product_margin]
 file_filter = addons/product_margin/i18n/<lang>.po
 source_file = addons/product_margin/i18n/product_margin.pot
-source_lang = en
-
-[odoo-master.product_visible_discount]
-file_filter = addons/product_visible_discount/i18n/<lang>.po
-source_file = addons/product_visible_discount/i18n/product_visible_discount.pot
 source_lang = en
 
 [odoo-master.project]
@@ -592,11 +597,6 @@ file_filter = addons/sale_crm/i18n/<lang>.po
 source_file = addons/sale_crm/i18n/sale_crm.pot
 source_lang = en
 
-[odoo-master.sale_expense]
-file_filter = addons/sale_expense/i18n/<lang>.po
-source_file = addons/sale_expense/i18n/sale_expense.pot
-source_lang = en
-
 [odoo-master.sale_margin]
 file_filter = addons/sale_margin/i18n/<lang>.po
 source_file = addons/sale_margin/i18n/sale_margin.pot
@@ -662,11 +662,6 @@ file_filter = addons/stock_picking_wave/i18n/<lang>.po
 source_file = addons/stock_picking_wave/i18n/stock_picking_wave.pot
 source_lang = en
 
-[odoo-master.subscription]
-file_filter = addons/subscription/i18n/<lang>.po
-source_file = addons/subscription/i18n/subscription.pot
-source_lang = en
-
 [odoo-master.survey]
 file_filter = addons/survey/i18n/<lang>.po
 source_file = addons/survey/i18n/survey.pot
@@ -695,11 +690,6 @@ source_lang = en
 [odoo-master.web]
 file_filter = addons/web/i18n/<lang>.po
 source_file = addons/web/i18n/web.pot
-source_lang = en
-
-[odoo-master.web_calendar]
-file_filter = addons/web_calendar/i18n/<lang>.po
-source_file = addons/web_calendar/i18n/web_calendar.pot
 source_lang = en
 
 [odoo-master.web_diagram]
@@ -800,11 +790,6 @@ source_lang = en
 [odoo-master.website_gengo]
 file_filter = addons/website_gengo/i18n/<lang>.po
 source_file = addons/website_gengo/i18n/website_gengo.pot
-source_lang = en
-
-[odoo-master.website_google_map]
-file_filter = addons/website_google_map/i18n/<lang>.po
-source_file = addons/website_google_map/i18n/website_google_map.pot
 source_lang = en
 
 [odoo-master.website_hr]
@@ -925,6 +910,11 @@ source_lang = en
 [odoo-master.website_slides]
 file_filter = addons/website_slides/i18n/<lang>.po
 source_file = addons/website_slides/i18n/website_slides.pot
+source_lang = en
+
+[odoo-master.website_theme_install]
+file_filter = addons/website_theme_install/i18n/<lang>.po
+source_file = addons/website_theme_install/i18n/website_theme_install.pot
 source_lang = en
 
 [odoo-master.website_twitter]

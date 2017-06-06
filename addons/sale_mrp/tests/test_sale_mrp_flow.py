@@ -111,7 +111,7 @@ class TestSaleMrpFlow(common.TransactionCase):
         create_bom_lines(bom_d.id, product_c.id, 1, self.uom_kg.id, 'make_to_stock')
 
         # ----------------------------------------
-        # Create sale order of 10 Dozen product A.
+        # Create sales order of 10 Dozen product A.
         # ----------------------------------------
 
         order = self.SaleOrder.create({
@@ -128,11 +128,11 @@ class TestSaleMrpFlow(common.TransactionCase):
             'product_uom_qty': 10,
             'product_uom': self.uom_dozen.id
         })
-        self.assertTrue(order, "Sale order not created.")
+        self.assertTrue(order, "Sales order not created.")
         order.action_confirm()
 
         # ===============================================================================
-        #  Sale order of 10 Dozen product A should create production order
+        #  Sales order of 10 Dozen product A should create production order
         #  like ..
         # ===============================================================================
         #    Product A  10 Dozen.
@@ -282,7 +282,7 @@ class TestSaleMrpFlow(common.TransactionCase):
         mnf_product_d.post_inventory()
 
         # Check state of manufacturing order.
-        self.assertEqual(mnf_product_d.state, 'confirmed', 'Manufacturing order should still be in confirmed state.')
+        self.assertEqual(mnf_product_d.state, 'progress', 'Manufacturing order should still be in progress state.')
         # Check available quantity of product D.
         self.assertEqual(product_d.qty_available, 20, 'Wrong quantity available of product D.')
 
@@ -334,7 +334,7 @@ class TestSaleMrpFlow(common.TransactionCase):
         mnf_product_a.post_inventory()
 
         # Check state of manufacturing order product A.
-        self.assertEqual(mnf_product_a.state, 'confirmed', 'Manufacturing order should still be in confirmed state.')
+        self.assertEqual(mnf_product_a.state, 'progress', 'Manufacturing order should still be in the progress state.')
         # Check product A avaialble quantity should be 120.
         self.assertEqual(product_a.qty_available, 120, 'Wrong quantity available of product A.')
 

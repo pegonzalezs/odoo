@@ -11,7 +11,7 @@
             <field eval="1.0" name="manufacturing_lead"/>
         </record>
 
-        <record id="product.product_assembly" model="product.product">
+        <record id="product_assembly" model="product.product">
             <field name="standard_price">0.1</field>
             <field name="uom_id" ref="product.product_uom_hour"/>
             <field name="uom_po_id" ref="product.product_uom_hour"/>
@@ -38,27 +38,26 @@
 
         <record id="mrp_workcenter_0" model="mrp.workcenter">
             <field name="name">Assembly Station 1</field>
-            <field name="calendar_id" ref="resource.timesheet_group1"/>
+            <field name="resource_calendar_id" ref="resource.resource_calendar_std"/>
             <field name="capacity">5</field>
             <field name="time_start">10</field>
             <field name="time_stop">8</field>
             <field name="time_efficiency">87</field>
-            <field name="calendar_id" ref="resource.timesheet_group1"/>
         </record>
 
         <record id="mrp_workcenter_3" model="mrp.workcenter">
             <field name="name">Cutting</field>
-            <field name="calendar_id" ref="resource.timesheet_group1"/>
+            <field name="resource_calendar_id" ref="resource.resource_calendar_std"/>
         </record>
 
         <record id="mrp_workcenter_1" model="mrp.workcenter">
             <field name="name">Drill Station 1</field>
-            <field name="calendar_id" ref="resource.timesheet_group1"/>
+            <field name="resource_calendar_id" ref="resource.resource_calendar_std"/>
         </record>
 
         <record id="mrp_workcenter_2" model="mrp.workcenter">
             <field name="name">Assemble Station 2</field>
-            <field name="calendar_id" ref="resource.timesheet_group1"/>
+            <field name="resource_calendar_id" ref="resource.resource_calendar_std"/>
         </record>
 
 
@@ -90,7 +89,7 @@
             <field name="name">Manual Assembly</field>
             <field name="time_cycle">60</field>
             <field name="sequence">5</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_1" model="mrp.routing.workcenter">
@@ -99,7 +98,7 @@
             <field name="name">Long time assembly</field>
             <field name="time_cycle">180</field>
             <field name="sequence">15</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_3" model="mrp.routing.workcenter">
@@ -108,7 +107,7 @@
             <field name="name">Testing</field>
             <field name="time_cycle">60</field>
             <field name="sequence">10</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_4" model="mrp.routing.workcenter">
@@ -117,7 +116,7 @@
             <field name="name">Packing</field>
             <field name="time_cycle">30</field>
             <field name="sequence">5</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_2" model="mrp.routing.workcenter">
@@ -126,7 +125,7 @@
             <field name="time_cycle">120</field>
             <field name="sequence">5</field>
             <field name="name">Manual Assembly</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_5" model="mrp.routing.workcenter">
@@ -135,7 +134,7 @@
             <field name="time_cycle">120</field>
             <field name="sequence">10</field>
             <field name="name">Cutting</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/cutting-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_6" model="mrp.routing.workcenter">
@@ -144,7 +143,7 @@
             <field name="time_cycle">120</field>
             <field name="sequence">15</field>
             <field name="name">Drilling</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/drill-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/drill-worksheet.pdf"/>
         </record>
 
         <record id="mrp_routing_workcenter_7" model="mrp.routing.workcenter">
@@ -153,7 +152,7 @@
             <field name="time_cycle">120</field>
             <field name="sequence">20</field>
             <field name="name">Assembly</field>
-            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.jpg"/>
+            <field name="worksheet" type="base64" file="mrp/static/img/assebly-worksheet.pdf"/>
         </record>
 
         <!-- Resource: mrp.bom -->
@@ -248,7 +247,7 @@
             <field name="uom_id" ref="product.product_uom_unit"/>
             <field name="uom_po_id" ref="product.product_uom_unit"/>
             <field name="description">Self Build kit.</field>
-            <field name="default_code">E-COM12</field>
+            <field name="default_code">E-COM92</field>
         </record>
 
         <record id="product_product_build_kit_product_template" model="product.template">
@@ -393,7 +392,7 @@
             <field name="uom_id" ref="product.product_uom_unit"/>
             <field name="uom_po_id" ref="product.product_uom_unit"/>
             <field name="description">19v,5.5 x 2.5 mm Pin Type Adapter (Power Cord Included)</field>
-            <field name="default_code">E-COM13</field>
+            <field name="default_code">E-COM93</field>
         </record>
 
         <record id="product_product_laptop_keypad" model="product.product">
@@ -406,7 +405,7 @@
             <field name="uom_id" ref="product.product_uom_unit"/>
             <field name="uom_po_id" ref="product.product_uom_unit"/>
             <field name="description">New Original Laptop Keyboard Part No 9GT99</field>
-            <field name="default_code">E-COM14</field>
+            <field name="default_code">E-COM94</field>
         </record>
 
         <record id="product.product_product_27" model="product.product">

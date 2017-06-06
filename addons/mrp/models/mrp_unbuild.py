@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 class MrpUnbuild(models.Model):
     _name = "mrp.unbuild"
     _description = "Unbuild Order"
-    _inherit = ['mail.thread']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
     def _get_default_location_id(self):
@@ -39,6 +39,7 @@ class MrpUnbuild(models.Model):
         'stock.production.lot', 'Lot',
         domain="[('product_id', '=', product_id)]",
         states={'done': [('readonly', True)]})
+    has_tracking=fields.Selection(related='product_id.tracking', readonly=True)
     location_id = fields.Many2one(
         'stock.location', 'Location',
         default=_get_default_location_id,
@@ -76,10 +77,9 @@ class MrpUnbuild(models.Model):
 
     @api.model
     def create(self, vals):
-        if not vals.get('name'):
+        if vals['name'] == _('New'):
             vals['name'] = self.env['ir.sequence'].next_by_code('mrp.unbuild') or _('New')
-        unbuild = super(MrpUnbuild, self).create(vals)
-        return unbuild
+        return super(MrpUnbuild, self).create(vals)
 
     @api.multi
     def action_unbuild(self):
@@ -128,9 +128,9 @@ class MrpUnbuild(models.Model):
                 produce_move.quantity_done = produce_move.product_uom_qty
         produce_moves.move_validate()
         produced_quant_ids = produce_moves.mapped('quant_ids').filtered(lambda quant: quant.qty > 0)
-        consume_move.quant_ids.write({'produced_quant_ids': [(6, 0, produced_quant_ids.ids)]})
+        consume_move.quant_ids.sudo().write({'produced_quant_ids': [(6, 0, produced_quant_ids.ids)]})
 
-        self.write({'state': 'done'})
+        return self.write({'state': 'done'})
 
     def _generate_consume_moves(self):
         moves = self.env['stock.move']
@@ -153,8 +153,8 @@ class MrpUnbuild(models.Model):
     def _generate_produce_moves(self):
         moves = self.env['stock.move']
         for unbuild in self:
-            factor = unbuild.product_uom_id._compute_quantity(unbuild.product_qty, unbuild.bom_id.product_uom_id)
-            boms, lines = unbuild.bom_id.explode(unbuild.product_id, factor / unbuild.bom_id.product_qty, picking_type=unbuild.bom_id.picking_type_id)
+            factor = unbuild.product_uom_id._compute_quantity(unbuild.product_qty, unbuild.bom_id.product_uom_id) / unbuild.bom_id.product_qty
+            boms, lines = unbuild.bom_id.explode(unbuild.product_id, factor, picking_type=unbuild.bom_id.picking_type_id)
             for line, line_data in lines:
                 moves += unbuild._generate_move_from_bom_line(line, line_data['qty'])
         return moves

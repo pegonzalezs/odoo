@@ -4,6 +4,7 @@
 from odoo import http, _
 from odoo.addons.website_event.controllers.main import WebsiteEventController
 from odoo.http import request
+from odoo.tools import pycompat
 
 
 class WebsiteEventSaleController(WebsiteEventController):
@@ -20,14 +21,14 @@ class WebsiteEventSaleController(WebsiteEventController):
 
     def _process_tickets_details(self, data):
         ticket_post = {}
-        for key, value in data.iteritems():
+        for key, value in pycompat.items(data):
             if not key.startswith('nb_register') or '-' not in key:
                 continue
             items = key.split('-')
             if len(items) < 2:
                 continue
             ticket_post[int(items[1])] = int(value)
-        tickets = request.env['event.event.ticket'].browse(ticket_post.keys())
+        tickets = request.env['event.event.ticket'].browse(tuple(ticket_post))
         return [{'id': ticket.id, 'name': ticket.name, 'quantity': ticket_post[ticket.id], 'price': ticket.price} for ticket in tickets if ticket_post[ticket.id]]
 
     @http.route(['/event/<model("event.event"):event>/registration/confirm'], type='http', auth="public", methods=['POST'], website=True)
@@ -38,7 +39,7 @@ class WebsiteEventSaleController(WebsiteEventController):
         registrations = self._process_registration_details(post)
         for registration in registrations:
             ticket = request.env['event.event.ticket'].sudo().browse(int(registration['ticket_id']))
-            cart_values = order.with_context(event_ticket_id=ticket.id)._cart_update(product_id=ticket.product_id.id, add_qty=1, registration_data=[registration])
+            cart_values = order.with_context(event_ticket_id=ticket.id, fixed_price=True)._cart_update(product_id=ticket.product_id.id, add_qty=1, registration_data=[registration])
             attendee_ids |= set(cart_values.get('attendee_ids', []))
 
         # free tickets -> order with amount = 0: auto-confirm, no checkout

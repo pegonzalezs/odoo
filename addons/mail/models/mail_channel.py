@@ -9,7 +9,7 @@ import uuid
 from odoo import _, api, fields, models, modules, tools
 from odoo.exceptions import UserError
 from odoo.osv import expression
-from odoo.tools import ormcache
+from odoo.tools import ormcache, pycompat
 from odoo.tools.safe_eval import safe_eval
 
 
@@ -20,6 +20,7 @@ class ChannelPartner(models.Model):
     _rec_name = 'partner_id'
 
     partner_id = fields.Many2one('res.partner', string='Recipient', ondelete='cascade')
+    partner_email = fields.Char('Email', related='partner_id.email')
     channel_id = fields.Many2one('mail.channel', string='Channel', ondelete='cascade')
     seen_message_id = fields.Many2one('mail.message', string='Last Seen')
     fold_state = fields.Selection([('open', 'Open'), ('folded', 'Folded'), ('closed', 'Closed')], string='Conversation Fold State', default='open')
@@ -34,14 +35,20 @@ class Channel(models.Model):
     _name = 'mail.channel'
     _mail_flat_thread = False
     _mail_post_access = 'read'
-    _inherit = ['mail.thread']
-    _inherits = {'mail.alias': 'alias_id'}
+    _inherit = ['mail.thread', 'mail.alias.mixin']
 
     MAX_BOUNCE_LIMIT = 10
 
     def _get_default_image(self):
         image_path = modules.get_module_resource('mail', 'static/src/img', 'groupdefault.png')
         return tools.image_resize_image_big(open(image_path, 'rb').read().encode('base64'))
+
+    @api.model
+    def default_get(self, fields):
+        res = super(Channel, self).default_get(fields)
+        if not res.get('alias_contact') and (not fields or 'alias_contact' in fields):
+            res['alias_contact'] = 'everyone' if res.get('public', 'private') == 'public' else 'followers'
+        return res
 
     name = fields.Char('Name', required=True, translate=True)
     channel_type = fields.Selection([
@@ -66,8 +73,7 @@ class Channel(models.Model):
     group_public_id = fields.Many2one('res.groups', string='Authorized Group',
                                       default=lambda self: self.env.ref('base.group_user'))
     group_ids = fields.Many2many(
-        'res.groups', rel='mail_channel_res_group_rel',
-        id1='mail_channel_id', id2='groups_id', string='Auto Subscription',
+        'res.groups', string='Auto Subscription',
         help="Members of those groups will automatically added as followers. "
              "Note that they will be able to manage their subscription manually "
              "if necessary.")
@@ -82,9 +88,6 @@ class Channel(models.Model):
         help="Small-sized photo of the group. It is automatically "
              "resized as a 64x64px image, with aspect ratio preserved. "
              "Use this field anywhere a small image is required.")
-    alias_id = fields.Many2one(
-        'mail.alias', 'Alias', ondelete="restrict", required=True,
-        help="The email address associated with this group. New emails received will automatically create new topics.")
     is_subscribed = fields.Boolean(
         'Is Subscribed', compute='_compute_is_subscribed')
 
@@ -102,6 +105,13 @@ class Channel(models.Model):
         membership_ids = memberships.mapped('channel_id')
         for record in self:
             record.is_member = record in membership_ids
+
+    @api.onchange('public')
+    def _onchange_public(self):
+        if self.public == 'public':
+            self.alias_contact = 'everyone'
+        else:
+            self.alias_contact = 'followers'
 
     @api.model
     def create(self, vals):
@@ -145,6 +155,9 @@ class Channel(models.Model):
             self._subscribe_users()
         return result
 
+    def get_alias_model_name(self, vals):
+        return vals.get('alias_model', 'mail.channel')
+
     def _subscribe_users(self):
         for mail_channel in self:
             mail_channel.write({'channel_partner_ids': [(4, pid) for pid in mail_channel.mapped('group_ids').mapped('users').mapped('partner_id').ids]})
@@ -172,15 +185,16 @@ class Channel(models.Model):
         return result
 
     @api.multi
-    def _notification_group_recipients(self, message, recipients, done_ids, group_data):
+    def _notification_recipients(self, message, groups):
         """ All recipients of a message on a channel are considered as partners.
         This means they will receive a minimal email, without a link to access
         in the backend. Mailing lists should indeed send minimal emails to avoid
         the noise. """
-        for recipient in recipients:
-            group_data['partner'] |= recipient
-            done_ids.add(recipient.id)
-        return super(Channel, self)._notification_group_recipients(message, recipients, done_ids, group_data)
+        groups = super(Channel, self)._notification_recipients(message, groups)
+        for (index, (group_name, group_func, group_data)) in enumerate(groups):
+            if group_name != 'customer':
+                groups[index] = (group_name, lambda partner: False, group_data)
+        return groups
 
     @api.multi
     def message_get_email_values(self, notif_mail=None):
@@ -209,8 +223,9 @@ class Channel(models.Model):
     @api.multi
     def message_receive_bounce(self, email, partner, mail_id=None):
         """ Override bounce management to unsubscribe bouncing addresses """
-        if partner.message_bounce >= self.MAX_BOUNCE_LIMIT:
-            self._action_unfollow(partner)
+        for p in partner:
+            if p.message_bounce >= self.MAX_BOUNCE_LIMIT:
+                self._action_unfollow(p)
         return super(Channel, self).message_receive_bounce(email, partner, mail_id=mail_id)
 
     @api.multi
@@ -230,6 +245,16 @@ class Channel(models.Model):
         self.filtered(lambda channel: channel.channel_type == 'chat').mapped('channel_last_seen_partner_ids').write({'is_pinned': True})
         message = super(Channel, self.with_context(mail_create_nosubscribe=True)).message_post(body=body, subject=subject, message_type=message_type, subtype=subtype, parent_id=parent_id, attachments=attachments, content_subtype=content_subtype, **kwargs)
         return message
+
+    def _alias_check_contact(self, message, message_dict, alias):
+        if alias.alias_contact == 'followers' and self.ids:
+            author = self.env['res.partner'].browse(message_dict.get('author_id', False))
+            if not author or author not in self.channel_partner_ids:
+                return {
+                    'error_mesage': _('restricted to channel members'),
+                }
+            return True
+        return super(Channel, self)._alias_check_contact(message, message_dict, alias)
 
     @api.model_cr
     def init(self):
@@ -318,6 +343,7 @@ class Channel(models.Model):
                 'channel_type': channel.channel_type,
                 'public': channel.public,
                 'mass_mailing': channel.email_send,
+                'group_based_subscription': bool(channel.group_ids),
             }
             if extra_info:
                 info['info'] = extra_info
@@ -588,12 +614,12 @@ class Channel(models.Model):
             GROUP BY mail_channel_id
             """, (tuple(self.ids),))
         channels_preview = dict((r['message_id'], r) for r in self._cr.dictfetchall())
-        last_messages = self.env['mail.message'].browse(channels_preview.keys()).message_format()
+        last_messages = self.env['mail.message'].browse(channels_preview).message_format()
         for message in last_messages:
             channel = channels_preview[message['id']]
             del(channel['message_id'])
             channel['last_message'] = message
-        return channels_preview.values()
+        return list(pycompat.values(channels_preview))
 
     #------------------------------------------------------
     # Commands

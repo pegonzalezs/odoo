@@ -15,7 +15,7 @@ class TestPortalProjectBase(TestProjectBase):
             'login': 'noemie',
             'email': 'n.n@example.com',
             'signature': '--\nNoemie',
-            'notify_email': 'always',
+            'notification_type': 'email',
             'groups_id': [(6, 0, [])]})
 
         self.task_3 = self.env['project.task'].with_context({'mail_create_nolog': True}).create({
@@ -30,7 +30,7 @@ class TestPortalProjectBase(TestProjectBase):
 
 class TestPortalProject(TestPortalProjectBase):
 
-    @mute_logger('openerp.addons.base.ir.ir_model')
+    @mute_logger('odoo.addons.base.ir.ir_model')
     def test_employee_project_access_rights(self):
         pigs = self.project_pigs
 
@@ -52,7 +52,7 @@ class TestPortalProject(TestPortalProjectBase):
             'project_id': pigs.id})
         tmp_task.sudo(self.user_projectuser).unlink()
 
-    @mute_logger('openerp.addons.base.ir.ir_model')
+    @mute_logger('odoo.addons.base.ir.ir_model')
     def test_followers_project_access_rights(self):
         pigs = self.project_pigs
         pigs.write({'privacy_visibility': 'followers'})

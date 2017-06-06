@@ -4,13 +4,14 @@
 # 
 # Translators:
 # Yenthe Van Ginneken <yenthespam@gmail.com>, 2016
+# Cas Vissers <casvissers@brahoo.nl>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0alpha1e\n"
+"Project-Id-Version: Odoo Server 10.saas~14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-18 08:37+0000\n"
-"PO-Revision-Date: 2016-08-18 08:37+0000\n"
-"Last-Translator: Yenthe Van Ginneken <yenthespam@gmail.com>, 2016\n"
+"POT-Creation-Date: 2017-02-15 09:50+0000\n"
+"PO-Revision-Date: 2017-02-15 09:50+0000\n"
+"Last-Translator: Cas Vissers <casvissers@brahoo.nl>, 2017\n"
 "Language-Team: Dutch (https://www.transifex.com/odoo/teams/41243/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,7 +22,7 @@ msgstr ""
 #. module: rating_project_issue
 #: model:ir.ui.view,arch_db:rating_project_issue.project_issue_view_rating
 msgid "% On issues"
-msgstr ""
+msgstr "% Op issues"
 
 #. module: rating_project_issue
 #: model:ir.actions.act_window,name:rating_project_issue.rating_rating_action_issue
@@ -34,11 +35,13 @@ msgid ""
 "Customer ratings on issues. If you have no rating, change your project "
 "Settings to activate it."
 msgstr ""
+"Klantenbeoordelingen op issues. Wijzig uw projectinstellingen om "
+"beoordelingen te activeren indien u er nog geen heeft."
 
 #. module: rating_project_issue
 #: model:ir.model.fields,field_description:rating_project_issue.field_project_project_percentage_satisfaction_issue
 msgid "Happy % on Issue"
-msgstr ""
+msgstr "% Blij op issue"
 
 #. module: rating_project_issue
 #: model:mail.message.subtype,name:rating_project_issue.mt_issue_rating
@@ -49,17 +52,17 @@ msgstr "Issue beoordeling"
 #. module: rating_project_issue
 #: model:ir.ui.view,arch_db:rating_project_issue.project_issue_view_kanban_inherit_rating
 msgid "Latest Rating: Average"
-msgstr ""
+msgstr "Laatste beoordeling: Gemiddeld"
 
 #. module: rating_project_issue
 #: model:ir.ui.view,arch_db:rating_project_issue.project_issue_view_kanban_inherit_rating
 msgid "Latest Rating: Happy"
-msgstr ""
+msgstr "Laatste beoordeling: Blij"
 
 #. module: rating_project_issue
 #: model:ir.ui.view,arch_db:rating_project_issue.project_issue_view_kanban_inherit_rating
 msgid "Latest Rating: Not Happy"
-msgstr ""
+msgstr "Laatste beoordeling: Niet tevreden"
 
 #. module: rating_project_issue
 #: model:ir.model,name:rating_project_issue.model_project_project
@@ -80,3 +83,8 @@ msgstr "Beoordeling"
 #: model:mail.message.subtype,description:rating_project_issue.mt_issue_rating
 msgid "Ratings"
 msgstr "Beoordelingen"
+
+#. module: rating_project_issue
+#: model:ir.model,name:rating_project_issue.model_project_task_type
+msgid "Task Stage"
+msgstr "Taak fase"

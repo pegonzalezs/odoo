@@ -20,25 +20,25 @@ class HrEmployee(models.Model):
             barcode = "".join(choice(digits) for i in range(8))
         return barcode
 
-    barcode = fields.Char(string="Badge ID", help="ID used for employee identification.", default=_default_random_barcode, copy=False, groups='base.group_hr_user')
-    pin = fields.Char(string="PIN", default=_default_random_pin, help="PIN used for Check In/Out in Attendance.", copy=False, groups='base.group_hr_user')
+    barcode = fields.Char(string="Badge ID", help="ID used for employee identification.", default=_default_random_barcode, copy=False)
+    pin = fields.Char(string="PIN", default=_default_random_pin, help="PIN used to Check In/Out in Kiosk Mode (if enabled in Configuration).", copy=False)
 
     attendance_ids = fields.One2many('hr.attendance', 'employee_id', help='list of attendances for the employee')
     last_attendance_id = fields.Many2one('hr.attendance', compute='_compute_last_attendance_id')
     attendance_state = fields.Selection(string="Attendance", compute='_compute_attendance_state', selection=[('checked_out', "Checked out"), ('checked_in', "Checked in")])
     manual_attendance = fields.Boolean(string='Manual Attendance', compute='_compute_manual_attendance', inverse='_inverse_manual_attendance',
-                                       help='The employee will have access to the "My Attendances" menu to perform his check in and out from his session')
+                                       help='The employee will have access to the "My Attendances" menu to check in and out from his session')
 
     _sql_constraints = [('barcode_uniq', 'unique (barcode)', "The Badge ID must be unique, this one is already assigned to another employee.")]
 
     @api.multi
     def _compute_manual_attendance(self):
         for employee in self:
-            employee.manual_attendance = employee.user_id.has_group('base.group_hr_attendance') if employee.user_id else False
+            employee.manual_attendance = employee.user_id.has_group('hr_attendance.group_hr_attendance') if employee.user_id else False
 
     @api.multi
     def _inverse_manual_attendance(self):
-        manual_attendance_group = self.env['res.groups'].search([('name', '=', 'Manual Attendances')])
+        manual_attendance_group = self.env.ref('hr_attendance.group_hr_attendance')
         for employee in self:
             if employee.user_id:
                 if employee.manual_attendance:
@@ -53,8 +53,6 @@ class HrEmployee(models.Model):
 
     @api.depends('last_attendance_id.check_in', 'last_attendance_id.check_out', 'last_attendance_id')
     def _compute_attendance_state(self):
-        """compute employee state, last check in and last check out
-        """
         for employee in self:
             employee.attendance_state = employee.last_attendance_id and not employee.last_attendance_id.check_out and 'checked_in' or 'checked_out'
 
@@ -66,17 +64,17 @@ class HrEmployee(models.Model):
 
     @api.model
     def attendance_scan(self, barcode):
-        """ Receive a barcode scanned from the main menu and change the attendances of corresponding employee.
+        """ Receive a barcode scanned from the Kiosk Mode and change the attendances of corresponding employee.
             Returns either an action or a warning.
         """
         employee = self.search([('barcode', '=', barcode)], limit=1)
-        return employee and employee.attendance_action('hr_attendance.hr_attendance_action_main_menu') or \
+        return employee and employee.attendance_action('hr_attendance.hr_attendance_action_kiosk_mode') or \
             {'warning': _('No employee corresponding to barcode %(barcode)s') % {'barcode': barcode}}
 
     @api.multi
     def attendance_manual(self, next_action, entered_pin=None):
         self.ensure_one()
-        if self.env['res.users'].browse(SUPERUSER_ID).has_group('base.group_hr_attendance_use_pin') and (self.user_id and self.user_id.id != self._uid or not self.user_id):
+        if not (entered_pin is None) or self.env['res.users'].browse(SUPERUSER_ID).has_group('hr_attendance.group_hr_attendance_use_pin') and (self.user_id and self.user_id.id != self._uid or not self.user_id):
             if entered_pin != self.pin:
                 return {'warning': _('Wrong PIN')}
         return self.attendance_action(next_action)
@@ -85,14 +83,11 @@ class HrEmployee(models.Model):
     def attendance_action(self, next_action):
         """ Changes the attendance of the employee.
             Returns an action to the check in/out message,
-            next_action defines which menu the check in/out message should return to.
+            next_action defines which menu the check in/out message should return to. ("My Attendances" or "Kiosk Mode")
         """
         self.ensure_one()
-        action_message = self.env.ref('hr_attendance.hr_attendance_action_message').read()[0]
+        action_message = self.env.ref('hr_attendance.hr_attendance_action_greeting_message').read()[0]
         action_message['previous_attendance_change_date'] = self.last_attendance_id and (self.last_attendance_id.check_out or self.last_attendance_id.check_in) or False
-        if action_message['previous_attendance_change_date']:
-            action_message['previous_attendance_change_date'] = \
-                fields.Datetime.to_string(fields.Datetime.context_timestamp(self, fields.Datetime.from_string(action_message['previous_attendance_change_date'])))
         action_message['employee_name'] = self.name
         action_message['next_action'] = next_action
 
@@ -113,11 +108,7 @@ class HrEmployee(models.Model):
             raise exceptions.UserError(_('Cannot perform check in or check out on multiple employees.'))
         action_date = fields.Datetime.now()
 
-        action = 'check_in'
-        if self.attendance_state == 'checked_in':
-            action = 'check_out'
-
-        if action == 'check_in':
+        if self.attendance_state != 'checked_in':
             vals = {
                 'employee_id': self.id,
                 'check_in': action_date,

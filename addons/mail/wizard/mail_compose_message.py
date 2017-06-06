@@ -5,6 +5,7 @@ import base64
 import re
 
 from odoo import _, api, fields, models, SUPERUSER_ID, tools
+from odoo.tools import pycompat
 from odoo.tools.safe_eval import safe_eval
 
 
@@ -12,18 +13,17 @@ from odoo.tools.safe_eval import safe_eval
 EXPRESSION_PATTERN = re.compile('(\$\{.+?\})')
 
 
-def _reopen(self, res_id, model):
+def _reopen(self, res_id, model, context=None):
+    # save original model in context, because selecting the list of available
+    # templates requires a model in context
+    context = dict(context or {}, default_model=model)
     return {'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'view_type': 'form',
             'res_id': res_id,
             'res_model': self._name,
             'target': 'new',
-            # save original model in context, because selecting the list of available
-            # templates requires a model in context
-            'context': {
-                'default_model': model,
-            },
+            'context': context,
             }
 
 
@@ -73,7 +73,6 @@ class MailComposer(models.TransientModel):
             result['composition_mode'] = 'comment'
         vals = {}
         if 'active_domain' in self._context:  # not context.get() because we want to keep global [] domains
-            vals['use_active_domain'] = True
             vals['active_domain'] = '%s' % self._context.get('active_domain')
         if result['composition_mode'] == 'comment':
             vals.update(self.get_record_data(result))
@@ -94,7 +93,7 @@ class MailComposer(models.TransientModel):
             result['res_id'] = self.env.user.partner_id.id
 
         if fields is not None:
-            [result.pop(field, None) for field in result.keys() if field not in fields]
+            [result.pop(field, None) for field in list(result) if field not in fields]
         return result
 
     @api.model
@@ -141,7 +140,7 @@ class MailComposer(models.TransientModel):
             for mid, rmod, rid in self._cr.fetchall():
                 message_values[mid] = {'model': rmod, 'res_id': rid}
             # remove from the set to check the ids that mail_compose_message accepts
-            author_ids = [mid for mid, message in message_values.iteritems()
+            author_ids = [mid for mid, message in pycompat.items(message_values)
                           if message.get('model') and not message.get('res_id')]
             self = self.browse(list(set(self.ids) - set(author_ids)))  # not sure slef = ...
 
@@ -192,7 +191,7 @@ class MailComposer(models.TransientModel):
     @api.multi
     def send_mail_action(self):
         # TDE/ ???
-        return self.with_context(report_template_in_attachment=True).send_mail()
+        return self.send_mail()
 
     @api.multi
     def send_mail(self, auto_commit=False):
@@ -249,7 +248,7 @@ class MailComposer(models.TransientModel):
             for res_ids in sliced_res_ids:
                 batch_mails = Mail
                 all_mail_values = wizard.get_mail_values(res_ids)
-                for res_id, mail_values in all_mail_values.iteritems():
+                for res_id, mail_values in pycompat.items(all_mail_values):
                     if wizard.composition_mode == 'mass_mail':
                         batch_mails |= Mail.create(mail_values)
                     else:
@@ -294,6 +293,7 @@ class MailComposer(models.TransientModel):
                 'record_name': self.record_name,
                 'no_auto_thread': self.no_auto_thread,
                 'mail_server_id': self.mail_server_id.id,
+                'mail_activity_type_id': self.mail_activity_type_id.id,
             }
             # mass mailing: rendering override wizard static values
             if mass_mail_mode and self.model:
@@ -338,7 +338,7 @@ class MailComposer(models.TransientModel):
     def onchange_template_id_wrapper(self):
         self.ensure_one()
         values = self.onchange_template_id(self.template_id.id, self.composition_mode, self.model, self.res_id)['value']
-        for fname, value in values.iteritems():
+        for fname, value in pycompat.items(values):
             setattr(self, fname, value)
 
     @api.multi
@@ -358,20 +358,6 @@ class MailComposer(models.TransientModel):
             if template.user_signature and 'body_html' in values:
                 signature = self.env.user.signature
                 values['body_html'] = tools.append_content_to_html(values['body_html'], signature, plaintext=False)
-            if template.report_template:
-                attachment = self.env['ir.attachment']
-                attach = self.generate_attachment_from_report(template_id, res_id)
-                for attach_fname, attach_datas in attach[res_id].pop('attachments', []):
-                    data_attach = {
-                        'name': attach_fname,
-                        'datas': attach_datas,
-                        'datas_fname': attach_fname,
-                        'res_model': 'mail.compose.message',
-                        'res_id': 0,
-                        'type': 'binary',
-                    }
-                values.setdefault('attachment_ids', list()).append(attachment.create(data_attach).id)
-
         elif template_id:
             values = self.generate_email_for_composer(template_id, [res_id])[res_id]
             # transform attachments into attachment_ids; not attached to the document because this will
@@ -403,34 +389,25 @@ class MailComposer(models.TransientModel):
         return {'value': values}
 
     @api.multi
-    def generate_attachment_from_report(self, template_id, res_id):
-        fields = ['attachment_ids']
-        result = self.env['mail.template'].with_context(tpl_partners_only=True).browse(template_id).generate_email([res_id], fields=fields)
-        return result
-
-
-    @api.multi
     def save_as_template(self):
         """ hit save as template button: current form value will be a new
             template attached to the current document. """
         for record in self:
-            models = self.env['ir.model'].search([('model', '=', record.model or 'mail.message')])
-            model_name = ''
-            if models:
-                model_name = models.name
+            model = self.env['ir.model']._get(record.model or 'mail.message')
+            model_name = model.name or ''
             template_name = "%s: %s" % (model_name, tools.ustr(record.subject))
             values = {
                 'name': template_name,
                 'subject': record.subject or False,
                 'body_html': record.body or False,
-                'model_id': models.id or False,
+                'model_id': model.id or False,
                 'attachment_ids': [(6, 0, [att.id for att in record.attachment_ids])],
             }
             template = self.env['mail.template'].create(values)
             # generate the saved template
             record.write({'template_id': template.id})
             record.onchange_template_id_wrapper()
-            return _reopen(self, record.id, record.model)
+            return _reopen(self, record.id, record.model, context=self._context)
 
     #------------------------------------------------------
     # Template rendering
@@ -458,7 +435,7 @@ class MailComposer(models.TransientModel):
         """
         self.ensure_one()
         multi_mode = True
-        if isinstance(res_ids, (int, long)):
+        if isinstance(res_ids, pycompat.integer_types):
             multi_mode = False
             res_ids = [res_ids]
 
@@ -466,8 +443,9 @@ class MailComposer(models.TransientModel):
         bodies = self.render_template(self.body, self.model, res_ids, post_process=True)
         emails_from = self.render_template(self.email_from, self.model, res_ids)
         replies_to = self.render_template(self.reply_to, self.model, res_ids)
-
-        default_recipients = self.env['mail.thread'].message_get_default_recipients(res_model=self.model, res_ids=res_ids)
+        default_recipients = {}
+        if not self.partner_ids:
+            default_recipients = self.env['mail.thread'].message_get_default_recipients(res_model=self.model, res_ids=res_ids)
 
         results = dict.fromkeys(res_ids, False)
         for res_id in res_ids:
@@ -507,7 +485,7 @@ class MailComposer(models.TransientModel):
         """ Call email_template.generate_email(), get fields relevant for
             mail.compose.message, transform email_cc and email_to into partner_ids """
         multi_mode = True
-        if isinstance(res_ids, (int, long)):
+        if isinstance(res_ids, pycompat.integer_types):
             multi_mode = False
             res_ids = [res_ids]
 

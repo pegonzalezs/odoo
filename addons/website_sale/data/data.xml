@@ -27,26 +27,25 @@
             <field name="html_class">oe_image_full</field>
         </record>
 
-        <record model="crm.team" id="website.salesteam_website_sales">
-            <field name="name">Website Sales</field>
-            <field name="use_quotations" eval="False"/>
+        <record model="crm.team" id="sales_team.salesteam_website_sales">
+            <field name="active" eval="True"/>
+            <field name="dashboard_graph_model">sale.report</field>
+            <field name="dashboard_graph_period">week</field>
         </record>
 
         <record model="website" id="website.default_website">
-            <field name="salesteam_id" ref="website.salesteam_website_sales"/>
+            <field name="salesteam_id" ref="sales_team.salesteam_website_sales"/>
         </record>
 
-        <record id="wlist0" model="website_pricelist">
-            <field name="selectable" eval="True" />
+        <record model="product.pricelist" id="product.list0">
+            <field name="selectable" eval="False" />
             <field name="website_id" ref="website.default_website" />
-            <field name="pricelist_id" ref='product.list0' />
-            <field name="country_group_ids" eval="[(6, 0, [ref('base.europe')])]" />
         </record>
     </data>
     <data>
         <record id="sale.model_sale_order" model="ir.model">
             <field name="website_form_access" eval="True"/>
-            <field name="website_form_label">Sale Order</field>
+            <field name="website_form_label">Sales Order</field>
         </record>
         <function model="ir.model.fields" name="formbuilder_whitelist">
             <value>sale.order</value>
@@ -63,7 +62,7 @@
             <value>res.partner</value>
             <value eval="[
                 'name', 'phone', 'email',
-                'city', 'zip', 'street', 'state_id', 'country_id',
+                'city', 'zip', 'street', 'street2', 'state_id', 'country_id',
                 'vat', 'company_name'
             ]"/>
         </function>

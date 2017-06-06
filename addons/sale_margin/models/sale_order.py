@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-import odoo.addons.decimal_precision as dp
+from odoo.addons import decimal_precision as dp
 
 
 class SaleOrderLine(models.Model):
@@ -21,6 +21,18 @@ class SaleOrderLine(models.Model):
         ctx['date'] = order_id.date_order
         price = frm_cur.with_context(ctx).compute(purchase_price, to_cur, round=False)
         return price
+
+    @api.model
+    def _get_purchase_price(self, pricelist, product, product_uom, date):
+        frm_cur = self.env.user.company_id.currency_id
+        to_cur = pricelist.currency_id
+        purchase_price = product.standard_price
+        if product_uom != product.uom_id:
+            purchase_price = product.uom_id._compute_price(purchase_price, product_uom)
+        ctx = self.env.context.copy()
+        ctx['date'] = date
+        price = frm_cur.with_context(ctx).compute(purchase_price, to_cur, round=False)
+        return {'purchase_price': price}
 
     @api.onchange('product_id', 'product_uom')
     def product_id_change_margin(self):

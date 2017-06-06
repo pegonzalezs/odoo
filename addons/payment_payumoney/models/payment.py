@@ -2,7 +2,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import hashlib
-import urlparse
+
+from werkzeug import urls
 
 from odoo import api, fields, models, _
 from odoo.addons.payment.models.payment_acquirer import ValidationError
@@ -17,8 +18,8 @@ class PaymentAcquirerPayumoney(models.Model):
     _inherit = 'payment.acquirer'
 
     provider = fields.Selection(selection_add=[('payumoney', 'PayUmoney')])
-    payumoney_merchant_key = fields.Char(string='Merchant Key', required_if_provider='payumoney')
-    payumoney_merchant_salt = fields.Char(string='Merchant Salt', required_if_provider='payumoney')
+    payumoney_merchant_key = fields.Char(string='Merchant Key', required_if_provider='payumoney', groups='base.group_user')
+    payumoney_merchant_salt = fields.Char(string='Merchant Salt', required_if_provider='payumoney', groups='base.group_user')
 
     def _get_payumoney_urls(self, environment):
         """ PayUmoney URLs"""
@@ -54,7 +55,7 @@ class PaymentAcquirerPayumoney(models.Model):
     @api.multi
     def payumoney_form_generate_values(self, values):
         self.ensure_one()
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
         payumoney_values = dict(values,
                                 key=self.payumoney_merchant_key,
                                 txnid=values['reference'],
@@ -64,9 +65,9 @@ class PaymentAcquirerPayumoney(models.Model):
                                 email=values.get('partner_email'),
                                 phone=values.get('partner_phone'),
                                 service_provider='payu_paisa',
-                                surl='%s' % urlparse.urljoin(base_url, '/payment/payumoney/return'),
-                                furl='%s' % urlparse.urljoin(base_url, '/payment/payumoney/error'),
-                                curl='%s' % urlparse.urljoin(base_url, '/payment/payumoney/cancel')
+                                surl=urls.url_join(base_url, '/payment/payumoney/return'),
+                                furl=urls.url_join(base_url, '/payment/payumoney/error'),
+                                curl=urls.url_join(base_url, '/payment/payumoney/cancel')
                                 )
 
         payumoney_values['udf1'] = payumoney_values.pop('return_url', '/')

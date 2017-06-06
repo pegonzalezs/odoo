@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 <!-- Assets -->
-<template id="assets_backend" inherit_id="web.assets_backend" name="Website Backend Assets">
+<template id="assets_backend" inherit_id="web.assets_backend" name="Website Backend Assets (used in backend interface)">
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/website/static/src/js/website.backend.js"></script>
         <script type="text/javascript" src="/website/static/src/js/website.tour.rte.js"></script>
@@ -10,21 +10,30 @@
     </xpath>
 </template>
 
-<template id="assets_frontend" inherit_id="web.assets_frontend" name="Website Frontend Assets">
+<template id="qunit_suite" inherit_id="web.qunit_suite">
+    <xpath expr="//script[last()]" position="after">
+        <script type="text/javascript" src="/website/static/tests/website_tests.js"/>
+    </xpath>
+</template>
+
+<template id="assets_frontend" inherit_id="web.assets_frontend" name="Website Assets">
     <xpath expr="//link[last()]" position="after">
         <link rel="stylesheet" type="text/less" href="/website/static/src/less/website.ui.less"/>
         <link rel="stylesheet" type="text/less" href="/website/static/src/less/website.ui.components.less"/>
         <link rel="stylesheet" type="text/less" href="/website/static/src/less/website.wrapwrap.less"/>
         <link rel="stylesheet" type="text/less" href="/website/static/src/less/website.snippets.less"/>
+        <link rel="stylesheet" type="text/less" href="/website/static/src/less/website.zoomodoo.less"/>
+        <link rel="stylesheet" type="text/less" href="/website/static/src/less/bootstrap.extend.less"/>
     </xpath>
     <xpath expr="//script[last()]" position="after">
         <script type="text/javascript" src="/website/static/src/js/website.js"></script>
         <script type="text/javascript" src="/website/static/src/js/website.share.js"></script>
         <script type="text/javascript" src="/website/static/src/js/website.snippets.animation.js"></script>
+        <script type="text/javascript" src="/website/static/src/js/website.zoomodoo.js"></script>
     </xpath>
 </template>
 
-<template id="website.assets_editor" name="Website Editor Assets">
+<template id="website.assets_editor" name="Website Editor Assets (used in website editor)">
     <t t-call="web.less_helpers"/>
 
     <link rel="stylesheet" type="text/less" href="/website/static/src/less/website.edit_mode.less"/>
@@ -49,7 +58,7 @@
 <!-- Layout -->
 <template id="submenu" name="Submenu">
     <li t-if="not submenu.child_id" t-att-class="
-        'active' if submenu.url and submenu.url != '/' and request.httprequest.path == submenu.url.replace('/page/website.', '/page/') else None
+        'active' if submenu.url and submenu.url != '/' and unslug_url(request.httprequest.path) == unslug_url(submenu.url.replace('/page/website.', '/page/')) else None
         ">
         <a t-att-href="(website.menu_id.child_id[0] == submenu) and '/' or submenu.url" t-ignore="true" t-att-target="'_blank' if submenu.new_window else None">
             <span t-field="submenu.name"/>
@@ -74,7 +83,7 @@
     <t t-call="web.layout">
         <t t-set="html_data" t-value="{
             'lang': lang and lang.replace('_', '-'),
-            'data-website-id': website.id if (editable or translatable) and website else None,
+            'data-website-id': website.id if website else None,
             'data-editable': '1' if editable else None,
             'data-translatable': '1' if translatable else None,
             'data-edit_translations': '1' if edit_translations else None,
@@ -90,7 +99,7 @@
                 <t t-set="title" t-value="main_object.website_meta_title"/>
             </t>
             <t t-else="">
-                <t t-set="title"><t t-if="additional_title"><t t-raw="additional_title"/> | </t><t t-esc="(website or res_company).name"/></t>
+                <t t-set="title"><t t-if="additional_title"><t t-raw="additional_title"/> | </t><t t-raw="(website or res_company).name"/></t>
             </t>
         </t>
         <t t-set="x_icon" t-value="'/web/image/website/%s/favicon/' % website.id"/>
@@ -121,21 +130,24 @@
             <script type="text/javascript">
                 odoo.session_info = {
                     is_superuser: <t t-esc="json.dumps(request.env.user._is_superuser())"/>,
+                    is_system: <t t-esc="json.dumps(request.env.user._is_system())"/>,
                     is_frontend: true,
+                    is_website_user: <t t-esc="json.dumps(request.env.user.id == request.website.user_id.id)" />,
+                    user_id: <t t-esc="json.dumps(request.env.user.id)" />
                 };
             </script>
 
             <t t-call-assets="web.assets_common" t-js="false"/>
             <t t-call-assets="web.assets_frontend" t-js="false"/>
-            <t t-call-assets="web_editor.summernote" t-js="false" groups="base.group_website_designer"/>
-            <t t-call-assets="web_editor.assets_editor" t-js="false" groups="base.group_website_designer"/>
-            <t t-call-assets="website.assets_editor" t-js="false" groups="base.group_website_publisher"/>
+            <t t-call-assets="web_editor.summernote" t-js="false" groups="website.group_website_publisher"/>
+            <t t-call-assets="web_editor.assets_editor" t-js="false" groups="website.group_website_publisher"/>
+            <t t-call-assets="website.assets_editor" t-js="false" groups="website.group_website_publisher"/>
 
             <t t-call-assets="web.assets_common" t-css="false"/>
             <t t-call-assets="web.assets_frontend" t-css="false"/>
-            <t t-call-assets="web_editor.summernote" t-css="false" groups="base.group_website_designer"/>
-            <t t-call-assets="web_editor.assets_editor" t-css="false" groups="base.group_website_designer"/>
-            <t t-call-assets="website.assets_editor" t-css="false" groups="base.group_website_publisher"/>
+            <t t-call-assets="web_editor.summernote" t-css="false" groups="website.group_website_publisher"/>
+            <t t-call-assets="web_editor.assets_editor" t-css="false" groups="website.group_website_publisher"/>
+            <t t-call-assets="website.assets_editor" t-css="false" groups="website.group_website_publisher"/>
         </t>
         <t t-set="head" t-value="head_website + (head or '')"/>
 
@@ -177,7 +189,7 @@
             <main>
                 <t t-raw="0"/>
             </main>
-            <footer>
+            <footer >
                 <div id="footer">
                 </div>
             </footer>
@@ -198,8 +210,8 @@
     <xpath expr="//footer" position="inside">
         <div class="container mt16 mb8">
             <div class="pull-right" t-ignore="true" t-if="not editable">
-                Create a <a href="http://www.odoo.com/page/website-builder">free website</a> with
-                <a class="label label-danger" href="http://www.odoo.com/page/website-builder">Odoo</a>
+                Create a <a target="_blank" href="http://www.odoo.com/page/website-builder">free website</a> with
+                <a target="_blank" class="label label-danger" href="http://www.odoo.com/page/website-builder">Odoo</a>
             </div>
             <div class="pull-left text-muted" itemscope="itemscope" itemtype="http://schema.org/Organization">
                 Copyright &amp;copy; <span t-field="res_company.name" itemprop="name">Company name</span>
@@ -211,81 +223,9 @@
 <template id="layout_logo_show" inherit_id="website.layout" customize_show="True" name="Show Logo">
     <xpath expr="//header//a[@class='navbar-brand']" position="replace">
         <a href="/" class="navbar-brand logo">
-            <img src="/logo.png" t-att-alt="'Logo of %s' % res_company.name" t-att-title="res_company.name"/>
+            <span t-field="res_company.logo" t-options="{'widget': 'image'}" t-att-alt="'Logo of %s' % res_company.name" t-att-title="res_company.name" />
         </a>
     </xpath>
-</template>
-
-<!--
-    Optional Bundle for PDFJS lib
-    Since PDFJS is quite huge (40000 lines), please only load it when it is necessary.
-    For now, it is only use to display the PDF slide Viewer during an embed.
-    Bundlized, the size is reduced to 3000 lines.
--->
-<template id="pdf_js_lib" name="PDF JS Library">
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/shared/util.js"></script>
-
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/api.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/metadata.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/canvas.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/webgl.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/pattern_helper.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/font_loader.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/display/annotation_helper.js"></script>
-    <!-- files normally dynamically loaded in worker_loader.js -->
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/network.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/chunked_stream.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/pdf_manager.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/core.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/obj.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/charsets.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/annotation.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/function.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/colorspace.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/crypto.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/pattern.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/evaluator.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/cmap.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/fonts.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/font_renderer.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/glyphlist.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/image.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/metrics.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/parser.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/ps_parser.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/stream.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/worker.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/arithmetic_decoder.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/jpg.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/jpx.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/jbig2.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/bidi.js"></script>
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/core/murmurhash3.js"></script>
-    <!--
-        NOTE JEM : PDFJS not-minified load its assets dynamically. Not minify, this lib is huge (4000 lines).
-        To load PDFJS using odoo bundle, we create a custom worker_loader, to avoid reloading all the assets (core/*.js) dynamically.
-        Loading all this assets in a bundle can be problematic in debug mode, since we don't wait all assets to be loaded to start using PDFJS. That's why, in debug mode, we use the native loader, otherwise our custom loader is used.
-    -->
-    <t t-if="not debug">
-        <script>
-            // Use Odoo PDFJS Loader, to avoid dynamic assets loading
-            PDFJS.workerSrc = '/website/static/lib/pdfjs/worker_loader_by_odoo.js';
-            PDFJS.disableWorker = true;
-        </script>
-    </t>
-    <t t-if="debug">
-        <script>
-            // Specify the main script used to create a new PDF.JS web worker.
-            // In production, leave this undefined or change it to point to the
-            // combined `pdf.worker.js` file.
-            PDFJS.workerSrc = '/website/static/lib/pdfjs/src/worker_loader.js';
-        </script>
-    </t>
-    <!--
-        If no loader defined, this file will try to load pdf.worker.js (in build/).
-        It will crash since we don't use the minified version of PDFJS
-    -->
-    <script type="text/javascript" src="/website/static/lib/pdfjs/src/pdf.js"></script>
 </template>
 
 <!-- Features template -->
@@ -310,7 +250,7 @@
 
 <template id="footer_custom" inherit_id="website.layout" name="Footer">
     <xpath expr="//div[@id='footer']" position="replace">
-        <div class="oe_structure" id="footer">
+        <div class="oe_structure" id="footer" t-if='not no_footer'>
             <section>
                 <div class="container">
                     <div class="row">
@@ -351,7 +291,7 @@
             <t t-esc="lg[1].split('/').pop()"/>
           </a>
         </li>
-        <li groups="base.group_website_publisher">
+        <li groups="website.group_website_publisher">
             <t t-set="url_return" t-value="url_for('', '[lang]') + '?' + keep_query()"/>
             <a t-attf-href="/web#action=base.action_view_base_language_install&amp;website_id=#{website.id if website else ''}&amp;url_return=#{url_return}">
                 <i class="fa fa-plus-circle"/>
@@ -362,8 +302,8 @@
 </template>
 
 <template id="footer_default" inherit_id="website.footer_custom" customize_show="True" name="Automatic Footer">
-    <xpath expr="//div[@id='footer']" position="replace">
-        <div id="footer" class="container hidden-print">
+    <xpath expr="//div[@id='footer']" position="replace" >
+        <div id="footer" class="container hidden-print" t-if='not no_footer'>
             <div class="row">
                 <div class="col-md-4 col-lg-3">
                     <h4>Our Products &amp; Services</h4>
@@ -414,8 +354,8 @@
 
 <!-- Util template -->
 <template id="publish_management">
-    <div groups="base.group_website_publisher" t-ignore="true" class="pull-right css_editable_mode_hidden" t-att-style="style or None">
-        <div t-attf-class="btn-group js_publish_management #{object.website_published and 'css_published' or 'css_unpublished'}" t-att-data-id="object.id" t-att-data-object="object._name" t-att-data-controller="publish_controller">
+    <div groups="website.group_website_publisher" t-ignore="true" class="pull-right css_editable_mode_hidden" t-att-style="style or None">
+        <div t-attf-class="btn-group #{btn_class} js_publish_management #{object.website_published and 'css_published' or 'css_unpublished'}" t-att-data-id="object.id" t-att-data-object="object._name" t-att-data-controller="publish_controller">
             <button class="btn btn-danger js_publish_btn">Unpublished</button>
             <button class="btn btn-success js_publish_btn">Published</button>
             <button type="button" t-attf-class="btn btn-default dropdown-toggle" t-att-id="'dopprod-%s' % object.id" data-toggle="dropdown">
@@ -433,7 +373,7 @@
 </template>
 
 <template id="publish_short">
-    <t groups="base.group_website_publisher" t-ignore="true">
+    <t groups="website.group_website_publisher" t-ignore="true">
         <div t-attf-class="pull-right js_publish_management #{object.website_published and 'css_published' or 'css_unpublished'}" t-att-data-id="object.id" t-att-data-object="object._name" t-att-data-controller="publish_controller">
             <button class="btn btn-danger js_publish_btn">Unpublished</button>
             <button class="btn btn-success js_publish_btn">Published</button>
@@ -563,10 +503,10 @@
                     <small>Odoo Version <t t-raw="version.get('server_version')"/></small>
                 </h1>
                 <p>
-                    Information about the <t t-esc="res_company.name"/> instance of Odoo, the <a href="https://www.odoo.com">Open Source ERP</a>.
+                    Information about the <t t-esc="res_company.name"/> instance of Odoo, the <a target="_blank" href="https://www.odoo.com">Open Source ERP</a>.
                 </p>
 
-                <div class="alert alert-warning alert-dismissable mt16" groups="base.group_website_publisher">
+                <div class="alert alert-warning alert-dismissable mt16" groups="website.group_website_publisher">
                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&amp;times;</button>
                    <p>
                      Note: To hide this page, uncheck it from the top Customize menu.
@@ -659,7 +599,7 @@
                     <p t-if="website_controller">The following error was raised in the website controller <code t-esc="website_controller"/></p>
                     <p>
                         <strong>Error message:</strong>
-                        <pre t-esc="exception.message"/>
+                        <pre t-esc="exception"/>
                     </p>
                 </div>
             </div>

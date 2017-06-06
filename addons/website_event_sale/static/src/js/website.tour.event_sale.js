@@ -2,8 +2,13 @@ odoo.define('website_event_sale.tour', function (require) {
 'use strict';
 
 var tour = require('web_tour.tour');
+var base = require("web_editor.base");
 
-tour.register('event_buy_tickets', { test: true, url: '/event' },
+tour.register('event_buy_tickets', {
+    test: true,
+    url: '/event',
+    wait_for: base.ready()
+},
     [
         {
             content: "Go to the `Events` page",
@@ -24,7 +29,7 @@ tour.register('event_buy_tickets', { test: true, url: '/event' },
         {
             content: "Click on `Order Now` button",
             extra_trigger: 'select:eq(1):has(option:contains(2):propSelected)',
-            trigger: '.btn-primary:contains("Order Now")',
+            trigger: '.btn-primary:contains("Register Now")',
         },
         {
             content: "Fill attendees details",

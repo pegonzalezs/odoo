@@ -183,19 +183,14 @@ parameter) will see those record just disappear.
         </record>
 
         <!-- Price list -->
-
         <record id="list0" model="product.pricelist">
             <field name="name">Public Pricelist</field>
+            <field name="sequence">1</field>
         </record>
 
         <!--
         Property
         -->
-        <record forcecreate="True" id="property_product_pricelist" model="ir.property">
-            <field name="name">property_product_pricelist</field>
-            <field name="fields_id" search="[('model','=','res.partner'),('name','=','property_product_pricelist')]"/>
-            <field eval="'product.pricelist,'+str(ref('list0'))" name="value"/>
-        </record>
 
     </data>
 </odoo>

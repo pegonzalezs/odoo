@@ -4,7 +4,10 @@
 from ast import literal_eval
 from email.utils import parseaddr
 import functools
-import htmlentitydefs
+try:
+    from html.entities import entitydefs
+except ImportError:
+    from htmlentitydefs import entitydefs # pylint: disable=deprecated-module
 import itertools
 import logging
 import operator
@@ -17,14 +20,13 @@ from .validate_email import validate_email
 from odoo import api, fields, models
 from odoo import SUPERUSER_ID, _
 from odoo.exceptions import ValidationError, UserError
-from odoo.tools import mute_logger
-
+from odoo.tools import mute_logger, pycompat
 
 _logger = logging.getLogger('base.partner.merge')
 
 
 # http://www.php2python.com/wiki/function.html-entity-decode/
-def html_entity_decode_char(m, defs=htmlentitydefs.entitydefs):
+def html_entity_decode_char(m, defs=entitydefs):
     try:
         return defs[m.group(1)]
     except KeyError:
@@ -177,7 +179,7 @@ class MergePartnerAutomatic(models.TransientModel):
                     self._cr.execute(query, (dst_partner.id, partner.id, dst_partner.id))
             else:
                 try:
-                    with mute_logger('openerp.sql_db'), self._cr.savepoint():
+                    with mute_logger('odoo.sql_db'), self._cr.savepoint():
                         query = 'UPDATE "%(table)s" SET %(column)s = %%s WHERE %(column)s IN %%s' % query_dic
                         self._cr.execute(query, (dst_partner.id, tuple(src_partners.ids),))
 
@@ -216,7 +218,7 @@ class MergePartnerAutomatic(models.TransientModel):
                 return
             records = Model.sudo().search([(field_model, '=', 'res.partner'), (field_id, '=', src.id)])
             try:
-                with mute_logger('openerp.sql_db'), self._cr.savepoint():
+                with mute_logger('odoo.sql_db'), self._cr.savepoint():
                     return records.sudo().write({field_id: dst_partner.id})
             except psycopg2.Error:
                 # updating fails, most likely due to a violated unique constraint
@@ -269,7 +271,7 @@ class MergePartnerAutomatic(models.TransientModel):
                 return item
         # get all fields that are not computed or x2many
         values = dict()
-        for column, field in model_fields.iteritems():
+        for column, field in pycompat.items(model_fields):
             if field.type not in ('many2many', 'one2many') and field.compute is None:
                 for item in itertools.chain(src_partners, [dst_partner]):
                     if item[column]:
@@ -306,7 +308,7 @@ class MergePartnerAutomatic(models.TransientModel):
             raise UserError(_("You cannot merge a contact with one of his parent."))
 
         # check only admin can merge partners with different emails
-        if SUPERUSER_ID != self.env.uid and len(set(partner.email for partner in Partner.browse(partner_ids))) > 1:
+        if SUPERUSER_ID != self.env.uid and len(set(partner.email for partner in partner_ids)) > 1:
             raise UserError(_("All contacts must have the same email. Only the Administrator can merge contacts with different emails."))
 
         # remove dst_partner from partners to merge
@@ -406,8 +408,8 @@ class MergePartnerAutomatic(models.TransientModel):
             :param models : dict mapping a model name with its foreign key with res_partner table
         """
         return any(
-            self.env[model].search_count([(field, 'in', aggr_ids)], limit=1)
-            for model, field in models.iteritems()
+            self.env[model].search_count([(field, 'in', aggr_ids)])
+            for model, field in pycompat.items(models)
         )
 
     @api.model
@@ -433,11 +435,6 @@ class MergePartnerAutomatic(models.TransientModel):
     # ----------------------------------------
     # Actions
     # ----------------------------------------
-
-    @api.multi
-    def action_close(self):
-        self.ensure_one()
-        return {'type': 'ir.actions.act_window_close'}
 
     @api.multi
     def action_skip(self):
@@ -494,13 +491,19 @@ class MergePartnerAutomatic(models.TransientModel):
 
         counter = 0
         for min_id, aggr_ids in self._cr.fetchall():
-            # exclude partner according to options
-            if model_mapping and self._partner_use_in(aggr_ids, model_mapping):
+            # To ensure that the used partners are accessible by the user
+            partners = self.env['res.partner'].search([('id', 'in', aggr_ids)])
+            if len(partners) < 2:
                 continue
+
+            # exclude partner according to options
+            if model_mapping and self._partner_use_in(partners.ids, model_mapping):
+                continue
+
             self.env['base.partner.merge.line'].create({
                 'wizard_id': self.id,
                 'min_id': min_id,
-                'aggr_ids': aggr_ids,
+                'aggr_ids': partners.ids,
             })
             counter += 1
 

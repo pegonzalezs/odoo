@@ -31,9 +31,9 @@ var PosBaseWidget = require('point_of_sale.BaseWidget');
 var gui = require('point_of_sale.gui');
 var models = require('point_of_sale.models');
 var core = require('web.core');
-var Model = require('web.DataModel');
+var rpc = require('web.rpc');
 var utils = require('web.utils');
-var formats = require('web.formats');
+var field_utils = require('web.field_utils');
 
 var QWeb = core.qweb;
 var _t = core._t;
@@ -272,15 +272,16 @@ var ScaleScreenWidget = ScreenWidget.extend({
         });
 
         this.$('.next,.buy-product').click(function(){
-            self.order_product();
             self.gui.show_screen(self.next_screen);
+            // add product *after* switching screen to scroll properly
+            self.order_product();
         });
 
         queue.schedule(function(){
             return self.pos.proxy.scale_read().then(function(weight){
                 self.set_weight(weight.weight);
             });
-        },{duration:50, repeat: true});
+        },{duration:150, repeat: true});
 
     },
     get_product: function(){
@@ -363,12 +364,20 @@ var NumpadWidget = PosBaseWidget.extend({
         this.state = new models.NumpadState();
     },
     start: function() {
+        this.applyAccessRights();
         this.state.bind('change:mode', this.changedMode, this);
+        this.pos.bind('change:cashier', this.applyAccessRights, this);
         this.changedMode();
         this.$el.find('.numpad-backspace').click(_.bind(this.clickDeleteLastChar, this));
         this.$el.find('.numpad-minus').click(_.bind(this.clickSwitchSign, this));
         this.$el.find('.number-char').click(_.bind(this.clickAppendNewChar, this));
         this.$el.find('.mode-button').click(_.bind(this.clickChangeMode, this));
+    },
+    applyAccessRights: function() {
+        var has_price_control_rights = !this.pos.config.restrict_price_control || this.pos.get_cashier().role == 'manager';
+        this.$el.find('.mode-button[data-mode="price"]')
+            .toggleClass('disabled-mode', !has_price_control_rights)
+            .prop('disabled', !has_price_control_rights);
     },
     clickDeleteLastChar: function() {
         return this.state.deleteLastChar();
@@ -964,10 +973,12 @@ var ProductScreenWidget = ScreenWidget.extend({
        }
     },
 
-    show: function(){
+    show: function(reset){
         this._super();
-        this.product_categories_widget.reset_category();
-        this.numpad.state.reset();
+        if (reset) {
+            this.product_categories_widget.reset_category();
+            this.numpad.state.reset();
+        }
     },
 
     close: function(){
@@ -1206,15 +1217,19 @@ var ClientListScreenWidget = ScreenWidget.extend({
         fields.id           = partner.id || false;
         fields.country_id   = fields.country_id || false;
 
-        new Model('res.partner').call('create_from_ui',[fields]).then(function(partner_id){
-            self.saved_client_details(partner_id);
-        },function(err,event){
-            event.preventDefault();
-            self.gui.show_popup('error',{
-                'title': _t('Error: Could not Save Changes'),
-                'body': _t('Your Internet connection is probably down.'),
+        rpc.query({
+                model: 'res.partner',
+                method: 'create_from_ui',
+                args: [fields],
+            })
+            .then(function(partner_id){
+                self.saved_client_details(partner_id);
+            },function(type,err){
+                self.gui.show_popup('error',{
+                    'title': _t('Error: Could not Save Changes'),
+                    'body': _t('Your Internet connection is probably down.'),
+                });
             });
-        });
     },
     
     // what happens when we've just pushed modifications for a partner of id partner_id
@@ -1332,6 +1347,9 @@ var ClientListScreenWidget = ScreenWidget.extend({
             var new_height   = contents.height();
 
             if(!this.details_visible){
+                // resize client list to take into account client details
+                parent.height('-=' + new_height);
+
                 if(clickpos < scroll + new_height + 20 ){
                     parent.scrollTop( clickpos - 20 );
                 }else{
@@ -1349,6 +1367,16 @@ var ClientListScreenWidget = ScreenWidget.extend({
             contents.append($(QWeb.render('ClientDetailsEdit',{widget:this,partner:partner})));
             this.toggle_save_button();
 
+            // Browsers attempt to scroll invisible input elements
+            // into view (eg. when hidden behind keyboard). They don't
+            // seem to take into account that some elements are not
+            // scrollable.
+            contents.find('input').blur(function() {
+                setTimeout(function() {
+                    self.$('.window').scrollTop(0);
+                }, 0);
+            });
+
             contents.find('.image-uploader').on('change',function(event){
                 self.load_image_file(event.target.files[0],function(res){
                     if (res) {
@@ -1361,6 +1389,7 @@ var ClientListScreenWidget = ScreenWidget.extend({
             });
         } else if (visibility === 'hide') {
             contents.empty();
+            parent.height('100%');
             if( height > scroll ){
                 contents.css({height:height+'px'});
                 contents.animate({height:0},400,function(){
@@ -1397,7 +1426,9 @@ var ReceiptScreenWidget = ScreenWidget.extend({
 
         this.render_change();
         this.render_receipt();
-
+        this.handle_auto_print();
+    },
+    handle_auto_print: function() {
         if (this.should_auto_print()) {
             this.print();
             if (this.should_close_immediately()){
@@ -1406,7 +1437,6 @@ var ReceiptScreenWidget = ScreenWidget.extend({
         } else {
             this.lock_screen(false);
         }
-
     },
     should_auto_print: function() {
         return this.pos.config.iface_print_auto && !this.pos.get_order()._printed;
@@ -1429,6 +1459,8 @@ var ReceiptScreenWidget = ScreenWidget.extend({
     print_xml: function() {
         var env = {
             widget:  this,
+            pos: this.pos,
+            order: this.pos.get_order(),
             receipt: this.pos.get_order().export_for_printing(),
             paymentlines: this.pos.get_order().get_paymentlines()
         };
@@ -1619,7 +1651,7 @@ var PaymentScreenWidget = ScreenWidget.extend({
                 var amount = this.inputbuffer;
 
                 if (this.inputbuffer !== "-") {
-                    amount = formats.parse_value(this.inputbuffer, {type: "float"}, 0.0);
+                    amount = field_utils.parse.float(this.inputbuffer);
                 }
 
                 order.selected_paymentline.set_amount(amount);
@@ -1753,7 +1785,7 @@ var PaymentScreenWidget = ScreenWidget.extend({
             'title': tip ? _t('Change Tip') : _t('Add Tip'),
             'value': self.format_currency_no_symbol(value),
             'confirm': function(value) {
-                order.set_tip(formats.parse_value(value, {type: "float"}, 0));
+                order.set_tip(field_utils.parse.float(value));
                 self.order_changes();
                 self.render_paymentlines();
             }
@@ -1847,11 +1879,9 @@ var PaymentScreenWidget = ScreenWidget.extend({
             self.$('.next').removeClass('highlight');
         }
     },
-    // Check if the order is paid, then sends it to the backend,
-    // and complete the sale process
-    validate_order: function(force_validation) {
-        var self = this;
 
+    order_is_valid: function(force_validation) {
+        var self = this;
         var order = this.pos.get_order();
 
         // FIXME: this check is there because the backend is unable to
@@ -1861,22 +1891,22 @@ var PaymentScreenWidget = ScreenWidget.extend({
                 'title': _t('Empty Order'),
                 'body':  _t('There must be at least one product in your order before it can be validated'),
             });
-            return;
+            return false;
         }
 
         var plines = order.get_paymentlines();
         for (var i = 0; i < plines.length; i++) {
             if (plines[i].get_type() === 'bank' && plines[i].get_amount() < 0) {
-                this.pos_widget.screen_selector.show_popup('error',{
+                this.gui.show_popup('error',{
                     'message': _t('Negative Bank Payment'),
                     'comment': _t('You cannot have a negative amount in a Bank payment. Use a cash payment method to return money to the customer.'),
                 });
-                return;
+                return false;
             }
         }
 
         if (!order.is_paid() || this.invoicing) {
-            return;
+            return false;
         }
 
         // The exact amount must be paid if there is no cash payment method defined.
@@ -1890,12 +1920,12 @@ var PaymentScreenWidget = ScreenWidget.extend({
                     title: _t('Cannot return change without a cash payment method'),
                     body:  _t('There is no cash payment method available in this point of sale to handle the change.\n\n Please pay the exact amount or add a cash payment method in the point of sale configuration'),
                 });
-                return;
+                return false;
             }
         }
 
         // if the change is too large, it's probably an input error, make the user confirm.
-        if (!force_validation && (order.get_total_with_tax() * 1000 < order.get_total_paid())) {
+        if (!force_validation && order.get_total_with_tax() > 0 && (order.get_total_with_tax() * 1000 < order.get_total_paid())) {
             this.gui.show_popup('confirm',{
                 title: _t('Please Confirm Large Amount'),
                 body:  _t('Are you sure that the customer wants to  pay') + 
@@ -1911,8 +1941,15 @@ var PaymentScreenWidget = ScreenWidget.extend({
                     self.validate_order('confirm');
                 },
             });
-            return;
+            return false;
         }
+
+        return true;
+    },
+
+    finalize_validation: function() {
+        var self = this;
+        var order = this.pos.get_order();
 
         if (order.is_paid_with_cash() && this.pos.config.iface_cashdrawer) { 
 
@@ -1962,6 +1999,14 @@ var PaymentScreenWidget = ScreenWidget.extend({
             this.gui.show_screen('receipt');
         }
 
+    },
+
+    // Check if the order is paid, then sends it to the backend,
+    // and complete the sale process
+    validate_order: function(force_validation) {
+        if (this.order_is_valid(force_validation)) {
+            this.finalize_validation();
+        }
     },
 });
 gui.define_screen({name:'payment', widget: PaymentScreenWidget});

@@ -3,8 +3,9 @@
 
 import datetime
 import logging
+
+import requests
 import werkzeug.urls
-import urllib2
 
 from ast import literal_eval
 
@@ -26,25 +27,25 @@ class PublisherWarrantyContract(AbstractModel):
         Users = self.env['res.users']
         IrParamSudo = self.env['ir.config_parameter'].sudo()
 
-        dbuuid = IrParamSudo('database.uuid')
-        db_create_date = IrParamSudo('database.create_date')
+        dbuuid = IrParamSudo.get_param('database.uuid')
+        db_create_date = IrParamSudo.get_param('database.create_date')
         limit_date = datetime.datetime.now()
         limit_date = limit_date - datetime.timedelta(15)
         limit_date_str = limit_date.strftime(misc.DEFAULT_SERVER_DATETIME_FORMAT)
-        nbr_users = Users.search_count([])
-        nbr_active_users = Users.search_count([("login_date", ">=", limit_date_str)])
+        nbr_users = Users.search_count([('active', '=', True)])
+        nbr_active_users = Users.search_count([("login_date", ">=", limit_date_str), ('active', '=', True)])
         nbr_share_users = 0
         nbr_active_share_users = 0
         if "share" in Users._fields:
-            nbr_share_users = Users.search_count([("share", "=", True)])
-            nbr_active_share_users = Users.search_count([("share", "=", True), ("login_date", ">=", limit_date_str)])
+            nbr_share_users = Users.search_count([("share", "=", True), ('active', '=', True)])
+            nbr_active_share_users = Users.search_count([("share", "=", True), ("login_date", ">=", limit_date_str), ('active', '=', True)])
         user = self.env.user
         domain = [('application', '=', True), ('state', 'in', ['installed', 'to upgrade', 'to remove'])]
         apps = self.env['ir.module.module'].sudo().search_read(domain, ['name'])
 
-        enterprise_code = IrParamSudo('database.enterprise_code')
+        enterprise_code = IrParamSudo.get_param('database.enterprise_code')
 
-        web_base_url = IrParamSudo('web.base.url')
+        web_base_url = IrParamSudo.get_param('web.base.url')
         msg = {
             "dbuuid": dbuuid,
             "nbr_users": nbr_users,
@@ -60,7 +61,7 @@ class PublisherWarrantyContract(AbstractModel):
             "enterprise_code": enterprise_code,
         }
         if user.partner_id.company_id:
-            company_id = user.partner_id.company_id.id
+            company_id = user.partner_id.company_id
             msg.update(company_id.read(["name", "email", "phone"])[0])
         return msg
 
@@ -71,21 +72,17 @@ class PublisherWarrantyContract(AbstractModel):
         """
         msg = self._get_message()
         arguments = {'arg0': msg, "action": "update"}
-        arguments_raw = werkzeug.urls.url_encode(arguments)
 
         url = config.get("publisher_warranty_url")
 
-        uo = urllib2.urlopen(url, arguments_raw, timeout=30)
-        try:
-            submit_result = uo.read()
-            return literal_eval(submit_result)
-        finally:
-            uo.close()
+        r = requests.post(url, data=arguments, timeout=30)
+        r.raise_for_status()
+        return literal_eval(r.text)
 
     @api.multi
     def update_notification(self, cron_mode=True):
         """
-        Send a message to OpenERP's publisher warranty server to check the
+        Send a message to Odoo's publisher warranty server to check the
         validity of the contracts, get notifications, etc...
 
         @param cron_mode: If true, catch all exceptions (appropriate for usage in a cron).
@@ -101,7 +98,7 @@ class PublisherWarrantyContract(AbstractModel):
                 raise UserError(_("Error during communication with the publisher warranty server."))
             # old behavior based on res.log; now on mail.message, that is not necessarily installed
             user = self.env['res.users'].sudo().browse(SUPERUSER_ID)
-            poster = self.env.sudo().ref('mail.channel_all_employees')
+            poster = self.sudo().env.ref('mail.channel_all_employees')
             if not (poster and poster.exists()):
                 if not user.exists():
                     return True
@@ -113,9 +110,10 @@ class PublisherWarrantyContract(AbstractModel):
                     pass
             if result.get('enterprise_info'):
                 # Update expiration date
-                self.env['ir.config_parameter'].sudo().set_param('database.expiration_date', result['enterprise_info'].get('expiration_date'), ['base.group_user'])
-                self.env['ir.config_parameter'].sudo().set_param('database.expiration_reason', result['enterprise_info'].get('expiration_reason', 'trial'), ['base.group_system'])
-                self.env['ir.config_parameter'].sudo().set_param('database.enterprise_code', result['enterprise_info'].get('enterprise_code'), ['base.group_user'])
+                set_param = self.env['ir.config_parameter'].sudo().set_param
+                set_param('database.expiration_date', result['enterprise_info'].get('expiration_date'))
+                set_param('database.expiration_reason', result['enterprise_info'].get('expiration_reason', 'trial'))
+                set_param('database.enterprise_code', result['enterprise_info'].get('enterprise_code'))
 
         except Exception:
             if cron_mode:

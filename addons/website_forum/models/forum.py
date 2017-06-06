@@ -12,6 +12,7 @@ from werkzeug.exceptions import Forbidden
 
 from odoo import api, fields, models, modules, tools, SUPERUSER_ID, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import pycompat
 
 _logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class Forum(models.Model):
         TDE TODO: move me somewhere else, auto_init ? """
         forum_uuids = self.env['ir.config_parameter'].search([('key', '=', 'website_forum.uuid')])
         if not forum_uuids:
-            forum_uuids.set_param('website_forum.uuid', str(uuid.uuid4()), ['base.group_system'])
+            forum_uuids.set_param('website_forum.uuid', str(uuid.uuid4()))
 
     @api.model
     def _get_default_faq(self):
@@ -166,7 +167,7 @@ class Forum(models.Model):
         post_tags = []
         existing_keep = []
         user = self.env.user
-        for tag in filter(None, tags.split(',')):
+        for tag in (tag for tag in tags.split(',') if tag):
             if tag.startswith('_'):  # it's a new tag
                 # check that not arleady created meanwhile or maybe excluded by the limit on the search
                 tag_ids = Tag.search([('name', '=', tag[1:])])
@@ -379,7 +380,7 @@ class Post(models.Model):
         is_admin = user.id == SUPERUSER_ID
         # sudoed recordset instead of individual posts so values can be
         # prefetched in bulk
-        for post, post_sudo in itertools.izip(self, self.sudo()):
+        for post, post_sudo in pycompat.izip(self, self.sudo()):
             is_creator = post.create_uid == user
 
             post.karma_accept = post.forum_id.karma_answer_accept_own if post.parent_id.create_uid == user else post.forum_id.karma_answer_accept_all
@@ -492,7 +493,7 @@ class Post(models.Model):
             tag_ids = set(tag.get('id') for tag in self.resolve_2many_commands('tag_ids', vals['tag_ids']))
             if any(set(post.tag_ids) != tag_ids for post in self) and any(self.env.user.karma < post.forum_id.karma_edit_retag for post in self):
                 raise KarmaError(_('Not enough karma to retag.'))
-        if any(key not in ['state', 'active', 'is_correct', 'closed_uid', 'closed_date', 'closed_reason_id', 'tag_ids'] for key in vals.keys()) and any(not post.can_edit for post in self):
+        if any(key not in ['state', 'active', 'is_correct', 'closed_uid', 'closed_date', 'closed_reason_id', 'tag_ids'] for key in vals) and any(not post.can_edit for post in self):
             raise KarmaError('Not enough karma to edit a post.')
 
         res = super(Post, self).write(vals)
@@ -525,14 +526,14 @@ class Post(models.Model):
                     subject=_('Re: %s') % post.parent_id.name,
                     partner_ids=[(4, p.id) for p in tag_partners],
                     channel_ids=[(4, c.id) for c in tag_channels],
-                    subtype_id=self.env['ir.model.data'].sudo().xmlid_to_res_id('website_forum.mt_answer_new'))
+                    subtype_id=self.env['ir.model.data'].xmlid_to_res_id('website_forum.mt_answer_new'))
             elif post.state == 'active' and not post.parent_id:
                 post.message_post_with_view(
                     'website_forum.forum_post_template_new_question',
                     subject=post.name,
                     partner_ids=[(4, p.id) for p in tag_partners],
                     channel_ids=[(4, c.id) for c in tag_channels],
-                    subtype_id=self.env['ir.model.data'].sudo().xmlid_to_res_id('website_forum.mt_question_new'))
+                    subtype_id=self.env['ir.model.data'].xmlid_to_res_id('website_forum.mt_question_new'))
             elif post.state == 'pending' and not post.parent_id:
                 # TDE FIXME: in master, you should probably use a subtype;
                 # however here we remove subtype but set partner_ids
@@ -543,7 +544,7 @@ class Post(models.Model):
                     'website_forum.forum_post_template_validation',
                     subject=post.name,
                     partner_ids=partners.ids,
-                    subtype_id=self.env['ir.model.data'].sudo().xmlid_to_res_id('mail.mt_note'))
+                    subtype_id=self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note'))
         return True
 
     @api.multi
@@ -780,8 +781,7 @@ class Post(models.Model):
 
     @api.multi
     def get_access_action(self):
-        """ Override method that generated the link to access the document. Instead
-        of the classic form view, redirect to the post on the website directly """
+        """ Instead of the classic form view, redirect to the post on the website directly """
         self.ensure_one()
         return {
             'type': 'ir.actions.act_url',
@@ -791,23 +791,36 @@ class Post(models.Model):
         }
 
     @api.multi
-    def _notification_get_recipient_groups(self, message, recipients):
-        """ Override to set the access button: everyone can see an access button
-        on their notification email. It will lead on the website view of the
-        post. """
-        res = super(Post, self)._notification_get_recipient_groups(message, recipients)
-        access_action = self._notification_link_helper('view', model=message.model, res_id=message.res_id)
-        for category, data in res.iteritems():
-            res[category]['button_access'] = {'url': access_action, 'title': '%s %s' % (_('View'), self.post_type)}
-        return res
+    def _notification_recipients(self, message, groups):
+        groups = super(Post, self)._notification_recipients(message, groups)
+
+        for group_name, group_method, group_data in groups:
+            group_data['has_button_access'] = True
+
+        return groups
 
     @api.multi
+    @api.returns('self', lambda value: value.id)
     def message_post(self, message_type='notification', subtype=None, **kwargs):
+        question_followers = self.env['res.partner']
         if self.ids and message_type == 'comment':  # user comments have a restriction on karma
+            # add followers of comments on the parent post
+            if self.parent_id:
+                partner_ids = kwargs.get('partner_ids', [])
+                comment_subtype = self.sudo().env.ref('mail.mt_comment')
+                question_followers = self.env['mail.followers'].sudo().search([
+                    ('res_model', '=', self._name),
+                    ('res_id', '=', self.parent_id.id),
+                    ('partner_id', '!=', False),
+                ]).filtered(lambda fol: comment_subtype in fol.subtype_ids).mapped('partner_id')
+                partner_ids += [(4, partner.id) for partner in question_followers]
+                kwargs['partner_ids'] = partner_ids
+
             self.ensure_one()
             if not self.can_comment:
                 raise KarmaError('Not enough karma to comment')
-            kwargs['record_name'] = kwargs.get('record_name') or self.parent_id and self.parent_id.name
+            if not kwargs.get('record_name') and self.parent_id:
+                kwargs['record_name'] = self.parent_id.name
         return super(Post, self).message_post(message_type=message_type, subtype=subtype, **kwargs)
 
     @api.multi
@@ -818,6 +831,7 @@ class Post(models.Model):
         if message.message_type == 'comment':
             return {
                 'needaction_partner_ids': [],
+                'partner_ids': [],
             }
         return {}
 

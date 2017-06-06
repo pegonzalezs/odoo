@@ -100,7 +100,7 @@ class CompanyLDAP(models.Model):
             _logger.warning('Could not format LDAP filter. Your filter should contain one \'%s\'.')
             return False
         try:
-            results = self.query(conf, filter)
+            results = self.query(conf, tools.ustr(filter))
 
             # Get rid of (None, attrs) for searchResultReference replies
             results = [i for i in results if i[0]]
@@ -112,7 +112,7 @@ class CompanyLDAP(models.Model):
                 entry = results[0]
         except ldap.INVALID_CREDENTIALS:
             return False
-        except ldap.LDAPError, e:
+        except ldap.LDAPError as e:
             _logger.error('An LDAP exception occurred: %s', e)
         return entry
 
@@ -145,11 +145,11 @@ class CompanyLDAP(models.Model):
             ldap_password = conf['ldap_password'] or ''
             ldap_binddn = conf['ldap_binddn'] or ''
             conn.simple_bind_s(ldap_binddn.encode('utf-8'), ldap_password.encode('utf-8'))
-            results = conn.search_st(conf['ldap_base'], ldap.SCOPE_SUBTREE, filter, retrieve_attributes, timeout=60)
+            results = conn.search_st(conf['ldap_base'].encode('utf-8'), ldap.SCOPE_SUBTREE, filter, retrieve_attributes, timeout=60)
             conn.unbind()
         except ldap.INVALID_CREDENTIALS:
             _logger.error('LDAP bind failed.')
-        except ldap.LDAPError, e:
+        except ldap.LDAPError as e:
             _logger.error('An LDAP exception occurred: %s', e)
         return results
 

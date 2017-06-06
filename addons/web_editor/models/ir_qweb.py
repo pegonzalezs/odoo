@@ -14,19 +14,20 @@ import itertools
 import json
 import logging
 import os
-import urllib2
-import urlparse
 import re
 import hashlib
 
 import pytz
+import requests
 from dateutil import parser
 from lxml import etree, html
 from PIL import Image as I
+from werkzeug import urls
+
 import odoo.modules
 
 from odoo import api, models, fields
-from odoo.tools import ustr
+from odoo.tools import ustr, pycompat
 from odoo.tools import html_escape as escape
 from odoo.addons.base.ir import ir_qweb
 
@@ -283,7 +284,7 @@ class Image(models.AbstractModel):
             "hose again."
 
         aclasses = ['img', 'img-responsive'] + options.get('class', '').split()
-        classes = ' '.join(itertools.imap(escape, aclasses))
+        classes = ' '.join(pycompat.imap(escape, aclasses))
 
         max_size = None
         if options.get('resize'):
@@ -303,8 +304,14 @@ class Image(models.AbstractModel):
         elif options.get('alt'):
             alt = options['alt']
 
-        img = '<img class="%s" src="%s" style="%s"%s/>' % \
-            (classes, src, options.get('style', ''), ' alt="%s"' % alt if alt else '')
+        src_zoom = None
+        if options.get('zoom') and getattr(record, options['zoom'], None):
+            src_zoom = '/web/image/%s/%s/%s%s?unique=%s' % (record._name, record.id, options['zoom'], max_size, sha)
+        elif options.get('zoom'):
+            src_zoom = options['zoom']
+
+        img = '<img class="%s" src="%s" style="%s"%s%s/>' % \
+            (classes, src, options.get('style', ''), ' alt="%s"' % alt if alt else '', ' data-zoom="1" data-zoom-image="%s"' % src_zoom if src_zoom else '')
         return ir_qweb.unicodifier(img)
 
     local_url_re = re.compile(r'^/(?P<module>[^]]+)/static/(?P<rest>.+)$')
@@ -313,11 +320,11 @@ class Image(models.AbstractModel):
     def from_html(self, model, field, element):
         url = element.find('img').get('src')
 
-        url_object = urlparse.urlsplit(url)
+        url_object = urls.url_parse(url)
         if url_object.path.startswith('/web/image'):
             # url might be /web/image/<model>/<id>[_<checksum>]/<field>[/<width>x<height>]
             fragments = url_object.path.split('/')
-            query = dict(urlparse.parse_qsl(url_object.query))
+            query = url_object.decode_query()
             if fragments[3].isdigit():
                 model = 'ir.attachment'
                 oid = fragments[3]
@@ -335,7 +342,7 @@ class Image(models.AbstractModel):
         return self.load_remote_url(url)
 
     def load_local_url(self, url):
-        match = self.local_url_re.match(urlparse.urlsplit(url).path)
+        match = self.local_url_re.match(urls.url_parse(url).path)
 
         rest = match.group('rest')
         for sep in os.sep, os.altsep:
@@ -368,9 +375,9 @@ class Image(models.AbstractModel):
             #   linking to HTTP images
             # implement drag & drop image upload to mitigate?
 
-            req = urllib2.urlopen(url, timeout=REMOTE_CONNECTION_TIMEOUT)
-            # PIL needs a seekable file-like image, urllib result is not seekable
-            image = I.open(cStringIO.StringIO(req.read()))
+            req = requests.get(url, timeout=REMOTE_CONNECTION_TIMEOUT)
+            # PIL needs a seekable file-like image so wrap result in IO buffer
+            image = I.open(cStringIO.StringIO(req.content))
             # force a complete load of the image data to validate it
             image.load()
         except Exception:

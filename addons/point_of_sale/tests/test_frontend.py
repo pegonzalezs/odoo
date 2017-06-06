@@ -30,18 +30,22 @@ class TestUi(odoo.tests.HttpCase):
                                    'value': 'account.account,' + str(account_receivable.id)})
 
         # set the company currency to USD, otherwise it will assume
-        # euro's. this will cause issues as the sale journal is in
+        # euro's. this will cause issues as the sales journal is in
         # USD, because of this all products would have a different
         # price
         main_company.currency_id = env.ref('base.USD')
 
-        test_sale_journal = journal_obj.create({'name': 'Sale Journal - Test',
+        test_sale_journal = journal_obj.create({'name': 'Sales Journal - Test',
                                                 'code': 'TSJ',
                                                 'type': 'sale',
                                                 'company_id': main_company.id})
 
-        main_pos_config.journal_id = test_sale_journal
-        main_pos_config.write({'journal_ids': [(0, 0, {'name': 'Cash Journal - Test',
+        env['product.pricelist'].search([]).write(dict(currency_id=main_company.currency_id.id))
+
+        main_pos_config.write({
+            'journal_id': test_sale_journal.id,
+            'invoice_journal_id': test_sale_journal.id,
+            'journal_ids': [(0, 0, {'name': 'Cash Journal - Test',
                                                        'code': 'TSC',
                                                        'type': 'cash',
                                                        'company_id': main_company.id,

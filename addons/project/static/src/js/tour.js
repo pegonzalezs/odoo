@@ -9,7 +9,7 @@ var _t = core._t;
 tour.register('project_tour', {
     url: "/web",
 }, [tour.STEPS.MENU_MORE, {
-    trigger: '.o_app[data-menu-xmlid="base.menu_main_pm"], .oe_menu_toggler[data-menu-xmlid="base.menu_main_pm"]',
+    trigger: '.o_app[data-menu-xmlid="project.menu_main_pm"], .oe_menu_toggler[data-menu-xmlid="project.menu_main_pm"]',
     content: _t('Want a better way to <b>manage your projects</b>? <i>It starts here.</i>'),
     position: 'bottom',
 }, {
@@ -58,16 +58,13 @@ tour.register('project_tour', {
     extra_trigger: '.o_kanban_project_tasks',
     content: _t("Click on a card to get the details of the task."),
     position: "bottom",
-    run: function (actions) {
-        actions.auto(".o_kanban_record .oe_kanban_action[data-type=edit]");
-    },
 }, {
     trigger: ".o_form_button_edit",
     extra_trigger: '.o_form_project_tasks',
     content: _t('Click on this button to modify the task.'),
     position: "bottom"
 }, {
-    trigger: ".o_form_field.o_task_user_field",
+    trigger: ".o_form_view .o_task_user_field",
     extra_trigger: '.o_form_project_tasks.o_form_editable',
     content: _t('<b>Assign the task</b> to someone. <i>You can create and invite a new user on the fly.</i>'),
     position: "bottom",
@@ -85,7 +82,7 @@ tour.register('project_tour', {
 }, {
     trigger: ".breadcrumb li:not(.active):last",
     extra_trigger: '.o_form_project_tasks.o_form_readonly',
-    content: _t("Click on layers in the path to easily <b>return to tasks</b>."),
+    content: _t("Use the breadcrumbs to <b>go back to your tasks pipeline</b>."),
     position: "bottom"
 }, tour.STEPS.TOGGLE_APPSWITCHER,
 tour.STEPS.MENU_MORE, {
@@ -96,6 +93,15 @@ tour.STEPS.MENU_MORE, {
     trigger: ".o_web_settings_dashboard textarea#user_emails",
     content: _t("<b>Invite coworkers</b> via email.<br/><i>Enter one email per line.</i>"),
     position: "right"
+}, tour.STEPS.TOGGLE_APPSWITCHER,
+tour.STEPS.MENU_MORE, {
+    trigger: '.o_app[data-menu-xmlid="project.menu_main_pm"], .oe_menu_toggler[data-menu-xmlid="project.menu_main_pm"]',
+    content: _t("Good job! Your completed the Project Management tour. You can continue with the <b>implementation guide</b> to help you setup Project Management in your company."),
+    position: 'bottom',
+}, {
+    trigger: '.o_planner_systray div.progress',
+    content: _t("Use the <b>implementation guide</b> to setup Project Management in your company."),
+    position: 'bottom',
 }]);
 
 });

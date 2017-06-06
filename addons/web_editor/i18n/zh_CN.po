@@ -3,7 +3,7 @@
 # * web_editor
 # 
 # Translators:
-# Jeffery Chenn <jeffery9@gmail.com>, 2016
+# Jeffery CHEN <jeffery9@gmail.com>, 2016
 # fausthuang <faust_huang@hotmail.com>, 2016
 # Xia Fajin <xia.fajin@elico-corp.com>, 2016
 # Xu Lei <xulei8@qq.com>, 2016
@@ -14,13 +14,15 @@
 # mrshelly <mrshelly@hotmail.com>, 2016
 # Gary Wei <Gary.wei@elico-corp.com>, 2016
 # THL <wt39181819@gmail.com>, 2016
+# waveyeung <waveyeung@qq.com>, 2016
+# Maie <m@maie.name>, 2017
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 10.0alpha1e\n"
+"Project-Id-Version: Odoo Server 10.saas~14\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-18 08:38+0000\n"
-"PO-Revision-Date: 2016-08-18 08:38+0000\n"
-"Last-Translator: THL <wt39181819@gmail.com>, 2016\n"
+"POT-Creation-Date: 2017-02-15 09:50+0000\n"
+"PO-Revision-Date: 2017-02-15 09:50+0000\n"
+"Last-Translator: Maie <m@maie.name>, 2017\n"
 "Language-Team: Chinese (China) (https://www.transifex.com/odoo/teams/41243/zh_CN/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,7 +32,7 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:899
+#: code:addons/web_editor/static/src/js/rte.summernote.js:911
 #, python-format
 msgid "(YouTube, Vimeo, Vine, Instagram, DailyMotion or Youku)"
 msgstr "(油管, Vimeo, Vine, Instagram, DailyMotion or 优酷)"
@@ -43,13 +45,52 @@ msgid "(Youtube, Vimeo, Dailymotion)"
 msgstr "(油管, Vimeo, Dailymotion)"
 
 #. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
+msgid "25% Black"
+msgstr ""
+
+#. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
+msgid "25% White"
+msgstr ""
+
+#. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
+msgid "50% Black"
+msgstr ""
+
+#. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
+msgid "50% White"
+msgstr ""
+
+#. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
+msgid "75% Black"
+msgstr ""
+
+#. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
+msgid "75% White"
+msgstr ""
+
+#. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.snippets
 msgid "<i class=\"fa fa-th-large\"/> First Panel"
 msgstr "<i class=\"fa fa-th-large\"/> 首个面板"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:951
+#: code:addons/web_editor/static/src/js/ace.js:360
+#, python-format
+msgid ""
+"A server error occured. Please check you correctly signed in and that the "
+"XML you are saving is well-formed."
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:963
 #, python-format
 msgid "Action"
 msgstr "动作"
@@ -69,22 +110,27 @@ msgid "Add an image URL"
 msgstr "添加图像网址"
 
 #. module: web_editor
+#: model:ir.ui.view,arch_db:web_editor.snippets
+msgid "Add blocks"
+msgstr ""
+
+#. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:933
+#: code:addons/web_editor/static/src/js/rte.summernote.js:945
 #, python-format
 msgid "Align center"
 msgstr "居中"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:932
+#: code:addons/web_editor/static/src/js/rte.summernote.js:944
 #, python-format
 msgid "Align left"
 msgstr "居左"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:934
+#: code:addons/web_editor/static/src/js/rte.summernote.js:946
 #, python-format
 msgid "Align right"
 msgstr "居右"
@@ -129,7 +175,7 @@ msgstr "自动播放"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:940
+#: code:addons/web_editor/static/src/js/rte.summernote.js:952
 #: code:addons/web_editor/static/src/xml/snippets.xml:49
 #, python-format
 msgid "Background Color"
@@ -137,10 +183,10 @@ msgstr "背景颜色"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/snippets.options.js:405
+#: code:addons/web_editor/static/src/js/snippets.options.js:667
 #, python-format
-msgid "Background Image Options"
-msgstr "背景图像选项"
+msgid "Background Image Sizing"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -196,7 +242,7 @@ msgstr "黑色"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/snippets.editor.js:842
+#: code:addons/web_editor/static/src/js/snippets.editor.js:804
 #, python-format
 msgid "Block"
 msgstr "块"
@@ -210,14 +256,14 @@ msgstr "块风格"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:860
+#: code:addons/web_editor/static/src/js/rte.summernote.js:872
 #, python-format
 msgid "Bold"
 msgstr "加粗"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:127
+#: code:addons/web_editor/static/src/js/rte.summernote.js:100
 #, python-format
 msgid "Center"
 msgstr "居中"
@@ -231,22 +277,23 @@ msgstr "更改媒体说明和提示"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:949
+#: code:addons/web_editor/static/src/js/rte.summernote.js:961
 #: code:addons/web_editor/static/src/js/translator.js:74
+#: code:addons/web_editor/static/src/xml/ace.xml:17
 #, python-format
 msgid "Close"
 msgstr "关闭"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:911
+#: code:addons/web_editor/static/src/js/rte.summernote.js:923
 #, python-format
 msgid "Code"
 msgstr "代码"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:926
+#: code:addons/web_editor/static/src/js/rte.summernote.js:938
 #, python-format
 msgid "Code View"
 msgstr "代码视图"
@@ -260,10 +307,17 @@ msgstr "颜色样式"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/snippets.editor.js:840
+#: code:addons/web_editor/static/src/js/snippets.editor.js:802
 #, python-format
 msgid "Column"
 msgstr "栏位"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:66
+#, python-format
+msgid "Common colors"
+msgstr "通用颜色"
 
 #. module: web_editor
 #. openerp-web
@@ -282,12 +336,12 @@ msgstr "封面"
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub_create_uid
 msgid "Created by"
-msgstr "创建者"
+msgstr "创建人"
 
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub_create_date
 msgid "Created on"
-msgstr "创建于"
+msgstr "创建时间"
 
 #. module: web_editor
 #. openerp-web
@@ -313,7 +367,7 @@ msgstr "危险"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/summernote.js:1920
+#: code:addons/web_editor/static/src/js/summernote.js:1927
 #: code:addons/web_editor/static/src/xml/editor.xml:298
 #, python-format
 msgid "Default"
@@ -333,15 +387,21 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:200
-#: code:addons/web_editor/static/src/xml/editor.xml:34
+#: code:addons/web_editor/static/src/js/rte.summernote.js:173
 #, python-format
 msgid "Description"
 msgstr "说明"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/snippets.options.js:409
+#: code:addons/web_editor/static/src/xml/editor.xml:34
+#, python-format
+msgid "Description (alt tag)"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/snippets.options.js:671
 #: code:addons/web_editor/static/src/js/widgets.js:26
 #: code:addons/web_editor/static/src/xml/editor.xml:12
 #: code:addons/web_editor/static/src/xml/editor.xml:140
@@ -363,21 +423,21 @@ msgstr "单据"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:953
+#: code:addons/web_editor/static/src/js/rte.summernote.js:965
 #, python-format
 msgid "Document Style"
 msgstr "文档样式"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:767
+#: code:addons/web_editor/static/src/js/rte.summernote.js:847
 #, python-format
 msgid "Double-click to edit"
 msgstr "双击编辑"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:880
+#: code:addons/web_editor/static/src/js/rte.summernote.js:892
 #, python-format
 msgid "Drag an image here"
 msgstr "这里拖进来一张图像"
@@ -398,8 +458,8 @@ msgstr "复制的容器"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:186
-#: code:addons/web_editor/static/src/js/rte.summernote.js:889
+#: code:addons/web_editor/static/src/js/rte.summernote.js:159
+#: code:addons/web_editor/static/src/js/rte.summernote.js:901
 #, python-format
 msgid "Edit"
 msgstr "编辑"
@@ -439,6 +499,13 @@ msgstr "特小"
 
 #. module: web_editor
 #. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:884
+#, python-format
+msgid "File / Image"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:25
 #, python-format
 msgid "Fixed size"
@@ -446,49 +513,56 @@ msgstr "固定尺寸"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:877
+#: code:addons/web_editor/static/src/js/rte.summernote.js:889
 #, python-format
 msgid "Float Left"
 msgstr "左浮动"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:879
+#: code:addons/web_editor/static/src/js/rte.summernote.js:891
 #, python-format
 msgid "Float None"
 msgstr "无浮动"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:878
+#: code:addons/web_editor/static/src/js/rte.summernote.js:890
 #, python-format
 msgid "Float Right"
 msgstr "右浮动"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:941
+#: code:addons/web_editor/static/src/js/rte.summernote.js:953
 #, python-format
 msgid "Font Color"
 msgstr "字体颜色"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:868
+#: code:addons/web_editor/static/src/js/rte.summernote.js:880
 #, python-format
 msgid "Font Family"
 msgstr "字体系列"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:869
+#: code:addons/web_editor/static/src/js/rte.summernote.js:881
 #, python-format
 msgid "Font Size"
 msgstr "字体大小"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:925
+#: code:addons/web_editor/static/src/xml/ace.xml:16
+#, python-format
+msgid "Format"
+msgstr "格式"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:937
 #, python-format
 msgid "Full Screen"
 msgstr "全屏"
@@ -501,12 +575,12 @@ msgstr ""
 #. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.colorpicker
 msgid "Gray"
-msgstr ""
+msgstr "灰色"
 
 #. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.colorpicker
 msgid "Gray Dark"
-msgstr ""
+msgstr "深灰"
 
 #. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.colorpicker
@@ -516,7 +590,7 @@ msgstr ""
 #. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.colorpicker
 msgid "Gray Light"
-msgstr ""
+msgstr "浅灰"
 
 #. module: web_editor
 #: model:ir.ui.view,arch_db:web_editor.colorpicker
@@ -530,49 +604,49 @@ msgstr "HTTP 路由"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:912
+#: code:addons/web_editor/static/src/js/rte.summernote.js:924
 #, python-format
 msgid "Header 1"
 msgstr "标题1"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:913
+#: code:addons/web_editor/static/src/js/rte.summernote.js:925
 #, python-format
 msgid "Header 2"
 msgstr "标题2"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:914
+#: code:addons/web_editor/static/src/js/rte.summernote.js:926
 #, python-format
 msgid "Header 3"
 msgstr "标题3"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:915
+#: code:addons/web_editor/static/src/js/rte.summernote.js:927
 #, python-format
 msgid "Header 4"
 msgstr "标题4"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:916
+#: code:addons/web_editor/static/src/js/rte.summernote.js:928
 #, python-format
 msgid "Header 5"
 msgstr "标题5"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:917
+#: code:addons/web_editor/static/src/js/rte.summernote.js:929
 #, python-format
 msgid "Header 6"
 msgstr "标题6"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:924
+#: code:addons/web_editor/static/src/js/rte.summernote.js:936
 #, python-format
 msgid "Help"
 msgstr "帮助"
@@ -607,14 +681,21 @@ msgstr "图像"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:882
+#: code:addons/web_editor/static/src/js/rte.summernote.js:894
 #, python-format
 msgid "Image URL"
 msgstr "图像网址"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:931
+#: code:addons/web_editor/static/src/xml/ace.xml:9
+#, python-format
+msgid "Include Asset Bundles"
+msgstr "包括资产捆绑"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:943
 #, python-format
 msgid "Indent"
 msgstr "缩进"
@@ -629,56 +710,56 @@ msgstr "信息"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:905
+#: code:addons/web_editor/static/src/js/rte.summernote.js:917
 #, python-format
 msgid "Insert Horizontal Rule"
 msgstr "插入水平尺"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:873
+#: code:addons/web_editor/static/src/js/rte.summernote.js:885
 #, python-format
 msgid "Insert Image"
 msgstr "插入图像"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:887
+#: code:addons/web_editor/static/src/js/rte.summernote.js:899
 #, python-format
 msgid "Insert Link"
 msgstr "插入链接"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:897
+#: code:addons/web_editor/static/src/js/rte.summernote.js:909
 #, python-format
 msgid "Insert Video"
 msgstr "插入视频"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:861
+#: code:addons/web_editor/static/src/js/rte.summernote.js:873
 #, python-format
 msgid "Italic"
 msgstr "斜体"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:935
+#: code:addons/web_editor/static/src/js/rte.summernote.js:947
 #, python-format
 msgid "Justify full"
 msgstr "两端对齐"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:948
+#: code:addons/web_editor/static/src/js/rte.summernote.js:960
 #, python-format
 msgid "Keyboard shortcuts"
 msgstr "键盘快捷键"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:141
+#: code:addons/web_editor/static/src/js/rte.summernote.js:114
 #: code:addons/web_editor/static/src/xml/editor.xml:302
 #, python-format
 msgid "Large"
@@ -697,18 +778,18 @@ msgstr "最后更新人"
 #. module: web_editor
 #: model:ir.model.fields,field_description:web_editor.field_web_editor_converter_test_sub_write_date
 msgid "Last Updated on"
-msgstr "最近更新时间"
+msgstr "最后更新时间"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:867
+#: code:addons/web_editor/static/src/js/rte.summernote.js:879
 #, python-format
 msgid "Line Height"
 msgstr "行高"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:886
+#: code:addons/web_editor/static/src/js/rte.summernote.js:898
 #: code:addons/web_editor/static/src/xml/editor.xml:254
 #, python-format
 msgid "Link"
@@ -723,21 +804,21 @@ msgstr "行标签"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/widgets.js:949
+#: code:addons/web_editor/static/src/js/widgets.js:958
 #, python-format
 msgid "Link to"
 msgstr "链接到"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:140
+#: code:addons/web_editor/static/src/js/rte.summernote.js:113
 #, python-format
 msgid "Medium"
 msgstr "普通"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:939
+#: code:addons/web_editor/static/src/js/rte.summernote.js:951
 #, python-format
 msgid "More Color"
 msgstr "更多的颜色"
@@ -763,7 +844,7 @@ msgstr "不重复"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:138
+#: code:addons/web_editor/static/src/js/rte.summernote.js:111
 #: code:addons/web_editor/static/src/xml/snippets.xml:51
 #, python-format
 msgid "None"
@@ -771,21 +852,21 @@ msgstr "无"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:909
+#: code:addons/web_editor/static/src/js/rte.summernote.js:921
 #, python-format
 msgid "Normal"
 msgstr "一般"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/snippets.options.js:408
+#: code:addons/web_editor/static/src/js/snippets.options.js:670
 #, python-format
 msgid "Ok"
 msgstr "确定"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:892
+#: code:addons/web_editor/static/src/js/rte.summernote.js:904
 #: code:addons/web_editor/static/src/xml/editor.xml:235
 #, python-format
 msgid "Open in new window"
@@ -793,35 +874,35 @@ msgstr "在新窗口中打开"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:921
+#: code:addons/web_editor/static/src/js/rte.summernote.js:933
 #, python-format
 msgid "Ordered list"
 msgstr "有序列表"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:930
+#: code:addons/web_editor/static/src/js/rte.summernote.js:942
 #, python-format
 msgid "Outdent"
 msgstr "凸出"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:145
+#: code:addons/web_editor/static/src/js/rte.summernote.js:118
 #, python-format
 msgid "Padding"
 msgstr "内边距"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:929
+#: code:addons/web_editor/static/src/js/rte.summernote.js:941
 #, python-format
 msgid "Paragraph"
 msgstr "段落"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:952
+#: code:addons/web_editor/static/src/js/rte.summernote.js:964
 #, python-format
 msgid "Paragraph formatting"
 msgstr "段落格式"
@@ -832,13 +913,6 @@ msgstr "段落格式"
 #, python-format
 msgid "Pictogram"
 msgstr "小图片"
-
-#. module: web_editor
-#. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:872
-#, python-format
-msgid "Picture"
-msgstr "图片"
 
 #. module: web_editor
 #. openerp-web
@@ -859,35 +933,35 @@ msgstr "首要的"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:910
+#: code:addons/web_editor/static/src/js/rte.summernote.js:922
 #, python-format
 msgid "Quote"
 msgstr "引用"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.js:343
+#: code:addons/web_editor/static/src/js/rte.js:336
 #, python-format
 msgid "Readonly field"
 msgstr "只读字段"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:938
+#: code:addons/web_editor/static/src/js/rte.summernote.js:950
 #, python-format
 msgid "Recent Color"
 msgstr "近期颜色"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:957
+#: code:addons/web_editor/static/src/js/rte.summernote.js:969
 #, python-format
 msgid "Redo"
 msgstr "重做"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:190
+#: code:addons/web_editor/static/src/js/rte.summernote.js:163
 #, python-format
 msgid "Remove"
 msgstr "移除"
@@ -901,14 +975,14 @@ msgstr "删除块"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:866
+#: code:addons/web_editor/static/src/js/rte.summernote.js:878
 #, python-format
 msgid "Remove Font Style"
 msgstr "移除字体样式"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:883
+#: code:addons/web_editor/static/src/js/rte.summernote.js:895
 #, python-format
 msgid "Remove Image"
 msgstr "删除图像"
@@ -943,7 +1017,7 @@ msgstr "重复 y"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:944
+#: code:addons/web_editor/static/src/js/rte.summernote.js:956
 #, python-format
 msgid "Reset"
 msgstr "重置"
@@ -957,28 +1031,28 @@ msgstr "恢复为源"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:945
+#: code:addons/web_editor/static/src/js/rte.summernote.js:957
 #, python-format
 msgid "Reset to default"
 msgstr "设置为默认"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:874
+#: code:addons/web_editor/static/src/js/rte.summernote.js:886
 #, python-format
 msgid "Resize Full"
 msgstr "调整大小为全屏"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:875
+#: code:addons/web_editor/static/src/js/rte.summernote.js:887
 #, python-format
 msgid "Resize Half"
 msgstr "调整大小为一半"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:876
+#: code:addons/web_editor/static/src/js/rte.summernote.js:888
 #, python-format
 msgid "Resize Quarter"
 msgstr "调整大小为四分之一"
@@ -993,6 +1067,7 @@ msgstr "调整大小，强制此块的高度"
 #. module: web_editor
 #. openerp-web
 #: code:addons/web_editor/static/src/js/widgets.js:25
+#: code:addons/web_editor/static/src/xml/ace.xml:15
 #: code:addons/web_editor/static/src/xml/editor.xml:13
 #, python-format
 msgid "Save"
@@ -1016,8 +1091,8 @@ msgstr "搜索联系人"
 #. openerp-web
 #: code:addons/web_editor/static/src/xml/snippets.xml:30
 #, python-format
-msgid "Select Container Block"
-msgstr "选择容器块"
+msgid "Select Parent Container"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1035,10 +1110,17 @@ msgstr "选择一个图片"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:881
+#: code:addons/web_editor/static/src/js/rte.summernote.js:893
 #, python-format
 msgid "Select from files"
 msgstr "从文件中选择"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/ace.js:358
+#, python-format
+msgid "Server error"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1056,7 +1138,7 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:943
+#: code:addons/web_editor/static/src/js/rte.summernote.js:955
 #, python-format
 msgid "Set transparent"
 msgstr "设置透明"
@@ -1072,7 +1154,7 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:152
+#: code:addons/web_editor/static/src/js/rte.summernote.js:125
 #, python-format
 msgid "Shadow"
 msgstr "阴影"
@@ -1086,7 +1168,7 @@ msgstr "尺寸："
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:139
+#: code:addons/web_editor/static/src/js/rte.summernote.js:112
 #: code:addons/web_editor/static/src/xml/editor.xml:294
 #, python-format
 msgid "Small"
@@ -1094,21 +1176,21 @@ msgstr "小"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:160
+#: code:addons/web_editor/static/src/js/rte.summernote.js:133
 #, python-format
 msgid "Spin"
 msgstr "自动旋转"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:863
+#: code:addons/web_editor/static/src/js/rte.summernote.js:875
 #, python-format
 msgid "Strikethrough"
 msgstr "删除线"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:908
+#: code:addons/web_editor/static/src/js/rte.summernote.js:920
 #: code:addons/web_editor/static/src/xml/editor.xml:246
 #, python-format
 msgid "Style"
@@ -1116,7 +1198,7 @@ msgstr "风格"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:864
+#: code:addons/web_editor/static/src/js/rte.summernote.js:876
 #, python-format
 msgid "Subscript"
 msgstr "下标"
@@ -1131,31 +1213,45 @@ msgstr "成功"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:865
+#: code:addons/web_editor/static/src/js/rte.summernote.js:877
 #, python-format
 msgid "Superscript"
 msgstr "上标"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:902
+#: code:addons/web_editor/static/src/js/rte.summernote.js:914
 #, python-format
 msgid "Table"
 msgstr "桌台"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:950
+#: code:addons/web_editor/static/src/js/ace.js:266
+#, python-format
+msgid "Template ID: %s"
+msgstr "模板ID： %s"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:962
 #, python-format
 msgid "Text formatting"
 msgstr "文本格式"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:890
+#: code:addons/web_editor/static/src/js/rte.summernote.js:902
 #, python-format
 msgid "Text to display"
 msgstr "要显示的文字"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/xml/editor.xml:213
+#, python-format
+msgid "The feature might not be supported for every video type"
+msgstr ""
 
 #. module: web_editor
 #. openerp-web
@@ -1170,6 +1266,13 @@ msgstr ""
 
 #. module: web_editor
 #. openerp-web
+#: code:addons/web_editor/static/src/js/rte.summernote.js:58
+#, python-format
+msgid "Theme colors"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
 #: code:addons/web_editor/static/src/js/editor.js:91
 #: code:addons/web_editor/static/src/js/translator.js:165
 #, python-format
@@ -1178,7 +1281,7 @@ msgstr "该文档没有被保存！"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:891
+#: code:addons/web_editor/static/src/js/rte.summernote.js:903
 #, python-format
 msgid "To what URL should this link go?"
 msgstr "这个URL链接指向哪里？"
@@ -1199,7 +1302,8 @@ msgstr "翻译属性"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:942
+#: code:addons/web_editor/static/src/js/rte.summernote.js:954
+#: model:ir.ui.view,arch_db:web_editor.colorpicker
 #, python-format
 msgid "Transparent"
 msgstr "透明"
@@ -1213,28 +1317,28 @@ msgstr "网址或电子邮件地址"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:862
+#: code:addons/web_editor/static/src/js/rte.summernote.js:874
 #, python-format
 msgid "Underline"
 msgstr "下划线"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:956
+#: code:addons/web_editor/static/src/js/rte.summernote.js:968
 #, python-format
 msgid "Undo"
 msgstr "取消"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:888
+#: code:addons/web_editor/static/src/js/rte.summernote.js:900
 #, python-format
 msgid "Unlink"
 msgstr "取消链接"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:920
+#: code:addons/web_editor/static/src/js/rte.summernote.js:932
 #, python-format
 msgid "Unordered list"
 msgstr "无序列表"
@@ -1269,7 +1373,7 @@ msgstr "竖直"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:895
+#: code:addons/web_editor/static/src/js/rte.summernote.js:907
 #: code:addons/web_editor/static/src/xml/editor.xml:53
 #, python-format
 msgid "Video"
@@ -1277,14 +1381,14 @@ msgstr "视频"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:896
+#: code:addons/web_editor/static/src/js/rte.summernote.js:908
 #, python-format
 msgid "Video Link"
 msgstr "视频链接"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:898
+#: code:addons/web_editor/static/src/js/rte.summernote.js:910
 #, python-format
 msgid "Video URL?"
 msgstr "视频网址?"
@@ -1318,7 +1422,7 @@ msgstr "在这里编辑你的文字或者拖动块"
 
 #. module: web_editor
 #. openerp-web
-#: code:addons/web_editor/static/src/js/rte.summernote.js:142
+#: code:addons/web_editor/static/src/js/rte.summernote.js:115
 #, python-format
 msgid "Xl"
 msgstr "Xl"
@@ -1338,7 +1442,7 @@ msgstr "自动"
 #: code:addons/web_editor/static/src/xml/editor.xml:241
 #, python-format
 msgid "https://www.odoo.com"
-msgstr ""
+msgstr "https://www.odoo.com"
 
 #. module: web_editor
 #. openerp-web
@@ -1350,112 +1454,114 @@ msgstr ""
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_attachment
 msgid "ir.attachment"
-msgstr ""
+msgstr "ir.attachment"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb
 msgid "ir.qweb"
-msgstr ""
+msgstr "ir.qweb"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field
 msgid "ir.qweb.field"
-msgstr ""
-
-#. module: web_editor
-#: model:ir.model,name:web_editor.model_ir_qweb_field_barcode
-msgid "ir.qweb.field.barcode"
-msgstr ""
+msgstr "ir.qweb.field"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_contact
 msgid "ir.qweb.field.contact"
-msgstr ""
+msgstr "ir.qweb.field.contact"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_date
 msgid "ir.qweb.field.date"
-msgstr ""
+msgstr "ir.qweb.field.date"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_datetime
 msgid "ir.qweb.field.datetime"
-msgstr ""
+msgstr "ir.qweb.field.datetime"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_duration
 msgid "ir.qweb.field.duration"
-msgstr ""
+msgstr "ir.qweb.field.duration"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_float
 msgid "ir.qweb.field.float"
-msgstr ""
+msgstr "ir.qweb.field.float"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_html
 msgid "ir.qweb.field.html"
-msgstr ""
+msgstr "ir.qweb.field.html"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_image
 msgid "ir.qweb.field.image"
-msgstr ""
+msgstr "ir.qweb.field.image"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_integer
 msgid "ir.qweb.field.integer"
-msgstr ""
+msgstr "ir.qweb.field.integer"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_many2one
 msgid "ir.qweb.field.many2one"
-msgstr ""
+msgstr "ir.qweb.field.many2one"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_monetary
 msgid "ir.qweb.field.monetary"
-msgstr ""
+msgstr "ir.qweb.field.monetary"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_qweb
 msgid "ir.qweb.field.qweb"
-msgstr ""
+msgstr "ir.qweb.field.qweb"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_relative
 msgid "ir.qweb.field.relative"
-msgstr ""
+msgstr "ir.qweb.field.relative"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_selection
 msgid "ir.qweb.field.selection"
-msgstr ""
+msgstr "ir.qweb.field.selection"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_qweb_field_text
 msgid "ir.qweb.field.text"
-msgstr ""
+msgstr "ir.qweb.field.text"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_translation
 msgid "ir.translation"
-msgstr ""
+msgstr "ir.translation"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_ui_view
 msgid "ir.ui.view"
+msgstr "ir.ui.view"
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/ace.js:302
+#, python-format
+msgid "unsaved changes"
 msgstr ""
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_web_editor_converter_test
 msgid "web_editor.converter.test"
-msgstr ""
+msgstr "web_editor.converter.test"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_web_editor_converter_test_sub
 msgid "web_editor.converter.test.sub"
-msgstr ""
+msgstr "web_editor.converter.test.sub"
 
 #. module: web_editor
 #. openerp-web

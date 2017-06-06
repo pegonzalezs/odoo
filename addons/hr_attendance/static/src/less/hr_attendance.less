@@ -7,12 +7,14 @@
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.6);
 }
 
-.oe_hr_attendance_status {
+
+.o_kanban_view #oe_hr_attendance_status {
     font-size: 1.2em;
     margin-right: .3em;
-    display: inline-block;
-    color: @odoo-brand-secondary;
+}
 
+#oe_hr_attendance_status {
+    color: @odoo-brand-secondary;
     &.oe_hr_attendance_status_green {
         color: @brand-success;
     }
@@ -57,7 +59,7 @@
     margin: 5px 0px 5px 0px;   
 }
 
-.o_hr_attendance_main_menu_container {
+.o_hr_attendance_kiosk_mode_container {
     .o-flex-display();
     .o-flex-flow(column, nowrap);
     .o-justify-content(center);
@@ -80,7 +82,7 @@
 .o_hr_attendance_random_message {
     font-style: italic;
 }
-.o_hr_attendance_main_menu {
+.o_hr_attendance_kiosk_mode {
     width: 100%;
     text-align: center;
     position: relative;

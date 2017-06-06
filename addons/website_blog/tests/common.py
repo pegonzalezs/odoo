@@ -10,7 +10,7 @@ class TestWebsiteBlogCommon(common.TransactionCase):
 
         Users = self.env['res.users']
 
-        group_blog_manager_id = self.ref('base.group_website_designer')
+        group_blog_manager_id = self.ref('website.group_website_designer')
         group_employee_id = self.ref('base.group_user')
         group_public_id = self.ref('base.group_public')
 
@@ -18,20 +18,20 @@ class TestWebsiteBlogCommon(common.TransactionCase):
             'name': 'Armande Employee',
             'login': 'armande',
             'email': 'armande.employee@example.com',
-            'notify_email': 'none',
+            'notification_type': 'inbox',
             'groups_id': [(6, 0, [group_employee_id])]
         })
         self.user_blogmanager = Users.with_context({'no_reset_password': True}).create({
             'name': 'Bastien BlogManager',
             'login': 'bastien',
             'email': 'bastien.blogmanager@example.com',
-            'notify_email': 'none',
+            'notification_type': 'inbox',
             'groups_id': [(6, 0, [group_blog_manager_id, group_employee_id])]
         })
         self.user_public = Users.with_context({'no_reset_password': True}).create({
             'name': 'Cedric Public',
             'login': 'cedric',
             'email': 'cedric.public@example.com',
-            'notify_email': 'none',
+            'notification_type': 'inbox',
             'groups_id': [(6, 0, [group_public_id])]
         })

@@ -9,13 +9,16 @@ from odoo.tools.safe_eval import safe_eval
 class ProjectIssue(models.Model):
     _name = "project.issue"
     _description = "Project Issue"
-    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = "priority desc, create_date desc"
     _mail_post_access = 'read'
 
     @api.model
     def _get_default_stage_id(self):
-        return self.stage_find(self.env.context.get('default_project_id'), [('fold', '=', False)])
+        project_id = self.env.context.get('default_project_id')
+        if not project_id:
+            return False
+        return self.stage_find(project_id, [('fold', '=', False)])
 
     name = fields.Char(string='Issue', required=True)
     active = fields.Boolean(default=True)
@@ -24,13 +27,16 @@ class ProjectIssue(models.Model):
     date_deadline = fields.Date(string='Deadline')
     partner_id = fields.Many2one('res.partner', string='Contact', index=True)
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.user.company_id)
-    description = fields.Text('Private Note')
-    kanban_state = fields.Selection([('normal', 'Normal'), ('blocked', 'Blocked'), ('done', 'Ready for next stage')], string='Kanban State',
-                                    track_visibility='onchange', required=True, default='normal',
-                                    help="""An Issue's kanban state indicates special situations affecting it:\n
-                                           * Normal is the default situation\n
-                                           * Blocked indicates something is preventing the progress of this issue\n
-                                           * Ready for next stage indicates the issue is ready to be pulled to the next stage""")
+    description = fields.Html('Private Note')
+    kanban_state = fields.Selection([
+        ('normal', 'Grey'),
+        ('blocked', 'Red'),
+        ('done', 'Green')], string='Kanban State',
+        copy=False, default='normal', required=True, track_visibility='onchange',
+        help="An Issue's kanban state indicates special situations affecting it:\n"
+             " * Grey is the default situation\n"
+             " * Red indicates something is preventing the progress of this issue\n"
+             " * Green indicates the issue is ready to be pulled to the next stage")
     email_from = fields.Char(string='Email', help="These people will receive email.", index=True)
     email_cc = fields.Char(string='Watchers Emails', help="""These email addresses will be added to the CC field of all inbound
         and outbound emails for this record before being sent. Separate multiple email addresses with a comma""")
@@ -38,84 +44,71 @@ class ProjectIssue(models.Model):
     date_closed = fields.Datetime(string='Closed', readonly=True, index=True)
     date = fields.Datetime('Date')
     date_last_stage_update = fields.Datetime(string='Last Stage Update', index=True, default=fields.Datetime.now)
-    channel = fields.Char(string='Channel', help="Communication channel.")
+    channel = fields.Char(string='Channel', help="Communication channel.")  # TDE note: is it still used somewhere ?
     tag_ids = fields.Many2many('project.tags', string='Tags')
     priority = fields.Selection([('0', 'Low'), ('1', 'Normal'), ('2', 'High')], 'Priority', index=True, default='0')
     stage_id = fields.Many2one('project.task.type', string='Stage', track_visibility='onchange', index=True,
                                domain="[('project_ids', '=', project_id)]", copy=False,
+                               group_expand='_read_group_stage_ids',
                                default=_get_default_stage_id)
     project_id = fields.Many2one('project.project', string='Project', track_visibility='onchange', index=True)
     duration = fields.Float('Duration')
     task_id = fields.Many2one('project.task', string='Task', domain="[('project_id','=',project_id)]",
                               help="You can link this issue to an existing task or directly create a new one from here")
-    day_open = fields.Float(compute='_compute_day', string='Days to Assign', store=True)
-    day_close = fields.Float(compute='_compute_day', string='Days to Close', store=True)
+    day_open = fields.Float(compute='_compute_day', string='Days to Assign', store=True, group_operator="avg")
+    day_close = fields.Float(compute='_compute_day', string='Days to Close', store=True, group_operator="avg")
 
     user_id = fields.Many2one('res.users', string='Assigned to', index=True, track_visibility='onchange', default=lambda self: self.env.uid)
-    working_hours_open = fields.Float(compute='_compute_day', string='Working Hours to assign the Issue', store=True)
-    working_hours_close = fields.Float(compute='_compute_day', string='Working Hours to close the Issue', store=True)
+    working_hours_open = fields.Float(compute='_compute_day', string='Working Hours to assign the Issue', store=True, group_operator="avg")
+    working_hours_close = fields.Float(compute='_compute_day', string='Working Hours to close the Issue', store=True, group_operator="avg")
     inactivity_days = fields.Integer(compute='_compute_inactivity_days', string='Days since last action',
                                      help="Difference in days between last action and current date")
     color = fields.Integer('Color Index')
     user_email = fields.Char(related='user_id.email', string='User Email', readonly=True)
     date_action_last = fields.Datetime(string='Last Action', readonly=True)
-    date_action_next = fields.Datetime(string='Next Action', readonly=True)
-    legend_blocked = fields.Char(related="stage_id.legend_blocked", string='Kanban Blocked Explanation')
-    legend_done = fields.Char(related="stage_id.legend_done", string='Kanban Valid Explanation')
-    legend_normal = fields.Char(related="stage_id.legend_normal", string='Kanban Ongoing Explanation')
+    legend_blocked = fields.Char(related="stage_id.legend_blocked", string='Kanban Blocked Explanation', readonly=True)
+    legend_done = fields.Char(related="stage_id.legend_done", string='Kanban Valid Explanation', readonly=True)
+    legend_normal = fields.Char(related="stage_id.legend_normal", string='Kanban Ongoing Explanation', readonly=True)
 
-    @api.multi
-    def _read_group_stage_ids(self, domain, read_group_order=None, access_rights_uid=None):
-        access_rights_uid = access_rights_uid or self.env.uid
-        ProjectTaskType = self.env['project.task.type']
-        order = ProjectTaskType._order
-        # lame hack to allow reverting search, should just work in the trivial case
-        if read_group_order == 'stage_id desc':
-            order = "%s desc" % order
+    @api.model
+    def _read_group_stage_ids(self, stages, domain, order):
+        search_domain = [('id', 'in', stages.ids)]
         # retrieve project_id from the context, add them to already fetched columns (ids)
         if 'default_project_id' in self.env.context:
-            search_domain = ['|', ('project_ids', '=', self.env.context['default_project_id']), ('id', 'in', self.ids)]
-        else:
-            search_domain = [('id', 'in', self.ids)]
+            search_domain = ['|', ('project_ids', '=', self.env.context['default_project_id'])] + search_domain
         # perform search
-        project_task_types = ProjectTaskType.sudo(access_rights_uid).search(search_domain, order=order)
-        result = project_task_types.sudo(access_rights_uid).name_get()
-        # restore order of the search
-        project_task_type_ids = project_task_types.mapped('id')
-        result.sort(lambda x, y: cmp(project_task_type_ids.index(x[0]), project_task_type_ids.index(y[0])))
-        fold = {project_task_type.id: project_task_type.fold for project_task_type in project_task_types}
-        return result, fold
-
-    _group_by_full = {
-        'stage_id': _read_group_stage_ids
-    }
+        return stages.search(search_domain, order=order)
 
     @api.multi
     @api.depends('create_date', 'date_closed', 'date_open')
     def _compute_day(self):
         for issue in self:
-            # if the working hours on the project are not defined, use default ones (8 -> 12 and 13 -> 17 * 5)
-            calendar = issue.project_id.resource_calendar_id
-
             dt_create_date = fields.Datetime.from_string(issue.create_date)
+
             if issue.date_open:
                 dt_date_open = fields.Datetime.from_string(issue.date_open)
                 issue.day_open = (dt_date_open - dt_create_date).total_seconds() / (24.0 * 3600)
-                issue.working_hours_open = calendar.get_working_hours(dt_create_date, dt_date_open,
-                    compute_leaves=True, resource_id=False, default_interval=(8, 16))
+                if issue.project_id.resource_calendar_id:
+                    issue.working_hours_open = issue.project_id.resource_calendar_id.get_work_hours_count(
+                        dt_create_date, dt_date_open, False, compute_leaves=True)
+                else:
+                    issue.working_hours_open = 0
 
             if issue.date_closed:
                 dt_date_closed = fields.Datetime.from_string(issue.date_closed)
                 issue.day_close = (dt_date_closed - dt_create_date).total_seconds() / (24.0 * 3600)
-                issue.working_hours_close = calendar.get_working_hours(dt_create_date, dt_date_closed,
-                    compute_leaves=True, resource_id=False, default_interval=(8, 16))
+                if issue.project_id.resource_calendar_id:
+                    issue.working_hours_close = issue.project_id.resource_calendar_id.get_work_hours_count(
+                        dt_create_date, dt_date_closed, False, compute_leaves=True)
+                else:
+                    issue.working_hours_close = 0
 
     @api.multi
     @api.depends('create_date', 'date_action_last', 'date_last_stage_update')
     def _compute_inactivity_days(self):
         current_datetime = fields.Datetime.from_string(fields.Datetime.now())
         for issue in self:
-            dt_create_date = fields.Datetime.from_string(issue.create_date)
+            dt_create_date = fields.Datetime.from_string(issue.create_date) or current_datetime
             issue.days_since_creation = (current_datetime - dt_create_date).days
 
             if issue.date_action_last:
@@ -133,15 +126,23 @@ class ProjectIssue(models.Model):
 
     @api.onchange('project_id')
     def _onchange_project_id(self):
+        default_partner_id = self.env.context.get('default_partner_id')
+        default_partner = self.env['res.partner'].browse(default_partner_id) if default_partner_id else self.env['res.partner']
         if self.project_id:
-            self.partner_id = self.project_id.partner_id.id
-            self.email_from = self.project_id.partner_id.email
+            if not self.partner_id and not self.email_from:
+                self.partner_id = self.project_id.partner_id.id
+                self.email_from = self.project_id.partner_id.email
+            self.stage_id = self.stage_find(self.project_id.id, [('fold', '=', False)])
+        else:
+            self.partner_id = default_partner
+            self.email_from = default_partner.email
+            self.stage_id = False
 
     @api.onchange('task_id')
     def _onchange_task_id(self):
         self.user_id = self.task_id.user_id
 
-    @api.one
+    @api.multi
     def copy(self, default=None):
         if default is None:
             default = {}
@@ -233,41 +234,24 @@ class ProjectIssue(models.Model):
         return super(ProjectIssue, self)._track_subtype(init_values)
 
     @api.multi
-    def _notification_group_recipients(self, message, recipients, done_ids, group_data):
-        """ Override the mail.thread method to handle project users and officers
-        recipients. Indeed those will have specific action in their notification
-        emails: creating tasks, assigning it. """
-        group_project_user_id = self.env.ref('project.group_project_user').id
-        for recipient in recipients:
-            if recipient.id in done_ids:
-                continue
-            if recipient.user_ids and group_project_user_id in recipient.user_ids[0].groups_id.ids:
-                group_data['group_project_user'] |= recipient
-            elif not recipient.user_ids:
-                group_data['partner'] |= recipient
-            else:
-                group_data['user'] |= recipient
-            done_ids.add(recipient.id)
-        return super(ProjectIssue, self)._notification_group_recipients(message, recipients, done_ids, group_data)
+    def _notification_recipients(self, message, groups):
+        """
+        """
+        groups = super(ProjectIssue, self)._notification_recipients(message, groups)
 
-    @api.multi
-    def _notification_get_recipient_groups(self, message, recipients):
         self.ensure_one()
-        res = super(ProjectIssue, self)._notification_get_recipient_groups(message, recipients)
-
-        actions = []
         if not self.user_id:
             take_action = self._notification_link_helper('assign')
-            actions.append({'url': take_action, 'title': _('I take it')})
+            project_actions = [{'url': take_action, 'title': _('I take it')}]
         else:
-            new_action_id = self.env.ref('project_issue.project_issue_categ_act0').id
-            new_action = self._notification_link_helper('new', action_id=new_action_id)
-            actions.append({'url': new_action, 'title': _('New Issue')})
+            project_actions = []
 
-        res['group_project_user'] = {
-            'actions': actions
-        }
-        return res
+        new_group = (
+            'group_project_user', lambda partner: bool(partner.user_ids) and any(user.has_group('project.group_project_user') for user in partner.user_ids), {
+                'actions': project_actions,
+            })
+
+        return [new_group] + groups
 
     @api.model
     def message_get_reply_to(self, res_ids, default=None):
@@ -294,7 +278,7 @@ class ProjectIssue(models.Model):
     def email_split(self, msg):
         email_list = tools.email_split((msg.get('to') or '') + ',' + (msg.get('cc') or ''))
         # check left-part is not already an alias
-        return filter(lambda x: x.split('@')[0] not in self.mapped('project_id.alias_name'), email_list)
+        return [x for x in email_list if x.split('@')[0] not in self.mapped('project_id.alias_name')]
 
     @api.model
     def message_new(self, msg, custom_values=None):
@@ -317,18 +301,17 @@ class ProjectIssue(models.Model):
         if custom_values:
             defaults.update(custom_values)
 
-        res_id = super(ProjectIssue, self.with_context(create_context)).message_new(msg, custom_values=defaults)
-        issue = self.browse(res_id)
+        issue = super(ProjectIssue, self.with_context(create_context)).message_new(msg, custom_values=defaults)
         email_list = issue.email_split(msg)
-        partner_ids = filter(None, issue._find_partner_from_emails(email_list))
+        partner_ids = [p for p in issue._find_partner_from_emails(email_list) if p]
         issue.message_subscribe(partner_ids)
-        return res_id
+        return issue
 
     @api.multi
     def message_update(self, msg, update_vals=None):
         """ Override to update the issue according to the email. """
         email_list = self.email_split(msg)
-        partner_ids = filter(None, self._find_partner_from_emails(email_list))
+        partner_ids = [p for p in self._find_partner_from_emails(email_list) if p]
         self.message_subscribe(partner_ids)
         return super(ProjectIssue, self).message_update(msg, update_vals=update_vals)
 
@@ -344,6 +327,19 @@ class ProjectIssue(models.Model):
             self.sudo().write({'date_action_last': fields.Datetime.now()})
         return mail_message
 
+    def _message_post_after_hook(self, message):
+        if self.email_from and not self.partner_id:
+            # we consider that posting a message with a specified recipient (not a follower, a specific one)
+            # on a document without customer means that it was created through the chatter using
+            # suggested recipients. This heuristic allows to avoid ugly hacks in JS.
+            new_partner = message.partner_ids.filtered(lambda partner: partner.email == self.email_from)
+            if new_partner:
+                self.search([
+                    ('partner_id', '=', False),
+                    ('email_from', '=', new_partner.email),
+                    ('stage_id.fold', '=', False)]).write({'partner_id': new_partner.id})
+        return super(ProjectIssue, self)._message_post_after_hook(message)
+
     @api.multi
     def message_get_email_values(self, notif_mail=None):
         self.ensure_one()
@@ -355,7 +351,7 @@ class ProjectIssue(models.Model):
             except Exception:
                 pass
         if self.project_id:
-            current_objects = filter(None, headers.get('X-Odoo-Objects', '').split(','))
+            current_objects = [h for h in headers.get('X-Odoo-Objects', '').split(',') if h]
             current_objects.insert(0, 'project.project-%s, ' % self.project_id.id)
             headers['X-Odoo-Objects'] = ','.join(current_objects)
         if self.tag_ids:

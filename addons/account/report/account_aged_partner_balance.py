@@ -61,7 +61,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
 
         # Build a string like (1,2,3) for easy use in SQL query
         partner_ids = [partner['partner_id'] for partner in partners if partner['partner_id']]
-        lines = dict([(partner['partner_id'], []) for partner in partners if partner['partner_id']])
+        lines = dict((partner['partner_id'] or False, []) for partner in partners)
         if not partner_ids:
             return [], [], []
 
@@ -80,23 +80,24 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         aml_ids = cr.fetchall()
         aml_ids = aml_ids and [x[0] for x in aml_ids] or []
         for line in self.env['account.move.line'].browse(aml_ids):
-            partner_id = line.partner_id.id or None
+            partner_id = line.partner_id.id or False
             if partner_id not in undue_amounts:
                 undue_amounts[partner_id] = 0.0
             line_amount = line.balance
             if line.balance == 0:
                 continue
             for partial_line in line.matched_debit_ids:
-                if partial_line.create_date[:10] <= date_from:
+                if partial_line.max_date <= date_from:
                     line_amount += partial_line.amount
             for partial_line in line.matched_credit_ids:
-                if partial_line.create_date[:10] <= date_from:
+                if partial_line.max_date <= date_from:
                     line_amount -= partial_line.amount
-            undue_amounts[partner_id] += line_amount
-            lines[partner_id].append({
-                'line': line,
-                'amount': line_amount,
-                'period': 6,
+            if not self.env.user.company_id.currency_id.is_zero(line_amount):
+                undue_amounts[partner_id] += line_amount
+                lines[partner_id].append({
+                    'line': line,
+                    'amount': line_amount,
+                    'period': 6,
                 })
 
         # Use one query per period and store results in history (a list variable)
@@ -131,28 +132,31 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             aml_ids = cr.fetchall()
             aml_ids = aml_ids and [x[0] for x in aml_ids] or []
             for line in self.env['account.move.line'].browse(aml_ids):
-                partner_id = line.partner_id.id or None
+                partner_id = line.partner_id.id or False
                 if partner_id not in partners_amount:
                     partners_amount[partner_id] = 0.0
                 line_amount = line.balance
                 if line.balance == 0:
                     continue
                 for partial_line in line.matched_debit_ids:
-                    if partial_line.create_date[:10] <= date_from:
+                    if partial_line.max_date <= date_from:
                         line_amount += partial_line.amount
                 for partial_line in line.matched_credit_ids:
-                    if partial_line.create_date[:10] <= date_from:
+                    if partial_line.max_date <= date_from:
                         line_amount -= partial_line.amount
 
-                partners_amount[partner_id] += line_amount
-                lines[partner_id].append({
-                    'line': line,
-                    'amount': line_amount,
-                    'period': i + 1,
-                    })
+                if not self.env.user.company_id.currency_id.is_zero(line_amount):
+                    partners_amount[partner_id] += line_amount
+                    lines[partner_id].append({
+                        'line': line,
+                        'amount': line_amount,
+                        'period': i + 1,
+                        })
             history.append(partners_amount)
 
         for partner in partners:
+            if partner['partner_id'] is None:
+                partner['partner_id'] = False
             at_least_one_amount = False
             values = {}
             undue_amt = 0.0
@@ -191,7 +195,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
         return res, total, lines
 
     @api.model
-    def render_html(self, docids, data=None):
+    def get_report_values(self, docids, data=None):
         total = []
         model = self.env.context.get('active_model')
         docs = self.env[model].browse(self.env.context.get('active_id'))
@@ -207,7 +211,7 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             account_type = ['payable', 'receivable']
 
         movelines, total, dummy = self._get_partner_move_lines(account_type, date_from, target_move, data['form']['period_length'])
-        docargs = {
+        return {
             'doc_ids': self.ids,
             'doc_model': model,
             'data': data['form'],
@@ -216,4 +220,3 @@ class ReportAgedPartnerBalance(models.AbstractModel):
             'get_partner_lines': movelines,
             'get_direction': total,
         }
-        return self.env['report'].render('account.report_agedpartnerbalance', docargs)

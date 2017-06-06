@@ -3,7 +3,8 @@ odoo.define('web_tour.TourManager', function(require) {
 
 var core = require('web.core');
 var local_storage = require('web.local_storage');
-var Model = require('web.Model');
+var mixins = require('web.mixins');
+var ServicesMixin = require('web.ServicesMixin');
 var session = require('web.session');
 var Tip = require('web_tour.Tip');
 
@@ -187,16 +188,19 @@ var RunningTourActionHelper = core.Class.extend({
     },
 });
 
-return core.Class.extend({
-    init: function(consumed_tours) {
+return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
+    init: function(parent, consumed_tours) {
+        mixins.EventDispatcherMixin.init.call(this);
+        this.setParent(parent);
+
         this.$body = $('body');
         this.active_tooltips = {};
         this.tours = {};
         this.consumed_tours = consumed_tours || [];
         this.running_tour = local_storage.getItem(get_running_key());
-        this.running_step_delay = parseInt(local_storage.getItem(get_running_delay_key()), 10) || 300;
-        this.TourModel = new Model('web_tour.tour');
+        this.running_step_delay = parseInt(local_storage.getItem(get_running_delay_key()), 10) || 10;
         this.edition = (_.last(session.server_version_info) === 'e') ? 'enterprise' : 'community';
+        this._log = [];
     },
     /**
      * Registers a tour described by the following arguments (in order)
@@ -242,15 +246,22 @@ return core.Class.extend({
     _register: function (do_update, tour, name) {
         if (tour.ready) return $.when();
 
+        var tour_is_consumed = _.contains(this.consumed_tours, name);
+
         return tour.wait_for.then((function () {
             tour.current_step = parseInt(local_storage.getItem(get_step_key(name))) || 0;
             tour.steps = _.filter(tour.steps, (function (step) {
                 return !step.edition || step.edition === this.edition;
             }).bind(this));
 
+            if (tour_is_consumed || tour.current_step >= tour.steps.length) {
+                local_storage.removeItem(get_step_key(name));
+                tour.current_step = 0;
+            }
+
             tour.ready = true;
 
-            if (do_update && (this.running_tour === name || (!this.running_tour && !tour.test && !_.contains(this.consumed_tours, name)))) {
+            if (do_update && (this.running_tour === name || (!this.running_tour && !tour.test && !tour_is_consumed))) {
                 this._to_next_step(name, 0);
                 this.update(name);
             }
@@ -286,7 +297,8 @@ return core.Class.extend({
                 this.update();
             }).bind(this));
 
-            window.location.href = session.debug ? $.param.querystring(tour.url, {debug: session.debug}) : tour.url;
+            var url = session.debug ? $.param.querystring(tour.url, {debug: session.debug}) : tour.url;
+            window.location.href = window.location.origin + url;
         } else {
             this.update();
         }
@@ -326,17 +338,35 @@ return core.Class.extend({
         } else {
             $trigger = $(tip.trigger);
         }
-        $trigger = get_first_visible_element($trigger);
-        var extra_trigger = tip.extra_trigger ? get_first_visible_element($(tip.extra_trigger)).length : true;
-        var triggered = $trigger.length && extra_trigger;
+        var $visible_trigger = get_first_visible_element($trigger);
+
+        var extra_trigger = true;
+        var $extra_trigger = undefined;
+        if (tip.extra_trigger) {
+            $extra_trigger = $(tip.extra_trigger);
+            extra_trigger = get_first_visible_element($extra_trigger).length;
+        }
+
+        var triggered = $visible_trigger.length && extra_trigger;
         if (triggered) {
             if (!tip.widget) {
-                this._activate_tip(tip, tour_name, $trigger);
+                this._activate_tip(tip, tour_name, $visible_trigger);
             } else {
-                tip.widget.update($trigger);
+                tip.widget.update($visible_trigger);
             }
         } else {
             this._deactivate_tip(tip);
+
+            if (this.running_tour === tour_name) {
+                this._log.push("_check_for_tooltip");
+                this._log.push("- modal_displayed: " + this.$modal_displayed.length);
+                this._log.push("- trigger '" + tip.trigger + "': " + $trigger.length);
+                this._log.push("- visible trigger '" + tip.trigger + "': " + $visible_trigger.length);
+                if ($extra_trigger !== undefined) {
+                    this._log.push("- extra_trigger '" + tip.extra_trigger + "': " + $extra_trigger.length);
+                    this._log.push("- visible extra_trigger '" + tip.extra_trigger + "': " + extra_trigger);
+                }
+            }
         }
     },
     _activate_tip: function(tip, tour_name, $anchor) {
@@ -376,6 +406,7 @@ return core.Class.extend({
         if (this.active_tooltips[tour_name]) {
             local_storage.setItem(get_step_key(tour_name), this.tours[tour_name].current_step);
             if (is_running) {
+                this._log = [];
                 this._set_running_tour_timeout(tour_name, this.active_tooltips[tour_name]);
             }
             this.update(tour_name);
@@ -409,15 +440,26 @@ return core.Class.extend({
             this.running_tour = undefined;
             this.running_step_delay = undefined;
             if (error) {
+                _.each(this._log, function (log) {
+                    console.log(log);
+                });
+                console.log(document.body.outerHTML);
                 console.log("error " + error); // phantomJS wait for message starting by error
             } else {
                 console.log(_.str.sprintf("Tour %s succeeded", tour_name));
                 console.log("ok"); // phantomJS wait for exact message "ok"
             }
+            this._log = [];
         } else {
-            this.TourModel.call('consume', [[tour_name]]).then((function () {
-                this.consumed_tours.push(tour_name);
-            }).bind(this));
+            var self = this;
+            this._rpc({
+                    model: 'web_tour.tour',
+                    method: 'consume',
+                    args: [[tour_name]],
+                })
+                .then(function () {
+                    self.consumed_tours.push(tour_name);
+                });
         }
     },
     _set_running_tour_timeout: function (tour_name, step) {
@@ -477,4 +519,5 @@ return core.Class.extend({
         },
     },
 });
+
 });

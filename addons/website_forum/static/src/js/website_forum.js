@@ -40,6 +40,33 @@ if(!$('.website_forum').length) {
             $(this).find('.o_forum_tag_follow_box').stop().fadeOut().css('display','none');
     });
 
+    $('.o_forum_profile_pic_edit').on('click', function(ev) {
+        ev.preventDefault();
+        $(this).closest('form').find('.o_forum_file_upload').trigger('click');
+    });
+
+    $('.o_forum_file_upload').on('change', function() {
+        if (this.files.length) {
+            var $form = $(this).closest('form');
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                $form.find('.o_forum_avatar_img').attr('src', ev.target.result);
+            };
+            reader.readAsDataURL(this.files[0]);
+            $form.find('#forum_clear_image').remove();
+        }
+    });
+
+    $('.o_forum_profile_pic_clear').click(function() {
+        var $form = $(this).closest('form');
+        $form.find('.o_forum_avatar_img').attr("src", "/web/static/src/img/placeholder.png");
+        $form.append($('<input/>', {
+            name: 'clear_image',
+            id: 'forum_clear_image',
+            type: 'hidden',
+        }));
+    });
+
     // Extended user biography toogle
     $('.o_forum_user_info').hover(
         function () {
@@ -136,6 +163,25 @@ if(!$('.website_forum').length) {
                     }
                 }
             });
+    });
+
+    $(".o_js_validation_queue a[href*='/validate']").on('click', function (ev) {
+        ev.preventDefault();
+        var $link = $(ev.currentTarget);
+        var self = $(this);
+        $(this).parents('.post_to_validate').hide();
+        $.get($link.attr('href'))
+            .fail(function() {
+                self.parents('.o_js_validation_queue > div').addClass('panel-danger').css('background-color', '#FAA');
+                self.parents('.post_to_validate').show();
+            })
+            .done(function() {
+                var left = $('.o_js_validation_queue:visible').length;
+                var type = $('h2.page-header li.active a').data('type');
+                $('#count_post').text(left);
+                $('#moderation_tools a[href*="/'+type+'_"]').find('strong').text(left);
+            });
+
     });
 
     $('.accept_answer').not('.karma_required').on('click', function (ev) {
@@ -235,7 +281,45 @@ if(!$('.website_forum').length) {
         if (url.search("^http(s?)://.*")) {
             url = 'http://'+url;
         }
-        var regex = new RegExp("(http(s)?://.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)");
+
+        // https://gist.github.com/dperini/729294
+        var regex = new RegExp(
+          "^" +
+            // protocol identifier
+            "(?:(?:https?|ftp)://)" +
+            // user:pass authentication
+            "(?:\\S+(?::\\S*)?@)?" +
+            "(?:" +
+              // IP address exclusion
+              // private & local networks
+              "(?!(?:10|127)(?:\\.\\d{1,3}){3})" +
+              "(?!(?:169\\.254|192\\.168)(?:\\.\\d{1,3}){2})" +
+              "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +
+              // IP address dotted notation octets
+              // excludes loopback network 0.0.0.0
+              // excludes reserved space >= 224.0.0.0
+              // excludes network & broacast addresses
+              // (first & last IP address of each class)
+              "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
+              "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
+              "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
+            "|" +
+              // host name
+              "(?:(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)" +
+              // domain name
+              "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]-*)*[a-z\\u00a1-\\uffff0-9]+)*" +
+              // TLD identifier
+              "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))" +
+              // TLD may end with dot
+              "\\.?" +
+            ")" +
+            // port number
+            "(?::\\d{2,5})?" +
+            // resource path
+            "(?:[/?#]\\S*)?" +
+          "$", "i"
+        );
+
         if(regex.test(url)){
             ajax.jsonRpc("/forum/get_url_title", 'call', {'url': url}).then(function (data) {
                 if (data) {

@@ -4,10 +4,19 @@
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError
-from odoo.tools.safe_eval import safe_eval
+from odoo.tools import pycompat
 from odoo.tools.float_utils import float_round
 from datetime import datetime
+import operator as py_operator
 
+OPERATORS = {
+    '<': py_operator.lt,
+    '>': py_operator.gt,
+    '<=': py_operator.le,
+    '>=': py_operator.ge,
+    '=': py_operator.eq,
+    '!=': py_operator.ne
+}
 
 class Product(models.Model):
     _inherit = "product.product"
@@ -172,7 +181,7 @@ class Product(models.Model):
 
         location_ids = []
         if self.env.context.get('location', False):
-            if isinstance(self.env.context['location'], (int, long)):
+            if isinstance(self.env.context['location'], pycompat.integer_types):
                 location_ids = [self.env.context['location']]
             elif isinstance(self.env.context['location'], basestring):
                 domain = [('complete_name', 'ilike', self.env.context['location'])]
@@ -183,7 +192,7 @@ class Product(models.Model):
                 location_ids = self.env.context['location']
         else:
             if self.env.context.get('warehouse', False):
-                if isinstance(self.env.context['warehouse'], (int, long)):
+                if isinstance(self.env.context['warehouse'], pycompat.integer_types):
                     wids = [self.env.context['warehouse']]
                 elif isinstance(self.env.context['warehouse'], basestring):
                     domain = [('name', 'ilike', self.env.context['warehouse'])]
@@ -226,8 +235,8 @@ class Product(models.Model):
             dest_loc_domain = dest_loc_domain + [('location_dest_id', operator, [location.id for location in other_locations])]
         return (
             domain + loc_domain,
-            domain + ['&'] + dest_loc_domain + ['!'] + loc_domain,
-            domain + ['&'] + loc_domain + ['!'] + dest_loc_domain
+            domain + dest_loc_domain + ['!'] + loc_domain if loc_domain else domain + dest_loc_domain,
+            domain + loc_domain + ['!'] + dest_loc_domain if dest_loc_domain else domain + loc_domain
         )
 
     def _search_virtual_available(self, operator, value):
@@ -246,25 +255,22 @@ class Product(models.Model):
         # TDE FIXME: should probably clean the search methods
         # to prevent sql injections
         if field not in ('qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty'):
-            raise UserError('Invalid domain left operand')
+            raise UserError(_('Invalid domain left operand %s') % field)
         if operator not in ('<', '>', '=', '!=', '<=', '>='):
-            raise UserError('Invalid domain operator')
+            raise UserError(_('Invalid domain operator %s') % operator)
         if not isinstance(value, (float, int)):
-            raise UserError('Invalid domain right operand')
-
-        if operator == '=':
-            operator = '=='
+            raise UserError(_('Invalid domain right operand %s') % value)
 
         # TODO: Still optimization possible when searching virtual quantities
         ids = []
         for product in self.search([]):
-            if safe_eval(str(product[field]) + operator + str(value)):
+            if OPERATORS[operator](product[field], value):
                 ids.append(product.id)
         return [('id', 'in', ids)]
 
     def _search_qty_available(self, operator, value):
         # TDE FIXME: should probably clean the search methods
-        if value == 0.0 and operator in ('==', '>=', '<='):
+        if value == 0.0 and operator in ('=', '>=', '<='):
             return self._search_product_quantity(operator, value, 'qty_available')
         product_ids = self._search_qty_available_new(operator, value, self._context.get('lot_id'), self._context.get('owner_id'), self._context.get('package_id'))
         return [('id', 'in', product_ids)]
@@ -281,7 +287,7 @@ class Product(models.Model):
             domain_quant.append(('package_id', '=', package_id))
         quants_groupby = self.env['stock.quant'].read_group(domain_quant, ['product_id', 'qty'], ['product_id'])
         for quant in quants_groupby:
-            if safe_eval('%s %s %s' % (quant['qty'], operator, value)):
+            if OPERATORS[operator](quant['qty'], value):
                 product_ids.add(quant['product_id'][0])
         return list(product_ids)
 
@@ -321,7 +327,7 @@ class Product(models.Model):
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         res = super(Product, self).fields_view_get(view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu)
-        if self._context.get('location') and isinstance(self._context['location'], (int, long)):
+        if self._context.get('location') and isinstance(self._context['location'], pycompat.integer_types):
             location = self.env['stock.location'].browse(self._context['location'])
             fields = res.get('fields')
             if fields:
@@ -384,17 +390,19 @@ class ProductTemplate(models.Model):
         ('lot', 'By Lots'),
         ('none', 'No Tracking')], string="Tracking", default='none', required=True)
     description_picking = fields.Text('Description on Picking', translate=True)
+    description_pickingout = fields.Text('Description on Delivery Orders', translate=True)
+    description_pickingin = fields.Text('Description on Receptions', translate=True)
     qty_available = fields.Float(
-        'Quantity On Hand', compute='_compute_quantities', search='_search_quantities',
+        'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
         digits=dp.get_precision('Product Unit of Measure'))
     virtual_available = fields.Float(
-        'Forecasted Quantity', compute='_compute_quantities', search='_search_quantities',
+        'Forecasted Quantity', compute='_compute_quantities', search='_search_virtual_available',
         digits=dp.get_precision('Product Unit of Measure'))
     incoming_qty = fields.Float(
-        'Incoming', compute='_compute_quantities', search='_search_quantities',
+        'Incoming', compute='_compute_quantities', search='_search_incoming_qty',
         digits=dp.get_precision('Product Unit of Measure'))
     outgoing_qty = fields.Float(
-        'Outgoing', compute='_compute_quantities', search='_search_quantities',
+        'Outgoing', compute='_compute_quantities', search='_search_outgoing_qty',
         digits=dp.get_precision('Product Unit of Measure'))
     location_id = fields.Many2one('stock.location', 'Location')
     warehouse_id = fields.Many2one('stock.warehouse', 'Warehouse')
@@ -444,9 +452,23 @@ class ProductTemplate(models.Model):
             }
         return prod_available
 
-    def _search_quantities(self, operator, value):
-        # TDE FIXME: does this work anyway ?
-        domain = []  # TDE ADDED
+    def _search_qty_available(self, operator, value):
+        domain = [('qty_available', operator, value)]
+        product_variant_ids = self.env['product.product'].search(domain)
+        return [('product_variant_ids', 'in', product_variant_ids.ids)]
+
+    def _search_virtual_available(self, operator, value):
+        domain = [('virtual_available', operator, value)]
+        product_variant_ids = self.env['product.product'].search(domain)
+        return [('product_variant_ids', 'in', product_variant_ids.ids)]
+
+    def _search_incoming_qty(self, operator, value):
+        domain = [('incoming_qty', operator, value)]
+        product_variant_ids = self.env['product.product'].search(domain)
+        return [('product_variant_ids', 'in', product_variant_ids.ids)]
+
+    def _search_outgoing_qty(self, operator, value):
+        domain = [('outgoing_qty', operator, value)]
         product_variant_ids = self.env['product.product'].search(domain)
         return [('product_variant_ids', 'in', product_variant_ids.ids)]
 
@@ -510,7 +532,7 @@ class ProductTemplate(models.Model):
         action = self.env.ref('stock.act_product_stock_move_open').read()[0]
         if self:
             action['context'] = {'default_product_id': products.ids[0]}
-        action['domain'] = [('product_id.product_tmpl_id', 'in', products.ids)]
+        action['domain'] = [('product_id.product_tmpl_id', 'in', self.ids)]
         return action
 
 

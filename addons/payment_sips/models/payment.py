@@ -1,9 +1,12 @@
 # coding: utf-8
 
+# Copyright 2015 Eezee-It
+
 import json
 import logging
 from hashlib import sha256
-import urlparse
+
+from werkzeug import urls
 
 from odoo import models, fields, api
 from odoo.tools.float_utils import float_compare
@@ -37,8 +40,8 @@ class AcquirerSips(models.Model):
     _inherit = 'payment.acquirer'
 
     provider = fields.Selection(selection_add=[('sips', 'Sips')])
-    sips_merchant_id = fields.Char('SIPS API User Password', required_if_provider='sips')
-    sips_secret = fields.Char('SIPS Secret', size=64, required_if_provider='sips')
+    sips_merchant_id = fields.Char('SIPS API User Password', required_if_provider='sips', groups='base.group_user')
+    sips_secret = fields.Char('SIPS Secret', size=64, required_if_provider='sips', groups='base.group_user')
 
     def _get_sips_urls(self, environment):
         """ Worldline SIPS URLS """
@@ -89,8 +92,8 @@ class AcquirerSips(models.Model):
             'Data': u'amount=%s|' % amount +
                     u'currencyCode=%s|' % currency_code +
                     u'merchantId=%s|' % merchant_id +
-                    u'normalReturnUrl=%s|' % urlparse.urljoin(base_url, SipsController._return_url) +
-                    u'automaticResponseUrl=%s|' % urlparse.urljoin(base_url, SipsController._return_url) +
+                    u'normalReturnUrl=%s|' % urls.url_join(base_url, SipsController._return_url) +
+                    u'automaticResponseUrl=%s|' % urls.url_join(base_url, SipsController._return_url) +
                     u'transactionReference=%s|' % values['reference'] +
                     u'statementReference=%s|' % values['reference'] +
                     u'keyVersion=%s' % key_version,

@@ -4,6 +4,7 @@
 from odoo import api, fields, models, _
 from odoo.addons import decimal_precision as dp
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import float_round
 
 
 class MrpBom(models.Model):
@@ -51,9 +52,9 @@ class MrpBom(models.Model):
         ('asap', 'The components of 1st operation')], string='Manufacturing Readiness',
         default='asap', required=True)
     picking_type_id = fields.Many2one(
-        'stock.picking.type', 'Picking Type', domain=[('code', '=', 'mrp_operation')],
-        help="When a procurement has a ‘produce’ route with a picking type set, it will try to create "
-             "a Manufacturing Order for that product using a BoM of the same picking type. That allows "
+        'stock.picking.type', 'Operation Type', domain=[('code', '=', 'mrp_operation')],
+        help="When a procurement has a ‘produce’ route with a operation type set, it will try to create "
+             "a Manufacturing Order for that product using a BoM of the same operation type. That allows "
              "to define procurement rules which trigger different manufacturing orders with different BoMs. ")
     company_id = fields.Many2one(
         'res.company', 'Company',
@@ -111,13 +112,18 @@ class MrpBom(models.Model):
         return self.search(domain, order='sequence, product_id', limit=1)
 
     def explode(self, product, quantity, picking_type=False):
-        boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity})]
+        """
+            Explodes the BoM and creates two lists with all the information you need: bom_done and line_done
+            Quantity describes the number of times you need the BoM: so the quantity divided by the number created by the BoM
+            and converted into its UoM
+        """
+        boms_done = [(self, {'qty': quantity, 'product': product, 'original_qty': quantity, 'parent_line': False})]
         lines_done = []
         templates_done = product.product_tmpl_id
 
-        bom_lines = [(bom_line, product, quantity) for bom_line in self.bom_line_ids]
+        bom_lines = [(bom_line, product, quantity, False) for bom_line in self.bom_line_ids]
         while bom_lines:
-            current_line, current_product, current_qty = bom_lines[0]
+            current_line, current_product, current_qty, parent_line = bom_lines[0]
             bom_lines = bom_lines[1:]
 
             if current_line._skip_bom_line(current_product):
@@ -125,16 +131,19 @@ class MrpBom(models.Model):
             if current_line.product_id.product_tmpl_id in templates_done:
                 raise UserError(_('Recursion error!  A product with a Bill of Material should not have itself in its BoM or child BoMs!'))
 
-            line_quantity = current_qty * current_line.product_qty / current_line.bom_id.product_qty
-
+            line_quantity = current_qty * current_line.product_qty
             bom = self._bom_find(product=current_line.product_id, picking_type=picking_type or self.picking_type_id, company_id=self.company_id.id)
             if bom.type == 'phantom':
-                converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity, bom.product_uom_id)
-                bom_lines = [(line, current_line.product_id, line_quantity) for line in bom.bom_line_ids] + bom_lines
+                converted_line_quantity = current_line.product_uom_id._compute_quantity(line_quantity / bom.product_qty, bom.product_uom_id)
+                bom_lines = [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids] + bom_lines
                 templates_done |= current_line.product_id.product_tmpl_id
-                boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity}))
+                boms_done.append((bom, {'qty': converted_line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': current_line}))
             else:
-                lines_done.append((current_line, {'qty': line_quantity, 'product': current_product, 'original_qty': quantity}))
+                # We round up here because the user expects that if he has to consume a little more, the whole UOM unit
+                # should be consumed.
+                rounding = current_line.product_uom_id.rounding
+                line_quantity = float_round(line_quantity, precision_rounding=rounding, rounding_method='UP')
+                lines_done.append((current_line, {'qty': line_quantity, 'product': current_product, 'original_qty': quantity, 'parent_line': parent_line}))
 
         return boms_done, lines_done
 
@@ -253,7 +262,7 @@ class MrpBomLine(models.Model):
         return {
             'name': _('Attachments'),
             'domain': domain,
-            'res_model': 'ir.attachment',
+            'res_model': 'mrp.document',
             'type': 'ir.actions.act_window',
             'view_id': attachment_view.id,
             'views': [(attachment_view.id, 'kanban'), (False, 'form')],

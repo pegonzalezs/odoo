@@ -7,7 +7,9 @@ from odoo import api, fields, models, tools, _
 from odoo.exceptions import ValidationError
 from odoo.osv import expression
 
-import odoo.addons.decimal_precision as dp
+from odoo.addons import decimal_precision as dp
+
+from odoo.tools import pycompat
 
 
 class ProductCategory(models.Model):
@@ -16,9 +18,13 @@ class ProductCategory(models.Model):
     _parent_name = "parent_id"
     _parent_store = True
     _parent_order = 'name'
+    _rec_name = 'complete_name'
     _order = 'parent_left'
 
     name = fields.Char('Name', index=True, required=True, translate=True)
+    complete_name = fields.Char(
+        'Complete Name', compute='_compute_complete_name',
+        store=True)
     parent_id = fields.Many2one('product.category', 'Parent Category', index=True, ondelete='cascade')
     child_id = fields.One2many('product.category', 'parent_id', 'Child Categories')
     type = fields.Selection([
@@ -30,6 +36,14 @@ class ProductCategory(models.Model):
     product_count = fields.Integer(
         '# Products', compute='_compute_product_count',
         help="The number of products under this category (Does not consider the children categories)")
+
+    @api.depends('name', 'parent_id.complete_name')
+    def _compute_complete_name(self):
+        for category in self:
+            if category.parent_id:
+                category.complete_name = '%s / %s' % (category.parent_id.complete_name, category.name)
+            else:
+                category.complete_name = category.name
 
     def _compute_product_count(self):
         read_group_res = self.env['product.template'].read_group([('categ_id', 'in', self.ids)], ['categ_id'], ['categ_id'])
@@ -43,47 +57,6 @@ class ProductCategory(models.Model):
             raise ValidationError(_('Error ! You cannot create recursive categories.'))
         return True
 
-    @api.multi
-    def name_get(self):
-        def get_names(cat):
-            """ Return the list [cat.name, cat.parent_id.name, ...] """
-            res = []
-            while cat:
-                res.append(cat.name)
-                cat = cat.parent_id
-            return res
-
-        return [(cat.id, " / ".join(reversed(get_names(cat)))) for cat in self]
-
-    @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
-        if not args:
-            args = []
-        if name:
-            # Be sure name_search is symetric to name_get
-            category_names = name.split(' / ')
-            parents = list(category_names)
-            child = parents.pop()
-            domain = [('name', operator, child)]
-            if parents:
-                names_ids = self.name_search(' / '.join(parents), args=args, operator='ilike', limit=limit)
-                category_ids = [name_id[0] for name_id in names_ids]
-                if operator in expression.NEGATIVE_TERM_OPERATORS:
-                    categories = self.search([('id', 'not in', category_ids)])
-                    domain = expression.OR([[('parent_id', 'in', categories.ids)], domain])
-                else:
-                    domain = expression.AND([[('parent_id', 'in', category_ids)], domain])
-                for i in range(1, len(category_names)):
-                    domain = [[('name', operator, ' / '.join(category_names[-1 - i:]))], domain]
-                    if operator in expression.NEGATIVE_TERM_OPERATORS:
-                        domain = expression.AND(domain)
-                    else:
-                        domain = expression.OR(domain)
-            categories = self.search(expression.AND([domain, args]), limit=limit)
-        else:
-            categories = self.search(args, limit=limit)
-        return categories.name_get()
-
 
 class ProductPriceHistory(models.Model):
     """ Keep track of the ``product.template`` standard prices as they are changed. """
@@ -94,9 +67,10 @@ class ProductPriceHistory(models.Model):
     def _get_default_company_id(self):
         return self._context.get('force_company', self.env.user.company_id.id)
 
-    company_id = fields.Many2one('res.company', default=_get_default_company_id, required=True)
+    company_id = fields.Many2one('res.company', string='Company',
+        default=_get_default_company_id, required=True)
     product_id = fields.Many2one('product.product', 'Product', ondelete='cascade', required=True)
-    datetime = fields.Datetime('Date', default=fields.Datetime.now())
+    datetime = fields.Datetime('Date', default=fields.Datetime.now)
     cost = fields.Float('Cost', digits=dp.get_precision('Product Price'))
 
 
@@ -105,7 +79,7 @@ class ProductProduct(models.Model):
     _description = "Product"
     _inherits = {'product.template': 'product_tmpl_id'}
     _inherit = ['mail.thread']
-    _order = 'default_code'
+    _order = 'default_code, id'
 
     price = fields.Float(
         'Price', compute='_compute_product_price',
@@ -116,11 +90,11 @@ class ProductProduct(models.Model):
         help="This is the sum of the extra price of all attributes")
     lst_price = fields.Float(
         'Sale Price', compute='_compute_product_lst_price',
-        digits=dp.get_precision('Product Price'), inverse='_set_product_price',
+        digits=dp.get_precision('Product Price'), inverse='_set_product_lst_price',
         help="The sale price is managed from the product template. Click on the 'Variant Prices' button to set the extra attribute prices.")
 
     default_code = fields.Char('Internal Reference', index=True)
-    code = fields.Char('Internal Reference', compute='_compute_product_code')
+    code = fields.Char('Reference', compute='_compute_product_code')
     partner_ref = fields.Char('Customer Ref', compute='_compute_partner_ref')
 
     active = fields.Boolean(
@@ -133,7 +107,7 @@ class ProductProduct(models.Model):
         'Barcode', copy=False, oldname='ean13',
         help="International Article Number used for product identification.")
     attribute_value_ids = fields.Many2many(
-        'product.attribute.value', id1='prod_id', id2='att_id', string='Attributes', ondelete='restrict')
+        'product.attribute.value', string='Attributes', ondelete='restrict')
     # image: all image fields are base64 encoded and PIL-supported
     image_variant = fields.Binary(
         "Variant Image", attachment=True,
@@ -163,8 +137,12 @@ class ProductProduct(models.Model):
     pricelist_item_ids = fields.Many2many(
         'product.pricelist.item', 'Pricelist Items', compute='_get_pricelist_items')
 
+    packaging_ids = fields.One2many(
+        'product.packaging', 'product_id', 'Product Packages',
+        help="Gives the different ways to package the same product.")
+
     _sql_constraints = [
-        ('barcode_uniq', 'unique(barcode)', _("A barcode can only be assigned to one product !")),
+        ('barcode_uniq', 'unique(barcode)', "A barcode can only be assigned to one product !"),
     ]
 
     def _compute_product_price(self):
@@ -177,8 +155,10 @@ class ProductProduct(models.Model):
 
             # Support context pricelists specified as display_name or ID for compatibility
             if isinstance(pricelist_id_or_name, basestring):
-                pricelist = self.env['product.pricelist'].name_search(pricelist_id_or_name, operator='=', limit=1)
-            elif isinstance(pricelist_id_or_name, (int, long)):
+                pricelist_name_search = self.env['product.pricelist'].name_search(pricelist_id_or_name, operator='=', limit=1)
+                if pricelist_name_search:
+                    pricelist = self.env['product.pricelist'].browse([pricelist_name_search[0][0]])
+            elif isinstance(pricelist_id_or_name, pycompat.integer_types):
                 pricelist = self.env['product.pricelist'].browse(pricelist_id_or_name)
 
             if pricelist:
@@ -195,6 +175,15 @@ class ProductProduct(models.Model):
                 value = self.env['product.uom'].browse(self._context['uom'])._compute_price(product.price, product.uom_id)
             else:
                 value = product.price
+            value -= product.price_extra
+            product.write({'list_price': value})
+
+    def _set_product_lst_price(self):
+        for product in self:
+            if self._context.get('uom'):
+                value = self.env['product.uom'].browse(self._context['uom'])._compute_price(product.lst_price, product.uom_id)
+            else:
+                value = product.lst_price
             value -= product.price_extra
             product.write({'list_price': value})
 
@@ -236,7 +225,7 @@ class ProductProduct(models.Model):
                 product_name = supplier_info.product_name or self.default_code
         else:
             product_name = self.name
-        self.partner_ref = '%s%s' % (self.code and '[%s]' % self.code or '', product_name)
+        self.partner_ref = '%s%s' % (self.code and '[%s] ' % self.code or '', product_name)
 
     @api.one
     @api.depends('image_variant', 'product_tmpl_id.image')
@@ -378,13 +367,12 @@ class ProductProduct(models.Model):
         for product in self.sudo():
             # display only the attributes with multiple possible values on the template
             variable_attributes = product.attribute_line_ids.filtered(lambda l: len(l.value_ids) > 1).mapped('attribute_id')
-            variant = ", ".join([v.name for v in product.attribute_value_ids if v.attribute_id in variable_attributes])
+            variant = product.attribute_value_ids._variant_name(variable_attributes)
 
             name = variant and "%s (%s)" % (product.name, variant) or product.name
             sellers = []
             if partner_ids:
-                if variant:
-                    sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and (x.product_id == product)]
+                sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and (x.product_id == product)]
                 if not sellers:
                     sellers = [x for x in product.seller_ids if (x.name.id in partner_ids) and not x.product_id]
             if sellers:
@@ -540,7 +528,7 @@ class ProductProduct(models.Model):
             PriceHistory.create({
                 'product_id': product.id,
                 'cost': value,
-                'company_id': self._context.get('force_compay', self.env.user.company_id.id),
+                'company_id': self._context.get('force_company', self.env.user.company_id.id),
             })
 
     @api.multi
@@ -562,13 +550,14 @@ class ProductPackaging(models.Model):
     _description = "Packaging"
     _order = 'sequence'
 
-    name = fields.Char('Packaging Type', required=True)
+    name = fields.Char('Package Type', required=True)
     sequence = fields.Integer('Sequence', default=1, help="The first in the sequence is the default one.")
-    product_tmpl_id = fields.Many2one('product.template', string='Product')
+    product_id = fields.Many2one('product.product', string='Product')
     qty = fields.Float('Quantity per Package', help="The total number of products you can have per pallet or box.")
+    barcode = fields.Char('Barcode', copy=False, help="Barcode used for packaging identification.")
 
 
-class SuppliferInfo(models.Model):
+class SupplierInfo(models.Model):
     _name = "product.supplierinfo"
     _description = "Information about a product vendor"
     _order = 'sequence, min_qty desc, price'

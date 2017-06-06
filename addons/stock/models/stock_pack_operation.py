@@ -34,8 +34,7 @@ class PackOperation(models.Model):
     product_qty = fields.Float('To Do', default=0.0, digits=dp.get_precision('Product Unit of Measure'), required=True)
     ordered_qty = fields.Float('Ordered Quantity', digits=dp.get_precision('Product Unit of Measure'))
     qty_done = fields.Float('Done', default=0.0, digits=dp.get_precision('Product Unit of Measure'))
-    # TDE FIXME: what what what what ??
-    is_done = fields.Boolean(compute='_compute_is_done', inverse='_set_is_done', string='Done', oldname='processed_boolean')
+    is_done = fields.Boolean(compute='_compute_is_done', string='Done', readonly=False, oldname='processed_boolean')
     package_id = fields.Many2one('stock.quant.package', 'Source Package')
     pack_lot_ids = fields.One2many('stock.pack.operation.lot', 'operation_id', 'Lots/Serial Numbers Used')
     result_package_id = fields.Many2one(
@@ -73,13 +72,12 @@ class PackOperation(models.Model):
     def _compute_is_done(self):
         self.is_done = self.qty_done > 0.0
 
-    @api.one
-    def _set_is_done(self):
-        # TDE FIXME: whuuuut ???
+    @api.onchange('is_done')
+    def on_change_is_done(self):
         if not self.product_id:
-            if self.processed_boolean and self.qty_done == 0:
+            if self.is_done and self.qty_done == 0:
                 self.qty_done = 1.0
-            if not self.processed_boolean and self.qty_done != 0:
+            if not self.is_done and self.qty_done != 0:
                 self.qty_done = 0.0
 
     def _get_remaining_prod_quantities(self):
@@ -164,8 +162,9 @@ class PackOperation(models.Model):
     def split_quantities(self):
         for operation in self:
             if float_compare(operation.product_qty, operation.qty_done, precision_rounding=operation.product_uom_id.rounding) == 1:
-                operation.copy(default={'qty_done': 0.0, 'product_qty': operation.product_qty - operation.qty_done})
+                cpy = operation.copy(default={'qty_done': 0.0, 'product_qty': operation.product_qty - operation.qty_done})
                 operation.write({'product_qty': operation.qty_done})
+                operation._copy_remaining_pack_lot_ids(cpy)
             else:
                 raise UserError(_('The quantity to split should be smaller than the quantity To Do.  '))
         return True
@@ -205,7 +204,6 @@ class PackOperation(models.Model):
             'target': 'new',
             'res_id': self.ids[0],
             'context': action_ctx}
-    split_lot = action_split_lots
 
     @api.multi
     def show_details(self):
@@ -237,6 +235,19 @@ class PackOperation(models.Model):
                         if opslot.qty not in (1.0, 0.0):
                             raise UserError(_('You should provide a different serial number for each piece'))
     check_tracking = _check_serial_number
+
+    @api.multi
+    def _copy_remaining_pack_lot_ids(self, new_operation):
+        for op in self:
+            for lot in op.pack_lot_ids:
+                new_qty_todo = lot.qty_todo - lot.qty
+
+                if float_compare(new_qty_todo, 0, precision_rounding=op.product_uom_id.rounding) > 0:
+                    lot.copy({
+                        'operation_id': new_operation.id,
+                        'qty_todo': new_qty_todo,
+                        'qty': 0,
+                    })
 
 
 class PackOperationLot(models.Model):

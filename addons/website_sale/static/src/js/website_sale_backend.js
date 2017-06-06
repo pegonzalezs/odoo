@@ -12,8 +12,8 @@ WebsiteBackend.include({
     init: function(parent, context) {
         this._super(parent, context);
 
-        this.dashboards_templates.push('website_sale.dashboard_sales');
-        this.graphs.push('sales');
+        this.dashboards_templates.unshift('website_sale.dashboard_sales');
+        this.graphs.push({'name': 'sales', 'group': 'sale_salesman'});
     },
 
     on_product_template: function(ev) {

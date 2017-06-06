@@ -2,10 +2,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import copy
+import logging
 from lxml import etree, html
 
 from odoo.exceptions import AccessError
 from odoo import api, models
+from odoo.tools import pycompat
+
+_logger = logging.getLogger(__name__)
 
 
 class IrUiView(models.Model):
@@ -80,8 +84,8 @@ class IrUiView(models.Model):
     @api.model
     def to_field_ref(self, el):
         # filter out meta-information inserted in the document
-        attributes = dict((k, v) for k, v in el.items()
-                          if not k.startswith('data-oe-'))
+        attributes = {k: v for k, v in pycompat.items(el.attrib)
+                           if not k.startswith('data-oe-')}
         attributes['t-field'] = el.get('data-oe-expression')
 
         out = html.html_parser.makeelement(el.tag, attrib=attributes)
@@ -113,3 +117,70 @@ class IrUiView(models.Model):
             view.write({'arch': view._pretty_arch(arch)})
 
         self.sudo().mapped('model_data_id').write({'noupdate': True})
+
+    @api.model
+    def _view_obj(self, view_id):
+        if isinstance(view_id, basestring):
+            return self.env.ref(view_id)
+        elif isinstance(view_id, pycompat.integer_types):
+            return self.browse(view_id)
+        # assume it's already a view object (WTF?)
+        return view_id
+
+    # Returns all views (called and inherited) related to a view
+    # Used by translation mechanism, SEO and optional templates
+
+    @api.model
+    def _views_get(self, view_id, options=True, bundles=False, root=True):
+        """ For a given view ``view_id``, should return:
+                * the view itself
+                * all views inheriting from it, enabled or not
+                  - but not the optional children of a non-enabled child
+                * all views called from it (via t-call)
+            :returns recordset of ir.ui.view
+        """
+        try:
+            view = self._view_obj(view_id)
+        except ValueError:
+            _logger.warning("Could not find view object with view_id '%s'", view_id)
+            return []
+
+        while root and view.inherit_id:
+            view = view.inherit_id
+
+        views_to_return = view
+
+        node = etree.fromstring(view.arch)
+        xpath = "//t[@t-call]"
+        if bundles:
+            xpath += "| //t[@t-call-assets]"
+        for child in node.xpath(xpath):
+            try:
+                called_view = self._view_obj(child.get('t-call', child.get('t-call-assets')))
+            except ValueError:
+                continue
+            if called_view not in views_to_return:
+                views_to_return += self._views_get(called_view, options=options, bundles=bundles)
+
+        extensions = view.inherit_children_ids
+        if not options:
+            # only active children
+            extensions = view.inherit_children_ids.filtered(lambda view: view.active)
+
+        # Keep options in a deterministic order regardless of their applicability
+        for extension in extensions.sorted(key=lambda v: v.id):
+            # only return optional grandchildren if this child is enabled
+            for ext_view in self._views_get(extension, options=extension.active, root=False):
+                if ext_view not in views_to_return:
+                    views_to_return += ext_view
+        return views_to_return
+
+    @api.model
+    def get_related_views(self, key, bundles=False):
+        """ Get inherit view's informations of the template ``key``.
+            returns templates info (which can be active or not)
+            ``bundles=True`` returns also the asset bundles
+        """
+        user_groups = set(self.env.user.groups_id)
+        views = self.with_context(active_test=False)._views_get(key, bundles=bundles)
+        return views.filtered(lambda v: not v.groups_id or len(user_groups.intersection(v.groups_id)))

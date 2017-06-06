@@ -31,10 +31,10 @@ var TopBarContent = Widget.extend({
         var def = $.Deferred();
         if ($("[data-content_menu_id]").length) {
             var select = new SelectEditMenuDialog();
-            select.appendTo(document.body);
             select.on('save', this, function (root) {
                 def.resolve(root);
             });
+            select.open();
         } else {
             def.resolve(null);
         }
@@ -49,7 +49,7 @@ var TopBarContent = Widget.extend({
                 },
             }).then(function (menu) {
                 var dialog = new EditMenuDialog(this, {}, menu).open();
-                dialog.on("saved", null, function () {
+                dialog.on("save", null, function () {
                     $.when(action_before_reload && action_before_reload()).then(function () {
                         editor.reload();
                     });
@@ -186,8 +186,8 @@ var SelectEditMenuDialog = widget.Dialog.extend({
         }, options || {}));
     },
     save: function () {
-        this.trigger("save", parseInt(this.$el.find("select").val() || null));
-        this._super();
+        this.final_data = parseInt(this.$el.find("select").val() || null);
+        this._super.apply(this, arguments);
     }
 });
 
@@ -235,7 +235,7 @@ var EditMenuDialog = widget.Dialog.extend({
     },
     add_menu: function () {
         var self = this;
-        var dialog = new MenuEntryDialog(this, {}, undefined, {});
+        var dialog = new MenuEntryDialog(this, {menu_link_options: true}, undefined, {});
         dialog.on('save', this, function (link) {
             var new_menu = {
                 id: _.uniqueId('new-'),
@@ -291,9 +291,9 @@ var EditMenuDialog = widget.Dialog.extend({
         var context = base.get_context();
         // Resequence, re-tree and remove useless data
         new_menu.forEach(function (menu) {
-            if (menu.item_id) {
+            if (menu.id) {
                 levels[menu.depth] = (levels[menu.depth] || 0) + 1;
-                var mobj = self.flat[menu.item_id];
+                var mobj = self.flat[menu.id];
                 mobj.sequence = levels[menu.depth];
                 mobj.parent_id = (menu.parent_id|0) || menu.parent_id || self.root_menu_id;
                 delete(mobj.children);
@@ -318,29 +318,32 @@ var MenuEntryDialog = widget.LinkDialog.extend({
         data.text = data.name || '';
         data.isNewWindow = data.new_window;
         this.data = data;
+        this.menu_link_options = options.menu_link_options;
         return this._super.apply(this, arguments);
     },
     start: function () {
         var self = this;
-
-        this.$(".link-style").remove();
-        this.$("label[for=link-new]").text("Menu Label");
-
-        return $.when(this._super.apply(this, arguments)).then(function () {
-            var $link_text = self.$('#link-text').focus();
-            self.$('#link-page').change(function (e) {
-                if ($link_text.val()) { return; }
-                var data = $(this).select2('data');
-                $link_text.val(data.create ? data.id : data.text);
-                $link_text.focus();
+        this.$(".o_link_dialog_preview").remove();
+        this.$(".window-new, .link-style").closest(".form-group").remove();
+        this.$("label[for='o_link_dialog_label_input']").text(_t("Menu Label"));
+        if (this.menu_link_options) { // add menu link option only when adding new menu
+            this.$('#o_link_dialog_label_input').closest('.form-group').after(qweb.render('website.contentMenu.dialog.edit.link_menu_options'));
+            this.$('input[name=link_menu_options]').on('change', function() {
+                self.$('#o_link_dialog_url_input').closest('.form-group').toggle();
             });
-        });
+        }
+
+        return this._super.apply(this, arguments);
     },
     save: function () {
-        var $e = this.$('#link-text');
+        var $e = this.$('#o_link_dialog_label_input');
         if (!$e.val() || !$e[0].checkValidity()) {
             $e.closest('.form-group').addClass('has-error');
             $e.focus();
+            return;
+        }
+        if (this.$('input[name=link_menu_options]:checked').val() === 'new_page') {
+            window.location = '/website/add/' + encodeURIComponent($e.val()) + '?add_menu=1';
             return;
         }
         return this._super.apply(this, arguments);
@@ -349,6 +352,7 @@ var MenuEntryDialog = widget.LinkDialog.extend({
 
 return {
     'TopBar': TopBarContent,
+    'EditMenuDialog': EditMenuDialog,
 };
 
 });
