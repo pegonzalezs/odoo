@@ -5,6 +5,7 @@ from datetime import timedelta
 from functools import partial
 
 import psycopg2
+import pytz
 
 from odoo import api, fields, models, tools, _
 from odoo.tools import float_is_zero
@@ -611,11 +612,11 @@ class PosOrder(models.Model):
                     'location_id': location_id,
                     'location_dest_id': destination_id,
                 }
-                pos_qty = any([x.qty > 0 for x in order.lines])
+                pos_qty = any([x.qty > 0 for x in order.lines if x.product_id.type in ['product', 'consu']])
                 if pos_qty:
                     order_picking = Picking.create(picking_vals.copy())
                     order_picking.message_post(body=message)
-                neg_qty = any([x.qty < 0 for x in order.lines])
+                neg_qty = any([x.qty < 0 for x in order.lines if x.product_id.type in ['product', 'consu']])
                 if neg_qty:
                     return_vals = picking_vals.copy()
                     return_vals.update({
@@ -907,7 +908,9 @@ class ReportSaleDetails(models.AbstractModel):
         if not configs:
             configs = self.env['pos.config'].search([])
 
-        today = fields.Datetime.from_string(fields.Date.context_today(self))
+        user_tz = pytz.timezone(self.env.context.get('tz') or self.env.user.tz or 'UTC')
+        today = user_tz.localize(fields.Datetime.from_string(fields.Date.context_today(self)))
+        today = today.astimezone(pytz.timezone('UTC'))
         if date_start:
             date_start = fields.Datetime.from_string(date_start)
         else:
