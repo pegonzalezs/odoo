@@ -84,7 +84,7 @@ QUnit.module('Views', {
     QUnit.module('ListView');
 
     QUnit.test('simple readonly list', function (assert) {
-        assert.expect(9);
+        assert.expect(10);
 
         var list = createView({
             View: ListView,
@@ -92,6 +92,9 @@ QUnit.module('Views', {
             data: this.data,
             arch: '<tree><field name="foo"/><field name="int_field"/></tree>',
         });
+
+        assert.notOk(list.$el.hasClass('o_cannot_create'),
+            "should not have className 'o_cannot_create'");
 
         // 3 th (1 for checkbox, 2 for columns)
         assert.strictEqual(list.$('th').length, 3, "should have 3 columns");
@@ -111,6 +114,24 @@ QUnit.module('Views', {
             "should not have a visible save button");
         assert.ok(!list.$buttons.find('.o_list_button_discard').is(':visible'),
             "should not have a visible save button");
+        list.destroy();
+    });
+
+    QUnit.test('list with create="0"', function (assert) {
+        assert.expect(2);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree create="0"><field name="foo"/></tree>',
+        });
+
+        assert.ok(list.$el.hasClass('o_cannot_create'),
+            "should have className 'o_cannot_create'");
+        assert.strictEqual(list.$buttons.find('.o_list_button_add').length, 0,
+            "should not have the 'Create' button");
+
         list.destroy();
     });
 
@@ -2258,6 +2279,59 @@ QUnit.module('Views', {
             "should display string as password");
         assert.strictEqual(list.$('td.o_data_cell:eq(1)').text(), '****',
             "should display string as password");
+
+        list.destroy();
+    });
+
+    QUnit.test('list with handle widget', function (assert) {
+        assert.expect(11);
+
+        var list = createView({
+            View: ListView,
+            model: 'foo',
+            data: this.data,
+            arch: '<tree>' +
+                    '<field name="int_field" widget="handle"/>' +
+                    '<field name="amount" widget="float" digits="[5,0]"/>' +
+                  '</tree>',
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/resequence') {
+                    assert.strictEqual(args.offset, -4,
+                        "should write the sequence starting from the lowest current one");
+                    assert.strictEqual(args.field, 'int_field',
+                        "should write the right field as sequence");
+                    assert.deepEqual(args.ids, [1, 4, 2 , 3],
+                        "should write the sequence in correct order");
+                    return $.when();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
+            "default first record should have amount 1200");
+        assert.strictEqual(list.$('tbody tr:eq(1) td:last').text(), '500',
+            "default second record should have amount 500");
+        assert.strictEqual(list.$('tbody tr:eq(2) td:last').text(), '300',
+            "default third record should have amount 300");
+        assert.strictEqual(list.$('tbody tr:eq(3) td:last').text(), '0',
+            "default third record should have amount 0");
+
+        // Drag and drop the fourth line in second position
+        testUtils.dragAndDrop(
+            list.$('.ui-sortable-handle').eq(3),
+            list.$('tbody tr').first(),
+            {position: 'bottom'}
+        );
+
+        assert.strictEqual(list.$('tbody tr:eq(0) td:last').text(), '1200',
+            "new first record should have amount 1200");
+        assert.strictEqual(list.$('tbody tr:eq(1) td:last').text(), '0',
+            "new second record should have amount 0");
+        assert.strictEqual(list.$('tbody tr:eq(2) td:last').text(), '500',
+            "new third record should have amount 500");
+        assert.strictEqual(list.$('tbody tr:eq(3) td:last').text(), '300',
+            "new third record should have amount 300");
 
         list.destroy();
     });

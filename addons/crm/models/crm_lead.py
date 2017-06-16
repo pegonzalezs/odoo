@@ -104,7 +104,7 @@ class Lead(models.Model):
     date_conversion = fields.Datetime('Conversion Date', readonly=True)
 
     # Messaging and marketing
-    message_bounce = fields.Integer('Bounce', help="Counter of the number of bounced emails for this contact")
+    message_bounce = fields.Integer('Bounce', help="Counter of the number of bounced emails for this contact", default=0)
 
     # Only used for type opportunity
     probability = fields.Float('Probability', group_operator="avg", default=lambda self: self._default_probability())
@@ -252,6 +252,13 @@ class Lead(models.Model):
         """ When changing the user, also set a team_id or restrict team id to the ones user_id is member of. """
         values = self._onchange_user_values(self.user_id.id)
         self.update(values)
+
+    @api.constrains('user_id')
+    def _valid_team(self):
+        if self.user_id:
+            values = self.with_context(team_id=self.team_id.id)._onchange_user_values(self.user_id.id)
+            if values:
+                self.update(values)
 
     @api.onchange('state_id')
     def _onchange_state(self):

@@ -105,7 +105,9 @@ var FieldMany2One = AbstractField.extend({
         this.recordParams = {fieldName: this.name, viewType: this.viewType};
     },
     start: function () {
-        // what is 'this.floating' for? add a comment!
+        // booleean indicating that the content of the input isn't synchronized
+        // with the current m2o value (for instance, the user is currently
+        // typing something in the input, and hasn't selected a value yet).
         this.floating = false;
 
         this.$input = this.$('input');
@@ -211,17 +213,20 @@ var FieldMany2One = AbstractField.extend({
         var self = this;
         var slowCreate = this._searchCreatePopup.bind(this, "form", false, this._createContext(name));
         if (this.nodeOptions.quick_create) {
-            return this._rpc({
-                    model: this.field.relation,
-                    method: 'name_create',
-                    args: [name],
-                    context: this.record.getContext(this.recordParams),
-                })
-                .then(function (result) {
-                    if (self.mode === "edit") {
-                        self.reinitialize({id: result[0], display_name: result[1]});
-                    }
-                }, slowCreate);
+            this.trigger_up('mutexify', {
+                action: function () {
+                    return self._rpc({
+                        model: self.field.relation,
+                        method: 'name_create',
+                        args: [name],
+                        context: self.record.getContext(self.recordParams),
+                    }).then(function (result) {
+                        if (self.mode === "edit") {
+                            self.reinitialize({id: result[0], display_name: result[1]});
+                        }
+                    }, slowCreate);
+                },
+            });
         } else {
             slowCreate();
         }
@@ -453,8 +458,10 @@ var FieldMany2One = AbstractField.extend({
     _onInputClick: function () {
         if (this.$input.autocomplete("widget").is(":visible")) {
             this.$input.autocomplete("close");
+        } else if (this.floating) {
+            this.$input.autocomplete("search"); // search with the input's content
         } else {
-            this.$input.autocomplete("search", "");
+            this.$input.autocomplete("search", ''); // search with the empty string
         }
     },
     /**
@@ -561,6 +568,7 @@ var FieldX2Many = AbstractField.extend({
         list_record_delete: '_onDeleteRecord',
         open_record: '_onOpenRecord',
         save_line: '_onSaveLine',
+        resequence: '_onResequence',
         toggle_column_order: '_onToggleColumnOrder',
     }),
 
@@ -611,12 +619,15 @@ var FieldX2Many = AbstractField.extend({
      * @returns {Deferred}
      */
     commitChanges: function () {
+        var self = this;
         var inEditionRecordID =
             this.renderer
             && this.renderer.viewType === "list"
             && this.renderer.getEditableRecordID();
         if (inEditionRecordID) {
-            return this._saveLine(inEditionRecordID);
+            return this.renderer.commitChanges(inEditionRecordID).then(function () {
+                return self._saveLine(inEditionRecordID);
+            });
         }
         return this._super.apply(this, arguments);
     },
@@ -633,7 +644,7 @@ var FieldX2Many = AbstractField.extend({
      * @returns {Deferred}
      */
     reset: function (record, ev) {
-        if (ev && ev.target === this && ev.data.changes && this.view.arch.tag === 'tree' && this.editable) {
+        if (ev && ev.target === this && ev.data.changes && this.view.arch.tag === 'tree') {
             var command = ev.data.changes[this.name];
             if (command.operation === 'UPDATE') {
                 var state = record.data[this.name];
@@ -759,21 +770,17 @@ var FieldX2Many = AbstractField.extend({
      *                     did not agree to discard.
      */
     _saveLine: function (recordID) {
-        var self = this;
         var def = $.Deferred();
-        this.renderer.commitChanges(recordID).then(function () { // TODO wrong as no mutex protection
-            var fieldNames = self.renderer.canBeSaved(recordID);
-            if (fieldNames.length) {
-                self.trigger_up('discard_changes', {
-                    recordID: recordID,
-                    onSuccess: def.resolve.bind(def),
-                    onFailure: def.reject.bind(def),
-                });
-            } else {
-                self.renderer.setRowMode(recordID, 'readonly')
-                    .done(def.resolve.bind(def));
-            }
-        });
+        var fieldNames = this.renderer.canBeSaved(recordID);
+        if (fieldNames.length) {
+            this.trigger_up('discard_changes', {
+                recordID: recordID,
+                onSuccess: def.resolve.bind(def),
+                onFailure: def.reject.bind(def),
+            });
+        } else {
+            this.renderer.setRowMode(recordID, 'readonly').done(def.resolve.bind(def));
+        }
         return def;
     },
 
@@ -892,10 +899,34 @@ var FieldX2Many = AbstractField.extend({
         ev.stopPropagation();
         this.trigger_up('mutexify', {
             action: function () {
-                return self._saveLine(ev.data.recordID)
-                    .done(ev.data.onSuccess)
-                    .fail(ev.data.onFailure);
+                return self.renderer.commitChanges(ev.data.recordID).then(function () {
+                    self.trigger_up('mutexify', {
+                        action: function () {
+                            return self._saveLine(ev.data.recordID)
+                                .done(ev.data.onSuccess)
+                                .fail(ev.data.onFailure);
+                        },
+                    });
+                });
             },
+        });
+    },
+    /**
+     * Forces a resequencing of the records.
+     *
+     * @private
+     * @param {OdooEvent} event
+     */
+    _onResequence: function (event) {
+        var self = this;
+        _.each(event.data.rowIDs, function (rowID, index) {
+            var data = {};
+            data[event.data.handleField] = event.data.offset + index;
+            self._setValue({
+                operation: 'UPDATE',
+                id: rowID,
+                data: data,
+            });
         });
     },
     /**
@@ -941,7 +972,6 @@ var FieldOne2Many = FieldX2Many.extend({
                     var index = self.editable === 'top' ? 0 : self.value.data.length - 1;
                     var newID = self.value.data[index].id;
                     self.renderer.editRecord(newID);
-                    self.creatingRecord = false;
                 }
             }
         });
@@ -991,6 +1021,7 @@ var FieldOne2Many = FieldX2Many.extend({
      *   in the kanban view
      */
     _onAddRecord: function (ev) {
+        var self = this;
         // we don't want interference with the components upstream.
         ev.stopPropagation();
 
@@ -1000,10 +1031,11 @@ var FieldOne2Many = FieldX2Many.extend({
                 this._setValue({
                     operation: 'CREATE',
                     position: this.editable,
+                }).always(function () {
+                    self.creatingRecord = false;
                 });
             }
         } else {
-            var self = this;
             this._openFormDialog({
                 on_saved: function (record) {
                     self._setValue({ operation: 'ADD', id: record.id });
