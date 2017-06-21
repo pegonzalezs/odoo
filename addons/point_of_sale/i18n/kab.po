@@ -727,7 +727,7 @@ msgstr ""
 #: code:addons/point_of_sale/static/src/js/gui.js:335
 #, python-format
 msgid "Closing ..."
-msgstr ""
+msgstr "Amdal..."
 
 #. module: point_of_sale
 #: selection:pos.session,state:0
@@ -3649,6 +3649,12 @@ msgstr ""
 msgid ""
 "You have to select a pricelist in the sale form !\n"
 "Please set one before choosing a product."
+msgstr ""
+
+#. module: point_of_sale
+#: code:addons/point_of_sale/models/pos_session.py:24
+#, python-format
+msgid "You have to set a Sale Journal for the POS:%s"
 msgstr ""
 
 #. module: point_of_sale

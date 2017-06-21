@@ -35,7 +35,7 @@ msgstr ""
 #: code:addons/point_of_sale/models/pos_order.py:679
 #, python-format
 msgid " REFUND"
-msgstr ""
+msgstr "HYVITYS"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_report_pos_order_nbr_lines
@@ -2042,7 +2042,7 @@ msgstr "Kassapäätteen tilausrivit"
 #. module: point_of_sale
 #: model:ir.ui.view,arch_db:point_of_sale.view_partner_property_form
 msgid "POS Sales"
-msgstr ""
+msgstr "Kassamyynti"
 
 #. module: point_of_sale
 #: code:addons/point_of_sale/models/pos_config.py:223
@@ -3696,6 +3696,12 @@ msgid ""
 msgstr ""
 "Sinun pitää valita hinnasto myyntilomakkeella !\n"
 "Valitse ensin se ennenkuin valitset tuotteen."
+
+#. module: point_of_sale
+#: code:addons/point_of_sale/models/pos_session.py:24
+#, python-format
+msgid "You have to set a Sale Journal for the POS:%s"
+msgstr ""
 
 #. module: point_of_sale
 #: model:ir.actions.act_window,help:point_of_sale.product_product_action

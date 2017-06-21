@@ -368,6 +368,15 @@ class BaseModel(object):
                 field_id = cr.fetchone()[0]
                 self._context['todo'].append((20, Fields.browse(field_id).modified, [names]))
 
+        if not self.pool._init:
+            # remove ir.model.fields that are not in self._fields
+            fields = Fields.browse([col['id']
+                                    for name, col in cols.iteritems()
+                                    if name not in self._fields])
+            # add key '_force_unlink' in context to (1) force the removal of the
+            # fields and (2) not reload the registry
+            fields.with_context(_force_unlink=True).unlink()
+
         self.invalidate_cache()
 
     @api.model
@@ -389,7 +398,7 @@ class BaseModel(object):
             This method should only be used for manual fields.
         """
         cls = type(self)
-        field = cls._fields.pop(name)
+        field = cls._fields.pop(name, None)
         if hasattr(cls, name):
             delattr(cls, name)
         return field
@@ -669,7 +678,7 @@ class BaseModel(object):
                 field = cls._fields.get(name)
                 if not field:
                     _logger.warning("method %s.%s: @constrains parameter %r is not a field name", cls._name, attr, name)
-                if not (field.store or field.inverse):
+                elif not (field.store or field.inverse or field.inherited):
                     _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
             methods.append(func)
 
@@ -864,7 +873,12 @@ class BaseModel(object):
         ModelData.clear_caches()
         extracted = self._extract_records(fields, data, log=messages.append)
         converted = self._convert_records(extracted, log=messages.append)
+        i = 1
+        total = len(data)
         for id, xid, record, info in converted:
+            if i % 100 == 0:
+                _logger.info("{0}/{1} items procesed.".format(i, total))
+            i += 1
             try:
                 cr.execute('SAVEPOINT model_load_save')
             except psycopg2.InternalError as e:
@@ -1716,7 +1730,7 @@ class BaseModel(object):
     def _read_group_prepare(self, orderby, aggregated_fields, annotated_groupbys, query):
         """
         Prepares the GROUP BY and ORDER BY terms for the read_group method. Adds the missing JOIN clause
-        to the query if order should be computed against m2o field. 
+        to the query if order should be computed against m2o field.
         :param orderby: the orderby definition in the form "%(field)s %(order)s"
         :param aggregated_fields: list of aggregated fields in the query
         :param annotated_groupbys: list of dictionaries returned by _read_group_process_groupby
@@ -1798,9 +1812,9 @@ class BaseModel(object):
         return {
             'field': split[0],
             'groupby': gb,
-            'type': field_type, 
+            'type': field_type,
             'display_format': display_formats[gb_function or 'month'] if temporal else None,
-            'interval': time_intervals[gb_function or 'month'] if temporal else None,                
+            'interval': time_intervals[gb_function or 'month'] if temporal else None,
             'tz_convert': tz_convert,
             'qualified_field': qualified_field
         }
@@ -1825,8 +1839,8 @@ class BaseModel(object):
     @api.model
     def _read_group_format_result(self, data, annotated_groupbys, groupby, domain):
         """
-            Helper method to format the data contained in the dictionary data by 
-            adding the domain corresponding to its values, the groupbys in the 
+            Helper method to format the data contained in the dictionary data by
+            adding the domain corresponding to its values, the groupbys in the
             context and by properly formatting the date/datetime values.
 
         :param data: a single group
@@ -1846,7 +1860,7 @@ class BaseModel(object):
                 if ftype == 'many2one':
                     value = value[0]
                 elif ftype in ('date', 'datetime'):
-                    locale = self._context.get('lang', 'en_US')
+                    locale = self._context.get('lang') or 'en_US'
                     fmt = DEFAULT_SERVER_DATETIME_FORMAT if ftype == 'datetime' else DEFAULT_SERVER_DATE_FORMAT
                     tzinfo = None
                     range_start = value
@@ -1897,10 +1911,10 @@ class BaseModel(object):
 
         :param domain: list specifying search criteria [['field_name', 'operator', 'value'], ...]
         :param list fields: list of fields present in the list view specified on the object
-        :param list groupby: list of groupby descriptions by which the records will be grouped.  
+        :param list groupby: list of groupby descriptions by which the records will be grouped.
                 A groupby description is either a field (then it will be grouped by that field)
                 or a string 'field:groupby_function'.  Right now, the only functions supported
-                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for 
+                are 'day', 'week', 'month', 'quarter' or 'year', and they only make sense for
                 date/datetime fields.
         :param int offset: optional number of records to skip
         :param int limit: optional max number of records to return
@@ -1908,7 +1922,7 @@ class BaseModel(object):
                              overriding the natural sort ordering of the
                              groups, see also :py:meth:`~osv.osv.osv.search`
                              (supported only for many2one fields currently)
-        :param bool lazy: if true, the results are only grouped by the first groupby and the 
+        :param bool lazy: if true, the results are only grouped by the first groupby and the
                 remaining groupbys are put in the __context key.  If false, all the groupbys are
                 done in one call.
         :return: list of dictionaries(one dictionary for each record) containing:
@@ -2030,7 +2044,7 @@ class BaseModel(object):
             # Right now, read_group only fill results in lazy mode (by default).
             # If you need to have the empty groups in 'eager' mode, then the
             # method _read_group_fill_results need to be completely reimplemented
-            # in a sane way 
+            # in a sane way
             result = self._read_group_fill_results(
                 domain, groupby_fields[0], groupby[len(annotated_groupbys):],
                 aggregated_fields, count_field, result, read_group_order=order,
@@ -2759,7 +2773,7 @@ class BaseModel(object):
         cls = type(self)
         cls._setup_done = False
         # a model's base structure depends on its mro (without registry classes)
-        cls._model_cache_key = tuple(c for c in cls.mro() if not getattr(c, 'pool', None))
+        cls._model_cache_key = tuple(c for c in cls.mro() if getattr(c, 'pool', None) is None)
 
     @api.model
     def _setup_base(self, partial):
@@ -2805,7 +2819,7 @@ class BaseModel(object):
             self._add_magic_fields()
             cls._proper_fields = set(cls._fields)
 
-            cls.pool.model_cache[cls._model_cache_key] = cls
+        cls.pool.model_cache[cls._model_cache_key] = cls
 
         # 2. add custom fields
         self._add_manual_fields(partial)
@@ -3556,12 +3570,17 @@ class BaseModel(object):
 
             if new_vals:
                 # put the values of pure new-style fields into cache, and inverse them
+                self.modified(set(new_vals) - set(old_vals))
                 for record in self:
                     record._cache.update(record._convert_to_cache(new_vals, update=True))
                 for key in new_vals:
                     self._fields[key].determine_inverse(self)
+                self.modified(set(new_vals) - set(old_vals))
                 # check Python constraints for inversed fields
                 self._validate_fields(set(new_vals) - set(old_vals))
+                # recompute new-style fields
+                if self.env.recompute and self._context.get('recompute', True):
+                    self.recompute()
 
         return True
 
@@ -3815,14 +3834,19 @@ class BaseModel(object):
         # create record with old-style fields
         record = self.browse(self._create(old_vals))
 
-        # put the values of pure new-style fields into cache, and inverse them
-        record._cache.update(record._convert_to_cache(new_vals))
         protected_fields = map(self._fields.get, new_vals)
         with self.env.protecting(protected_fields, record):
+            # put the values of pure new-style fields into cache, and inverse them
+            record.modified(set(new_vals) - set(old_vals))
+            record._cache.update(record._convert_to_cache(new_vals))
             for key in new_vals:
                 self._fields[key].determine_inverse(record)
+            record.modified(set(new_vals) - set(old_vals))
             # check Python constraints for inversed fields
             record._validate_fields(set(new_vals) - set(old_vals))
+            # recompute new-style fields
+            if self.env.recompute and self._context.get('recompute', True):
+                self.recompute()
 
         return record
 
@@ -4343,16 +4367,18 @@ class BaseModel(object):
                 # for translatable fields we copy their translations
                 trans_name, source_id, target_id = get_trans(field, old, new)
                 domain = [('name', '=', trans_name), ('res_id', '=', source_id)]
+                new_val = new_wo_lang[name]
+                if old.env.lang:
+                    # the new value *without lang* must be the old value without lang
+                    new_wo_lang[name] = old_wo_lang[name]
                 for vals in Translation.search_read(domain):
                     del vals['id']
                     del vals['source']      # remove source to avoid triggering _set_src
                     del vals['module']      # duplicated vals is not linked to any module
                     vals['res_id'] = target_id
-                    if vals['lang'] == old.env.lang:
-                        # 'source' to force the call to _set_src
-                        # 'value' needed if value is changed in copy(), want to see the new_value
-                        vals['source'] = old_wo_lang[name]
-                        vals['value'] = new_wo_lang[name]
+                    if vals['lang'] == old.env.lang and field.translate is True:
+                        # the value should be the new value (given by copy())
+                        vals['value'] = new_val
                     Translation.create(vals)
 
     @api.multi
@@ -4369,7 +4395,8 @@ class BaseModel(object):
         """
         self.ensure_one()
         vals = self.copy_data(default)[0]
-        new = self.create(vals)
+        # To avoid to create a translation in the lang of the user, copy_translation will do it
+        new = self.with_context(lang=None).create(vals)
         self.copy_translations(new)
         return new
 
