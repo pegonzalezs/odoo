@@ -805,7 +805,17 @@ class one2many(_column):
         # read the inverse of records without prefetching other fields on them
         for record in records.with_context(prefetch_fields=False):
             # record[inverse] may be a record or an integer
-            result[int(record[inverse])].append(record.id)
+            # hack by meja1: needed due to the avoiding attachment duplication constraint.
+            # If the record is ir.attachment whose res_id is linked to a record that has not been prefetched
+            # (because it was not needed for this query) then the attachment has to be indicated who its real res_id is
+            if record._name == 'ir.attachment':
+                all_res_ids = record.other_res_ids.mapped('value')
+                all_res_ids.append(record.res_id)
+                real_res_id = [res_id for res_id in all_res_ids if res_id in result]
+                result[real_res_id[0]].append(record.id)
+            else:
+                # end hack
+                result[int(record[inverse])].append(record.id)
 
         return result
 
