@@ -128,6 +128,8 @@ instance.web.ActionManager = instance.web.Widget.extend({
         if (this.webclient.has_uncommitted_changes()) {
             return $.Deferred().reject();
         }
+
+        self.inner_action = widget.action;
         var widget_index = this.widgets.indexOf(widget),
             def = $.when(widget.select_view && widget.select_view(index));
 
@@ -234,7 +236,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
                     if (warm) {
                         this.null_action();
                     }
-                    action_loaded = this.do_action(state.action, { additional_context: add_context });
+                    action_loaded = this.do_action(state.action, {additional_context: add_context, state: state});
                     $.when(action_loaded || null).done(function() {
                         instance.webclient.menu.is_bound.done(function() {
                             if (self.inner_action && self.inner_action.id) {
@@ -432,7 +434,7 @@ instance.web.ActionManager = instance.web.Widget.extend({
 
         return this.ir_actions_common({
             widget: function () { 
-                return new instance.web.ViewManager(self, null, null, null, action); 
+                return new instance.web.ViewManager(self, null, null, null, action, options);
             },
             action: action,
             klass: 'oe_act_window',
@@ -533,7 +535,7 @@ instance.web.ViewManager =  instance.web.Widget.extend({
      * @param {Array} [views] List of [view_id, view_type]
      * @param {Object} [flags] various boolean describing UI state
      */
-    init: function(parent, dataset, views, flags, action) {
+    init: function(parent, dataset, views, flags, action, options) {
         if (action) {
             flags = action.flags || {};
             if (!('auto_search' in flags)) {
@@ -588,18 +590,25 @@ instance.web.ViewManager =  instance.web.Widget.extend({
                     embedded_view: view.embedded_view,
                     title: self.action && self.action.name,
                     button_label: View ? _.str.sprintf(_t('%(view_type)s view'), {'view_type': (view_label || view_type)}) : (void 'nope'),
+                    multi_record: View ? View.prototype.multi_record : undefined,
                 };
             self.view_order.push(view_descr);
             self.views[view_type] = view_descr;
         });
         this.multiple_views = (self.view_order.length > 1);
+
+        if (options && options.state && options.state.view_type) {
+            var view_type = options.state.view_type;
+            var view_descr = this.views[view_type];
+            this.default_view = view_descr && view_descr.multi_record ? view_type : undefined;
+        }
     },
     /**
      * @returns {jQuery.Deferred} initial view loading promise
      */
     start: function() {
         var self = this;
-        var default_view = this.flags.default_view || this.view_order[0].type,
+        var default_view = this.default_view || this.flags.default_view || this.view_order[0].type,
             default_options = this.flags[default_view] && this.flags[default_view].options;
 
         if (this.flags.headless) {
@@ -728,7 +737,7 @@ instance.web.ViewManager =  instance.web.Widget.extend({
 
         function make_breadcrumb (bc, is_last) {
             var $bc = $('<li>')
-                    .append(is_last ? bc.title : $('<a>').text(bc.title))
+                    .append(is_last ? _.escape(bc.title) : $('<a>').text(bc.title))
                     .toggleClass('active', is_last);
             if (!is_last) {
                 $bc.click(function () {
@@ -1023,7 +1032,7 @@ instance.web.Sidebar = instance.web.Widget.extend({
     init: function(parent) {
         var self = this;
         this._super(parent);
-        var view = this.getParent();
+        this.view = this.getParent();
         this.sections = [
             { 'name' : 'print', 'label' : _t('Print'), },
             { 'name' : 'other', 'label' : _t('More'), }
@@ -1227,6 +1236,9 @@ instance.web.View = instance.web.Widget.extend({
      * Define a view type for each view to allow automatic call to fields_view_get.
      */
     view_type: undefined,
+    // multi_record is used to distinguish views displaying a single record
+    // (e.g. FormView) from those that display several records (e.g. ListView)
+    multi_record: true,
     init: function(parent, dataset, view_id, options) {
         this._super(parent);
         this.ViewManager = parent;
@@ -1311,7 +1323,7 @@ instance.web.View = instance.web.Widget.extend({
                 // Wrong group_by values will simply fail and forbid rendering of the destination view
                 var ncontext = new instance.web.CompoundContext(
                     _.object(_.reject(_.pairs(dataset.get_context().eval()), function(pair) {
-                      return pair[0].match('^(?:(?:default_|search_default_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids)$') !== null;
+                      return pair[0].match('^(?:(?:default_|search_default_|show_).+|.+_view_ref|group_by|group_by_no_leaf|active_id|active_ids)$') !== null;
                     }))
                 );
                 ncontext.add(action_data.context || {});

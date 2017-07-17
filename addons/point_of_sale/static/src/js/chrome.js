@@ -418,6 +418,8 @@ openerp.point_of_sale.load_chrome = function load_chrome(instance, module){ //mo
             this.logo_click_time  = 0;
             this.logo_click_count = 0;
 
+            this.previous_touch_y_coordinate = -1;
+
             this.widget = {};   // contains references to subwidgets instances
 
             this.cleanup_dom();
@@ -449,7 +451,12 @@ openerp.point_of_sale.load_chrome = function load_chrome(instance, module){ //mo
             var self = this;
             FastClick.attach(document.body);
 
-            instance.webclient.set_content_full_screen(true);
+            if ($.browser.chrome) {
+                var chrome_version = $.browser.version.split('.')[0];
+                if (parseInt(chrome_version, 10) >= 50) {
+                    openerp.loadCSS('/point_of_sale/static/src/css/chrome50.css');
+                }
+            }
 
             this.renderElement();
 
@@ -485,12 +492,40 @@ openerp.point_of_sale.load_chrome = function load_chrome(instance, module){ //mo
             }
         },
 
+        _scrollable: function(element, scrolling_down){
+            var $element = $(element);
+            var scrollable = true;
+
+            if (! scrolling_down && $element.scrollTop() <= 0) {
+                scrollable = false;
+            } else if (scrolling_down && $element.scrollTop() + $element.height() >= element.scrollHeight) {
+                scrollable = false;
+            }
+
+            return scrollable;
+        },
+
         disable_rubberbanding: function(){
+            var self = this;
+
+            document.body.addEventListener('touchstart', function(event){
+                self.previous_touch_y_coordinate = event.touches[0].clientY;
+            });
+
             // prevent the pos body from being scrollable. 
             document.body.addEventListener('touchmove',function(event){
                 var node = event.target;
+                var current_touch_y_coordinate = event.touches[0].clientY;
+                var scrolling_down;
+
+                if (current_touch_y_coordinate < self.previous_touch_y_coordinate) {
+                    scrolling_down = true;
+                } else {
+                    scrolling_down = false;
+                }
+
                 while(node){
-                    if(node.classList && node.classList.contains('touch-scrollable')){
+                    if(node.classList && node.classList.contains('touch-scrollable') && self._scrollable(node, scrolling_down)){
                         return;
                     }
                     node = node.parentNode;
@@ -660,7 +695,6 @@ openerp.point_of_sale.load_chrome = function load_chrome(instance, module){ //mo
 
         destroy: function() {
             this.pos.destroy();
-            instance.webclient.set_content_full_screen(false);
             this._super();
         }
     });

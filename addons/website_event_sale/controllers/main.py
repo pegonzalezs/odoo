@@ -23,7 +23,7 @@ from openerp import SUPERUSER_ID
 from openerp.addons.web import http
 from openerp.addons.web.http import request
 from openerp.addons.website_event.controllers.main import website_event
-from openerp.addons.website_sale.controllers.main import get_pricelist
+from openerp.addons.website_sale.controllers.main import get_pricelist, website_sale
 from openerp.tools.translate import _
 
 
@@ -42,7 +42,7 @@ class website_event(website_event):
     def _process_tickets_details(self, data):
         ticket_post = {}
         for key, value in data.iteritems():
-            if not key.startswith('nb_register') or not '-' in key:
+            if not key.startswith('nb_register') or '-' not in key:
                 continue
             items = key.split('-')
             if len(items) < 2:
@@ -61,7 +61,7 @@ class website_event(website_event):
         for registration in registrations:
             ticket = request.registry['event.event.ticket'].browse(cr, SUPERUSER_ID, int(registration['ticket_id']), context=context)
             cart_values = order.with_context(event_ticket_id=ticket.id)._cart_update(product_id=ticket.product_id.id, add_qty=1, registration_data=[registration])
-            attendee_ids &= set(cart_values.get('attendees', []))
+            attendee_ids |= set(cart_values.get('attendee_ids', []))
 
         # free tickets -> order with amount = 0: auto-confirm, no checkout
         if not order.amount_total:
@@ -89,3 +89,23 @@ class website_event(website_event):
         except ValueError:
             pass
         return super(website_event, self)._add_event(event_name, context, **kwargs)
+
+
+class website_sale(website_sale):
+
+    @http.route(['/shop/get_unit_price'], type='json', auth="public", methods=['POST'], website=True)
+    def get_unit_price(self, product_ids, add_qty, use_order_pricelist=False, **kw):
+        cr, uid, context, pool = request.cr, request.uid, request.context, request.registry
+        res_ticket = {}
+        if 'line_id' in kw:
+            line = pool['sale.order.line'].browse(cr, SUPERUSER_ID, kw['line_id'])
+            if line.event_ticket_id:
+                if line.order_id.pricelist_id:
+                    ticket = pool['event.event.ticket'].browse(cr, SUPERUSER_ID, line.event_ticket_id.id, context=dict(context, pricelist=line.order_id.pricelist_id.id))
+                else:
+                    ticket = line.event_ticket_id
+                res_ticket = {ticket.product_id.id: ticket.price_reduce or ticket.price}
+                product_ids.remove(ticket.product_id.id)
+        res_options = super(website_sale, self).get_unit_price(product_ids, add_qty, use_order_pricelist, **kw)
+        return dict(res_ticket.items() + res_options.items())
+

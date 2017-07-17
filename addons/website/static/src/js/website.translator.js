@@ -34,24 +34,25 @@
         edit: function () {
             var self = this;
             var mysuper = this._super;
+            var $editables = $('[data-oe-model]:not([data-oe-type="html"])').addClass('o_skip_rte');
             if (!localStorage[nodialog]) {
                 var dialog = new website.TranslatorDialog();
                 dialog.appendTo($(document.body));
                 dialog.on('activate', this, function () {
                     localStorage[nodialog] = dialog.$('input[name=do_not_show]').prop('checked') || '';
                     dialog.$el.modal('hide');
+                    mysuper.call(self, !$('[data-oe-type="html"]').length);
                     self.translate().then(function () {
-                        mysuper.call(self, true);
                         if(self.gengo_translate){
-                            self.translation_gengo_display()
+                            self.translation_gengo_display();
                         }
                     });
                 });
             } else {
+                mysuper.call(self, !$('[data-oe-type="html"]').length);
                 this.translate().then(function () {
-                    mysuper.call(self, true);
                     if(self.gengo_translate){
-                        self.translation_gengo_display()
+                        self.translation_gengo_display();
                     }
                 });
             }
@@ -60,9 +61,11 @@
             ev.preventDefault();
             var link = $('.js_language_selector a[data-default-lang]')[0];
             if (link) {
-                link.pathname = $(link).data('lang') + link.pathname
                 link.search += (link.search ? '&' : '?') + 'enable_editor=1';
-                window.location = link.attributes.href.value;
+                var url = link.pathname + link.search + window.location.hash;
+                link.pathname = '/website/lang/default';
+                link.search = '?' + $.param({r: url});
+                window.location = link.href;
             }
         },
         translate: function () {
@@ -85,7 +88,8 @@
                     .not('link, script')
                     .not('.oe_snippets,.oe_snippet, .oe_snippet *, .navbar-toggle')
                     .not('[data-oe-type]')
-                    .add($('[data-oe-translate="1"]:not([data-oe-model="ir.ui.view"])').addClass('o_editable'));
+                    .add($('[data-oe-translate="1"]:not([data-oe-model="ir.ui.view"])').addClass('o_editable'))
+                    .on('click', self, function(ev) {ev.preventDefault()});
 
             $editables.each(function () {
                 var $node = $(this);
@@ -129,9 +133,9 @@
             // TODO: link nodes with same content
             node.className += ' oe_translatable_text';
             node.setAttribute('data-oe-translation-view-id', view_id);
-            var content = $(node).text().trim();
+            var content = $(node).html().trim();
             var trans = this.translations.filter(function (t) {
-                return t.res_id === view_id && t.value.trim() === content;
+                return t.res_id === view_id && t.value && t.value.trim() === content;
             });
             if (trans.length) {
                 node.setAttribute('data-oe-translation-id', trans[0].id);
@@ -150,7 +154,9 @@
             var self = this;
             var trans = {};
             // this._super.apply(this, arguments);
-            $('.oe_translatable_text.o_dirty').each(function () {
+            $('.oe_translatable_text.o_dirty').filter(function () {
+                return self.getInitialContent(this) !== $(this).text();
+            }).each(function () {
                 var $node = $(this);
                 var data = $node.data();
                 if (!trans[data.oeTranslationViewId]) {
@@ -158,7 +164,7 @@
                 }
                 trans[data.oeTranslationViewId].push({
                     initial_content: self.getInitialContent(this),
-                    new_content: $node.text(),
+                    new_content: $node.html(),
                     translation_id: data.oeTranslationId || null
                 });
             });

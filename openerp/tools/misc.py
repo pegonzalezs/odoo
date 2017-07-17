@@ -26,6 +26,7 @@ Miscellaneous tools used by OpenERP.
 """
 
 from functools import wraps
+import cPickle
 import cProfile
 from contextlib import contextmanager
 import subprocess
@@ -37,7 +38,8 @@ import threading
 import time
 import werkzeug.utils
 import zipfile
-from collections import defaultdict, Mapping
+from cStringIO import StringIO
+from collections import defaultdict, Mapping, OrderedDict
 from datetime import datetime
 from itertools import islice, izip, groupby
 from lxml import etree
@@ -63,7 +65,10 @@ _logger = logging.getLogger(__name__)
 
 # List of etree._Element subclasses that we choose to ignore when parsing XML.
 # We include the *Base ones just in case, currently they seem to be subclasses of the _* ones.
-SKIPPED_ELEMENT_TYPES = (etree._Comment, etree._ProcessingInstruction, etree.CommentBase, etree.PIBase)
+SKIPPED_ELEMENT_TYPES = (etree._Comment, etree._ProcessingInstruction, etree.CommentBase, etree.PIBase, etree._Entity)
+
+# Configure default global parser
+etree.set_default_parser(etree.XMLParser(resolve_entities=False))
 
 #----------------------------------------------------------
 # Subprocesses
@@ -197,7 +202,16 @@ def file_open(name, mode="r", subdir='addons', pathinfo=False):
 
 
 def _fileopen(path, mode, basedir, pathinfo, basename=None):
-    name = os.path.normpath(os.path.join(basedir, path))
+    name = os.path.normpath(os.path.normcase(os.path.join(basedir, path)))
+
+    import openerp.modules as addons
+    paths = addons.module.ad_paths + [config['root_path']]
+    for addons_path in paths:
+        addons_path = os.path.normpath(os.path.normcase(addons_path)) + os.sep
+        if name.startswith(addons_path):
+            break
+    else:
+        raise ValueError("Unknown path: %s" % name)
 
     if basename is None:
         basename = name
@@ -474,7 +488,6 @@ def get_iso_codes(lang):
     return lang
 
 ALL_LANGUAGES = {
-        'ab_RU': u'Abkhazian / аҧсуа',
         'am_ET': u'Amharic / አምሃርኛ',
         'ar_SY': u'Arabic / الْعَرَبيّة',
         'bg_BG': u'Bulgarian / български език',
@@ -483,8 +496,9 @@ ALL_LANGUAGES = {
         'cs_CZ': u'Czech / Čeština',
         'da_DK': u'Danish / Dansk',
         'de_DE': u'German / Deutsch',
+        'de_CH': u'German (CH) / Deutsch (CH)',
         'el_GR': u'Greek / Ελληνικά',
-        'en_CA': u'English (CA)',
+        'en_AU': u'English (AU)',
         'en_GB': u'English (UK)',
         'en_US': u'English (US)',
         'es_AR': u'Spanish (AR) / Español (AR)',
@@ -496,22 +510,20 @@ ALL_LANGUAGES = {
         'es_EC': u'Spanish (EC) / Español (EC)',
         'es_ES': u'Spanish / Español',
         'es_GT': u'Spanish (GT) / Español (GT)',
-        'es_HN': u'Spanish (HN) / Español (HN)',
         'es_MX': u'Spanish (MX) / Español (MX)',
-        'es_NI': u'Spanish (NI) / Español (NI)',
         'es_PA': u'Spanish (PA) / Español (PA)',
         'es_PE': u'Spanish (PE) / Español (PE)',
-        'es_PR': u'Spanish (PR) / Español (PR)',
         'es_PY': u'Spanish (PY) / Español (PY)',
-        'es_SV': u'Spanish (SV) / Español (SV)',
         'es_UY': u'Spanish (UY) / Español (UY)',
         'es_VE': u'Spanish (VE) / Español (VE)',
         'et_EE': u'Estonian / Eesti keel',
+        'eu_ES': u'Basque / Euskara',
         'fa_IR': u'Persian / فارس',
         'fi_FI': u'Finnish / Suomi',
         'fr_BE': u'French (BE) / Français (BE)',
         'fr_CA': u'French (CA) / Français (CA)',
         'fr_CH': u'French (CH) / Français (CH)',
+        'fr_CA': u'French (CA) / Français (CA)',
         'fr_FR': u'French / Français',
         'gl_ES': u'Galician / Galego',
         'gu_IN': u'Gujarati / ગુજરાતી',
@@ -521,8 +533,8 @@ ALL_LANGUAGES = {
         'hu_HU': u'Hungarian / Magyar',
         'id_ID': u'Indonesian / Bahasa Indonesia',
         'it_IT': u'Italian / Italiano',
-        'iu_CA': u'Inuktitut / ᐃᓄᒃᑎᑐᑦ',
         'ja_JP': u'Japanese / 日本語',
+        'ka_GE': u'Georgian / ქართული ენა',
         'kab_DZ': u'Kabyle / Taqbaylit',
         'ko_KP': u'Korean (KP) / 한국어 (KP)',
         'ko_KR': u'Korean (KR) / 한국어 (KR)',
@@ -530,18 +542,16 @@ ALL_LANGUAGES = {
         'lt_LT': u'Lithuanian / Lietuvių kalba',
         'lv_LV': u'Latvian / latviešu valoda',
         'mk_MK': u'Macedonian / македонски јазик',
-        'ml_IN': u'Malayalam / മലയാളം',
         'mn_MN': u'Mongolian / монгол',
+        'my_MM': u'Burmese / မြန်မာဘာသာ',
         'nb_NO': u'Norwegian Bokmål / Norsk bokmål',
         'nl_NL': u'Dutch / Nederlands',
         'nl_BE': u'Dutch (BE) / Nederlands (BE)',
-        'oc_FR': u'Occitan (FR, post 1500) / Occitan',
         'pl_PL': u'Polish / Język polski',
         'pt_BR': u'Portuguese (BR) / Português (BR)',
         'pt_PT': u'Portuguese / Português',
         'ro_RO': u'Romanian / română',
         'ru_RU': u'Russian / русский язык',
-        'si_LK': u'Sinhalese / සිංහල',
         'sl_SI': u'Slovenian / slovenščina',
         'sk_SK': u'Slovak / Slovenský jazyk',
         'sq_AL': u'Albanian / Shqip',
@@ -552,12 +562,10 @@ ALL_LANGUAGES = {
         'tr_TR': u'Turkish / Türkçe',
         'vi_VN': u'Vietnamese / Tiếng Việt',
         'uk_UA': u'Ukrainian / українська',
-        'ur_PK': u'Urdu / اردو',
         'zh_CN': u'Chinese (CN) / 简体中文',
         'zh_HK': u'Chinese (HK)',
         'zh_TW': u'Chinese (TW) / 正體字',
         'th_TH': u'Thai / ภาษาไทย',
-        'tlh_TLH': u'Klingon',
     }
 
 def scan_languages():
@@ -1064,7 +1072,6 @@ def stripped_sys_argv(*strip_args):
 
     return [x for i, x in enumerate(args) if not strip(args, i)]
 
-
 class ConstantMapping(Mapping):
     """
     An immutable mapping returning the provided value for every single key.
@@ -1146,6 +1153,17 @@ class frozendict(dict):
     def update(self, *args, **kwargs):
         raise NotImplementedError("'update' not supported on frozendict")
 
+class OrderedSet(OrderedDict):
+    """ A simple collection that remembers the elements insertion order. """
+    def __init__(self, seq=()):
+        super(OrderedSet, self).__init__([(x, None) for x in seq])
+
+    def add(self, elem):
+        self[elem] = None
+
+    def discard(self, elem):
+        self.pop(elem, None)
+
 @contextmanager
 def ignore(*exc):
     try:
@@ -1160,3 +1178,25 @@ if parse_version(getattr(werkzeug, '__version__', '0.0')) < parse_version('0.9.0
 else:
     def html_escape(text):
         return werkzeug.utils.escape(text)
+
+class Pickle(object):
+    @classmethod
+    def load(cls, stream, errors=False):
+        unpickler = cPickle.Unpickler(stream)
+        # pickle builtins: str/unicode, int/long, float, bool, tuple, list, dict, None
+        unpickler.find_global = None
+        try:
+            return unpickler.load()
+        except Exception:
+            _logger.warning('Failed unpickling data, returning default: %r', errors, exc_info=True)
+            return errors
+
+    @classmethod
+    def loads(cls, text):
+        return cls.load(StringIO(text))
+
+    dumps = cPickle.dumps
+    dump = cPickle.dump
+
+pickle = Pickle
+

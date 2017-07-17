@@ -167,16 +167,24 @@ class procurement_order(osv.osv):
         old_proc = False
         key = tuple()
         key_routes = {}
+        proc = False
         for proc, route in product_routes:
-            key += (route,)
-            if old_proc != proc:
-                if key:
-                    if key_routes.get(key):
-                        key_routes[key] += [proc]
-                    else:
-                        key_routes[key] = [proc]
+            if not old_proc:
                 old_proc = proc
-                key = tuple()
+            if old_proc == proc:
+                key += (route,)
+            else:
+                if key_routes.get(key):
+                    key_routes[key] += [old_proc]
+                else:
+                    key_routes[key] = [old_proc]
+                old_proc = proc
+                key = (route,)
+        if proc: #do not forget last one as we passed through it
+            if key_routes.get(key):
+                key_routes[key] += [proc]
+            else:
+                key_routes[key] = [proc]
         return key_routes
 
 
@@ -210,7 +218,6 @@ class procurement_order(osv.osv):
                 res = pull_obj.search(cr, uid, loc_domain + [('route_id', 'in', procurement_route_ids)], order='route_sequence, sequence', context=context)
                 if res and res[0]:
                     results_dict[procurement.id] = res[0]
-
 
         procurements_to_check = [x for x in procurements if x.id not in results_dict.keys()]
         #group by warehouse_id:
@@ -455,24 +462,25 @@ class procurement_order(osv.osv):
         '''
         Create procurement based on Orderpoint
 
-        :param bool use_new_cursor: if set, use a dedicated cursor and auto-commit after processing each procurement.
+        :param bool use_new_cursor: if set, use dedicated cursors and auto-commit after processing
+            1000 orderpoints.
             This is appropriate for batch jobs only.
         '''
         if context is None:
             context = {}
-        if use_new_cursor:
-            cr = openerp.registry(cr.dbname).cursor()
         orderpoint_obj = self.pool.get('stock.warehouse.orderpoint')
         procurement_obj = self.pool.get('procurement.order')
         product_obj = self.pool.get('product.product')
 
         dom = company_id and [('company_id', '=', company_id)] or []
-        orderpoint_ids = orderpoint_obj.search(cr, uid, dom, order="location_id")
+        orderpoint_ids = orderpoint_obj.search(cr, uid, dom, order="location_id", context=context)
         prev_ids = []
         tot_procs = []
         while orderpoint_ids:
             ids = orderpoint_ids[:1000]
             del orderpoint_ids[:1000]
+            if use_new_cursor:
+                cr = openerp.registry(cr.dbname).cursor()
             product_dict = {}
             ops_dict = {}
             ops = orderpoint_obj.browse(cr, uid, ids, context=context)
@@ -539,12 +547,10 @@ class procurement_order(osv.osv):
 
             if use_new_cursor:
                 cr.commit()
+                cr.close()
             if prev_ids == ids:
                 break
             else:
                 prev_ids = ids
 
-        if use_new_cursor:
-            cr.commit()
-            cr.close()
         return {}

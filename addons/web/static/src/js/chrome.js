@@ -249,19 +249,24 @@ instance.web.CrashManager = instance.web.Class.extend({
     },
 
     rpc_error: function(error) {
+        var self = this;
         if (!this.active) {
             return;
         }
         if (error.code == -32098) {
+            if (this.$indicator){
+                return;
+            }
             $.blockUI({ message: '' , overlayCSS: {'z-index': 9999, backgroundColor: '#FFFFFF', opacity: 0.0, cursor: 'wait'}});
-            var $indicator = $('<div class="oe_indicator">' + _t("Trying to reconnect... ") + '<i class="fa fa-refresh fa-spin"></i></div>');
-            $indicator.prependTo("body");
+            this.$indicator = $('<div class="oe_indicator">' + _t("Trying to reconnect... ") + '<i class="fa fa-refresh fa-spin"></i></div>');
+            this.$indicator.prependTo("body");
             var timeinterval = setInterval(function(){
                 openerp.jsonRpc('/web/webclient/version_info').then(function() {
                     clearInterval(timeinterval);
-                    $indicator.html(_t("You are back online"));
-                    $indicator.delay(2000).fadeOut('slow',function(){
-                        $indicator.remove();
+                    self.$indicator.html(_t("You are back online"));
+                    self.$indicator.delay(2000).fadeOut('slow', function() {
+                        $(this).remove();
+                        self.$indicator = null;
                     });
                     $.unblockUI();
                 });
@@ -1296,6 +1301,7 @@ instance.web.WebClient = instance.web.Client.extend({
         this.on("change:title_part", this, this._title_changed);
         this._title_changed();
 
+
         return $.when(this._super()).then(function() {
             if (jQuery.deparam !== undefined && jQuery.deparam(jQuery.param.querystring()).kitten !== undefined) {
                 self.to_kitten();
@@ -1307,6 +1313,10 @@ instance.web.WebClient = instance.web.Client.extend({
                 self.action_manager.do_action(self.client_options.action);
                 delete(self.client_options.action);
             }
+            instance.web.cordova.ready();
+            instance.web.cordova.on('back', self, function() {
+                self.do_action('history_back');
+            });
         });
     },
     to_kitten: function() {
@@ -1479,6 +1489,7 @@ instance.web.WebClient = instance.web.Client.extend({
     on_logout: function() {
         var self = this;
         if (!this.has_uncommitted_changes()) {
+            instance.web.cordova.logout();
             self.action_manager.do_action('logout');
         }
     },
@@ -1639,5 +1650,75 @@ instance.web.embed = function (origin, dbname, login, key, action, options) {
     var client = new instance.web.EmbeddedClient(null, origin, dbname, login, key, action, options);
     client.insertAfter(currentScript);
 };
+
+
+
+/* 
+ * The Android/iPhone App is a JS/HTML app that launches the
+ * Odoo webclient in an iframe, using the Cordova framework.
+ *
+ * This class acts as a link between the webclient and the
+ * Odoo Android/iPhone App implemented with cordova.
+ */
+instance.web.Cordova = instance.web.Class.extend({}, instance.web.PropertiesMixin, {
+    init: function(parent) {
+        var self = this;
+        instance.web.PropertiesMixin.init.call(this, parent);
+
+        window.addEventListener('message', function(event) {
+            self.receive(event);
+        }, false);
+
+    },
+    // odoo.send('foobar') in cordova will call messages.foobar()
+    messages: {
+        // launch the POS !
+        pos: function() {
+            if (window.location.href.indexOf('/pos/web') < 0) {
+                window.location.href = "/pos/web";
+            }
+        },
+    },
+    // what happens when we receive an event from cordova
+    // -> call messages[event.data]()
+    // -> selfs trigger(event.data)
+    receive: function(event) {
+        if (event.origin !== 'file://') {
+            return;
+        } 
+
+        if (typeof event.data === 'string') {
+            this.trigger(event.data);
+            if (this.messages[event.data]) {
+                this.messages[event.data].call(this);
+            }
+        }
+    },
+    // send a message to cordova
+    send: function(message) {
+        function inIframe(){
+            try {
+                return window.self !== window.top;
+            } catch (e) {
+                return true;
+            }
+        }
+        if (inIframe()) {
+            window.parent.postMessage(message,'file://');
+        }
+    },
+
+
+    // notifies cordova that the webclient is ready.
+    ready:      function() { this.send('ready');     },
+    // notifies cordova that we want to exit the app.
+    logout:     function() { this.send('logout');    },
+    // asks cordova to emit a beep.
+    beep:       function() { this.send('beep');      },
+    // ask cordova to vibrate the phone.
+    vibrate:    function() { this.send('vibrate');   },
+});
+
+instance.web.cordova = new instance.web.Cordova();
 
 })();

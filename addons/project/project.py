@@ -24,10 +24,11 @@ from dateutil import relativedelta
 from lxml import etree
 import time
 
-from openerp import SUPERUSER_ID
+from openerp import SUPERUSER_ID, api
 from openerp import tools
 from openerp.addons.resource.faces import task as Task
 from openerp.osv import fields, osv
+from openerp.tools import float_is_zero
 from openerp.tools.translate import _
 from openerp.exceptions import UserError
 
@@ -720,7 +721,7 @@ class task(osv.osv):
             res[task.id] = {'effective_hours': hours.get(task.id, 0.0), 'total_hours': (task.remaining_hours or 0.0) + hours.get(task.id, 0.0)}
             res[task.id]['delay_hours'] = res[task.id]['total_hours'] - task.planned_hours
             res[task.id]['progress'] = 0.0
-            if (task.remaining_hours + hours.get(task.id, 0.0)):
+            if not float_is_zero(res[task.id]['total_hours'], precision_digits=2):
                 res[task.id]['progress'] = round(min(100.0 * hours.get(task.id, 0.0) / res[task.id]['total_hours'], 99.99),2)
             if task.stage_id and task.stage_id.fold:
                 res[task.id]['progress'] = 100.0
@@ -734,6 +735,7 @@ class task(osv.osv):
     def onchange_planned(self, cr, uid, ids, planned=0.0, effective=0.0):
         return {'value': {'remaining_hours': planned - effective}}
 
+    @api.cr_uid_ids_context
     def onchange_project(self, cr, uid, id, project_id, context=None):
         if project_id:
             project = self.pool.get('project.project').browse(cr, uid, project_id, context=context)
@@ -759,9 +761,12 @@ class task(osv.osv):
     def copy_data(self, cr, uid, id, default=None, context=None):
         if default is None:
             default = {}
+        current = self.browse(cr, uid, id, context=context)
         if not default.get('name'):
-            current = self.browse(cr, uid, id, context=context)
             default['name'] = _("%s (copy)") % current.name
+        if 'remaining_hours' not in default:
+            default['remaining_hours'] = current.planned_hours
+
         return super(task, self).copy_data(cr, uid, id, default, context)
 
     def _is_template(self, cr, uid, ids, field_name, arg, context=None):
@@ -904,7 +909,7 @@ class task(osv.osv):
         users_obj = self.pool.get('res.users')
         if context is None: context = {}
 
-        res = super(task, self).fields_view_get(cr, uid, view_id, view_type, context, toolbar, submenu=submenu)
+        res = super(task, self).fields_view_get(cr, uid, view_id, view_type, context=context, toolbar=toolbar, submenu=submenu)
 
         # read uom as admin to avoid access rights issues, e.g. for portal/share users,
         # this should be safe (no context passed to avoid side-effects)
@@ -1024,7 +1029,7 @@ class task(osv.osv):
                 'remaining_hours': delegate_data['planned_hours_me'],
                 'planned_hours': delegate_data['planned_hours_me'] + (task.effective_hours or 0.0),
                 'name': newname,
-            }, context=context)
+            })
             delegated_tasks[task.id] = delegated_task_id
         return delegated_tasks
 

@@ -53,13 +53,13 @@ def url_for(path_or_uri, lang=None):
             if ps[1] in langs:
                 # Replace the language only if we explicitly provide a language to url_for
                 if force_lang:
-                    ps[1] = lang
+                    ps[1] = lang.encode('utf-8')
                 # Remove the default language unless it's explicitly provided
                 elif ps[1] == request.website.default_lang_code:
                     ps.pop(1)
             # Insert the context language or the provided language
             elif lang != request.website.default_lang_code or force_lang:
-                ps.insert(1, lang)
+                ps.insert(1, lang.encode('utf-8'))
             location = '/'.join(ps)
 
     return location.decode('utf-8')
@@ -160,7 +160,7 @@ class website(osv.osv):
         'domain': fields.char('Website Domain'),
         'company_id': fields.many2one('res.company', string="Company"),
         'language_ids': fields.many2many('res.lang', 'website_lang_rel', 'website_id', 'lang_id', 'Languages'),
-        'default_lang_id': fields.many2one('res.lang', string="Default language"),
+        'default_lang_id': fields.many2one('res.lang', string="Default language", required=True),
         'default_lang_code': fields.related('default_lang_id', 'code', type="char", string="Default language code", store=True),
         'social_twitter': fields.char('Twitter Account'),
         'social_facebook': fields.char('Facebook Account'),
@@ -206,8 +206,8 @@ class website(osv.osv):
 
         # find a free xmlid
         inc = 0
-        dom = [('key', '=', page_xmlid), '|', ('website_id', '=', False), ('website_id', '=', context.get('website_id'))]
-        while view.search(cr, openerp.SUPERUSER_ID, dom, context=dict(context or {}, active_test=False)):
+        dom = [('website_id', '=', False), ('website_id', '=', context.get('website_id'))]
+        while view.search(cr, openerp.SUPERUSER_ID, [('key', '=', page_xmlid), '|'] + dom, context=dict(context or {}, active_test=False)):
             inc += 1
             page_xmlid = "%s.%s" % (template_module, page_name + (inc and "-%s" % inc or ""))
         page_name += (inc and "-%s" % inc or "")
@@ -340,7 +340,7 @@ class website(osv.osv):
 
     def get_cdn_url(self, cr, uid, uri, context=None):
         # Currently only usable in a website_enable request context
-        if request and request.website and not request.debug:
+        if request and request.website and not request.debug and request.website.user_id.id == request.uid:
             cdn_url = request.website.cdn_url
             cdn_filters = (request.website.cdn_filters or '').splitlines()
             for flt in cdn_filters:
@@ -356,14 +356,22 @@ class website(osv.osv):
         if req is None:
             req = request.httprequest
         default = self.get_current_website(cr, uid, context=context).default_lang_code
-        uri = req.path
-        if req.query_string:
-            uri += '?' + req.query_string
         shorts = []
+
+        def get_url_localized(router, lang):
+            arguments = dict(request.endpoint_arguments)
+            for k, v in arguments.items():
+                if isinstance(v, orm.browse_record):
+                    arguments[k] = v.with_context(lang=lang)
+            return router.build(request.endpoint, arguments)
+        router = request.httprequest.app.get_db_router(request.db).bind('')
         for code, name in self.get_languages(cr, uid, ids, context=context):
             lg_path = ('/' + code) if code != default else ''
             lg = code.split('_')
             shorts.append(lg[0])
+            uri = request.endpoint and get_url_localized(router, code) or request.httprequest.path
+            if req.query_string:
+                uri += '?' + req.query_string
             lang = {
                 'hreflang': ('-'.join(lg)).lower(),
                 'short': lg[0],
@@ -471,7 +479,8 @@ class website(osv.osv):
         :rtype: bool
         """
         endpoint = rule.endpoint
-        methods = rule.methods or ['GET']
+        methods = endpoint.routing.get('methods') or ['GET']
+
         converters = rule._converters.values()
         if not ('GET' in methods
             and endpoint.routing['type'] == 'http'
@@ -507,7 +516,7 @@ class website(osv.osv):
         """
         router = request.httprequest.app.get_db_router(request.db)
         # Force enumeration to be performed as public user
-        url_list = []
+        url_set = set()
         for rule in router.iter_rules():
             if not self.rule_is_enumerable(rule):
                 continue
@@ -539,20 +548,20 @@ class website(osv.osv):
                         page[key[2:]] = val
                 if url in ('/sitemap.xml',):
                     continue
-                if url in url_list:
+                if url in url_set:
                     continue
-                url_list.append(url)
+                url_set.add(url)
 
                 yield page
 
     def search_pages(self, cr, uid, ids, needle=None, limit=None, context=None):
         name = re.sub(r"^/p(a(g(e(/(w(e(b(s(i(t(e(\.)?)?)?)?)?)?)?)?)?)?)?)?", "", needle or "")
+        name = slugify(name, max_length=50)
         res = []
         for page in self.enumerate_pages(cr, uid, ids, query_string=name, context=context):
-            if needle in page['loc']:
-                res.append(page)
-                if len(res) == limit:
-                    break
+            res.append(page)
+            if len(res) == limit:
+                break
         return res
 
     def kanban(self, cr, uid, ids, model, domain, column, template, step=None, scope=None, orderby=None, context=None):
@@ -659,8 +668,10 @@ class website(osv.osv):
         Model = self.pool[model]
         id = int(id)
 
-        ids = Model.search(cr, uid,
-                           [('id', '=', id)], context=context)
+        ids = None
+        if Model.check_access_rights(cr, uid, 'read', raise_exception=False):
+            ids = Model.search(cr, uid,
+                               [('id', '=', id)], context=context)
         if not ids and 'website_published' in Model._fields:
             ids = Model.search(cr, openerp.SUPERUSER_ID,
                                [('id', '=', id), ('website_published', '=', True)], context=context)
@@ -891,11 +902,11 @@ class res_partner(osv.osv):
         }
         return urlplus('//maps.googleapis.com/maps/api/staticmap' , params)
 
-    def google_map_link(self, cr, uid, ids, zoom=8, context=None):
+    def google_map_link(self, cr, uid, ids, zoom=10, context=None):
         partner = self.browse(cr, uid, ids[0], context=context)
         params = {
             'q': '%s, %s %s, %s' % (partner.street or '', partner.city  or '', partner.zip or '', partner.country_id and partner.country_id.name_get()[0][1] or ''),
-            'z': 10
+            'z': zoom,
         }
         return urlplus('https://maps.google.com/maps' , params)
 
@@ -968,6 +979,13 @@ class website_published_mixin(osv.AbstractModel):
 
     def _website_url(self, cr, uid, ids, field_name, arg, context=None):
         return dict.fromkeys(ids, '#')
+
+    def website_publish_button(self, cr, uid, ids, context=None):
+        if self.pool['res.users'].has_group(cr, uid, 'base.group_website_publisher'):
+            return self.open_website_url(cr, uid, ids, context)
+        for r in self.browse(cr, uid, ids, context=context):
+            r.write({'website_published': not r.website_published})
+        return True
 
     def open_website_url(self, cr, uid, ids, context=None):
         return {

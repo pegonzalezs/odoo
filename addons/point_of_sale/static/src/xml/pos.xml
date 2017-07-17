@@ -257,7 +257,7 @@
                         <t t-esc="widget.get_product_weight_string()" />
                     </div>
                     <div class='product-price'>
-                        <t t-esc="widget.format_currency(widget.get_product_price()) + '/Kg'" />
+                        <t t-esc="widget.format_currency(widget.get_product_price()) + '/' + widget.get_product_uom()" />
                     </div>
                     <div class='computed-price'>
                         123.14 €
@@ -311,7 +311,7 @@
                     </div>
                     <div class='client-detail'>
                         <span class='label'>Country</span>
-                        <select class='detail client-address-country' name='country_id'>
+                        <select class='detail client-address-country needsclick' name='country_id'>
                             <option value=''>None</option>
                             <t t-foreach='widget.pos.countries' t-as='country'>
                                 <option t-att-value='country.id' t-att-selected="partner.country_id ? ((country.id === partner.country_id[0]) ? true : undefined) : undefined"> 
@@ -420,7 +420,7 @@
                 <section class="full-content">
                     <div class='window'>
                         <section class='subwindow collapsed'>
-                            <div class='subwindow-container'>
+                            <div class='subwindow-container collapsed'>
                                 <div class='subwindow-container-fix client-details-contents'>
                                 </div>
                             </div>
@@ -544,7 +544,7 @@
             <br />
             <button class="input-button numpad-char" data-action='CLEAR' >C</button>
             <button class="input-button number-char" data-action='0'>0</button>
-            <button class="input-button number-char" data-action='.'>.</button>
+            <button class="input-button number-char" t-att-data-action='widget.decimal_point'><t t-esc='widget.decimal_point'/></button>
             <button class="input-button numpad-backspace" data-action='BACKSPACE' >
                 <img src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" />
             </button>
@@ -678,9 +678,6 @@
                         <div>--------------------------------</div>
                         <div>Served by <t t-esc='receipt.cashier' /></div>
                     </div>
-                </t>
-                <t t-if='!receipt.customer_count'>
-                    <div>Guests: <t t-esc='receipt.customer_count' /></div>
                 </t>
             </div>
             <br /><br />
@@ -1023,7 +1020,7 @@
                     <br />
                     <button class="input-button numpad-char" data-action='CLEAR' >C</button>
                     <button class="input-button number-char" data-action='0'>0</button>
-                    <button class="input-button number-char dot" data-action='.'>.</button>
+                    <button class="input-button number-char dot" t-att-data-action='widget.decimal_separator'><t t-esc='widget.decimal_separator'/></button>
                     <button class="input-button numpad-backspace" data-action='BACKSPACE' >
                         <img style="pointer-events: none;" src="/point_of_sale/static/src/img/backspace.png" width="24" height="21" />
                     </button>
@@ -1052,7 +1049,7 @@
                 </t>
                 <t t-if="product.to_weight">
                     <span class="price-tag">
-                        <t t-esc="widget.format_currency(product.price,'Product Price')+'/Kg'"/>
+                        <t t-esc="widget.format_currency(product.price,'Product Price')+'/'+widget.pos.units_by_id[product.uom_id[0]].name"/>
                     </span>
                 </t>
             </div>
@@ -1174,7 +1171,10 @@
             <div class='paymentline-name'>
                 <t t-esc="line.name"/>
             </div>
-            <input class='paymentline-input' type="number" step="0.01" t-att-value="line.get_amount_str()" />
+            <input class='paymentline-input'
+                t-att-type="widget.decimal_point === '.' ? 'number' : 'text'"
+                t-attf-pattern="[0-9]+([\\#{widget.decimal_point || '.' }][0-9]+)?"
+                step="0.01" t-att-value="line.get_amount_str()" />
             <span  class='paymentline-delete'>
                 <img src="/point_of_sale/static/src/img/search_reset.gif" />
             </span>
@@ -1217,7 +1217,6 @@
                         </span>
                     </t>
                 </t>
-            
             </span>
             <span class="order-button square neworder-button">
                 <i class='fa fa-plus' />
@@ -1278,7 +1277,7 @@
                 <tr>
                     <td>Subtotal:</td>
                     <td class="pos-right-align">
-                        <t t-esc="widget.format_currency(order.get_subtotal())"/>
+                        <t t-esc="widget.format_currency(order.get_total_without_tax())"/>
                     </td>
                 </tr>
                 <t t-foreach="order.get_tax_details()" t-as="taxdetail">

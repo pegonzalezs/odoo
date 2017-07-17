@@ -151,6 +151,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             model:  'product.uom',
             fields: [],
             domain: null,
+            context: function(self){ return { active_test: false }; },
             loaded: function(self,units){
                 self.units = units;
                 var units_by_id = {};
@@ -269,7 +270,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             loaded: function(self, pricelists){ self.pricelist = pricelists[0]; },
         },{
             model: 'res.currency',
-            fields: ['symbol','position','rounding','accuracy'],
+            fields: ['name','symbol','position','rounding','accuracy'],
             ids:    function(self){ return [self.pricelist.currency_id[0]]; },
             loaded: function(self, currencies){
                 self.currency = currencies[0];
@@ -289,7 +290,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             },
         },{
             model:  'pos.category',
-            fields: ['id','name','parent_id','child_id'],
+            fields: ['id','name','parent_id','child_id','image'],
             domain: null,
             loaded: function(self, categories){
                 self.db.add_categories(categories);
@@ -393,7 +394,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
                     logo_loaded.reject();
                 };
                     self.company_logo.crossOrigin = "anonymous";
-                self.company_logo.src = '/web/binary/company_logo' +'?_'+Math.random();
+                self.company_logo.src = '/web/binary/company_logo' +'?dbname=' + self.session.db + '&_'+Math.random();
 
                 return logo_loaded;
             },
@@ -863,8 +864,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             }
             this.product = options.product;
             this.price   = options.product.price;
-            this.quantity = 1;
-            this.quantityStr = '1';
+            this.set_quantity(1);
             this.discount = 0;
             this.discountStr = '0';
             this.type = 'unit';
@@ -885,10 +885,11 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
         clone: function(){
             var orderline = new module.Orderline({},{
                 pos: this.pos,
-                order: null,
+                order: this.order,
                 product: this.product,
                 price: this.price,
             });
+            orderline.order = null;
             orderline.quantity = this.quantity;
             orderline.quantityStr = this.quantityStr;
             orderline.discount = this.discount;
@@ -927,7 +928,8 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
                 if(unit){
                     if (unit.rounding) {
                         this.quantity    = round_pr(quant, unit.rounding);
-                        this.quantityStr = this.quantity.toFixed(Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10)));
+                        var decimals = Math.ceil(Math.log(1.0 / unit.rounding) / Math.log(10));
+                        this.quantityStr = openerp.instances[this.pos.session.name].web.format_value(this.quantity, { type: 'float', digits: [69, decimals]});
                     } else {
                         this.quantity    = round_pr(quant, 1);
                         this.quantityStr = this.quantity.toFixed(0);
@@ -1033,7 +1035,9 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             this.trigger('change',this);
         },
         get_unit_price: function(){
-            return this.price;
+            var digits = this.pos.dp['Product Price'];
+            // round and truncate to mimic _sybmbol_set behavior
+            return parseFloat(round_di(this.price || 0, digits).toFixed(digits));
         },
         get_unit_display_price: function(){
             if (this.pos.config.iface_tax_included) {
@@ -1051,9 +1055,8 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             return round_pr(this.get_unit_price() * this.get_quantity() * (1 - this.get_discount()/100), rounding);
         },
         get_display_price: function(){
-            return this.get_base_price();
             if (this.pos.config.iface_tax_included) {
-                return this.get_all_prices().priceWithTax;
+                return this.get_price_with_tax();
             } else {
                 return this.get_base_price();
             }
@@ -1111,7 +1114,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
                         data = {amount:tmp, price_include:true, id: tax.id};
                         res.push(data);
                     } else if (tax.type === "fixed") {
-                        tmp = round_pr(tax.amount * self.get_quantity(),currency_rounding);
+                        tmp = tax.amount * self.get_quantity();
                         data = {amount:tmp, price_include:true, id: tax.id};
                         res.push(data);
                     } else {
@@ -1123,7 +1126,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
                         data = {amount:tmp, price_include:false, id: tax.id};
                         res.push(data);
                     } else if (tax.type === "fixed") {
-                        tmp = round_pr(tax.amount * self.get_quantity(), currency_rounding);
+                        tmp = tax.amount * self.get_quantity();
                         data = {amount:tmp, price_include:false, id: tax.id};
                         res.push(data);
                     } else {
@@ -1176,6 +1179,7 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
                 taxtotal += tax.amount;
                 taxdetail[tax.id] = tax.amount;
             });
+            totalNoTax = round_pr(totalNoTax, this.pos.currency.rounding);
 
             return {
                 "priceWithTax": totalTax,
@@ -1220,7 +1224,9 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             return this.amount;
         },
         get_amount_str: function(){
-            return this.amount.toFixed(this.pos.currency.decimals);
+            return openerp.instances[this.pos.session.name].web.format_value(this.amount, {
+                type: 'float', digits: [69, this.pos.currency.decimals]
+            });
         },
         set_selected: function(selected){
             if(this.selected !== selected){
@@ -1418,8 +1424,6 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
                 client: client ? client.name : null ,
                 invoice_id: null,   //TODO
                 cashier: cashier ? cashier.name : null,
-                header: this.pos.config.receipt_header || '',
-                footer: this.pos.config.receipt_footer || '',
                 precision: {
                     price: 2,
                     money: 2,
@@ -1452,11 +1456,17 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             };
             
             if (is_xml(this.pos.config.receipt_header)){
+                receipt.header = '';
                 receipt.header_xml = render_xml(this.pos.config.receipt_header);
+            } else {
+                receipt.header = this.pos.config.receipt_header || '';
             }
 
             if (is_xml(this.pos.config.receipt_footer)){
+                receipt.footer = '';
                 receipt.footer_xml = render_xml(this.pos.config.receipt_footer);
+            } else {
+                receipt.footer = this.pos.config.receipt_footer || '';
             }
 
             return receipt;
@@ -1546,6 +1556,10 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
             this.select_orderline(this.get_last_orderline());
         },
         add_product: function(product, options){
+            if(this._printed){
+                this.destroy();
+                return this.pos.get_order().add_product(product, options);
+            }
             this.assert_editable();
             options = options || {};
             var attr = JSON.parse(JSON.stringify(product));
@@ -1646,34 +1660,32 @@ openerp.point_of_sale.load_models = function load_models(instance, module){ //mo
         },
         /* ---- Payment Status --- */
         get_subtotal : function(){
-            return this.orderlines.reduce((function(sum, orderLine){
+            return round_pr(this.orderlines.reduce((function(sum, orderLine){
                 return sum + orderLine.get_display_price();
-            }), 0);
+            }), 0), this.pos.currency.rounding);
         },
         get_total_with_tax: function() {
-            return this.orderlines.reduce((function(sum, orderLine) {
-                return sum + orderLine.get_price_with_tax();
-            }), 0);
+            return this.get_total_without_tax() + this.get_total_tax();
         },
         get_total_without_tax: function() {
-            return this.orderlines.reduce((function(sum, orderLine) {
+            return round_pr(this.orderlines.reduce((function(sum, orderLine) {
                 return sum + orderLine.get_price_without_tax();
-            }), 0);
+            }), 0), this.pos.currency.rounding);
         },
         get_total_discount: function() {
-            return this.orderlines.reduce((function(sum, orderLine) {
+            return round_pr(this.orderlines.reduce((function(sum, orderLine) {
                 return sum + (orderLine.get_unit_price() * (orderLine.get_discount()/100) * orderLine.get_quantity());
-            }), 0);
+            }), 0), this.pos.currency.rounding);
         },
         get_total_tax: function() {
-            return this.orderlines.reduce((function(sum, orderLine) {
+            return round_pr(this.orderlines.reduce((function(sum, orderLine) {
                 return sum + orderLine.get_tax();
-            }), 0);
+            }), 0), this.pos.currency.rounding);
         },
         get_total_paid: function() {
-            return this.paymentlines.reduce((function(sum, paymentLine) {
+            return round_pr(this.paymentlines.reduce((function(sum, paymentLine) {
                 return sum + paymentLine.get_amount();
-            }), 0);
+            }), 0), this.pos.currency.rounding);
         },
         get_tax_details: function(){
             var details = {};

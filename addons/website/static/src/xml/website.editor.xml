@@ -74,7 +74,7 @@
                             </label>
                         </h4>
                         <input type="text" class="form-control url email-address url-source"
-                               id="link-external" placeholder="http://openerp.com"/>
+                               id="link-external" placeholder="https://www.odoo.com"/>
                     </li>
                 </ul>
                 <div class="form-horizontal link-style">
@@ -368,9 +368,11 @@
     </t>
     <t t-name="website.editor.dialog.font-icons.icons">
         <t t-foreach="iconsParser" t-as="data">
-            <span t-foreach="data.icons" t-as="icon"
-                  t-attf-class="#{data.base} font-icons-icon #{icon}"
-                  t-att-data-id="icon"/>
+            <span t-foreach="data.cssData" t-as="cssData"
+                  t-attf-class="#{data.base} font-icons-icon #{cssData[2]}"
+                  t-attf-data-alias=",#{cssData[3]},"
+                  t-att-title="cssData[3].join(', ')"
+                  t-att-data-id="cssData[2]"/>
         </t>
     </t>
 
@@ -409,12 +411,6 @@
                         src=""
                         frameborder="0"
                         allowfullscreen="allowfullscreen"></iframe>
-                </div>
-            </div>
-
-            <div class="text-center mt32">
-                <div class="checkbox">
-                    <label><input type="checkbox" id="autoplay"/> Autoplay</label>
                 </div>
             </div>
         </form>

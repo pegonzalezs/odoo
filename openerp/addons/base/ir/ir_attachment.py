@@ -255,9 +255,8 @@ class ir_attachment(osv.osv):
         """ compute the checksum for the given datas
             :param bin_data : datas in its binary form
         """
-        if bin_data:
-            return hashlib.sha1(bin_data).hexdigest()
-        return False
+        # an empty file has a checksum too (for caching)
+        return hashlib.sha1(bin_data or '').hexdigest()
 
     def _compute_mimetype(self, values):
         """ compute the mimetype of the given values
@@ -319,11 +318,12 @@ class ir_attachment(osv.osv):
     }
 
     def _auto_init(self, cr, context=None):
-        super(ir_attachment, self)._auto_init(cr, context)
+        res = super(ir_attachment, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('ir_attachment_res_idx',))
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_attachment_res_idx ON ir_attachment (res_model, res_id)')
             cr.commit()
+        return res
 
     def check(self, cr, uid, ids, mode, context=None, values=None):
         """Restricts the access to an ir.attachment, according to referred model
@@ -472,7 +472,7 @@ class ir_attachment(osv.osv):
             cr, uid, 'base', 'action_attachment', context=context)
 
     def invalidate_bundle(self, cr, uid, type='%', xmlid=None, context=None):
-        assert type in ('%', 'css', 'js'), "Unhandled bundle type"
+        assert type in ('%', 'js') or type.startswith('css'), "Unhandled bundle type"
         xmlid = '%' if xmlid is None else xmlid + '%'
         domain = [('url', '=like', '/web/%s/%s/%%' % (type, xmlid))]
         ids = self.search(cr, uid, domain, context=context)

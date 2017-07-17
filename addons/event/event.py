@@ -3,8 +3,7 @@
 import pytz
 
 from openerp import _, api, fields, models
-from openerp.exceptions import UserError
-
+from openerp.exceptions import AccessError, UserError
 
 class event_type(models.Model):
     """ Event Type """
@@ -80,6 +79,9 @@ class event_event(models.Model):
     seats_used = fields.Integer(
         oldname='register_attended', string='Number of Participations',
         store=True, readonly=True, compute='_compute_seats')
+    seats_expected = fields.Integer(
+        string='Number of Expected Attendees',
+        readonly=True, compute='_compute_seats')
 
     @api.multi
     @api.depends('seats_max', 'registration_ids.state')
@@ -108,6 +110,7 @@ class event_event(models.Model):
         for event in self:
             if event.seats_max > 0:
                 event.seats_available = event.seats_max - (event.seats_reserved + event.seats_used)
+            event.seats_expected = event.seats_unconfirmed + event.seats_reserved + event.seats_used
 
     # Registration fields
     registration_ids = fields.One2many(
@@ -175,7 +178,9 @@ class event_event(models.Model):
     def name_get(self):
         result = []
         for event in self:
-            dates = [dt.split(' ')[0] for dt in [event.date_begin, event.date_end] if dt]
+            date_begin = fields.Datetime.from_string(event.date_begin)
+            date_end = fields.Datetime.from_string(event.date_end)
+            dates = [fields.Date.to_string(fields.Datetime.context_timestamp(event, dt)) for dt in [date_begin, date_end] if dt]
             dates = sorted(set(dates))
             result.append((event.id, '%s (%s)' % (event.name, ' - '.join(dates))))
         return result
@@ -332,6 +337,11 @@ class event_registration(models.Model):
             subtype="event.mt_event_registration")
         self.state = 'open'
 
+        # auto-trigger after_sub (on subscribe) mail schedulers, if needed
+        onsubscribe_schedulers = self.event_id.event_mail_ids.filtered(
+            lambda s: s.interval_type == 'after_sub')
+        onsubscribe_schedulers.execute()
+
     @api.one
     def button_reg_close(self):
         """ Close Registration """
@@ -358,9 +368,12 @@ class event_registration(models.Model):
     @api.multi
     def message_get_suggested_recipients(self):
         recipients = super(event_registration, self).message_get_suggested_recipients()
-        for attendee in self:
-            if attendee.email:
-                self._message_add_suggested_recipient(recipients, attendee, email=attendee.email, reason=_('Customer Email'))
-            if attendee.partner_id:
-                self._message_add_suggested_recipient(recipients, attendee, partner=attendee.partner_id, reason=_('Customer'))
+        try:
+            for attendee in self:
+                if attendee.partner_id:
+                    self._message_add_suggested_recipient(recipients, attendee, partner=attendee.partner_id, reason=_('Customer'))
+                elif attendee.email:
+                    self._message_add_suggested_recipient(recipients, attendee, email=attendee.email, reason=_('Customer Email'))
+        except AccessError: # no read access rights -> ignore suggested recipients
+            pass
         return recipients

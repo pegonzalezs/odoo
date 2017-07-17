@@ -22,7 +22,7 @@
 from openerp import api
 from openerp import SUPERUSER_ID
 from openerp.exceptions import AccessError
-from openerp.osv import osv
+from openerp.osv import osv, fields
 from openerp.tools import config
 from openerp.tools.misc import find_in_path
 from openerp.tools.translate import _
@@ -42,6 +42,7 @@ from contextlib import closing
 from distutils.version import LooseVersion
 from functools import partial
 from pyPdf import PdfFileWriter, PdfFileReader
+from reportlab.graphics.barcode import createBarcodeDrawing
 
 
 #--------------------------------------------------------------------------
@@ -140,6 +141,7 @@ class Report(osv.Model):
                 context = dict(context, translatable=context.get('lang') != request.website.default_lang_code)
         values.update(
             time=time,
+            context_timestamp=lambda t: fields.datetime.context_timestamp(cr, uid, t, context),
             translate_doc=translate_doc,
             editable=True,
             user=user,
@@ -174,8 +176,8 @@ class Report(osv.Model):
 
     @api.v8
     def get_html(self, records, report_name, data=None):
-        return self._model.get_html(self._cr, self._uid, records.ids, report_name,
-                                    data=data, context=self._context)
+        return Report.get_html(self._model, self._cr, self._uid, records.ids,
+                               report_name, data=data, context=self._context)
 
     @api.v7
     def get_pdf(self, cr, uid, ids, report_name, html=None, data=None, context=None):
@@ -268,13 +270,14 @@ class Report(osv.Model):
         # Run wkhtmltopdf process
         return self._run_wkhtmltopdf(
             cr, uid, headerhtml, footerhtml, contenthtml, context.get('landscape'),
-            paperformat, specific_paperformat_args, save_in_attachment
+            paperformat, specific_paperformat_args, save_in_attachment,
+            context.get('set_viewport_size')
         )
 
     @api.v8
     def get_pdf(self, records, report_name, html=None, data=None):
-        return self._model.get_pdf(self._cr, self._uid, records.ids, report_name,
-                                   html=html, data=data, context=self._context)
+        return Report.get_pdf(self._model, self._cr, self._uid, records.ids,
+                              report_name, html=html, data=data, context=self._context)
 
     @api.v7
     def get_action(self, cr, uid, ids, report_name, data=None, context=None):
@@ -307,8 +310,8 @@ class Report(osv.Model):
 
     @api.v8
     def get_action(self, records, report_name, data=None):
-        return self._model.get_action(self._cr, self._uid, records.ids, report_name,
-                                      data=data, context=self._context)
+        return Report.get_action(self._model, self._cr, self._uid, records.ids,
+                                 report_name, data=data, context=self._context)
 
     #--------------------------------------------------------------------------
     # Report generation helpers
@@ -354,13 +357,13 @@ class Report(osv.Model):
 
     @api.v8
     def _check_attachment_use(self, records, report):
-        return self._model._check_attachment_use(
-            self._cr, self._uid, records.ids, report, context=self._context)
+        return Report._check_attachment_use(
+            self._model, self._cr, self._uid, records.ids, report, context=self._context)
 
     def _check_wkhtmltopdf(self):
         return wkhtmltopdf_state
 
-    def _run_wkhtmltopdf(self, cr, uid, headers, footers, bodies, landscape, paperformat, spec_paperformat_args=None, save_in_attachment=None):
+    def _run_wkhtmltopdf(self, cr, uid, headers, footers, bodies, landscape, paperformat, spec_paperformat_args=None, save_in_attachment=None, set_viewport_size=False):
         """Execute wkhtmltopdf as a subprocess in order to convert html given in input into a pdf
         document.
 
@@ -374,6 +377,8 @@ class Report(osv.Model):
         :returns: Content of the pdf as a string
         """
         command_args = []
+        if set_viewport_size:
+            command_args.extend(['--viewport-size', landscape and '1024x1280' or '1280x1024'])
 
         # Passing the cookie to wkhtmltopdf in order to resolve internal links.
         try:
@@ -396,7 +401,7 @@ class Report(osv.Model):
                     del command_args[index]
                     del command_args[index]
                     command_args.extend(['--orientation', 'landscape'])
-        elif landscape and not '--orientation' in command_args:
+        elif landscape and '--orientation' not in command_args:
             command_args.extend(['--orientation', 'landscape'])
 
         # Execute WKhtmltopdf
@@ -446,7 +451,7 @@ class Report(osv.Model):
 
                 if process.returncode not in [0, 1]:
                     raise UserError(_('Wkhtmltopdf failed (error code: %s). '
-                                        'Message: %s') % (str(process.returncode), err))
+                                      'Message: %s') % (str(process.returncode), err))
 
                 # Save the pdf in attachment if marked
                 if reporthtml[0] is not False and save_in_attachment.get(reporthtml[0]):
@@ -461,8 +466,7 @@ class Report(osv.Model):
                         try:
                             self.pool['ir.attachment'].create(cr, uid, attachment)
                         except AccessError:
-                            _logger.info("Cannot save PDF report %r as attachment",
-                                            attachment['name'])
+                            _logger.info("Cannot save PDF report %r as attachment", attachment['name'])
                         else:
                             _logger.info('The PDF document %s is now saved in the database',
                                          attachment['name'])
@@ -552,18 +556,37 @@ class Report(osv.Model):
         """
         writer = PdfFileWriter()
         streams = []  # We have to close the streams *after* PdfFilWriter's call to write()
-        for document in documents:
-            pdfreport = file(document, 'rb')
-            streams.append(pdfreport)
-            reader = PdfFileReader(pdfreport)
-            for page in range(0, reader.getNumPages()):
-                writer.addPage(reader.getPage(page))
+        try:
+            for document in documents:
+                pdfreport = file(document, 'rb')
+                streams.append(pdfreport)
+                reader = PdfFileReader(pdfreport)
+                for page in range(0, reader.getNumPages()):
+                    writer.addPage(reader.getPage(page))
 
-        merged_file_fd, merged_file_path = tempfile.mkstemp(suffix='.html', prefix='report.merged.tmp.')
-        with closing(os.fdopen(merged_file_fd, 'w')) as merged_file:
-            writer.write(merged_file)
-
-        for stream in streams:
-            stream.close()
+            merged_file_fd, merged_file_path = tempfile.mkstemp(suffix='.pdf', prefix='report.merged.tmp.')
+            with closing(os.fdopen(merged_file_fd, 'w')) as merged_file:
+                writer.write(merged_file)
+        finally:
+            for stream in streams:
+                try:
+                    stream.close()
+                except Exception:
+                    pass
 
         return merged_file_path
+
+    def barcode(self, barcode_type, value, width=600, height=100, humanreadable=0):
+        if barcode_type == 'UPCA' and len(value) in (11, 12, 13):
+            barcode_type = 'EAN13'
+            if len(value) in (11, 12):
+                value = '0%s' % value
+        try:
+            width, height, humanreadable = int(width), int(height), bool(humanreadable)
+            barcode = createBarcodeDrawing(
+                barcode_type, value=value, format='png', width=width, height=height,
+                humanReadable=humanreadable
+            )
+            return barcode.asString('png')
+        except (ValueError, AttributeError):
+            raise ValueError("Cannot convert into barcode.")

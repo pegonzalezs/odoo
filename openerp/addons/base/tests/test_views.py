@@ -9,6 +9,8 @@ from lxml.builder import E
 
 from psycopg2 import IntegrityError
 
+from openerp.osv.orm import modifiers_tests
+from openerp.exceptions import ValidationError
 from openerp.tests import common
 import openerp.tools
 
@@ -243,6 +245,25 @@ class TestViewInheritance(ViewCase):
             self.View.default_view(
                 self.cr, self.uid, model=self.model, view_type='graph'))
 
+    def test_no_recursion(self):
+        r1 = self.makeView('R1')
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            self.View.write(self.cr, self.uid, r1, {'inherit_id': r1})
+
+        r2 = self.makeView('R2', r1)
+        r3 = self.makeView('R3', r2)
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            self.View.write(self.cr, self.uid, r2, {'inherit_id': r3})
+
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            self.View.write(self.cr, self.uid, r1, {'inherit_id': r3})
+
+        with self.assertRaises(ValidationError), self.cr.savepoint():
+            self.View.write(self.cr, self.uid, r1, {
+                'inherit_id': r1,
+                'arch': self.arch_for('itself', parent=True),
+            })
+
 class TestApplyInheritanceSpecs(ViewCase):
     """ Applies a sequence of inheritance specification nodes to a base
     architecture. IO state parameters (cr, uid, model, context) are used for
@@ -452,7 +473,7 @@ class TestTemplating(ViewCase):
     def setUp(self):
         import openerp.modules
         super(TestTemplating, self).setUp()
-        self._pool = openerp.modules.registry.RegistryManager.get(common.DB)
+        self._pool = openerp.modules.registry.RegistryManager.get(common.get_db_name())
         self._init = self._pool._init
         # fuck off
         self._pool._init = False
@@ -743,7 +764,10 @@ class test_views(ViewCase):
             'priority': 17,
             'arch': """
                 <footer position="attributes">
-                    <attribute name="thing">bob</attribute>
+                    <attribute name="thing">bob tata lolo</attribute>
+                    <attribute name="thing" add="bibi and co" remove="tata" separator=" " />
+                    <attribute name="otherthing">bob, tata,lolo</attribute>
+                    <attribute name="otherthing" remove="tata, bob"/>
                 </footer>
             """
         })
@@ -763,7 +787,7 @@ class test_views(ViewCase):
                 E.p("Replacement data"),
                 E.footer(
                     E.button(name="action_next", type="object", string="New button"),
-                    thing="bob"
+                    thing="bob lolo bibi and co", otherthing="lolo"
                 ),
                 string="Replacement title", version="7.0"))
 
@@ -833,6 +857,10 @@ class test_views(ViewCase):
                     E.button(name="action_next", type="object", string="New button")),
                 string="Replacement title", version="7.0"
             ))
+
+    def test_modifiers(self):
+        # implemeted elsewhere...
+        modifiers_tests()
 
 class ViewModeField(ViewCase):
     """

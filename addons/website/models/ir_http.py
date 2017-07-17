@@ -2,6 +2,7 @@
 import logging
 import os
 import re
+import time
 import traceback
 
 import werkzeug
@@ -15,6 +16,7 @@ from openerp.addons.website.models.website import slug, url_for, _UNSLUG_RE
 from openerp.http import request
 from openerp.tools import config
 from openerp.osv import orm
+from openerp.tools.safe_eval import safe_eval as eval
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +28,7 @@ class ir_http(orm.AbstractModel):
     _inherit = 'ir.http'
 
     rerouting_limit = 10
-    geo_ip_resolver = None
+    _geoip_resolver = None
 
     def _get_converters(self):
         return dict(
@@ -57,14 +59,39 @@ class ir_http(orm.AbstractModel):
 
     def get_nearest_lang(self, lang):
         # Try to find a similar lang. Eg: fr_BE and fr_FR
-        if lang in request.website.get_languages():
-            return lang
-
-        short = lang.split('_')[0]
+        short = lang.partition('_')[0]
+        short_match = False
         for code, name in request.website.get_languages():
-            if code.startswith(short):
-                return code
-        return False
+            if code == lang:
+                return lang
+            if not short_match and code.startswith(short):
+                short_match = code
+        return short_match
+
+    def _geoip_setup_resolver(self):
+        if self._geoip_resolver is None:
+            try:
+                import GeoIP
+                # updated database can be downloaded on MaxMind website
+                # http://dev.maxmind.com/geoip/legacy/install/city/
+                geofile = config.get('geoip_database')
+                if os.path.exists(geofile):
+                    self._geoip_resolver = GeoIP.open(geofile, GeoIP.GEOIP_STANDARD)
+                else:
+                    self._geoip_resolver = False
+                    logger.warning('GeoIP database file %r does not exists, apt-get install geoip-database-contrib or download it from http://dev.maxmind.com/geoip/legacy/install/city/', geofile)
+            except ImportError:
+                self._geoip_resolver = False
+
+    def _geoip_resolve(self):
+        if 'geoip' not in request.session:
+            record = {}
+            if self._geoip_resolver and request.httprequest.remote_addr:
+                record = self._geoip_resolver.record_by_addr(request.httprequest.remote_addr) or {}
+            request.session['geoip'] = record
+
+    def get_page_key(self):
+        return (self._name, "cache", request.uid, request.lang, request.httprequest.full_path)
 
     def _dispatch(self):
         first_pass = not hasattr(request, 'website')
@@ -86,24 +113,8 @@ class ir_http(orm.AbstractModel):
             func and func.routing.get('multilang', func.routing['type'] == 'http')
         )
 
-        if 'geoip' not in request.session:
-            record = {}
-            if self.geo_ip_resolver is None:
-                try:
-                    import GeoIP
-                    # updated database can be downloaded on MaxMind website
-                    # http://dev.maxmind.com/geoip/legacy/install/city/
-                    geofile = config.get('geoip_database')
-                    if os.path.exists(geofile):
-                        self.geo_ip_resolver = GeoIP.open(geofile, GeoIP.GEOIP_STANDARD)
-                    else:
-                        self.geo_ip_resolver = False
-                        logger.warning('GeoIP database file %r does not exists', geofile)
-                except ImportError:
-                    self.geo_ip_resolver = False
-            if self.geo_ip_resolver and request.httprequest.remote_addr:
-                record = self.geo_ip_resolver.record_by_addr(request.httprequest.remote_addr) or {}
-            request.session['geoip'] = record
+        self._geoip_setup_resolver()
+        self._geoip_resolve()
 
         cook_lang = request.httprequest.cookies.get('website_lang')
         if request.website_enabled:
@@ -147,14 +158,37 @@ class ir_http(orm.AbstractModel):
                     redirect.set_cookie('website_lang', request.lang)
                     return redirect
                 elif url_lang:
+                    request.uid = None
                     path.pop(1)
                     return self.reroute('/'.join(path) or '/')
 
             if not request.context.get('tz'):
-                request.context['tz'] = request.session['geoip'].get('time_zone')
+                request.context['tz'] = request.session.get('geoip', {}).get('time_zone')
             # bind modified context
             request.website = request.website.with_context(request.context)
-        resp = super(ir_http, self)._dispatch()
+
+        # cache for auth public
+        cache_time = getattr(func, 'routing', {}).get('cache')
+        cache_enable = cache_time and request.httprequest.method == "GET" and request.website.user_id.id == request.uid
+        cache_response = None
+        if cache_enable:
+            key = self.get_page_key()
+            try:
+                r = self.pool.cache[key]
+                if r['time'] + cache_time > time.time():
+                    cache_response = openerp.http.Response(r['content'], mimetype=r['mimetype'])
+                else:
+                    del self.pool.cache[key]
+            except KeyError:
+                pass
+
+        if cache_response:
+            request.cache_save = False
+            resp = cache_response
+        else:
+            request.cache_save = key if cache_enable else False
+            resp = super(ir_http, self)._dispatch()
+
         if request.website_enabled and cook_lang != request.lang and hasattr(resp, 'set_cookie'):
             resp.set_cookie('website_lang', request.lang)
         return resp
@@ -241,7 +275,8 @@ class ir_http(orm.AbstractModel):
                 logger.error("500 Internal Server Error:\n\n%s", values['traceback'])
                 if 'qweb_exception' in values:
                     view = request.registry.get("ir.ui.view")
-                    views = view._views_get(request.cr, request.uid, exception.qweb['template'], request.context)
+                    views = view._views_get(request.cr, request.uid, exception.qweb['template'],
+                                            context=request.context)
                     to_reset = [v for v in views if v.model_data_id.noupdate is True and not v.page]
                     values['views'] = to_reset
             elif code == 403:

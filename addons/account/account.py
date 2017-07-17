@@ -31,6 +31,7 @@ from openerp import tools
 from openerp.osv import fields, osv, expression
 from openerp.tools.translate import _
 from openerp.tools.float_utils import float_round as round
+from openerp.tools.safe_eval import safe_eval as eval
 from openerp.exceptions import UserError
 
 import openerp.addons.decimal_precision as dp
@@ -548,6 +549,14 @@ class account_account(osv.osv):
             ids = child_ids
         return True
 
+    def _check_consol_children(self, cr, uid, ids, context=None):
+        obj = self.browse(cr, uid, ids[0], context=context)
+        if obj.child_consol_ids.ids:
+            parent_ids = self.search(cr, uid, [('parent_id', 'child_of', obj.child_consol_ids.ids)], context=context)
+            if (ids[0] in parent_ids):
+                return False
+        return True
+
     def _check_type(self, cr, uid, ids, context=None):
         if context is None:
             context = {}
@@ -572,6 +581,7 @@ class account_account(osv.osv):
 
     _constraints = [
         (_check_recursion, 'Error!\nYou cannot create recursive accounts.', ['parent_id']),
+        (_check_consol_children, 'Error!\nYou cannot use this account as consolidated children.', ['child_consol_ids']),
         (_check_type, 'Configuration Error!\nYou cannot define children to an account with internal type different of "View".', ['type']),
         (_check_account_type, 'Configuration Error!\nYou cannot select an account type with a `carry forward` method different of "Unreconciled" for accounts with internal type "Payable/Receivable".', ['user_type','type']),
         (_check_company_account, 'Error!\nYou cannot create an account which has parent account of different company.', ['parent_id']),
@@ -580,6 +590,8 @@ class account_account(osv.osv):
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
     ]
     def name_search(self, cr, user, name, args=None, operator='ilike', context=None, limit=100):
+        if context is None:
+            context = {}
         if not args:
             args = []
         args = args[:]
@@ -604,18 +616,18 @@ class account_account(osv.osv):
                     'like': ('=like', plus_percent),
                 }.get(operator, (operator, lambda n: n))
 
-                ids = self.search(cr, user, ['|', ('code', code_op, code_conv(name)), '|', ('shortcut', '=', name), ('name', operator, name)]+args, limit=limit)
+                ids = self.search(cr, user, ['|', ('code', code_op, code_conv(name)), '|', ('shortcut', '=', name), ('name', operator, name)]+args, limit=limit, context=context)
 
                 if not ids and len(name.split()) >= 2:
                     #Separating code and name of account for searching
                     operand1,operand2 = name.split(' ',1) #name can contain spaces e.g. OpenERP S.A.
-                    ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2)]+ args, limit=limit)
+                    ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2)]+ args, limit=limit, context=context)
             else:
-                ids = self.search(cr, user, ['&','!', ('code', '=like', name+"%"), ('name', operator, name)]+args, limit=limit)
+                ids = self.search(cr, user, ['&','!', ('code', '=like', name+"%"), ('name', operator, name)]+args, limit=limit, context=context)
                 # as negation want to restric, do if already have results
                 if ids and len(name.split()) >= 2:
                     operand1,operand2 = name.split(' ',1) #name can contain spaces e.g. OpenERP S.A.
-                    ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2), ('id', 'in', ids)]+ args, limit=limit)
+                    ids = self.search(cr, user, [('code', operator, operand1), ('name', operator, operand2), ('id', 'in', ids)]+ args, limit=limit, context=context)
         else:
             ids = self.search(cr, user, args, context=context, limit=limit)
         return self.name_get(cr, user, ids, context=context)
@@ -640,7 +652,6 @@ class account_account(osv.osv):
             done_list = []
         account = self.browse(cr, uid, id, context=context)
         new_child_ids = []
-        default.update(code=_("%s (copy)") % (account['code'] or ''))
         if not local:
             done_list = []
         if account.id in done_list:
@@ -654,6 +665,7 @@ class account_account(osv.osv):
             default['child_parent_ids'] = [(6, 0, new_child_ids)]
         else:
             default['child_parent_ids'] = False
+        default.setdefault('code', _("%s (copy)") % (account['code'] or ''))
         return super(account_account, self).copy(cr, uid, id, default, context=context)
 
     def _check_moves(self, cr, uid, ids, method, context=None):
@@ -819,7 +831,7 @@ class account_journal(osv.osv):
         seq = {
             'name': vals['name'],
             'implementation':'no_gap',
-            'prefix': prefix + "/%(year)s/",
+            'prefix': prefix + "/%(range_year)s/",
             'padding': 4,
             'number_increment': 1,
             'use_date_range': True,
@@ -1165,13 +1177,15 @@ class account_move(osv.osv):
     _order = 'id desc'
 
     def account_assert_balanced(self, cr, uid, context=None):
+        obj_precision = self.pool.get('decimal.precision')
+        prec = obj_precision.precision_get(cr, uid, 'Account')
         cr.execute("""\
             SELECT      move_id
             FROM        account_move_line
             WHERE       state = 'valid'
             GROUP BY    move_id
-            HAVING      abs(sum(debit) - sum(credit)) > 0.00001
-            """)
+            HAVING      abs(sum(debit) - sum(credit)) >= %s
+            """ % (10 ** (-max(5, prec))))
         assert len(cr.fetchall()) == 0, \
             "For all Journal Items, the state is valid implies that the sum " \
             "of credits equals the sum of debits"
@@ -1281,7 +1295,7 @@ class account_move(osv.osv):
         'narration':fields.text('Internal Note'),
         'company_id': fields.related('journal_id','company_id',type='many2one',relation='res.company',string='Company', store=True, readonly=True),
         'balance': fields.float('balance', digits_compute=dp.get_precision('Account'), help="This is a field only used for internal purpose and shouldn't be displayed"),
-        'statement_line_id': fields.many2one('account.bank.statement.line', 'Bank statement line reconciled with this entry', copy=False, readonly=True)
+        'statement_line_id': fields.many2one('account.bank.statement.line', 'Bank statement line reconciled with this entry', copy=False, readonly=True, select=True)
     }
 
     _defaults = {
@@ -1339,7 +1353,7 @@ class account_move(osv.osv):
                    'SET state=%s '\
                    'WHERE id IN %s',
                    ('posted', tuple(valid_moves),))
-        self.invalidate_cache(cr, uid, context=context)
+        self.invalidate_cache(cr, uid, ['state', ], valid_moves, context=context)
         return True
 
     def button_validate(self, cursor, user, ids, context=None):
@@ -1532,6 +1546,8 @@ class account_move(osv.osv):
         valid_moves = [] #Maintains a list of moves which can be responsible to create analytic entries
         obj_analytic_line = self.pool.get('account.analytic.line')
         obj_move_line = self.pool.get('account.move.line')
+        obj_precision = self.pool.get('decimal.precision')
+        prec = obj_precision.precision_get(cr, uid, 'Account')
         for move in self.browse(cr, uid, ids, context):
             journal = move.journal_id
             amount = 0
@@ -1555,7 +1571,7 @@ class account_move(osv.osv):
                     if line.account_id.currency_id.id != line.currency_id.id and (line.account_id.currency_id.id != line.account_id.company_id.currency_id.id):
                         raise UserError(_("""Cannot create move with currency different from ..""") % (line.account_id.code, line.account_id.name))
 
-            if abs(amount) < 10 ** -4:
+            if round(abs(amount), prec) < 10 ** (-max(5, prec)):
                 # If the move is balanced
                 # Add to the list of valid moves
                 # (analytic lines will be created later for valid moves)
@@ -1569,7 +1585,7 @@ class account_move(osv.osv):
 
                 obj_move_line.write(cr, uid, line_draft_ids, {
                     'state': 'valid'
-                }, context, check=False)
+                }, context=context, check=False)
 
                 account = {}
                 account2 = {}
@@ -1588,7 +1604,7 @@ class account_move(osv.osv):
                             obj_move_line.write(cr, uid, [line.id], {
                                 'tax_code_id': code,
                                 'tax_amount': amount
-                            }, context, check=False)
+                            }, context=context, check=False)
             elif journal.centralisation:
                 # If the move is not balanced, it must be centralised...
 
@@ -1603,7 +1619,7 @@ class account_move(osv.osv):
                 self._centralise(cr, uid, move, 'credit', context=context)
                 obj_move_line.write(cr, uid, line_draft_ids, {
                     'state': 'valid'
-                }, context, check=False)
+                }, context=context, check=False)
             else:
                 # We can't validate it (it's unbalanced)
                 # Setting the lines as draft
@@ -1611,7 +1627,7 @@ class account_move(osv.osv):
                 if not_draft_line_ids:
                     obj_move_line.write(cr, uid, not_draft_line_ids, {
                         'state': 'draft'
-                    }, context, check=False)
+                    }, context=context, check=False)
         # Create analytic lines for the valid moves
         for record in valid_moves:
             obj_move_line.create_analytic_lines(cr, uid, [line.id for line in record.line_id], context)
@@ -1642,26 +1658,6 @@ class account_move_reconcile(osv.osv):
             if move_rec.opening_reconciliation:
                 raise UserError(_('You cannot unreconcile journal items if they has been generated by the opening/closing fiscal year process.'))
         return super(account_move_reconcile, self).unlink(cr, uid, ids, context=context)
-
-    # Look in the line_id and line_partial_ids to ensure the partner is the same or empty
-    # on all lines. We allow that only for opening/closing period
-    def _check_same_partner(self, cr, uid, ids, context=None):
-        for reconcile in self.browse(cr, uid, ids, context=context):
-            move_lines = []
-            if not reconcile.opening_reconciliation:
-                if reconcile.line_id:
-                    first_partner = reconcile.line_id[0].partner_id.id
-                    move_lines = reconcile.line_id
-                elif reconcile.line_partial_ids:
-                    first_partner = reconcile.line_partial_ids[0].partner_id.id
-                    move_lines = reconcile.line_partial_ids
-                if any([(line.account_id.type in ('receivable', 'payable') and line.partner_id.id != first_partner) for line in move_lines]):
-                    return False
-        return True
-
-    _constraints = [
-        (_check_same_partner, 'You can only reconcile journal items with the same partner.', ['line_id', 'line_partial_ids']),
-    ]
 
     def reconcile_partial_check(self, cr, uid, ids, type='auto', context=None):
         total = 0.0
@@ -1996,7 +1992,7 @@ class account_tax(osv.osv):
         for tax in taxes:
             if tax.applicable_type=='code':
                 localdict = {'price_unit':price_unit, 'product':product, 'partner':partner}
-                exec tax.python_applicable in localdict
+                eval(tax.python_applicable, localdict, mode="exec", nocopy=True)
                 if localdict.get('result', False):
                     res.append(tax)
             else:
@@ -2037,7 +2033,7 @@ class account_tax(osv.osv):
                # data['amount'] = quantity
             elif tax.type=='code':
                 localdict = {'price_unit':cur_price_unit, 'product':product, 'partner':partner, 'quantity': quantity}
-                exec tax.python_compute in localdict
+                eval(tax.python_compute, localdict, mode="exec", nocopy=True)
                 amount = localdict['result']
                 data['amount'] = amount
             elif tax.type=='balance':
@@ -2129,8 +2125,8 @@ class account_tax(osv.osv):
 
     @api.v8
     def compute_all(self, price_unit, quantity, product=None, partner=None, force_excluded=False):
-        return self._model.compute_all(
-            self._cr, self._uid, self, price_unit, quantity,
+        return account_tax.compute_all(
+            self._model, self._cr, self._uid, self, price_unit, quantity,
             product=product, partner=partner, force_excluded=force_excluded)
 
     def compute(self, cr, uid, taxes, price_unit, quantity,  product=None, partner=None):
@@ -2157,6 +2153,13 @@ class account_tax(osv.osv):
                 r['amount'] = round(r.get('amount', 0.0) * quantity, precision)
                 total += r['amount']
         return res
+
+    def _fix_tax_included_price(self, cr, uid, price, prod_taxes, line_taxes):
+        """Subtract tax amount from price when corresponding "price included" taxes do not apply"""
+        incl_tax = [tax for tax in prod_taxes if tax.id not in line_taxes and tax.price_include]
+        if incl_tax:
+            return self._unit_compute_inv(cr, uid, incl_tax, price)[0]['price_unit']
+        return price
 
     def _unit_compute_inv(self, cr, uid, taxes, price_unit, product=None, partner=None):
         taxes = self._applicable(cr, uid, taxes, price_unit,  product, partner)
@@ -2185,7 +2188,7 @@ class account_tax(osv.osv):
 
             elif tax.type=='code':
                 localdict = {'price_unit':cur_price_unit, 'product':product, 'partner':partner}
-                exec tax.python_compute_inv in localdict
+                eval(tax.python_compute_inv, localdict, mode="exec", nocopy=True)
                 amount = localdict['result']
             elif tax.type=='balance':
                 amount = cur_price_unit - reduce(lambda x,y: y.get('amount',0.0)+x, res, 0.0)
@@ -2284,8 +2287,7 @@ class account_model(osv.osv):
         pt_obj = self.pool.get('account.payment.term')
         period_obj = self.pool.get('account.period')
 
-        if context is None:
-            context = {}
+        context = dict(context or {})
 
         if data.get('date', False):
             context = dict(context)
@@ -2580,7 +2582,7 @@ class account_account_template(osv.osv):
         children_acc_criteria = [('chart_template_id','=', chart_template_id)]
         if template.account_root_id.id:
             children_acc_criteria = ['|'] + children_acc_criteria + ['&',('parent_id','child_of', [template.account_root_id.id]),('chart_template_id','=', False)]
-        children_acc_template = self.search(cr, uid, [('nocreate','!=',True)] + children_acc_criteria, order='id')
+        children_acc_template = self.search(cr, uid, [('nocreate','!=',True)] + children_acc_criteria, order='id', context=context)
         for account_template in self.browse(cr, uid, children_acc_template, context=context):
             # skip the root of COA if it's not the main one
             if (template.account_root_id.id == account_template.id) and template.parent_id:

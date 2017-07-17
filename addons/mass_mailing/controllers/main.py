@@ -19,7 +19,7 @@ class MassMailController(http.Controller):
 
         return response
 
-    @http.route(['/mail/mailing/<int:mailing_id>/unsubscribe'], type='http', auth='none', website=True)
+    @http.route(['/mail/mailing/<int:mailing_id>/unsubscribe'], type='http', auth='public', website=True)
     def mailing(self, mailing_id, email=None, res_id=None, **post):
         mailing = request.env['mail.mass_mailing'].sudo().browse(mailing_id)
         if mailing.exists():
@@ -60,8 +60,12 @@ class MassMailController(http.Controller):
     def subscribe(self, list_id, email, **post):
         cr, uid, context = request.cr, request.uid, request.context
         Contacts = request.registry['mail.mass_mailing.contact']
+        parsed_email = Contacts.get_name_email(email, context=context)[1]
 
-        contact_ids = Contacts.search_read(cr, SUPERUSER_ID, [('list_id', '=', int(list_id)), ('email', '=', email)], ['opt_out'], context=context)
+        contact_ids = Contacts.search_read(
+            cr, SUPERUSER_ID,
+            [('list_id', '=', int(list_id)), ('email', '=', parsed_email)],
+            ['opt_out'], context=context)
         if not contact_ids:
             Contacts.add_to_list(cr, SUPERUSER_ID, email, int(list_id), context=context)
         else:

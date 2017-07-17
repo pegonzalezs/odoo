@@ -251,7 +251,7 @@
         <field name="model">hr.applicant</field>
         <field name="arch" type="xml">
             <kanban default_group_by="stage_id">
-                <field name="stage_id" options='{"group_by_tooltip": {"description": "Description", "legend_priority": "Use of stars"}}'/>
+                <field name="stage_id" options='{"group_by_tooltip": {"requirements": "Description", "legend_priority": "Use of stars"}}'/>
                 <field name="color"/>
                 <field name="priority"/>
                 <field name="survey"/>
@@ -389,7 +389,7 @@
                 </div>
                 <label for="address_id"/>
                 <div>
-                    <field name="address_id" context="{'show_address': 1}" domain= "[('is_company', '=', True )]"/>
+                    <field name="address_id" context="{'show_address': 1}" domain= "[('is_company', '=', True )]" options="{'always_reload': True}"/>
                 </div>
             </group>
             <xpath expr="//field[@name='department_id']" position="after">

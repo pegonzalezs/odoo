@@ -313,7 +313,7 @@
             
             $html.find('.o_not_editable').attr("contentEditable", false);
 
-            $left_bar.append($html);
+            $left_bar.html($html);
 
             // animate for list of snippet blocks
             $left_bar.on('click', '.scroll-link', function (event) {
@@ -500,7 +500,8 @@
                     this.snippets.push($snippet.get(0));
                 }
                 this.$active_snipped_id = $snippet;
-                this.create_overlay(this.$active_snipped_id);
+                this.create_snippet_editor(this.$active_snipped_id);
+                this.cover_target($snippet.data('overlay'), $snippet);
                 this.snippet_focus($snippet);
             }
             this.$snippet.trigger('snippet-activated', $snippet);
@@ -508,13 +509,11 @@
                 $snippet.trigger('snippet-activated', $snippet);
             }
         },
-        create_overlay: function ($snippet) {
+        create_snippet_editor: function ($snippet) {
             if (typeof $snippet.data("snippet-editor") === 'undefined') {
-                var $targets = this.activate_overlay_zones($snippet);
-                if (!$targets.length) return;
+                if (!this.activate_overlay_zones($snippet).length) return;
                 $snippet.data("snippet-editor", new website.snippet.Editor(this, $snippet));
             }
-            this.cover_target($snippet.data('overlay'), $snippet);
         },
 
         // activate drag and drop for the snippets in the snippet toolbar
@@ -624,21 +623,12 @@
 
                             website.snippet.start_animation(true, $target);
 
-                            // drop_and_build_snippet
-                            self.create_overlay($target);
-                            if ($target.data("snippet-editor")) {
-                                $target.data("snippet-editor").drop_and_build_snippet();
-                            }
-                            for (var k in website.snippet.templateOptions) {
-                                website.snippet.templateOptions[k].selector.all($target).each(function () {
-                                    var $snippet = $(this);
-                                    self.create_overlay($snippet);
-                                    if ($snippet.data("snippet-editor")) {
-                                        $snippet.data("snippet-editor").drop_and_build_snippet();
-                                    }
-                                });
-                            }
-                            // end
+                            self.call_for_all_snippets($target, function (editor, $snippet) {
+                                editor.drop_and_build_snippet();
+                            });
+                            self.create_snippet_editor($target);
+                            self.cover_target($target.data('overlay'), $target);
+                            $target.closest(".o_editable").trigger("content_changed");
 
                             self.make_active($target);
                         },0);
@@ -646,6 +636,20 @@
                         $toInsert.remove();
                     }
                 },
+            });
+        },
+
+        // call a method on a snippet and all his children
+        call_for_all_snippets: function ($snippet, callback) {
+            var self = this;
+            $snippet.add(website.snippet.globalSelector.all($snippet)).each(function () {
+                var $snippet = $(this);
+                setTimeout(function () {
+                    self.create_snippet_editor($snippet);
+                    if ($snippet.data("snippet-editor")) {
+                        callback.call(self, $snippet.data("snippet-editor"), $snippet);
+                    }
+                });
             });
         },
 
@@ -811,12 +815,12 @@
 
                     var timer;
                     $target.closest('.o_editable').on("content_changed", function (event) {
-                        if ($target.data('overlay') && $target.data('overlay').hasClass("oe_active")) {
-                            clearTimeout(timer);
-                            timer = setTimeout(function () {
+                        clearTimeout(timer);
+                        timer = setTimeout(function () {
+                            if ($target.data('overlay') && $target.data('overlay').hasClass("oe_active")) {
                                 self.cover_target($target.data('overlay'), $target);
-                            },50);
-                        }
+                            }
+                        },50);
                      });
 
                     var resize = function () {
@@ -1050,21 +1054,25 @@
     });
     website.snippet.options.background = website.snippet.Option.extend({
         start: function ($change_target) {
-            this.$bg = $change_target || this.$target;
+            this.$target = $change_target || this.$target;
             this._super();
-            var src = this.$bg.css("background-image").replace(/url\(['"]*|['"]*\)|^none$/g, "");
-            if (this.$bg.hasClass('oe_custom_bg')) {
+            var src = this.$target.css("background-image").replace(/url\(['"]*|['"]*\)|^none$/g, "");
+            if (this.$target.hasClass('oe_custom_bg')) {
                 this.$el.find('li[data-choose_image]').data("background", src).attr("data-background", src);
             }
         },
         background: function(type, value, $li) {
             if (value && value.length) {
-                this.$bg.css("background-image", 'url(' + value + ')');
-                this.$bg.addClass("oe_img_bg");
+                this.$target.attr("style", 'background-image: url(' + value + '); ' + (this.$target.attr("style") || '').replace(/background-image:[^;]+;?/, ''));
+                this.$target.addClass("oe_img_bg");
             } else {
-                this.$bg.css("background-image", "");
-                this.$bg.removeClass("oe_img_bg").removeClass("oe_custom_bg");
+                this.$target.css("background-image", "");
+                this.$target.removeClass("oe_img_bg").removeClass("oe_custom_bg");
             }
+        },
+        select_class : function(type, value, $li) {
+            this.background(type, '', $li);
+            this._super(type, value, $li);
         },
         choose_image: function(type, value, $li) {
             if(type !== "click") return;
@@ -1072,7 +1080,7 @@
             var self = this;
             var $image = $('<img class="hidden"/>');
             $image.attr("src", value);
-            $image.appendTo(self.$bg);
+            $image.appendTo(self.$target);
 
             var editor = new website.editor.MediaDialog(null, $image[0]);
             editor.appendTo(document.body);
@@ -1083,8 +1091,8 @@
                 $image.remove();
                 self.$el.find('li[data-choose_image]').data("background", value).attr("data-background", value);
                 self.background(type, value,$li);
-                self.$bg.addClass('oe_custom_bg');
-                self.$bg.trigger("snippet-option-change", [self]);
+                self.$target.addClass('oe_custom_bg');
+                self.$target.trigger("snippet-option-change", [self]);
                 self.set_active();
             });
             editor.on('cancel', self, function () {
@@ -1093,8 +1101,12 @@
         },
         set_active: function () {
             var self = this;
-            var src = this.$bg.css("background-image").replace(/url\(['"]*|['"]*\)|^none$/g, "");
+            var src = this.$target.css("background-image").replace(/url\(['"]*|['"]*\)|^none$/g, "");
             this._super();
+
+            if (this.$target.hasClass('oe_custom_bg')) {
+                this.$el.find('li[data-choose_image]').data("background", src).attr("data-background", src);
+            }
 
             this.$el.find('li[data-background]:not([data-background=""])')
                 .removeClass("active")
@@ -1157,28 +1169,21 @@
                 .click(function () {
                     $td.removeClass("selected");
                     $(this).parent().addClass("selected");
+                    self.$target.closest(".o_editable").trigger("content_changed");
                 });
         }
     });
 
     website.snippet.options.slider = website.snippet.Option.extend({
-        unique_id: function () {
-            var id = 0;
-            $(".carousel").each(function () {
-                var cid = 1 + parseInt($(this).attr("id").replace(/[^0123456789]/g, ''),10);
-                if (id < cid) id = cid;
-            });
-            return "myCarousel" + id;
-        },
         drop_and_build_snippet: function() {
-            this.id = this.unique_id();
+            this.id = "myCarousel_" + new Date().getTime();
             this.$target.attr("id", this.id);
             this.$target.find("[data-slide]").attr("data-cke-saved-href", "#" + this.id);
             this.$target.find("[data-target]").attr("data-target", "#" + this.id);
             this.rebind_event();
         },
         on_clone: function ($clone) {
-            var id = this.unique_id();
+            var id = "myCarousel_" + new Date().getTime();
             $clone.attr("id", id);
             $clone.find("[data-slide]").attr("href", "#" + id);
             $clone.find("[data-slide-to]").attr("data-target", "#" + id);
@@ -1217,17 +1222,24 @@
             this.$indicators.append('<li data-target="#' + this.id + '" data-slide-to="' + cycle + '"></li>');
 
             // clone the best candidate from template to use new features
-            var $snippets = this.BuildingBlock.$snippets.find('.oe_snippet_body.carousel');
-            var point = 0;
-            var selection;
-            var className = _.compact(this.$target.attr("class").split(" "));
-            $snippets.each(function () {
-                var len = _.intersection(_.compact(this.className.split(" ")), className).length;
-                if (len > point) {
-                    point = len;
-                    selection = this;
-                }
-            });
+            var $snippets = this.BuildingBlock.$snippets;
+            //since saas-6, all snippets must start by s_
+            var selection = this.$target.closest('[class*="s_"');
+            if (_.isUndefined(selection)) {
+                var point = 0;
+                var className = _.compact(this.$target.attr("class").split(" "));
+                $snippets.find('.oe_snippet_body').each(function () {
+                    var len = _.intersection(_.compact(this.className.split(" ")), className).length;
+                    if (len > point) {
+                        point = len;
+                        selection = this;
+                    }
+                });
+            }
+            else {
+                var s_class = selection.attr('class').split(' ').filter(function(o) { return _.str.startsWith(o, "s_") })[0]
+                selection = $snippets.find("." + s_class);
+            }
             var $clone = $(selection).find('.item:first').clone();
 
             // insert
@@ -1302,7 +1314,7 @@
             };
             this.$target.on('slid.bs.carousel', function () {
                 if(self.editor && self.editor.styles.background) {
-                    self.editor.styles.background.$bg = self.$target.find(".item.active");
+                    self.editor.styles.background.$target = self.$target.find(".item.active");
                     self.editor.styles.background.set_active();
                 }
                 self.$target.carousel("pause");
@@ -1391,8 +1403,12 @@
                 } else {
                     var xy = event['page'+XY];
                     var current = resize[2] || 0;
+                    var margin_dir = {s:'bottom', n: 'top', w: 'left', e: 'right'}[compass];
+                    var real_margin = parseInt(self.$target.css('margin-'+margin_dir));
                     _.each(resize[0], function (val, key) {
                         if (self.$target.hasClass(val)) {
+                            current = key;
+                        } else if (resize[1][key] === real_margin) {
                             current = key;
                         }
                     });
@@ -1451,6 +1467,7 @@
                         self.BuildingBlock.editor_busy = false;
                     },0);
                     self.$target.removeClass("resize_editor_busy");
+                    self.$target.closest(".o_editable").trigger("content_changed");
                 };
                 $body.mousemove(body_mousemove);
                 $body.mouseup(body_mouseup);
@@ -1459,6 +1476,7 @@
                 self.$target.css("height", "");
                 self.$target.css("overflow", "");
                 self.BuildingBlock.cover_target(self.$overlay, self.$target);
+                self.$target.closest(".o_editable").trigger("content_changed");
                 return false;
             });
         },
@@ -1487,12 +1505,12 @@
             if (offset === 0) overlay_class+= " block-w-left";
 
             var mb = _class.match(/mb([0-9-]+)/i);
-            mb = mb ? +mb[1] : 0;
+            mb = mb ? +mb[1] : parseInt(this.$target.css('margin-bottom'));
             if (mb >= 128) overlay_class+= " block-s-bottom";
             else if (!mb) overlay_class+= " block-s-top";
 
             var mt = _class.match(/mt([0-9-]+)/i);
-            mt = mt ? +mt[1] : 0;
+            mt = mt ? +mt[1] : parseInt(this.$target.css('margin-top'));
             if (mt >= 128) overlay_class+= " block-n-top";
             else if (!mt) overlay_class+= " block-n-bottom";
 
@@ -1950,7 +1968,9 @@
             self.BuildingBlock.editor_busy = false;
 
             self.get_parent_block();
-            setTimeout(function () {self.BuildingBlock.create_overlay(self.$target);},0);
+            setTimeout(function () {
+                self.BuildingBlock.cover_target(self.$target.data('overlay'), self.$target);
+            },0);
         },
 
         load_style_options: function () {
@@ -1987,7 +2007,10 @@
         get_parent_block: function () {
             var self = this;
             var $button = this.$overlay.find('.oe_snippet_parent');
-            var $parent = website.snippet.globalSelector.closest(this.$target.parent());
+            var $parent = this.$target.parents().filter(function () { return $(this).data("snippet-editor"); });
+            if (!$parent.length) {
+                $parent = website.snippet.globalSelector.closest(this.$target.parent());
+            }
             if ($parent.length) {
                 $button.removeClass("hidden");
                 $button.off("click").on('click', function (event) {
@@ -2023,10 +2046,11 @@
             this.BuildingBlock.parent.rte.historyRecordUndo(this.$target);
             
             this.$target.after($clone);
-            for (var i in this.styles){
-                this.styles[i].on_clone($clone);
-            }
-            this.BuildingBlock.create_overlay(this.$target);
+            this.BuildingBlock.call_for_all_snippets($clone, function (editor, $snippet) {
+                for (var i in editor.styles){
+                    editor.styles[i].on_clone($snippet);
+                }
+            });
             return false;
         },
 
@@ -2037,9 +2061,11 @@
             this.BuildingBlock.parent.rte.historyRecordUndo(this.$target);
 
             var index = _.indexOf(this.BuildingBlock.snippets, this.$target.get(0));
-            for (var i in this.styles){
-                this.styles[i].on_remove();
-            }
+            this.BuildingBlock.call_for_all_snippets(this.$target, function (editor, $snippet) {
+                for (var i in editor.styles){
+                    editor.styles[i].on_remove();
+                }
+            });
             delete this.BuildingBlock.snippets[index];
 
             // remove node and his empty

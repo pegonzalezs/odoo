@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* ---- SNIPPET EDITOR ---- {{{ */
 #oe_snippets #o_left_bar, #oe_snippets #o_arrow {
   position: fixed;
@@ -8,6 +9,10 @@
   -moz-box-shadow: 0px 10px 10px -10px black inset;
   -webkit-box-shadow: 0px 10px 10px -10px black inset;
   box-shadow: 0px 10px 10px -10px black inset;
+  font-size: 14px;
+}
+#oe_snippets #o_left_bar .snippets_loading, #oe_snippets #o_arrow .snippets_loading {
+  color: white;
 }
 #oe_snippets #o_arrow {
   z-index: 1009;
@@ -104,7 +109,7 @@
 .oe_snippet {
   display: inline-block;
   vertical-align: top;
-  width: 93px;
+  width: 92px;
   margin-left: 3px;
   margin-right: 3px;
   margin-top: 1px;
@@ -228,6 +233,12 @@
 }
 
 /* ---- SNIPPET MANIPULATOR ----  {{{ */
+#oe_manipulators {
+  position: absolute;
+  top: 0;
+  z-index: 1050;
+}
+
 .resize_editor_busy {
   background-color: rgba(0, 0, 0, 0.3);
 }
@@ -869,4 +880,13 @@ table.table_desc tr td:last-child {
 
 .s_features_grid {
   margin-bottom: 16px;
+}
+
+/* other snippet styles */
+.s_comparisons .panel .list-group-item:not(.active) {
+  color: #666;
+}
+
+.s_references .img-thumbnail {
+  border: none;
 }

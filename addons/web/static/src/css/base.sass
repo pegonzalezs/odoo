@@ -148,14 +148,15 @@ $sheet-padding: 16px
 .oe_indicator
     z-index: 99999
     position: absolute
-    top: 10px
     display: inline-block
     color: white
-    background: #a24689
+    background: #a4498b
     padding: 6px 16px
     border-radius: 4px
     box-shadow: 0 0 1px black
-    left: 40%
+    left: 50%
+    transform: translate(-50%, 0)
+    -webkit-filter: blur(0)
 
 .oe_notification
     z-index: 1600
@@ -513,6 +514,8 @@ $sheet-padding: 16px
         @include radius(3px)
         background: $tag-bg-light
         color: #4C4C4C
+        display: inline-block
+        word-break: break-word
     .oe_tag_dark
         background: $tag-bg-dark
         color: #eee
@@ -543,10 +546,12 @@ $sheet-padding: 16px
             min-width: 250px
         .text-wrap
             width: 100% !important
+            position: static
             textarea
                 width: 100% !important
         .text-core
-            min-height: 22px
+            height: initial !important
+            word-break: break-word
             .text-wrap .text-dropdown .text-list .text-suggestion em
                 font-style: italic
                 text-decoration: none
@@ -1397,6 +1402,7 @@ $sheet-padding: 16px
         .oe_form_sheetbg
             background: url(/web/static/src/img/form_sheetbg.png)
             border-bottom: 1px solid #ddd
+            z-index: 1
             // Customize font weight according bootstrap3
             .oe_subtotal_footer label
                 font-weight: bold
@@ -1994,6 +2000,9 @@ $sheet-padding: 16px
                 margin: 0
             input, textarea, select
                 min-width: 0
+            textarea.field_text
+                position: relative
+                z-index: 1
             &.oe_form_field_float,&.oe_form_view_integer
                 &.oe_readonly
                     padding: 6px 0px 0px

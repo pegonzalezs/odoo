@@ -1,7 +1,7 @@
 # -*- coding: utf-'8' "-*-"
-
 import logging
 
+import openerp
 from openerp.osv import osv, fields
 from openerp.tools import float_round, float_repr
 from openerp.tools.translate import _
@@ -14,7 +14,7 @@ def _partner_format_address(address1=False, address2=False):
 
 
 def _partner_split_name(partner_name):
-    return [' '.join(partner_name.split()[-1:]), ' '.join(partner_name.split()[:-1])]
+    return [' '.join(partner_name.split()[:-1]), ' '.join(partner_name.split()[-1:])]
 
 
 class ValidationError(ValueError):
@@ -60,17 +60,20 @@ class PaymentAcquirer(osv.Model):
     _provider_selection = lambda self, *args, **kwargs: self._get_providers(*args, **kwargs)
 
     _columns = {
-        'name': fields.char('Name', required=True),
+        'name': fields.char('Name', required=True, translate=True),
         'provider': fields.selection(_provider_selection, string='Provider', required=True),
         'company_id': fields.many2one('res.company', 'Company', required=True),
         'pre_msg': fields.html('Message', translate=True,
-            help='Message displayed to explain and help the payment process.'),
+                               help='Message displayed to explain and help the payment process.'),
         'post_msg': fields.html('Thanks Message', help='Message displayed after having done the payment process.'),
         'validation': fields.selection(
             [('manual', 'Manual'), ('automatic', 'Automatic')],
             string='Process Method',
             help='Static payments are payments like transfer, that require manual steps.'),
         'view_template_id': fields.many2one('ir.ui.view', 'Form Button Template', required=True),
+        'registration_view_template_id': fields.many2one('ir.ui.view', 'S2S Form Template',
+                                                         domain=[('type', '=', 'qweb')],
+                                                         help="Template for method registration"),
         'environment': fields.selection(
             [('test', 'Test'), ('prod', 'Production')],
             string='Environment', oldname='env'),
@@ -273,10 +276,40 @@ class PaymentAcquirer(osv.Model):
             'partner_values': partner_values,
             'tx_values': tx_values,
             'context': context,
+            'type': tx_values.get('type') or 'form',
         }
 
         # because render accepts view ids but not qweb -> need to use the xml_id
         return self.pool['ir.ui.view'].render(cr, uid, acquirer.view_template_id.xml_id, qweb_context, engine='ir.qweb', context=context)
+
+    def _registration_render(self, cr, uid, id, partner_id, qweb_context=None, context=None):
+        acquirer = self.browse(cr, uid, id, context=context)
+        if qweb_context is None:
+            qweb_context = {}
+        qweb_context.update(id=id, partner_id=partner_id)
+        method_name = '_%s_registration_form_generate_values' % (acquirer.provider,)
+        if hasattr(self, method_name):
+            method = getattr(self, method_name)
+            qweb_context.update(method(cr, uid, id, qweb_context, context=context))
+        return self.pool['ir.ui.view'].render(cr, uid, acquirer.registration_view_template_id.xml_id, qweb_context, engine='ir.qweb', context=context)
+
+    def s2s_process(self, cr, uid, id, data, context=None):
+        acquirer = self.browse(cr, uid, id, context=context)
+        cust_method_name = '%s_s2s_form_process' % (acquirer.provider)
+        if not self.s2s_validate(cr, uid, id, data, context=context):
+            return False
+        if hasattr(self, cust_method_name):
+            method = getattr(self, cust_method_name)
+            return method(cr, uid, data, context=context)
+        return True
+
+    def s2s_validate(self, cr, uid, id, data, context=None):
+        acquirer = self.browse(cr, uid, id, context=context)
+        cust_method_name = '%s_s2s_form_validate' % (acquirer.provider)
+        if hasattr(self, cust_method_name):
+            method = getattr(self, cust_method_name)
+            return method(cr, uid, id, data, context=context)
+        return True
 
     def _wrap_payment_block(self, cr, uid, html_block, amount, currency_id, context=None):
         payment_header = _('Pay safely online')
@@ -342,14 +375,14 @@ class PaymentTransaction(osv.Model):
             required=True,
         ),
         'type': fields.selection(
-            [('server2server', 'Server To Server'), ('form', 'Form')],
+            [('server2server', 'Server To Server'), ('form', 'Form'), ('form_save', 'Form with credentials storage')],
             string='Type', required=True),
         'state': fields.selection(
             [('draft', 'Draft'), ('pending', 'Pending'),
              ('done', 'Done'), ('error', 'Error'),
              ('cancel', 'Canceled')
              ], 'Status', required=True,
-            track_visiblity='onchange', copy=False),
+            track_visibility='onchange', copy=False),
         'state_message': fields.text('Message',
                                      help='Field used to store error and/or validation messages for information'),
         # payment
@@ -377,6 +410,11 @@ class PaymentTransaction(osv.Model):
         'partner_phone': fields.char('Phone'),
         'partner_reference': fields.char('Partner Reference',
                                          help='Reference of the customer in the acquirer database'),
+        'html_3ds': fields.char('3D Secure HTML'),
+
+        's2s_cb_eval': fields.char('S2S Callback', help="""\
+            Will be safe_eval with `self` being the current transaction. i.e.:
+                self.env['my.model'].payment_validated(self)"""),
     }
 
     def _check_reference(self, cr, uid, ids, context=None):
@@ -411,7 +449,7 @@ class PaymentTransaction(osv.Model):
             custom_method_name = '%s_compute_fees' % acquirer.provider
             if hasattr(Acquirer, custom_method_name):
                 fees = getattr(Acquirer, custom_method_name)(
-                    cr, uid, acquirer.id, values.get('amount', 0.0), values.get('currency_id'), values.get('country_id'), context=None)
+                    cr, uid, acquirer.id, values.get('amount', 0.0), values.get('currency_id'), values.get('partner_country_id'), context=None)
                 values['fees'] = float_round(fees, 2)
 
             # custom create
@@ -420,6 +458,32 @@ class PaymentTransaction(osv.Model):
                 values.update(getattr(self, custom_method_name)(cr, uid, values, context=context))
 
         return super(PaymentTransaction, self).create(cr, uid, values, context=context)
+
+    def write(self, cr, uid, ids, values, context=None):
+        Acquirer = self.pool['payment.acquirer']
+        if ('acquirer_id' in values or 'amount' in values) and 'fees' not in values:
+            # The acquirer or the amount has changed, and the fees are not explicitely forced. Fees must be recomputed.
+            if isinstance(ids, (int, long)):
+                ids = [ids]
+            for txn_id in ids:
+                vals = dict(values)
+                vals['fees'] = 0.0
+                transaction = self.browse(cr, uid, txn_id, context=context)
+                if 'acquirer_id' in values:
+                    acquirer = Acquirer.browse(cr, uid, values['acquirer_id'], context=context) if values['acquirer_id'] else None
+                else:
+                    acquirer = transaction.acquirer_id
+                if acquirer:
+                    custom_method_name = '%s_compute_fees' % acquirer.provider
+                    if hasattr(Acquirer, custom_method_name):
+                        amount = (values['amount'] if 'amount' in values else transaction.amount) or 0.0
+                        currency_id = values.get('currency_id') or transaction.currency_id.id
+                        country_id = values.get('partner_country_id') or transaction.partner_country_id.id
+                        fees = getattr(Acquirer, custom_method_name)(cr, uid, acquirer.id, amount, currency_id, country_id, context=None)
+                        vals['fees'] = float_round(fees, 2)
+                res = super(PaymentTransaction, self).write(cr, uid, txn_id, vals, context=context)
+            return res
+        return super(PaymentTransaction, self).write(cr, uid, ids, values, context=context)
 
     def on_change_partner_id(self, cr, uid, ids, partner_id, context=None):
         partner = None
@@ -435,6 +499,14 @@ class PaymentTransaction(osv.Model):
             'partner_country_id': partner and partner.country_id.id or False,
             'partner_phone': partner and partner.phone or False,
         }}
+
+    def get_next_reference(self, cr, uid, reference, context=None):
+        ref_suffix = 1
+        init_ref = reference
+        while self.pool['payment.transaction'].search_count(cr, openerp.SUPERUSER_ID, [('reference', '=', reference)], context=context):
+            reference = init_ref + '-' + str(ref_suffix)
+            ref_suffix += 1
+        return reference
 
     # --------------------------------------------------
     # FORM RELATED METHODS
@@ -467,62 +539,16 @@ class PaymentTransaction(osv.Model):
     # --------------------------------------------------
     # SERVER2SERVER RELATED METHODS
     # --------------------------------------------------
-
     def s2s_create(self, cr, uid, values, cc_values, context=None):
         tx_id, tx_result = self.s2s_send(cr, uid, values, cc_values, context=context)
         self.s2s_feedback(cr, uid, tx_id, tx_result, context=context)
         return tx_id
 
-    def s2s_send(self, cr, uid, values, cc_values, context=None):
-        """ Create and send server-to-server transaction.
-
-        :param dict values: transaction values
-        :param dict cc_values: credit card values that are not stored into the
-                               payment.transaction object. Acquirers should
-                               handle receiving void or incorrect cc values.
-                               Should contain :
-
-                                - holder_name
-                                - number
-                                - cvc
-                                - expiry_date
-                                - brand
-                                - expiry_date_yy
-                                - expiry_date_mm
-        """
-        tx_id, result = None, None
-
-        if values.get('acquirer_id'):
-            acquirer = self.pool['payment.acquirer'].browse(cr, uid, values.get('acquirer_id'), context=context)
-            custom_method_name = '_%s_s2s_send' % acquirer.provider
-            if hasattr(self, custom_method_name):
-                tx_id, result = getattr(self, custom_method_name)(cr, uid, values, cc_values, context=context)
-
-        if tx_id is None and result is None:
-            tx_id = super(PaymentTransaction, self).create(cr, uid, values, context=context)
-        return (tx_id, result)
-
-    def s2s_feedback(self, cr, uid, tx_id, data, context=None):
-        """ Handle the feedback of a server-to-server transaction. """
-        tx = self.browse(cr, uid, tx_id, context=context)
-        invalid_parameters = None
-
-        invalid_param_method_name = '_%s_s2s_get_invalid_parameters' % tx.acquirer_id.provider
-        if hasattr(self, invalid_param_method_name):
-            invalid_parameters = getattr(self, invalid_param_method_name)(cr, uid, tx, data, context=context)
-
-        if invalid_parameters:
-            _error_message = '%s: incorrect tx data:\n' % (tx.acquirer_id.name)
-            for item in invalid_parameters:
-                _error_message += '\t%s: received %s instead of %s\n' % (item[0], item[1], item[2])
-            _logger.error(_error_message)
-            return False
-
-        feedback_method_name = '_%s_s2s_validate' % tx.acquirer_id.provider
-        if hasattr(self, feedback_method_name):
-            return getattr(self, feedback_method_name)(cr, uid, tx, data, context=context)
-
-        return True
+    def s2s_do_transaction(self, cr, uid, id, context=None, **kwargs):
+        tx = self.browse(cr, uid, id, context=context)
+        custom_method_name = '%s_s2s_do_transaction' % tx.acquirer_id.provider
+        if hasattr(self, custom_method_name):
+            return getattr(self, custom_method_name)(cr, uid, id, context=context, **kwargs)
 
     def s2s_get_tx_status(self, cr, uid, tx_id, context=None):
         """ Get the tx status. """
@@ -533,3 +559,32 @@ class PaymentTransaction(osv.Model):
             return getattr(self, invalid_param_method_name)(cr, uid, tx, context=context)
 
         return True
+
+
+class PaymentMethod(osv.Model):
+    _name = 'payment.method'
+    _order = 'partner_id'
+
+    _columns = {
+        'name': fields.char('Name', help='Name of the payment method'),
+        'partner_id': fields.many2one('res.partner', 'Partner', required=True),
+        'acquirer_id': fields.many2one('payment.acquirer', 'Acquirer Account', required=True),
+        'acquirer_ref': fields.char('Acquirer Ref.', required=True),
+        'active': fields.boolean('Active')
+    }
+
+    _defaults = {
+        'active': True
+    }
+
+    def create(self, cr, uid, values, context=None):
+        # call custom create method if defined (i.e. ogone_create for ogone)
+        if values.get('acquirer_id'):
+            acquirer = self.pool['payment.acquirer'].browse(cr, uid, values.get('acquirer_id'), context=context)
+
+            # custom create
+            custom_method_name = '%s_create' % acquirer.provider
+            if hasattr(self, custom_method_name):
+                values.update(getattr(self, custom_method_name)(cr, uid, values, context=context))
+
+        return super(PaymentMethod, self).create(cr, uid, values, context=context)

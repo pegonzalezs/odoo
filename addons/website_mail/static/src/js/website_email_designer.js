@@ -240,7 +240,9 @@
                                 selectorText.indexOf(":after") === -1 &&
                                 selectorText.indexOf(":active") === -1 &&
                                 selectorText.indexOf(":link") === -1 &&
-                                selectorText.indexOf("::") === -1) {
+                                selectorText.indexOf("::") === -1 &&
+                                selectorText.indexOf("\"") === -1 &&
+                                selectorText.indexOf("'") === -1) {
                             var st = selectorText.split(/\s*,\s*/);
                             for (var k=0; k<st.length; k++) {
                                 rulesCache.push({
@@ -301,6 +303,8 @@
             setTimeout(function () {
                 self.img_to_font();
                 self.style_to_class();
+                // fix outlook image rendering bug
+                $("#wrapwrap .o_editable:first").find('img[style*="width"], img[style*="height"]').removeAttr('height width');
             });
         },
 
@@ -315,24 +319,31 @@
             var theme = ($("#o_left_bar .o_panel_body > div:not(.hidden)").attr("class") || "").replace(/^\s*|\s*o_mail_block[^\s]+\s*|\s*oe_snippet\s*|\s*ui-draggable\s*|\s*$/g, '');
             var $theme = $("#wrapwrap .o_editable:first [data-snippet-theme]").removeAttr("data-snippet-theme").removeData("snippet-theme");
             $editable.children().first().attr("data-snippet-theme", theme);
-            $editable.find(":hidden").remove();
+            // fix outlook image rendering bug
+            _.each(['width', 'height'], function(attribute) {
+                $editable.find('img[style*="width"], img[style*="height"]').attr(attribute, function(){
+                    return $(this)[attribute]()
+                }).css(attribute, function(){
+                    return $(this).get(0).style[attribute] || 'auto';
+                });
+            });
         },
         // convert font awsome into image
         font_to_img: function () {
-            $("#wrapwrap .fa").each(function () {
+            $("#wrapwrap .o_editable .fa").each(function () {
                 var $font = $(this);
                 var content;
                 _.find(website.editor.fontIcons, function (font) {
                     return _.find(website.editor.getCssSelectors(font.parser), function (css) {
-                        if ($font.is(css[0].replace(/::?before$/, ''))) {
-                            content = css[1].match(/content:\s*['"](.)['"]/)[1];
+                        if ($font.is('.'+css[3].join(',.'))) {
+                            content = css[1].match(/content:\s*['"]?(.)['"]?/)[1];
                             return true;
                         }
                     });
                 });
                 if (content) {
                     var size = parseInt(parseFloat($font.css("font-size"))/parseFloat($font.parent().css("font-size")),10);
-                    var src = _.str.sprintf('/website_mail/font_to_img/%s/%s/'+$font.width(), window.encodeURI(content), window.encodeURI($font.css("color")));
+                    var src = _.str.sprintf('/website_mail/font_to_img/%s/%s/'+$font.height(), window.encodeURI(content), window.encodeURI($font.css("color").replace(/\s/g, '')));
                     var $img = $("<img/>").attr("src", src)
                         .attr("data-class", $font.attr("class"))
                         .attr("style", $font.attr("style"))

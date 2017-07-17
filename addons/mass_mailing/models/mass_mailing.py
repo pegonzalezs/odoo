@@ -28,6 +28,46 @@ class MassMailingTag(osv.Model):
     }
 
 
+class MassMailingList(osv.Model):
+    """Model of a contact list. """
+    _name = 'mail.mass_mailing.list'
+    _order = 'name'
+    _description = 'Mailing List'
+
+    def _get_contact_nbr(self, cr, uid, ids, name, arg, context=None):
+        result = dict.fromkeys(ids, 0)
+        Contacts = self.pool.get('mail.mass_mailing.contact')
+        for group in Contacts.read_group(cr, uid, [('list_id', 'in', ids), ('opt_out', '!=', True)], ['list_id'], ['list_id'], context=context):
+            result[group['list_id'][0]] = group['list_id_count']
+        return result
+
+    _columns = {
+        'name': fields.char('Mailing List', required=True),
+        'create_date': fields.datetime('Creation Date'),
+        'contact_nbr': fields.function(
+            _get_contact_nbr, type='integer',
+            string='Number of Contacts',
+        ),
+        'popup_content': fields.html("Website Popup Content", translate=True, required=True, sanitize=False),
+        'popup_redirect_url': fields.char("Website Popup Redirect URL"),
+    }
+
+    def _get_default_popup_content(self, cr, uid, context=None):
+        return """<div class="modal-header text-center">
+    <h3 class="modal-title mt8">Odoo Presents</h3>
+</div>
+<div class="o_popup_message">
+    <font>7</font>
+    <strong>Business Hacks</strong>
+    <span> to<br/>boost your marketing</span>
+</div>
+<p class="o_message_paragraph">Join our Marketing newsletter and get <strong>this white paper instantly</strong></p>"""
+
+    _defaults = {
+        'popup_content': _get_default_popup_content,
+    }
+
+
 class MassMailingContact(osv.Model):
     """Model of a contact. This model is different from the partner model
     because it holds only some basic information: name, email. The purpose is to
@@ -106,46 +146,6 @@ class MassMailingContact(osv.Model):
         to track bounces (see mail.thread for more details). """
         for obj in self.browse(cr, uid, ids, context=context):
             self.write(cr, uid, [obj.id], {'message_bounce': obj.message_bounce + 1}, context=context)
-
-
-class MassMailingList(osv.Model):
-    """Model of a contact list. """
-    _name = 'mail.mass_mailing.list'
-    _order = 'name'
-    _description = 'Mailing List'
-
-    def _get_contact_nbr(self, cr, uid, ids, name, arg, context=None):
-        result = dict.fromkeys(ids, 0)
-        Contacts = self.pool.get('mail.mass_mailing.contact')
-        for group in Contacts.read_group(cr, uid, [('list_id', 'in', ids), ('opt_out', '!=', True)], ['list_id'], ['list_id'], context=context):
-            result[group['list_id'][0]] = group['list_id_count']
-        return result
-
-    _columns = {
-        'name': fields.char('Mailing List', required=True),
-        'create_date': fields.datetime('Creation Date'),
-        'contact_nbr': fields.function(
-            _get_contact_nbr, type='integer',
-            string='Number of Contacts',
-        ),
-        'popup_content': fields.html("Website Popup Content", translate=True, required=True, sanitize=False),
-        'popup_redirect_url': fields.char("Website Popup Redirect URL"),
-    }
-
-    def _get_default_popup_content(self, cr, uid, context=None):
-        return """<div class="o_popup_modal_header text-center">
-    <h3 class="o_popup_modal_title mt8">Odoo Presents</h3>
-</div>
-<div class="o_popup_message">
-    <font>7</font>
-    <strong>Business Hacks</strong>
-    <span> to<br/>boost your marketing</span>
-</div>
-<p class="o_message_paragraph">Join our Marketing newsletter and get <strong>this white paper instantly</strong></p>"""
-
-    _defaults = {
-        'popup_content': _get_default_popup_content,
-    }
 
 
 class MassMailingStage(osv.Model):
@@ -634,6 +634,7 @@ class MassMailing(osv.Model):
         'reply_to': lambda self, cr, uid, ctx=None: self.pool['mail.message']._get_default_from(cr, uid, context=ctx),
         'mailing_model': 'mail.mass_mailing.contact',
         'contact_ab_pc': 100,
+        'mailing_domain': [],
     }
 
     def onchange_mass_mailing_campaign_id(self, cr, uid, id, mass_mailing_campaign_ids, context=None):
@@ -688,7 +689,8 @@ class MassMailing(osv.Model):
             email_fname = 'email_from'
             if 'email' in model._fields:
                 email_fname = 'email'
-            record_ids = model.search(cr, uid, [('id', 'in', res_ids), (email_fname, 'ilike', email)], context=context)
+            ctx = dict(context or {}, active_test=False)
+            record_ids = model.search(cr, uid, [('id', 'in', res_ids), (email_fname, 'ilike', email)], context=ctx)
             model.write(cr, uid, record_ids, {'opt_out': value}, context=context)
 
     #------------------------------------------------------
@@ -708,8 +710,10 @@ class MassMailing(osv.Model):
                 value['mailing_domain'] = "[('list_id', 'in', %s), ('opt_out', '=', False)]" % list(mailing_list_ids)
             else:
                 value['mailing_domain'] = "[('list_id', '=', False)]"
+        elif 'opt_out' in self.pool[mailing_model]._fields:
+            value['mailing_domain'] = "[('opt_out', '=', False)]"
         else:
-            value['mailing_domain'] = False
+            value['mailing_domain'] = []
         value['body_html'] = "on_change_model_and_list"
         return {'value': value}
 

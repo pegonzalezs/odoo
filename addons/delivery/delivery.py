@@ -24,7 +24,8 @@ import time
 from openerp.osv import fields,osv
 from openerp.tools.translate import _
 import openerp.addons.decimal_precision as dp
-from openerp.exceptions import UserError
+from openerp.tools.safe_eval import safe_eval as eval
+from openerp.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -37,13 +38,22 @@ class delivery_carrier(osv.osv):
             return []
         if context is None:
             context = {}
-        order_id = context.get('order_id',False)
-        if not order_id:
-            res = super(delivery_carrier, self).name_get(cr, uid, ids, context=context)
-        else:
+        display_delivery = context.get('display_delivery', False)
+        order_id = context.get('order_id', False)
+        if display_delivery and order_id:
             order = self.pool.get('sale.order').browse(cr, uid, order_id, context=context)
             currency = order.pricelist_id.currency_id.name or ''
-            res = [(r['id'], r['name']+' ('+(str(r['price']))+' '+currency+')') for r in self.read(cr, uid, ids, ['name', 'price'], context)]
+            res = []
+            for carrier_id in ids:
+                try:
+                    r = self.read(cr, uid, [carrier_id], ['name', 'price'], context)[0]
+                    res.append((r['id'], r['name'] + ' (' + (str(r['price'])) + ' ' + currency + ')'))
+                except ValidationError:
+                    r = self.read(cr, uid, [carrier_id], ['name'], context)[0]
+                    res.append((r['id'], r['name']))
+
+        else:
+            res = super(delivery_carrier, self).name_get(cr, uid, ids, context=context)
         return res
 
     def get_price(self, cr, uid, ids, field_name, arg=None, context=None):
@@ -126,12 +136,11 @@ class delivery_carrier(osv.osv):
 
             # not using advanced pricing per destination: override grid
             grid_id = grid_pool.search(cr, uid, [('carrier_id', '=', record.id)], context=context)
-            if grid_id and not (record.normal_price or record.free_if_more_than):
+            if grid_id and not (record.normal_price is not False or record.free_if_more_than):
                 grid_pool.unlink(cr, uid, grid_id, context=context)
                 grid_id = None
 
-            # Check that float, else 0.0 is False
-            if not (isinstance(record.normal_price,float) or record.free_if_more_than):
+            if not (record.normal_price is not False or record.free_if_more_than):
                 continue
 
             if not grid_id:
@@ -158,7 +167,7 @@ class delivery_carrier(osv.osv):
                     'list_price': 0.0,
                 }
                 grid_line_pool.create(cr, uid, line_data, context=context)
-            if isinstance(record.normal_price,float):
+            if record.normal_price is not False:
                 line_data = {
                     'grid_id': grid_id and grid_id[0],
                     'name': _('Default price'),
@@ -224,6 +233,9 @@ class delivery_grid(osv.osv):
             quantity += q
         total = (order.amount_total or 0.0) - total_delivery
 
+        ctx = context.copy()
+        ctx['date'] = order.date_order
+        total = self.pool['res.currency'].compute(cr, uid, order.currency_id.id, order.company_id.currency_id.id, total, context=ctx)
         return self.get_price_from_picking(cr, uid, id, total,weight, volume, quantity, context=context)
 
     def get_price_from_picking(self, cr, uid, id, total, weight, volume, quantity, context=None):

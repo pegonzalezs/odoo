@@ -168,6 +168,8 @@ instance.web.form.DashBoard = instance.web.form.FormWidget.extend({
             action = result,
             view_mode = action_attrs.view_mode;
 
+        if (!action) { return; }
+
         // evaluate action_attrs context and domain
         action_attrs.context_string = action_attrs.context;
         action_attrs.context = instance.web.pyeval.eval(
@@ -206,6 +208,7 @@ instance.web.form.DashBoard = instance.web.form.FormWidget.extend({
             headless: true,
             low_profile: true,
             display_title: false,
+            search_disable_custom_filters: true,
             list: {
                 selectable: false
             }
@@ -331,7 +334,7 @@ instance.web.search.FavoriteMenu.include({
         this.$add_dashboard_btn = $add_to_dashboard.eq(2).find('button');
         this.$add_dashboard_input = $add_to_dashboard.eq(1).find('input');
         this.$add_dashboard_link = $add_to_dashboard.first();
-        var title = this.searchview.getParent().title;
+        var title = this.searchview.getParent() && this.searchview.getParent().title;
         this.$add_dashboard_input.val(title);
         this.$add_dashboard_link.click(function () {
             self.toggle_dashboard_menu();

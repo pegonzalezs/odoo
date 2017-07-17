@@ -42,7 +42,8 @@ class price_type(osv.osv):
         ids = mf.search(cr, uid, [('model','in', (('product.product'),('product.template'))), ('ttype','=','float')], context=context)
         res = []
         for field in mf.browse(cr, uid, ids, context=context):
-            res.append((field.name, field.field_description))
+            if not (field.name, field.field_description) in res:
+                res.append((field.name, field.field_description))
         return res
 
     def _get_field_currency(self, cr, uid, fname, ctx):
@@ -197,6 +198,7 @@ class product_pricelist(osv.osv):
     def _price_rule_get_multi(self, cr, uid, pricelist, products_by_qty_by_partner, context=None):
         context = context or {}
         date = context.get('date') or time.strftime('%Y-%m-%d')
+        date = date[0:10]
 
         products = map(lambda x: x[0], products_by_qty_by_partner)
         currency_obj = self.pool.get('res.currency')
@@ -275,8 +277,7 @@ class product_pricelist(osv.osv):
                 if is_product_template:
                     if rule.product_tmpl_id and product.id != rule.product_tmpl_id.id:
                         continue
-                    if rule.product_id and \
-                            (product.product_variant_count > 1 or product.product_variant_ids[0].id != rule.product_id.id):
+                    if rule.product_id and not (product.product_variant_count == 1 and product.product_variant_ids[0].id == rule.product_id.id):
                         # product rule acceptable on template if has only one variant
                         continue
                 else:
@@ -311,7 +312,8 @@ class product_pricelist(osv.osv):
                         if (not partner) or (seller_id.name.id != partner):
                             continue
                         seller = seller_id
-                    if not seller and product.seller_ids:
+                    # DO NOT FORWARDPORT
+                    if not seller and product.seller_ids and rule.price_version_id.pricelist_id.type == 'sale':
                         seller = product.seller_ids[0]
                     if seller:
                         qty_in_seller_uom = qty
@@ -358,7 +360,7 @@ class product_pricelist(osv.osv):
                         price = min(price, price_limit + price_max_margin)
 
                     rule_id = rule.id
-                break
+                    break
 
             # Final price conversion to target UoM
             price = product_uom_obj._compute_price(cr, uid, price_uom_id, price, qty_uom_id)
@@ -379,6 +381,14 @@ class product_pricelist(osv.osv):
 class product_pricelist_version(osv.osv):
     _name = "product.pricelist.version"
     _description = "Pricelist Version"
+
+    def _get_product_pricelist(self, cr, uid, ids, context=None):
+        result = set()
+        for pricelist in self.pool['product.pricelist'].browse(cr, uid, ids, context=context):
+            for version_id in pricelist.version_id:
+                result.add(version_id.id)
+        return list(result)
+
     _columns = {
         'pricelist_id': fields.many2one('product.pricelist', 'Price List',
             required=True, select=True, ondelete='cascade'),
@@ -392,7 +402,10 @@ class product_pricelist_version(osv.osv):
         'date_start': fields.date('Start Date', help="First valid date for the version."),
         'date_end': fields.date('End Date', help="Last valid date for the version."),
         'company_id': fields.related('pricelist_id','company_id',type='many2one',
-            readonly=True, relation='res.company', string='Company', store=True)
+            readonly=True, relation='res.company', string='Company', store={
+                'product.pricelist': (_get_product_pricelist, ['company_id'], 20),
+                'product.pricelist.version': (lambda self, cr, uid, ids, c=None: ids, ['pricelist_id'], 20),
+            })
     }
     _defaults = {
         'active': lambda *a: 1,
@@ -485,6 +498,21 @@ class product_pricelist_item(osv.osv):
                 return False
         return True
 
+    def _get_product_pricelist(self, cr, uid, ids, context=None):
+        result = set()
+        for pricelist in self.pool['product.pricelist'].browse(cr, uid, ids, context=context):
+            for version_id in pricelist.version_id:
+                for item_id in version_id.items_id:
+                    result.add(item_id.id)
+        return list(result)
+
+    def _get_product_pricelist_version(self, cr, uid, ids, context=None):
+        result = set()
+        for version in self.pool['product.pricelist.version'].browse(cr, uid, ids, context=context):
+            for item_id in version.items_id:
+                result.add(item_id.id)
+        return list(result)
+
     _columns = {
         'name': fields.char('Rule Name', help="Explicit rule name for this pricelist line."),
         'price_version_id': fields.many2one('product.pricelist.version', 'Price List Version', required=True, select=True, ondelete='cascade'),
@@ -514,7 +542,11 @@ class product_pricelist_item(osv.osv):
         'price_max_margin': fields.float('Max. Price Margin',
             digits_compute= dp.get_precision('Product Price'), help='Specify the maximum amount of margin over the base price.'),
         'company_id': fields.related('price_version_id','company_id',type='many2one',
-            readonly=True, relation='res.company', string='Company', store=True)
+            readonly=True, relation='res.company', string='Company', store={
+                'product.pricelist': (_get_product_pricelist, ['company_id'], 30),
+                'product.pricelist.version': (_get_product_pricelist_version, ['pricelist_id'], 30),
+                'product.pricelist.item': (lambda self, cr, uid, ids, c=None: ids, ['price_version_id'], 30),
+            })
     }
 
     _constraints = [

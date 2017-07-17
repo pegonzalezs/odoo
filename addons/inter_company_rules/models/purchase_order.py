@@ -30,6 +30,7 @@ class purchase_order(models.Model):
             :param company : the company of the created PO
             :rtype company : res.company record
         """
+        self = self.with_context(force_company=company.id)
         SaleOrder = self.env['sale.order']
         company_partner = self.company_id.partner_id
 
@@ -50,8 +51,9 @@ class purchase_order(models.Model):
         # read it as sudo, because inter-compagny user can not have the access right on PO
         sale_order_data = self.sudo()._prepare_sale_order_data(self.name, company_partner, company, self.dest_address_id and self.dest_address_id.id or False)
         sale_order = SaleOrder.sudo(intercompany_uid).create(sale_order_data[0])
-        for line in self.order_line:
-            so_line_vals = self.sudo()._prepare_sale_order_line_data(line, company, sale_order.id)
+        # lines are browse as sudo to access all data required to be copied on SO line (mainly for company dependent field like taxes)
+        for line in self.order_line.sudo():
+            so_line_vals = self._prepare_sale_order_line_data(line, company, sale_order.id)
             SaleOrderLine.sudo(intercompany_uid).create(so_line_vals)
 
         # write supplier reference field on PO
@@ -75,9 +77,13 @@ class purchase_order(models.Model):
             :rtype direct_delivery_address : res.partner record
         """
         partner_addr = partner.sudo().address_get(['default', 'invoice', 'delivery', 'contact'])
+        warehouse = company.warehouse_id and company.warehouse_id.company_id.id == company.id and company.warehouse_id or False
+        if not warehouse:
+            raise Warning(_('Configure correct warehouse for company(%s) from Menu: Settings/companies/companies' % (company.name)))
         return {
             'name': self.env['ir.sequence'].sudo().next_by_code('sale.order') or '/',
             'company_id': company.id,
+            'warehouse_id': warehouse.id,
             'client_order_ref': name,
             'partner_id': partner.id,
             'pricelist_id': partner.property_product_pricelist.id,

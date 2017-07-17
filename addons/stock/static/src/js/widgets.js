@@ -152,7 +152,7 @@ function openerp_picking_widgets(instance){
             });
             this.$('.oe_searchbox').blur(function(){
                 self.getParent().barcode_scanner.connect(function(ean){
-                    self.get_Parent().scan(ean);
+                    self.getParent().scan(ean);
                 });
             })
             this.$('#js_select').change(function(){
@@ -254,12 +254,13 @@ function openerp_picking_widgets(instance){
                 return false;
             });
             this.$('.js_qty').focus(function(){
+                oldjsqtyvalue = parseFloat($(this).val());
                 self.getParent().barcode_scanner.disconnect();
             });
             this.$('.js_qty').blur(function(){
                 var op_id = $(this).parents("[data-id]:first").data('id');
                 var value = parseFloat($(this).val());
-                if (value>=0){
+                if (value!=oldjsqtyvalue && value>=0){
                     self.getParent().set_operation_quantity(value, op_id);
                 }
                 
@@ -685,18 +686,21 @@ function openerp_picking_widgets(instance){
             }
 
             return loaded_picking.then(function(){
+                var deferred_pack = new instance.web.Model('stock.picking').call('check_group_pack').then(function(result){
+                    return self.show_pack = result;
+                });
+                var deferred_lot = new instance.web.Model('stock.picking').call('check_group_lot').then(function(result){
+                    return self.show_lot = result;
+                });
+                
+                return $.when(deferred_pack, deferred_lot).done(function(){
+                    if (!_.isEmpty(self.locations)){
+                        return $.when();
+                    }
                     return new instance.web.Model('stock.location').call('search',[[['usage','=','internal']]]).then(function(locations_ids){
                         return new instance.web.Model('stock.location').call('read',[locations_ids, []]).then(function(locations){
                             self.locations = locations;
                         });
-                    });
-                }).then(function(){
-                    return new instance.web.Model('stock.picking').call('check_group_pack').then(function(result){
-                        return self.show_pack = result;
-                    });
-                }).then(function(){
-                    return new instance.web.Model('stock.picking').call('check_group_lot').then(function(result){
-                        return self.show_lot = result;
                     });
                 }).then(function(){
                     if (self.picking.pack_operation_exist === false){
@@ -704,9 +708,7 @@ function openerp_picking_widgets(instance){
                         return new instance.web.Model('stock.picking').call('do_prepare_partial',[[self.picking.id]]);
                     }
                 }).then(function(){
-                        return new instance.web.Model('stock.pack.operation').call('search',[[['picking_id','=',self.picking.id]]])
-                }).then(function(pack_op_ids){
-                        return new instance.web.Model('stock.pack.operation').call('read',[pack_op_ids, [], new instance.web.CompoundContext()])
+                        return new instance.web.Model('stock.pack.operation').call('search_read',[[['picking_id','=',self.picking.id]]])
                 }).then(function(operations){
                     self.packoplines = operations;
                     var package_ids = [];
@@ -722,11 +724,13 @@ function openerp_picking_widgets(instance){
                 }).then(function(packages){
                     self.packages = packages;
                 }).then(function(){
-                        return new instance.web.Model('product.ul').call('search',[[]])
-                }).then(function(uls_ids){
-                        return new instance.web.Model('product.ul').call('read',[uls_ids, []])
-                }).then(function(uls){
-                    self.uls = uls;
+                    if (!_.isEmpty(self.uls)){
+                        return $.when();
+                    }
+                    return new instance.web.Model('product.ul').call('search_read',[[]]).then(function(uls){
+                        self.uls = uls;
+                    });
+                });
                 });
         },
         start: function(){
@@ -844,8 +848,8 @@ function openerp_picking_widgets(instance){
                     if (result.filter_loc !== false){
                         //check if we have receive a location as answer
                         if (result.filter_loc !== undefined){
-                            var modal_loc_hidden = self.$('#js_LocationChooseModal').attr('aria-hidden');
-                            if (modal_loc_hidden === "false"){
+                            var modal_loc_hidden = self.$('#js_LocationChooseModal:visible');
+                            if (modal_loc_hidden.length > 0){
                                 var line = self.$('#js_LocationChooseModal .js_loc_option[data-loc-id='+result.filter_loc_id+']').attr('selected','selected');
                             }
                             else{

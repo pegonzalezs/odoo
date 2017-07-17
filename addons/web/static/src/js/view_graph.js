@@ -29,7 +29,7 @@ instance.web.GraphView = instance.web.View.extend({
         this.widget = undefined;
     },
     start: function () {
-        var load_fields = this.model.call('fields_get', [])
+        var load_fields = this.model.call('fields_get', [], {context: this.dataset.get_context()})
                 .then(this.prepare_fields.bind(this));
 
         return $.when(this._super(), load_fields).then(this.render_buttons.bind(this));
@@ -271,7 +271,9 @@ instance.web.GraphWidget = instance.web.Widget.extend({
         svg.transition().duration(0);
 
         var chart = nv.models.multiBarChart();
+        var maxVal = _.max(values, function(v) {return v.y})
         chart.options({
+          margin: {left: 12 * String(maxVal && maxVal.y || 10000000).length},
           delay: 250,
           transitionDuration: 10,
           showLegend: true,
@@ -400,8 +402,9 @@ instance.web.GraphWidget = instance.web.Widget.extend({
         svg.transition().duration(0);
 
         var chart = nv.models.lineChart();
+        var maxVal = _.max(values, function(v) {return v.y})
         chart.options({
-          margin: {left: 50, right: 50},
+          margin: {left: 12 * String(maxVal && maxVal.y || 10000000).length, right: 50},
           useInteractiveGuideline: true,
           showLegend: true,
           showXAxis: true,

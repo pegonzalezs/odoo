@@ -10,7 +10,7 @@ function reload_favorite_list(result) {
         if (result.view) {
             self = result.view;
         }
-        new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",self.dataset.context.uid]]).first()
+        return new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",self.dataset.context.uid]]).first()
         .done(
             function(result) {
                 var sidebar_items = {};
@@ -64,10 +64,11 @@ function reload_favorite_list(result) {
         }
     instance.web_calendar.CalendarView.include({
         extraSideBar: function(){
-            this._super();
+            result = this._super();
             if (this.useContacts){
-                new reload_favorite_list(this);
+                return result.then(reload_favorite_list(this));
             }
+            return result;
         }
     });
 
@@ -101,21 +102,23 @@ function reload_favorite_list(result) {
                 },
             });
             this.ir_model_m2o.insertAfter($('div.oe_calendar_filter'));
-            this.ir_model_m2o.on('change:value', self, function() { 
-                self.add_filter();
+            this.ir_model_m2o.on('change:value', self, function() {
+                // once selected, we reset the value to false.
+                if (self.ir_model_m2o.get_value()) {
+                    self.add_filter();
+                }
             });
         },
         add_filter: function() {
             var self = this;
-            new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",this.view.dataset.context.uid]]).first().done(function(result){
+            return new instance.web.Model("res.users").query(["partner_id"]).filter([["id", "=",this.view.dataset.context.uid]]).first().done(function(result) {
                 $.map(self.ir_model_m2o.display_value, function(element,index) {
                     if (result.partner_id[0] != index){
                         self.ds_message = new instance.web.DataSetSearch(self, 'calendar.contacts');
                         self.ds_message.call("create", [{'partner_id': index}]);
                     }
                 });
-            });
-            new reload_favorite_list(this);
+            }).then(reload_favorite_list(this));
         },
         destroy_filter: function(e) {
             var self= this;
@@ -125,9 +128,7 @@ function reload_favorite_list(result) {
                 var id = $(e.currentTarget)[0].dataset.id;
                 self.ds_message.call('search', [[['partner_id', '=', parseInt(id)]]]).then(function(record){
                     return self.ds_message.unlink(record);
-                }).done(function() {
-                    new reload_favorite_list(self);
-                });
+                }).done(reload_favorite_list(self));
             });
         },
     });

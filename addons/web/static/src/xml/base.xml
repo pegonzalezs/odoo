@@ -625,12 +625,12 @@
                     </t>
                     <a class="oe_file_attachment" t-att-title="item.title or ''" t-att-data-section="section.name" t-att-data-index="item_index" t-att-href="item.url">
                         <t t-raw="item.label"/>
-                        <span t-if="section.name == 'files' and !item.callback" class="oe_sidebar_delete_item" t-att-data-id="item.id" title="Delete this attachment">
+                        <span t-if="widget.view.is_action_enabled('edit') &amp;&amp; section.name == 'files' and !item.callback" class="oe_sidebar_delete_item" t-att-data-id="item.id" title="Delete this attachment">
                             <i class="fa fa-trash-o"/>
                         </span>
                     </a>
                 </li>
-                <li t-if="section.name == 'files'" class="oe_sidebar_add_attachment">
+                <li t-if="widget.view.is_action_enabled('edit') &amp;&amp; section.name == 'files'" class="oe_sidebar_add_attachment">
                     <t t-call="HiddenInputFile">
                         <t t-set="fileupload_id" t-value="widget.fileupload_id"/>
                         <t t-set="fileupload_action" t-translation="off">/web/binary/upload_attachment</t>
@@ -1945,13 +1945,11 @@
 <t t-name="FieldMany2ManyCheckBoxes">
     <t t-foreach="widget.get('records')" t-as="record">
         <div>
-            <t t-if="selected[record[0]]">
-                <input type="checkbox" t-att-data-record-id="JSON.stringify(record[0])" checked="true"/>
-            </t>
-            <t t-if="! selected[record[0]]">
-                <input type="checkbox" t-att-data-record-id="JSON.stringify(record[0])"/>
-            </t>
-            <t t-esc="record[1]"/>
+            <label style="font-weight: normal">
+                <input type="checkbox" t-att-data-record-id="JSON.stringify(record[0])"
+                       t-att-checked="selected[record[0]] or null"/>
+                <t t-esc="record[1]"/>
+            </label>
         </div>
     </t>
 </t>

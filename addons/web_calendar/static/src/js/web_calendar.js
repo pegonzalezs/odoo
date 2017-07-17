@@ -50,6 +50,9 @@ openerp.web_calendar = function(instance) {
             dayNames: moment.weekdays(),
             dayNamesShort: moment.weekdaysShort(),
             firstDay: moment._locale._week.dow,
+            weekNumberCalculation: function(date) {
+                return moment(date).week();
+            },
             weekNumbers: true,
             axisFormat : shortTimeformat.replace(/:mm/,'(:mm)'),
             timeFormat : {
@@ -297,7 +300,7 @@ openerp.web_calendar = function(instance) {
                     self.proxy('update_record')(event._id, data);
                 },
                 eventRender: function (event, element, view) {
-                    element.find('.fc-event-title').html(event.title);
+                    element.find('.fc-event-title').html(event.title + event.attendee_avatars);
                 },
                 eventAfterRender: function (event, element, view) {
                     if ((view.name !== 'month') && (((event.end-event.start)/60000)<=30)) {
@@ -364,6 +367,7 @@ openerp.web_calendar = function(instance) {
             return $.when();
         },
         extraSideBar: function() {
+            return $.when();
         },
 
         open_quick_create: function(data_template) {
@@ -531,6 +535,9 @@ openerp.web_calendar = function(instance) {
                             throw new Error("Incomplete data received from dataset for record " + evt.id);
                         }
                     }
+                    else if (_.contains(["date", "datetime"], self.fields[fieldname].type)) {
+                        temp_ret[fieldname] = instance.web.format_value(value, self.fields[fieldname]);
+                    }
                     else {
                         temp_ret[fieldname] = value;
                     }
@@ -565,7 +572,7 @@ openerp.web_calendar = function(instance) {
                             attendee_showed += 1;
                             if (attendee_showed<= MAX_ATTENDEES) {
                                 if (self.avatar_model !== null) {
-                                       the_title_avatar += '<img title="' + self.all_attendees[the_attendee_people] + '" class="attendee_head"  \
+                                       the_title_avatar += '<img title="' + _.escape(self.all_attendees[the_attendee_people]) + '" class="attendee_head"  \
                                                             src="/web/binary/image?model=' + self.avatar_model + '&field=image_small&id=' + the_attendee_people + '"></img>';
                                 }
                                 else {
@@ -573,19 +580,18 @@ openerp.web_calendar = function(instance) {
                                             tempColor = (self.all_filters[the_attendee_people] !== undefined) 
                                                         ? self.all_filters[the_attendee_people].color
                                                         : (self.all_filters[-1] ? self.all_filters[-1].color : 1);
-                                        the_title_avatar += '<i class="fa fa-user attendee_head color_'+tempColor+'" title="' + self.all_attendees[the_attendee_people] + '" ></i>';
+                                        the_title_avatar += '<i class="fa fa-user attendee_head color_'+tempColor+'" title="' + _.escape(self.all_attendees[the_attendee_people]) + '" ></i>';
                                     }//else don't add myself
                                 }
                             }
                             else {
-                                attendee_other += self.all_attendees[the_attendee_people] +", ";
+                                attendee_other += _.escape(self.all_attendees[the_attendee_people]) +", ";
                             }
                         }
                     );
                     if (attendee_other.length>2) {
                         the_title_avatar += '<span class="attendee_head" title="' + attendee_other.slice(0, -2) + '">+</span>';
                     }
-                    the_title = the_title_avatar + the_title;
                 }
             }
             
@@ -597,6 +603,7 @@ openerp.web_calendar = function(instance) {
                 'start': moment(date_start).format('YYYY-MM-DD HH:mm:ss'),
                 'end': moment(date_stop).format('YYYY-MM-DD HH:mm:ss'),
                 'title': the_title,
+                'attendee_avatars': the_title_avatar,
                 'allDay': (this.fields[this.date_start].type == 'date' || (this.all_day && evt[this.all_day]) || false),
                 'id': evt.id,
                 'attendees':attendees
@@ -680,9 +687,9 @@ openerp.web_calendar = function(instance) {
         },
         _do_search: function(domain, context, _group_by) {
             var self = this;
-           if (! self.all_filters) {            
-                self.all_filters = {}                
-           }
+            if (! self.all_filters) {
+                self.all_filters = {}
+            }
 
             if (! _.isUndefined(this.event_source)) {
                 this.$calendar.fullCalendar('removeEventSource', this.event_source);
@@ -690,9 +697,19 @@ openerp.web_calendar = function(instance) {
             this.event_source = {
                 events: function(start, end, callback) {
                     var current_event_source = self.event_source;
+                    var event_domain = self.get_range_domain(domain, start, end);
+                    if (self.useContacts && (!self.all_filters[-1] || !self.all_filters[-1].is_checked)) {
+                        var partner_ids = $.map(self.all_filters, function(o) { if (o.is_checked) { return o.value; }});
+                        if (!_.isEmpty(partner_ids)) {
+                            event_domain = new instance.web.CompoundDomain(
+                                event_domain,
+                                [[self.attendee_people, 'in', partner_ids]]
+                            );
+                        }
+                    }
                     self.dataset.read_slice(_.keys(self.fields), {
                         offset: 0,
-                        domain: self.get_range_domain(domain, start, end),
+                        domain: event_domain,
                         context: context,
                     }).done(function(events) {
                         if (self.dataset.index === null) {
@@ -716,9 +733,9 @@ openerp.web_calendar = function(instance) {
                             var color_field = self.fields[self.color_field];
                             _.each(events, function (e) {
                                 var key, val = null;
-                                if (self.fields[self.color_field].type == "selection"){
+                                if (color_field.type == "selection") {
                                     key = e[self.color_field];
-                                    val = _.find( self.fields[self.color_field].selection, function(name){ return name[0] === key;});
+                                    val = _.find(color_field.selection, function(name){ return name[0] === key;});
                                 }else{
                                     key = e[self.color_field][0];
                                     val = e[self.color_field];
@@ -743,7 +760,7 @@ openerp.web_calendar = function(instance) {
                                 self.sidebar.filter.set_filters();
 
                                 events = $.map(events, function (e) {
-                                    var key = self.fields[self.color_field].type == "selection"?e[self.color_field]:e[self.color_field][0];
+                                    var key = color_field.type == "selection" ? e[self.color_field] : e[self.color_field][0];
                                     if (_.contains(self.now_filter_ids, key) &&  self.all_filters[key].is_checked) {
                                         return e;
                                     }
@@ -751,21 +768,6 @@ openerp.web_calendar = function(instance) {
                                 });
                             }
 
-                        }
-                        else { //WE USE CONTACT
-                            if (self.attendee_people !== undefined) {
-                                //if we don't filter on 'Everybody's Calendar
-                                if (!self.all_filters[-1] || !self.all_filters[-1].is_checked) {
-                                    var checked_filter = $.map(self.all_filters, function(o) { if (o.is_checked) { return o.value; }});
-                                    // If we filter on contacts... we keep only events from coworkers
-                                    events = $.map(events, function (e) {
-                                        if (_.intersection(checked_filter,e[self.attendee_people]).length) {
-                                            return e;
-                                        }
-                                        return null;
-                                    });
-                                }
-                            }
                         }
                         var all_attendees = $.map(events, function (e) { return e[self.attendee_people]; });
                         all_attendees = _.chain(all_attendees).flatten().uniq().value();
@@ -801,22 +803,12 @@ openerp.web_calendar = function(instance) {
         get_range_domain: function(domain, start, end) {
             var format = instance.web.date_to_str;
             
-            extend_domain = [[this.date_start, '>=', format(start)],
-                     [this.date_start, '<=', format(end)]];
+            extend_domain = [[this.date_start, '<=', format(end)]];
 
             if (this.date_stop) {
-                //add at start 
-                extend_domain.splice(0,0,'|','|','&');
-                //add at end 
                 extend_domain.push(
-                                '&',
-                                [this.date_start, '<=', format(start)],
-                                [this.date_stop, '>=', format(start)],
-                                '&',
-                                [this.date_start, '<=', format(end)],
-                                [this.date_stop, '>=', format(start)]
+                    [this.date_stop, '>=', format(start)]
                 );
-                //final -> (A & B) | (C & D) | (E & F) ->  | | & A B & C D & E F
             }
             return new instance.web.CompoundDomain(domain, extend_domain);
         },
@@ -830,7 +822,7 @@ openerp.web_calendar = function(instance) {
             var index = this.dataset.get_id_index(id);
             if (index !== null) {
                 event_id = this.dataset.ids[index];
-                this.dataset.write(event_id, data, {}).done(function() {
+                this.dataset.write(event_id, data, {}).always(function() {
                     if (is_virtual_id(event_id)) {
                         // this is a virtual ID and so this will create a new event
                         // with an unknown id for us.
@@ -969,13 +961,7 @@ openerp.web_calendar = function(instance) {
             this.$input = $();
         },
         get_title: function () {
-            var parent = this.getParent();
-            if (_.isUndefined(parent)) {
-                return _t("Create");
-            }
-            var title = (_.isUndefined(parent.field_widget)) ?
-                    (parent.string || parent.name) :
-                    parent.field_widget.string || parent.field_widget.name || '';
+            var title = (this.options.action)? this.options.action.name : '';
             return _t("Create: ") + title;
         },
         start: function () {
@@ -1035,7 +1021,7 @@ openerp.web_calendar = function(instance) {
         
         slow_add: function() {
             var val = this.$input.val();
-            this.slow_create({'name': val});
+            this.slow_create(_.isEmpty(val) ? {} : {'name': val});
         },
 
         /**
@@ -1361,7 +1347,7 @@ openerp.web_calendar = function(instance) {
             pop.show_element(this.field.relation, id, this.build_context(), {
                 title: _t("Open: ") + this.string,
                 write_function: function(id, data, _options) {
-                    return self.dataset.write(id, data, {}).done(function() {
+                    return self.dataset.write(id, data, _options).done(function() {
                         // Note that dataset will trigger itself the
                         // ``dataset_changed`` signal
                         self.calendar_view.refresh_event(id);

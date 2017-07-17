@@ -111,8 +111,6 @@ define(['summernote/summernote'], function () {
             })).appendTo($resizefa);
         }
         var $colorfa = $airPopover.find('.note-color').clone();
-        $colorfa.find(".btn-group:first").remove();
-        $colorfa.find("ul.dropdown-menu").css('min-width', '172px');
         $colorfa.find('button[data-event="color"]').attr('data-value', '{"foreColor": "#f00"}')
             .find("i").css({'background': '', 'color': '#f00'});
         $resizefa.after($colorfa);
@@ -185,6 +183,8 @@ define(['summernote/summernote'], function () {
         $container.find('button[data-event="undo"]').attr('disabled', !history.hasUndo());
         $container.find('button[data-event="redo"]').attr('disabled', !history.hasRedo());
 
+        $container.find('.note-color').removeClass("hidden");
+
         if (oStyle.image) {
             $container.find('[data-event]').parent().removeClass("active");
 
@@ -195,7 +195,6 @@ define(['summernote/summernote'], function () {
             $container.find('a[data-event="padding"][data-value=""]').parent().toggleClass("active", !$container.find('.active a[data-event="padding"]').length);
 
             if (dom.isImgFont(oStyle.image)) {
-
                 $container.find('.btn-group:not(.only_fa):has(button[data-event="resize"],button[data-event="imageShape"])').addClass("hidden");
                 $container.find('.only_fa').removeClass("hidden");
                 $container.find('button[data-event="resizefa"][data-value="2"]').toggleClass("active", $(oStyle.image).hasClass("fa-2x"));
@@ -205,11 +204,9 @@ define(['summernote/summernote'], function () {
                 $container.find('button[data-event="resizefa"][data-value="1"]').toggleClass("active", !$container.find('.active[data-event="resizefa"]').length);
 
                 $container.find('button[data-event="imageShape"][data-value="fa-spin"]').toggleClass("active", $(oStyle.image).hasClass("fa-spin"));
-                
-                $container.find('.note-color').removeClass("hidden");
-
+                $container.find('button[data-event="imageShape"][data-value="shadow"]').toggleClass("active", $(oStyle.image).hasClass("shadow"));
+                $container.find('.btn-group:has(button[data-event="imageShape"])').removeClass("hidden");
             } else {
-
                 $container.find('.hidden:not(.only_fa)').removeClass("hidden");
                 $container.find('.only_fa').addClass("hidden");
                 var width = ($(oStyle.image).attr('style') || '').match(/(^|;|\s)width:\s*([0-9]+%)/);
@@ -300,15 +297,19 @@ define(['summernote/summernote'], function () {
     };
 
     $(document).on('click keyup', function () {
-        $('button[data-event="undo"]').attr('disabled', !history.hasUndo());
-        $('button[data-event="redo"]').attr('disabled', !history.hasRedo());
+        var $popover = $((range.create()||{}).sc).closest('[contenteditable]');
+        var popover_history = ($popover.data()||{}).NoteHistory;
+        if(!popover_history || popover_history == history) return;
+        var editor = $popover.parent('.note-editor');
+        $('button[data-event="undo"]', editor).attr('disabled', !popover_history.hasUndo());
+        $('button[data-event="redo"]', editor).attr('disabled', !popover_history.hasRedo());
     });
 
     eventHandler.editor.undo = function ($popover) {
-        if(!$popover.attr('disabled')) history.undo();
+        if(!$popover.attr('disabled')) $popover.data('NoteHistory').undo();
     };
     eventHandler.editor.redo = function ($popover) {
-        if(!$popover.attr('disabled')) history.redo();
+        if(!$popover.attr('disabled'))  $popover.data('NoteHistory').redo();
     };
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,15 +369,13 @@ define(['summernote/summernote'], function () {
 
         var def = new $.Deferred();
         editor.on("save", this, function (linkInfo) {
-            linkInfo.range.select();
             $editable.data('range', linkInfo.range);
             def.resolve(linkInfo);
-            $editable.data('NoteHistory').popUndo();
+            $editable.data('range', range.create());
             $('.note-popover .note-link-popover').show();
         });
         editor.on("cancel", this, function () {
             def.reject();
-            $editable.data('NoteHistory').popUndo();
         });
         return def;
     };
@@ -414,7 +413,7 @@ define(['summernote/summernote'], function () {
         if (node && (nodeName === "SPAN" || nodeName === "I") && className.length) {
             var classNames = className.split(/\s+/);
             for (var k=0; k<website.editor.fontIcons.length; k++) {
-                if (_.intersection(website.editor.fontIcons[k].icons, classNames).length) {
+                if (_.intersection(website.editor.fontIcons[k].alias, classNames).length) {
                     return true;
                 }
             }
@@ -856,11 +855,6 @@ define(['summernote/summernote'], function () {
             return aUndo.length > pos+1;
         };
 
-        this.popUndo = function () {
-            pos--;
-            aUndo.pop();
-        };
-
         var last;
         this.recordUndo = function ($editable, event, internal_history) {
             if (!internal_history) {
@@ -1125,7 +1119,16 @@ define(['summernote/summernote'], function () {
             return this._save();
         },
         saveElement: function ($el) {
-            var markup = $el.prop('outerHTML');
+            // escape text nodes for xml saving
+            var escaped_el = $el.clone();
+            var to_escape = escaped_el.find('*').addBack();
+            to_escape = to_escape.not(to_escape.filter('object,iframe,script,style,[data-oe-model][data-oe-model!="ir.ui.view"]').find('*').addBack());
+            to_escape.contents().each(function(){
+                if(this.nodeType == 3) {
+                    this.nodeValue = $('<div />').text(this.nodeValue).html();
+                }
+            });
+            var markup = escaped_el.prop('outerHTML');
             return openerp.jsonRpc('/web/dataset/call', 'call', {
                 model: 'ir.ui.view',
                 method: 'save',
@@ -1141,6 +1144,8 @@ define(['summernote/summernote'], function () {
                     d.resolve();
                 }).on('hidden.bs.modal', function () {
                     d.reject();
+                }).on('keydown.dismiss.bs.modal', function (event) {
+                    event.stopImmediatePropagation();
                 });
                 d.always(function () {
                     $dialog.remove();
@@ -1216,8 +1221,6 @@ define(['summernote/summernote'], function () {
             this.EditorBar = EditorBar;
             $('.inline-media-link').remove();
             this._super.apply(this, arguments);
-
-            computeFonts();
         },
         /**
          * Add a record undo to history
@@ -1289,7 +1292,7 @@ define(['summernote/summernote'], function () {
                     setTimeout(function () {$destroy.destroy();},150); // setTimeout to remove flickering when change to editable zone (re-create an editor)
                     $last = null;
                 }
-                if ($editable.size() && (!$last || $last[0] != $editable[0]) &&
+                if ($editable.not('.o_skip_rte').size() && (!$last || $last[0] != $editable[0]) &&
                         ($target.closest('[contenteditable]').attr('contenteditable') || "").toLowerCase() !== 'false') {
                     $editable.summernote(self._config());
                     $editable.data('NoteHistory', self.history);
@@ -1351,6 +1354,8 @@ define(['summernote/summernote'], function () {
             $(document).trigger('mousedown');
 
             if (!restart) {
+                computeFonts();
+
                 $('#wrapwrap, .o_editable').on('click', '*', function (event) {
                     event.preventDefault();
                 });
@@ -1403,6 +1408,7 @@ define(['summernote/summernote'], function () {
     website.editor.Dialog = openerp.Widget.extend({
         events: {
             'hidden.bs.modal': 'destroy',
+            'keydown.dismiss.bs.modal': 'stop_escape',
             'click button.save': 'save',
             'click button[data-dismiss="modal"]': 'cancel',
         },
@@ -1431,6 +1437,11 @@ define(['summernote/summernote'], function () {
                 $('body').addClass('modal-open');
             }
         },
+        stop_escape: function(event) {
+            if($(".modal.in").length>0 && event.which == 27){
+                event.stopPropagation();
+            }
+        }
     });
 
     website.editor.LinkDialog = website.editor.Dialog.extend({
@@ -1646,29 +1657,22 @@ define(['summernote/summernote'], function () {
                 });
             }
 
-            var match, $control;
-            if (href && (match = /mailto:(.+)/.exec(href))) {
-                this.$('input.email-address').val(match[1]).change();
-            }
-            if (href && !$control) {
-                this.page_exists(href).then(function (exist) {
-                    if (exist) {
-                        self.$('#link-page').select2('data', {'id': href, 'text': href});
-                    } else {
-                        self.$('input.url').val(href).change();
-                        self.$('input.window-new').closest("div").show();
-                    }
-                });
-            }
-
-            this.page_exists(href).then(function (exist) {
-                if (exist) {
-                    self.$('#link-page').select2('data', {'id': href, 'text': href});
-                } else {
-                    self.$('input.url').val(href).change();
-                    self.$('input.window-new').closest("div").show();
+            var match;
+            if(href){
+                if (match = /mailto:(.+)/.exec(href)) {
+                    this.$('input.email-address').val(match[1]).change();
                 }
-            });
+                else {
+                    this.page_exists(href).then(function (exist) {
+                        if (exist) {
+                            self.$('#link-page').select2('data', {'id': href, 'text': href});
+                        } else {
+                            self.$('input.url').val(href).change();
+                            self.$('input.window-new').closest("div").show();
+                        }
+                    });
+                }
+            }
 
             this.preview();
         },
@@ -1803,10 +1807,12 @@ define(['summernote/summernote'], function () {
 
             this.imageDialog = new website.editor.ImageDialog(this, this.media, this.options);
             this.imageDialog.appendTo(this.$("#editor-media-image"));
-            this.iconDialog = new website.editor.FontIconsDialog(this, this.media, this.options);
-            this.iconDialog.appendTo(this.$("#editor-media-icon"));
-            this.videoDialog = new website.editor.VideoDialog(this, this.media, this.options);
-            this.videoDialog.appendTo(this.$("#editor-media-video"));
+            if (!this.only_images) {
+                this.iconDialog = new website.editor.FontIconsDialog(this, this.media, this.options);
+                this.iconDialog.appendTo(this.$("#editor-media-icon"));
+                this.videoDialog = new website.editor.VideoDialog(this, this.media, this.options);
+                this.videoDialog.appendTo(this.$("#editor-media-video"));
+            }
 
             this.active = this.imageDialog;
 
@@ -1843,10 +1849,11 @@ define(['summernote/summernote'], function () {
                 if (this.active !== this.imageDialog) {
                     this.imageDialog.clear();
                 }
-                if (this.active !== this.iconDialog) {
+                // if not mode only_images
+                if (this.iconDialog && this.active !== this.iconDialog) {
                     this.iconDialog.clear();
                 }
-                if (this.active !== this.videoDialog) {
+                if (this.videoDialog && this.active !== this.videoDialog) {
                     this.videoDialog.clear();
                 }
             } else {
@@ -1863,6 +1870,9 @@ define(['summernote/summernote'], function () {
             $(document.body).trigger("media-saved", [self.active.media, self.old_media]);
             self.trigger("saved", [self.active.media, self.old_media]);
             setTimeout(function () {
+                if (!self.active.media.parentNode) {
+                    return;
+                }
                 range.createFromNode(self.active.media).select();
                 click_event(self.active.media, "mousedown");
                 if (!this.only_images) {
@@ -1921,6 +1931,7 @@ define(['summernote/summernote'], function () {
             //'change select.image-style': 'preview_image',
             'click .existing-attachments img': 'select_existing',
             'click .existing-attachment-remove': 'try_remove',
+            'keydown.dismiss.bs.modal': function(){},
         }),
         init: function (parent, media, options) {
             this._super();
@@ -1995,7 +2006,7 @@ define(['summernote/summernote'], function () {
             return this.media;
         },
         clear: function () {
-            this.media.className = this.media.className.replace(/(^|\s)(img(\s|$)|img-[^\s]*)/g, ' ');
+            this.media.className = this.media.className.replace(/(^|\s+)(img(\s|$)|img-(?!circle|rounded|thumbnail)[^\s]*)/g, ' ');
         },
         cancel: function () {
             this.trigger('cancel');
@@ -2185,14 +2196,30 @@ define(['summernote/summernote'], function () {
         }
         var sheets = document.styleSheets;
         for(var i = 0; i < sheets.length; i++) {
-            var rules = sheets[i].rules || sheets[i].cssRules;
+            try {
+                var rules = sheets[i].rules || sheets[i].cssRules;
+            } catch(e) {
+                continue;
+            }
             if (rules) {
                 for(var r = 0; r < rules.length; r++) {
                     var selectorText = rules[r].selectorText;
                     if (selectorText) {
-                        var match = selectorText.match(filter);
-                        if (match) {
-                            css.push([match[1], rules[r].cssText.replace(/(^.*\{\s*)|(\s*\}\s*$)/g, '')]);
+                        selectorText = selectorText.split(/\s*,\s*/);
+                        var data = null;
+                        for(var s = 0; s < selectorText.length; s++) {
+                            var match = selectorText[s].match(filter);
+                            if (match) {
+                                var clean = match[1].slice(1).replace(/::?before$/, '');
+                                if (!data) {
+                                    data = [match[1], rules[r].cssText.replace(/(^.*\{\s*)|(\s*\}\s*$)/g, ''), clean, [clean]];
+                                } else {
+                                    data[3].push(clean);
+                                }
+                            }
+                        }
+                        if (data) {
+                            css.push(data);
                         }
                     }
                 }
@@ -2200,13 +2227,16 @@ define(['summernote/summernote'], function () {
         }
         return cacheCssSelectors[filter] = css;
     };
-    function computeFonts() {
+    var computeFonts = _.once(function() {
         _.each(website.editor.fontIcons, function (data) {
-            data.icons = _.map(website.editor.getCssSelectors(data.parser), function (css) {
-                return css[0].slice(1, css[0].length).replace(/::?before$/, '');
+            data.cssData = website.editor.getCssSelectors(data.parser);
+            data.alias = [];
+            data.icons = _.map(data.cssData, function (css) {
+                data.alias.push.apply(data.alias, css[3]);
+                return css[2];
             });
         });
-    }
+    });
 
     /* list of font icons to load by editor. The icons are displayed in the media editor and
      * identified like font and image (can be colored, spinned, resized with fa classes).
@@ -2232,6 +2262,7 @@ define(['summernote/summernote'], function () {
                 $(".font-icons-icon").removeClass("font-icons-selected");
                 $(event.target).addClass("font-icons-selected");
             },
+            'keydown.dismiss.bs.modal': function(){},
         }),
 
         // extract list of font (like awsome) from the cheatsheet.
@@ -2247,6 +2278,7 @@ define(['summernote/summernote'], function () {
             this._super();
             this.parent = parent;
             this.media = media;
+            computeFonts();
         },
         start: function () {
             return this._super().then(this.proxy('load_data'));
@@ -2254,25 +2286,22 @@ define(['summernote/summernote'], function () {
         search: function (needle) {
             var iconsParser = this.iconsParser;
             if (needle) {
-                var parser = [];
-                var fontIcons = website.editor.fontIcons, fontIcon;
-
-                for (var k=0; k<fontIcons.length; k++) {
-                    fontIcon = fontIcons[k];
-                    var icons = _(fontIcon.icons).filter(function (icon) {
-                        return icon.indexOf(needle) !== -1;
+                var iconsParser = [];
+                _.filter(this.iconsParser, function (data) {
+                    var cssData = _.filter(data.cssData, function (cssData) {
+                        return _.find(cssData[3], function (alias) {
+                            return alias.indexOf(needle) !== -1;
+                        });
                     });
-                    if (icons.length) {
-                        parser.push({
-                            base: fontIcon.base,
-                            icons: icons
+                    if (cssData.length) {
+                        iconsParser.push({
+                            base: data.base,
+                            cssData: cssData
                         });
                     }
-                }
-                iconsParser = parser;
+                });
             }
-            this.$('div.font-icons-icons').html(
-                openerp.qweb.render('website.editor.dialog.font-icons.icons', {'iconsParser': iconsParser}));
+            this.$('div.font-icons-icons').html(openerp.qweb.render('website.editor.dialog.font-icons.icons', {'iconsParser': iconsParser}));
         },
         /**
          * Removes existing FontAwesome classes on the bound element, and sets
@@ -2284,12 +2313,14 @@ define(['summernote/summernote'], function () {
             var icons = this.icons;
             var style = this.media.attributes.style ? this.media.attributes.style.value : '';
             var classes = (this.media.className||"").split(/\s+/);
+            var custom_classes = /^fa(-[1-5]x|spin|rotate-(9|18|27)0|flip-(horizont|vertic)al|fw|border)?$/;
             var non_fa_classes = _.reject(classes, function (cls) {
-                return self.getFont(cls);
+                return self.getFont(cls) || custom_classes.test(cls);
             });
             var final_classes = non_fa_classes.concat(this.get_fa_classes());
             if (this.media.tagName !== "SPAN") {
                 var media = document.createElement('span');
+                $(media).data($(this.media).data());
                 $(this.media).replaceWith(media);
                 this.media = media;
                 style = style.replace(/\s*width:[^;]+/, '');
@@ -2303,17 +2334,17 @@ define(['summernote/summernote'], function () {
             if (!(classNames instanceof Array)) {
                 classNames = (classNames||"").split(/\s+/);
             }
-            var fontIcons = website.editor.fontIcons, fontIcon, className;
-            for (var i=0; i<classNames.length; i++) {
-                className = classNames[i];
-                for (var k=0; k<fontIcons.length; k++) {
-                    fontIcon = fontIcons[k];
-                    if (className === fontIcon.base || fontIcon.icons.indexOf(className) !== -1) {
+            var fontIcon, cssData;
+            for (var k=0; k<this.iconsParser.length; k++) {
+                fontIcon = this.iconsParser[k];
+                for (var s=0; s<fontIcon.cssData.length; s++) {
+                    cssData = fontIcon.cssData[s];
+                    if (_.intersection(classNames, cssData[3]).length) {
                         return {
                             'base': fontIcon.base,
                             'parser': fontIcon.parser,
                             'icons': fontIcon.icons,
-                            'font': className
+                            'font': cssData[2]
                         };
                     }
                 }
@@ -2349,7 +2380,7 @@ define(['summernote/summernote'], function () {
                         continue;
                     case '': continue;
                     default:
-                        $(".font-icons-icon").removeClass("font-icons-selected").filter("."+cls).addClass("font-icons-selected");
+                        $(".font-icons-icon").removeClass("font-icons-selected").filter("[data-alias*=',"+cls+",']").addClass("font-icons-selected");
                         for (var k=0; k<this.icons.length; k++) {
                             if (this.icons.indexOf(cls) !== -1) {
                                 this.$('#fa-icon').val(cls);
@@ -2431,6 +2462,10 @@ define(['summernote/summernote'], function () {
             .attr('src', '//player.youku.com/embed/' + youkuMatch[1]);
         } else {
           // this is not a known video link. Now what, Cat? Now what?
+          $video = $('<iframe webkitallowfullscreen mozallowfullscreen allowfullscreen>')
+            .attr('width', '640')
+            .attr('height', '360')
+            .attr('src', url);
         }
 
         $video.attr('frameborder', 0);
@@ -2450,7 +2485,8 @@ define(['summernote/summernote'], function () {
             'change input#urlvideo': 'change_input',
             'keyup input#urlvideo': 'change_input',
             'change input#embedvideo': 'change_input',
-            'keyup input#embedvideo': 'change_input'
+            'keyup input#embedvideo': 'change_input',
+            'keydown.dismiss.bs.modal': function(){},
         }),
         init: function (parent, media) {
             this._super();
@@ -2464,7 +2500,6 @@ define(['summernote/summernote'], function () {
             if ($media.hasClass("media_iframe_video")) {
                 var src = $media.data('src');
                 this.$("input#urlvideo").val(src);
-                this.$("#autoplay").attr("checked", src.indexOf('autoplay=1') != -1);
                 this.get_video();
             } else {
                 this.add_class = "pull-left";
@@ -2514,7 +2549,7 @@ define(['summernote/summernote'], function () {
             this.media = $iframe[0];
         },
         clear: function () {
-            delete this.media.dataset.src;
+            if(this.media.dataset.src) delete this.media.dataset.src;
             this.media.className = this.media.className.replace(/(^|\s)media_iframe_video(\s|$)/g, ' ');
         },
     });

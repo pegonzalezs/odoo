@@ -143,7 +143,7 @@ class crm_lead(format_address, osv.osv):
             action = self.get_formview_action(cr, user, context['opportunity_id'], context=context)
             if action.get('views') and any(view_id for view_id in action['views'] if view_id[1] == view_type):
                 view_id = next(view_id[0] for view_id in action['views'] if view_id[1] == view_type)
-        res = super(crm_lead, self).fields_view_get(cr, user, view_id, view_type, context, toolbar=toolbar, submenu=submenu)
+        res = super(crm_lead, self).fields_view_get(cr, user, view_id, view_type, context=context, toolbar=toolbar, submenu=submenu)
         if view_type == 'form':
             res['arch'] = self.fields_view_get_address(cr, user, res['arch'], context=context)
         return res
@@ -298,9 +298,10 @@ class crm_lead(format_address, osv.osv):
         values = {}
         if partner_id:
             partner = self.pool.get('res.partner').browse(cr, uid, partner_id, context=context)
+            partner_name = (partner.parent_id and partner.parent_id.name) or (partner.is_company and partner.name) or False
             values = {
-                'partner_name': partner.parent_id.name if partner.parent_id else partner.name,
-                'contact_name': partner.name if partner.parent_id else False,
+                'partner_name': partner_name,
+                'contact_name': (not partner.is_company and partner.name) or False,
                 'title': partner.title and partner.title.id or False,
                 'street': partner.street,
                 'street2': partner.street2,
@@ -319,6 +320,12 @@ class crm_lead(format_address, osv.osv):
     def on_change_user(self, cr, uid, ids, user_id, context=None):
         """ When changing the user, also set a team_id or restrict team id
             to the ones user_id is member of. """
+        if not context:
+            context = {}
+        if user_id and context.get('team_id'):
+            team = self.pool['crm.team'].browse(cr, uid, context['team_id'], context=context)
+            if user_id in team.member_ids.ids:
+                return {}
         team_id = self.pool['crm.team']._get_default_team_id(cr, uid, user_id=user_id, context=context)
         if user_id and not team_id and self.pool['res.users'].has_group(cr, uid, 'base.group_multi_salesteams'):
             team_ids = self.pool.get('crm.team').search(cr, uid, ['|', ('user_id', '=', user_id), ('member_ids', '=', user_id)], context=context)
@@ -665,7 +672,7 @@ class crm_lead(format_address, osv.osv):
 
         # Check if the stage is in the stages of the sales team. If not, assign the stage with the lowest sequence
         if merged_data.get('team_id'):
-            team_stage_ids = self.pool.get('crm.stage').search(cr, uid, [('team_ids', 'in', merged_data['team_id']), ('type', '=', merged_data.get('type'))], order='sequence', context=context)
+            team_stage_ids = self.pool.get('crm.stage').search(cr, uid, [('team_ids', 'in', merged_data['team_id']), ('type', 'in', [merged_data.get('type'), 'both'])], order='sequence', context=context)
             if merged_data.get('stage_id') not in team_stage_ids:
                 merged_data['stage_id'] = team_stage_ids and team_stage_ids[0] or False
         # Write merged data into first opportunity

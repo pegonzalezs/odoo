@@ -33,18 +33,17 @@ from openerp.tools.translate import _
 EXPRESSION_PATTERN = re.compile('(\$\{.+?\})')
 
 
-def _reopen(self, res_id, model):
+def _reopen(self, res_id, model, context=None):
+    # save original model in context, because selecting the list of available
+    # templates requires a model in context
+    context = dict(context or {}, default_model=model)
     return {'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'view_type': 'form',
             'res_id': res_id,
             'res_model': self._name,
             'target': 'new',
-            # save original model in context, because selecting the list of available
-            # templates requires a model in context
-            'context': {
-                'default_model': model,
-            },
+            'context': context,
             }
 
 
@@ -319,7 +318,7 @@ class mail_compose_message(osv.TransientModel):
             # static wizard (mail.message) values
             mail_values = {
                 'subject': wizard.subject,
-                'body': wizard.body,
+                'body': wizard.body or '',
                 'parent_id': wizard.parent_id and wizard.parent_id.id,
                 'partner_ids': [partner.id for partner in wizard.partner_ids],
                 'attachment_ids': [attach.id for attach in wizard.attachment_ids],
@@ -428,7 +427,7 @@ class mail_compose_message(osv.TransientModel):
             template_values = record.onchange_template_id(template_id, record.composition_mode, record.model, record.res_id)['value']
             template_values['template_id'] = template_id
             record.write(template_values)
-            return _reopen(self, record.id, record.model)
+            return _reopen(self, record.id, record.model, context=context)
 
     #------------------------------------------------------
     # Template rendering

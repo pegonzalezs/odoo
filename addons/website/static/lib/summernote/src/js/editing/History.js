@@ -9,7 +9,7 @@ define(['summernote/core/range'], function (range) {
 
     var makeSnapshot = function () {
       var rng = range.create();
-      var emptyBookmark = {s: {path: [0], offset: 0}, e: {path: [0], offset: 0}};
+      var emptyBookmark = {s: {path: [], offset: 0}, e: {path: [], offset: 0}};
 
       return {
         contents: $editable.html(),
@@ -38,6 +38,14 @@ define(['summernote/core/range'], function (range) {
         stackOffset++;
         applySnapshot(stack[stackOffset]);
       }
+    };
+
+    this.hasUndo = function () {
+      return 1 < stackOffset;
+    };
+
+    this.hasRedo = function () {
+      return stack.length - 1 > stackOffset;
     };
 
     this.recordUndo = function () {

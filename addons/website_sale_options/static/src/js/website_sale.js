@@ -1,4 +1,7 @@
 $(document).ready(function () {
+    if(! $(".js_add_cart_variants[data-attribute_value_ids]").length){
+        return;
+    }
     $('.oe_website_sale #add_to_cart, .oe_website_sale #products_grid .a-submit')
         .off('click')
         .removeClass('a-submit')
@@ -30,7 +33,7 @@ $(document).ready(function () {
                             data: {lang: openerp.website.get_context().lang},
                             success: function (quantity) {
                                 if (!$a.hasClass('js_goto_shop')) {
-                                    window.location.href = window.location.href.replace(/shop([\/?].*)?$/, "shop/cart");
+                                    window.location.pathname = window.location.pathname.replace(/shop([\/?].*)?$/, "shop/cart");
                                 }
                                 var $q = $(".my_cart_quantity");
                                 $q.parent().parent().removeClass("hidden", !quantity);
@@ -60,18 +63,18 @@ $(document).ready(function () {
                     });
 
                     $modal.find('input[name="add_qty"]').val(quantity).change();
-                    $('ul.js_add_cart_variants').each(function () {
+                    $('.js_add_cart_variants').each(function () {
                         $('input.js_variant_change, select.js_variant_change', this).first().trigger('change');
                     });
 
                     $modal.on("change", 'input[name="add_qty"]', function (event) {
-                        var product_id = $($modal.find('span.oe_price[data-oe-model="product.product"]').first()).data('oe-id');
+                        var product_id = $($modal.find('span.oe_price[data-product-id]')).first().data('product-id');
                         var default_price = parseInt($('.text-danger.oe_default_price > span.oe_currency_value').text());
                         var $dom = $(event.target).closest('tr');
                         var qty = $dom.find('input[name="add_qty"]').val();
                         var product_ids = [product_id];
                         var $products_dom = [];
-                        $modal.find("ul.js_add_cart_variants[data-attribute_value_ids]").each(function(){
+                        $modal.find(".js_add_cart_variants[data-attribute_value_ids]").each(function(){
                             var $el = $(this);
                             $products_dom.push($el);
                             _.each($el.data("attribute_value_ids"), function (values) {

@@ -56,27 +56,31 @@ instance.web.PivotView = instance.web.View.extend({
 
         this.last_header_selected = null;
         this.sorted_column = {};
+
+        this.numbering = {};
     },
     start: function () {
         var self = this;
         this.$table_container = this.$('.o-pivot-table');
 
-        var load_fields = this.model.call('fields_get', [])
+        var load_fields = this.model.call('fields_get', [], {context: this.dataset.get_context()})
                 .then(this.prepare_fields.bind(this));
+        var _super = this._super.bind(this);
 
-        if (this.$sidebar) {
-            openerp.session.rpc('/web/pivot/check_xlwt').then(function (result) {
-                if (result) {
-                    self.sidebar = new instance.web.Sidebar(self);
-                    self.sidebar.appendTo(self.$sidebar);
-                    self.sidebar.add_items('other', [{
-                        label: _t("Download xls"),
-                        callback: self.download_table.bind(self)
-                    }]);
-                }
-            });
-        }
-        return $.when(this._super(), load_fields).then(this.render_buttons.bind(this));
+        return load_fields.then(function(){return _super();}).then(this.render_buttons.bind(this)).then(function(){
+            if (self.$sidebar) {
+                return openerp.session.rpc('/web/pivot/check_xlwt').then(function (result) {
+                    if (result) {
+                        self.sidebar = new instance.web.Sidebar(self);
+                        self.sidebar.appendTo(self.$sidebar);
+                        self.sidebar.add_items('other', [{
+                            label: _t("Download xls"),
+                            callback: self.download_table.bind(self)
+                        }]);
+                    }
+                });
+            }
+        });
     },
     render_buttons: function () {
         var self = this;
@@ -472,12 +476,21 @@ instance.web.PivotView = instance.web.View.extend({
     },
     sanitize_value: function (value, field) {
         if (value === false) return _t("Undefined");
-        if (value instanceof Array) return value[1];
+        if (value instanceof Array) return this.get_numbered_value(value, field);
         if (field && this.fields[field] && (this.fields[field].type === 'selection')) {
             var selected = _.where(this.fields[field].selection, {0: value})[0];
             return selected ? selected[1] : value;
         }
         return value;
+    },
+    get_numbered_value: function(value, field) {
+        var id= value[0];
+        var name= value[1]
+        this.numbering[field] = this.numbering[field] || {};
+        this.numbering[field][name] = this.numbering[field][name] || {};
+        var numbers = this.numbering[field][name];
+        numbers[id] = numbers[id] || _.size(numbers) + 1;
+        return name + (numbers[id] > 1 ? "  (" + numbers[id] + ")" : "");
     },
     make_header: function (data_pt, root, i, j, parent_header) {
         var attrs = data_pt.attributes,
@@ -546,7 +559,7 @@ instance.web.PivotView = instance.web.View.extend({
             display_total = this.main_col.width > 1;
 
         var groupby_labels = _.map(this.main_col.groupbys, function (gb) {
-            return self.groupable_fields[gb.split(':')[0]].string;
+            return self.fields[gb.split(':')[0]].string;
         });
 
         for (i = 0; i < headers.length; i++) {
@@ -589,7 +602,7 @@ instance.web.PivotView = instance.web.View.extend({
             display_total = this.main_col.width > 1;
 
         var groupby_labels = _.map(this.main_row.groupbys, function (gb) {
-            return self.groupable_fields[gb.split(':')[0]].string;
+            return self.fields[gb.split(':')[0]].string;
         });
         var measure_types = this.active_measures.map(function (name) {
             return self.measures[name].type;
@@ -772,6 +785,10 @@ instance.web.PivotView = instance.web.View.extend({
             title: this.title,
         };
         var c = openerp.webclient.crashmanager;
+        if(table.measure_row.length + 1 > 256) {
+            c.show_message(_t("For Excel compatibility, data cannot be exported if there is more than 256 columns.\n\nTip: try to flip axis, filter further or reduce the number of measures."))
+            return;
+        }
         this.session.get_file({
             url: '/web/pivot/export_xls',
             data: {data: JSON.stringify(table)},

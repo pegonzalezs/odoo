@@ -120,6 +120,7 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
         if (this._limit === undefined) {
             this._limit = (this.options.limit
                         || this.defaults.limit
+                        || parseInt(this.fields_view.arch.attrs.limit, 10)
                         || (this.getParent().action || {}).limit
                         || 80);
         }
@@ -552,11 +553,12 @@ instance.web.ListView = instance.web.View.extend( /** @lends instance.web.ListVi
                 self.records.remove(record);
                 return;
             }
-            _.each(values, function (value, key) {
+            // _.each is broken if a field "length" is present
+            for (var key in values) {
                 if (fields[key] && fields[key].type === 'many2many')
                     record.set(key + '__display', false, {silent: true});
-                record.set(key, value, {silent: true});            
-            });
+                record.set(key, values[key], {silent: true});
+            }
             record.trigger('change', record);
         });
     },
@@ -974,7 +976,9 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
                     $row = self.$current.children(
                         '[data-id=' + record.get('id') + ']');
                 }
-                $row.replaceWith(self.render_record(record));
+                if ($row.length) {
+                    $row.replaceWith(self.render_record(record));
+                }
             },
             'add': function (ev, records, record, index) {
                 var $new_row = $(self.render_record(record));
@@ -1117,14 +1121,14 @@ instance.web.ListView.List = instance.web.Class.extend( /** @lends instance.web.
                     ids = value;
                 }
                 new instance.web.Model(column.relation)
-                    .call('name_get', [ids, this.dataset.context]).done(function (names) {
+                    .call('name_get', [ids, this.dataset.get_context()]).done(function (names) {
                         // FIXME: nth horrible hack in this poor listview
                         record.set(column.id + '__display',
                                    _(names).pluck(1).join(', '));
                         record.set(column.id, ids);
                     });
-                // temp empty value
-                record.set(column.id, false);
+                // temporary empty display name
+                record.set(column.id + '__display', false);
             }
         }
         return column.format(record.toForm().data, {
@@ -2189,7 +2193,6 @@ instance.web.list.Column = instance.web.Class.extend({
             id: id,
             tag: tag
         });
-
         this.modifiers = attrs.modifiers ? JSON.parse(attrs.modifiers) : {};
         delete attrs.modifiers;
         _.extend(this, attrs);
@@ -2216,10 +2219,14 @@ instance.web.list.Column = instance.web.Class.extend({
         if (this.type !== 'integer' && this.type !== 'float') {
             return {};
         }
-        var aggregation_func = this['group_operator'] || 'sum';
-        if (!(aggregation_func in this)) {
+
+        var aggregation_func = (this.sum && 'sum') || (this.avg && 'avg') ||
+                               (this.max && 'max') || (this.min && 'min');
+
+        if (!aggregation_func) {
             return {};
         }
+
         var C = function (fn, label) {
             this['function'] = fn;
             this.label = label;
@@ -2312,7 +2319,7 @@ instance.web.list.Binary = instance.web.list.Column.extend({
      * @private
      */
     _format: function (row_data, options) {
-        var text = _t("Download");
+        var text = _t("Download"), filename=_t('Binary file');
         var value = row_data[this.id].value;
         if (!value) {
             return options.value_if_empty || '';
@@ -2330,11 +2337,13 @@ instance.web.list.Binary = instance.web.list.Column.extend({
         if (this.filename && row_data[this.filename]) {
             text = _.str.sprintf(_t("Download \"%s\""), instance.web.format_value(
                     row_data[this.filename].value, {type: 'char'}));
+            filename = row_data[this.filename].value;
         }
-        return _.template('<a href="<%-href%>"><%-text%></a> (<%-size%>)')({
+        return _.template('<a download="<%-download%>" href="<%-href%>"><%-text%></a> (<%-size%>)')({
             text: text,
             href: download_url,
             size: instance.web.binary_to_binsize(value),
+            download: filename,
         });
     }
 });

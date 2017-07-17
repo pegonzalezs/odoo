@@ -191,6 +191,9 @@ td
 .para_large
     font-size: 120%
 
+.jumbotron.para_large p
+    font-size: 150%
+
 .readable
     font-size: 120%
     max-width: 700px
@@ -241,14 +244,11 @@ body > nav.navbar
     width: 100%
     position: absolute
     z-index: 10000
-nav.navbar + #wrapwrap
-    padding-top: 34px
+@media (min-width: 767px)
+    nav.navbar + #wrapwrap
+        padding-top: 34px
 
 /* ----- BOOTSTRAP FIX ----- */
-
-.col-md-12
-    float: left
-    width: 100%
 
 @-moz-document url-prefix()
     .table .img-responsive
@@ -337,7 +337,7 @@ ul.nav-stacked > li > a
 /* ---- SNIPPETS --- */
 
 .oe_img_bg
-    background-size: 100%
+    background-size: cover
 
 .carousel, .parallax, .blockquote
     overflow: hidden
@@ -576,8 +576,7 @@ div.carousel
 /* Background (kept for 8.0 compatibility) */
 
 .oe_dark
-    background: #eff8f8
-    background: rgba(200, 200, 200, 0.14)
+    background-color: rgba(200, 200, 200, 0.14)
 
 .oe_black
     background-color: rgba(0, 0, 0, 0.9)
@@ -674,6 +673,7 @@ span[data-oe-type="monetary"]
     width: 121px
     input
         text-align: center
+        min-width: 50px
 
 div.media_iframe_video
     margin: 0 auto
@@ -785,3 +785,7 @@ div.carousel
         font-size: 13px
     .navbar-nav.navbar-right:last-child
         margin-right: 0 !important
+
+/* ---- footer style ---- {{{ */
+#footer div.row
+    word-wrap: break-word

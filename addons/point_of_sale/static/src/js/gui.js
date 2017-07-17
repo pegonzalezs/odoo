@@ -26,6 +26,7 @@ openerp.point_of_sale.load_gui = function load_gui(instance, module) {
             this.current_screen = null; 
 
             this.chrome.ready.then(function(){
+                instance.web.cordova.posready();
                 var order = self.pos.get_order();
                 if (order) {
                     self.show_saved_screen(order);
@@ -271,6 +272,7 @@ openerp.point_of_sale.load_gui = function load_gui(instance, module) {
             this.chrome.loading_message(_t('Closing ...'));
 
             this.pos.push_order().then(function(){
+                instance.web.cordova.poslogout();
                 return new instance.web.Model("ir.model.data").get_func("search_read")([['name', '=', 'action_client_pos_menu']], ['res_id'])
                 .pipe(function(res) {
                     window.location = '/web#action=' + res[0]['res_id'];
@@ -312,14 +314,16 @@ openerp.point_of_sale.load_gui = function load_gui(instance, module) {
         numpad_input: function(buffer, input, options) { 
             var options = options || {};
             var newbuf  = buffer.slice(0);
+            var newbuf_float  = instance.web.parse_value(newbuf, {type: "float"}, 0);
+            var decimal_point = instance.web._t.database.parameters.decimal_point;
 
-            if (input === '.') {
+            if (input === decimal_point) {
                 if (options.firstinput) {
                     newbuf = "0.";
                 }else if (!newbuf.length || newbuf === '-') {
                     newbuf += "0.";
-                } else if (newbuf.indexOf('.') < 0){
-                    newbuf = newbuf + '.';
+                } else if (newbuf.indexOf(decimal_point) < 0){
+                    newbuf = newbuf + decimal_point;
                 }
             } else if (input === 'CLEAR') {
                 newbuf = ""; 
@@ -336,7 +340,7 @@ openerp.point_of_sale.load_gui = function load_gui(instance, module) {
                     newbuf = '-' + newbuf;
                 }
             } else if (input[0] === '+' && !isNaN(parseFloat(input))) {
-                newbuf = '' + ((parseFloat(newbuf) || 0) + parseFloat(input));
+                newbuf = this.chrome.format_currency_no_symbol(newbuf_float + parseFloat(input));
             } else if (!isNaN(parseInt(input))) {
                 if (options.firstinput) {
                     newbuf = '' + input;

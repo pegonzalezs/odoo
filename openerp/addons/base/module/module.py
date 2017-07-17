@@ -22,7 +22,7 @@ from docutils import nodes
 from docutils.core import publish_string
 from docutils.transforms import Transform, writer_aux
 from docutils.writers.html4css1 import Writer
-import imp
+import importlib
 import logging
 from operator import attrgetter
 import os
@@ -49,6 +49,7 @@ from openerp.modules.db import create_categories
 from openerp.modules import get_module_resource
 from openerp.tools.parse_version import parse_version
 from openerp.tools.translate import _
+from openerp.tools import html_sanitize
 from openerp.osv import osv, orm, fields
 from openerp import api, fields as fields2
 
@@ -176,7 +177,7 @@ class module(osv.osv):
                     for element, attribute, link, pos in html.iterlinks():
                         if element.get('src') and not '//' in element.get('src') and not 'static/' in element.get('src'):
                             element.set('src', "/%s/static/description/%s" % (module.name, element.get('src')))
-                    res[module.id] = lxml.html.tostring(html)
+                    res[module.id] = html_sanitize(lxml.html.tostring(html))
             else:
                 overrides = {
                     'embed_stylesheet': False,
@@ -185,7 +186,7 @@ class module(osv.osv):
                     'xml_declaration': False,
                 }
                 output = publish_string(source=module.description or '', settings_overrides=overrides, writer=MyWriter())
-                res[module.id] = output
+                res[module.id] = html_sanitize(output)
         return res
 
     def _get_latest_version(self, cr, uid, ids, field_name=None, arg=None, context=None):
@@ -303,6 +304,7 @@ class module(osv.osv):
             ('GPL-3', 'GPL Version 3'),
             ('GPL-3 or any later version', 'GPL-3 or later version'),
             ('AGPL-3', 'Affero GPL-3'),
+            ('LGPL-3', 'LGPL Version 3'),
             ('Other OSI approved licence', 'Other OSI Approved Licence'),
             ('Other proprietary', 'Other Proprietary')
         ], string='License', readonly=True),
@@ -353,15 +355,10 @@ class module(osv.osv):
         if not depends:
             return
         for pydep in depends.get('python', []):
-            parts = pydep.split('.')
-            parts.reverse()
-            path = None
-            while parts:
-                part = parts.pop()
-                try:
-                    _, path, _ = imp.find_module(part, path and [path] or None)
-                except ImportError:
-                    raise ImportError('No module named %s' % (pydep,))
+            try:
+                importlib.import_module(pydep)
+            except ImportError:
+                raise ImportError('No module named %s' % (pydep,))
 
         for binary in depends.get('bin', []):
             try:
@@ -414,31 +411,56 @@ class module(osv.osv):
 
         return demo
 
-    def button_install(self, cr, uid, ids, context=None):
+    @api.multi
+    def button_install(self):
+        # domain to select auto-installable (but not yet installed) modules
+        auto_domain = [('state', '=', 'uninstalled'), ('auto_install', '=', True)]
 
-        # Mark the given modules to be installed.
-        self.state_update(cr, uid, ids, 'to install', ['uninstalled'], context=context)
+        # determine whether an auto-install module must be installed:
+        #  - all its dependencies are installed or to be installed,
+        #  - at least one dependency is 'to install'
+        install_states = frozenset(('installed', 'to install', 'to upgrade'))
+        def must_install(module):
+            states = set(dep.state for dep in module.dependencies_id)
+            return states <= install_states and 'to install' in states
 
-        # Mark (recursively) the newly satisfied modules to also be installed
+        modules = self
+        while modules:
+            # Mark the given modules and their dependencies to be installed.
+            modules.state_update('to install', ['uninstalled'])
 
-        # Select all auto-installable (but not yet installed) modules.
-        domain = [('state', '=', 'uninstalled'), ('auto_install', '=', True)]
-        uninstalled_ids = self.search(cr, uid, domain, context=context)
-        uninstalled_modules = self.browse(cr, uid, uninstalled_ids, context=context)
+            # Determine which auto-installable modules must be installed.
+            modules = self.search(auto_domain).filtered(must_install)
 
-        # Keep those with:
-        #  - all dependencies satisfied (installed or to be installed),
-        #  - at least one dependency being 'to install'
-        satisfied_states = frozenset(('installed', 'to install', 'to upgrade'))
-        def all_depencies_satisfied(m):
-            states = set(d.state for d in m.dependencies_id)
-            return states.issubset(satisfied_states) and ('to install' in states)
-        to_install_modules = filter(all_depencies_satisfied, uninstalled_modules)
-        to_install_ids = map(lambda m: m.id, to_install_modules)
+        # retrieve the installed (or to be installed) theme modules
+        theme_category = self.env.ref('base.module_category_theme')
+        theme_modules = self.search([
+            ('state', 'in', list(install_states)),
+            ('category_id', 'child_of', [theme_category.id]),
+        ])
 
-        # Mark them to be installed.
-        if to_install_ids:
-            self.button_install(cr, uid, to_install_ids, context=context)
+        # determine all theme modules that mods depends on, including mods
+        def theme_deps(mods):
+            deps = mods.mapped('dependencies_id.depend_id')
+            while deps:
+                mods |= deps
+                deps = deps.mapped('dependencies_id.depend_id')
+            return mods & theme_modules
+
+        if any(module.state == 'to install' for module in theme_modules):
+            # check: the installation is valid if all installed theme modules
+            # correspond to one theme module and all its theme dependencies
+            if not any(theme_deps(module) == theme_modules for module in theme_modules):
+                state_labels = dict(self.fields_get(['state'])['state']['selection'])
+                themes_list = [
+                    "- %s (%s)" % (module.shortdesc, state_labels[module.state])
+                    for module in theme_modules
+                ]
+                raise UserError(_(
+                    "You are trying to install incompatible themes:\n%s\n\n" \
+                    "Please uninstall your current theme before installing another one.\n"
+                    "Warning: switching themes may significantly alter the look of your current website pages!"
+                ) % ("\n".join(themes_list)))
 
         return dict(ACTION_DICT, name=_('Install'))
 
@@ -463,7 +485,7 @@ class module(osv.osv):
         ir_model_data = self.pool.get('ir.model.data')
         modules_to_remove = [m.name for m in self.browse(cr, uid, ids, context)]
         ir_model_data._module_data_uninstall(cr, uid, modules_to_remove, context)
-        self.write(cr, uid, ids, {'state': 'uninstalled'})
+        self.write(cr, uid, ids, {'state': 'uninstalled', 'latest_version': False})
         return True
 
     def downstream_dependencies(self, cr, uid, ids, known_dep_ids=None,
@@ -665,6 +687,15 @@ class module(osv.osv):
         if not self.pool['res.users'].has_group(cr, uid, 'base.group_system'):
             raise openerp.exceptions.AccessDenied()
 
+        # One-click install is opt-in - cfr Issue #15225
+        ad_dir = openerp.tools.config.addons_data_dir
+        if not os.access(ad_dir, os.W_OK):
+            msg = (_("Automatic install of downloaded Apps is currently disabled.") + "\n\n" +
+                   _("To enable it, make sure this directory exists and is writable on the server:") +
+                   "\n%s" % ad_dir)
+            _logger.warning(msg)
+            raise openerp.exceptions.AccessError(msg)
+
         apps_server = urlparse.urlparse(self.get_apps_server(cr, uid, context=context))
 
         OPENERP = openerp.release.product_name.lower()
@@ -730,7 +761,7 @@ class module(osv.osv):
             to_install_ids = self.search(cr, uid, [('name', 'in', urls.keys()), ('state', '=', 'uninstalled')], context=context)
             post_install_action = self.button_immediate_install(cr, uid, to_install_ids, context=context)
 
-            if already_installed:
+            if already_installed or to_install_ids:
                 # in this case, force server restart to reload python code...
                 cr.commit()
                 openerp.service.server.restart()

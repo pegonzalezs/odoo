@@ -107,12 +107,11 @@ class ir_http(osv.AbstractModel):
             wdate = attach[0]['__last_update']
             datas = attach[0]['datas'] or ''
             name = attach[0]['name']
+            checksum = attach[0]['checksum'] or hashlib.sha1(datas).hexdigest()
 
-            if not datas:
-                if name.startswith(('http://', 'https://', '/')):
-                    return werkzeug.utils.redirect(name, 301)
-                else:
-                    return werkzeug.wrappers.Response(status=204)     # NO CONTENT
+            if (not datas and name != request.httprequest.path and
+                    name.startswith(('http://', 'https://', '/'))):
+                return werkzeug.utils.redirect(name, 301)
 
             response = werkzeug.wrappers.Response()
             server_format = openerp.tools.misc.DEFAULT_SERVER_DATETIME_FORMAT
@@ -122,7 +121,7 @@ class ir_http(osv.AbstractModel):
                 # just in case we have a timestamp without microseconds
                 response.last_modified = datetime.datetime.strptime(wdate, server_format)
 
-            response.set_etag(attach[0]['checksum'])
+            response.set_etag(checksum)
             response.make_conditional(request.httprequest)
 
             if response.status_code == 304:
@@ -137,9 +136,10 @@ class ir_http(osv.AbstractModel):
 
         # This is done first as the attachment path may
         # not match any HTTP controller
-        attach = self._serve_attachment()
-        if attach:
-            return attach
+        if isinstance(exception, werkzeug.exceptions.HTTPException) and exception.code == 404:
+            attach = self._serve_attachment()
+            if attach:
+                return attach
 
         # Don't handle exception but use werkeug debugger if server in --dev mode
         if openerp.tools.config['dev_mode']:
@@ -193,7 +193,11 @@ class ir_http(osv.AbstractModel):
             _logger.info("Generating routing map")
             cr = request.cr
             m = request.registry.get('ir.module.module')
-            ids = m.search(cr, openerp.SUPERUSER_ID, [('state', '=', 'installed'), ('name', '!=', 'web')], context=request.context)
+            ids = m.search(
+                cr, openerp.SUPERUSER_ID,
+                [('state', 'in', ('installed', 'to remove', 'to upgrade')),
+                 ('name', '!=', 'web')],
+                context=request.context)
             installed = set(x['name'] for x in m.read(cr, 1, ids, ['name'], context=request.context))
             if openerp.tools.config['test_enable']:
                 installed.add(openerp.modules.module.current_test)

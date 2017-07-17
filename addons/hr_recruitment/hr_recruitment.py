@@ -168,6 +168,8 @@ class hr_applicant(osv.Model):
             department_ids = self.pool.get('hr.department').name_search(cr, uid, name=department_name, context=context)
             if len(department_ids) == 1:
                 return int(department_ids[0][0])
+        if context.get('search_default_job_id'):
+            return self.pool['hr.job'].browse(cr, uid, context.get('search_default_job_id'))[0].department_id.id
         return None
 
     def _get_default_company_id(self, cr, uid, department_id=None, context=None):
@@ -520,6 +522,7 @@ class hr_applicant(osv.Model):
             if stage.template_id:
                 # TDENOTE: probably factorize me in a message_post_with_template generic method FIXME
                 compose_ctx = dict(context,
+                                   active_id=False,
                                    active_ids=ids)
                 compose_id = self.pool['mail.compose.message'].create(
                     cr, uid, {

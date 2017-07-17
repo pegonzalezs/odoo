@@ -23,14 +23,12 @@
 from lxml import etree
 import os
 import base64
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 import random
 import datetime
 from openerp.osv import fields, osv
+from openerp.tools import pickle
 from openerp.tools.translate import _
+from openerp.tools.safe_eval import safe_eval as eval
 
 from itertools import groupby
 from operator import itemgetter
@@ -310,7 +308,7 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
 
         step = context.get('step', 'new_window')
 
-        res = super(ir_model_fields_anonymize_wizard, self).fields_view_get(cr, uid, view_id, view_type, context, *args, **kwargs)
+        res = super(ir_model_fields_anonymize_wizard, self).fields_view_get(cr, uid, view_id, view_type, context=context, *args, **kwargs)
 
         eview = etree.fromstring(res['arch'])
         placeholder = eview.xpath("group[@name='placeholder1']")
@@ -431,6 +429,8 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
                     anonymized_value = 'xxx'+sid
                 elif field_type == 'text':
                     anonymized_value = 'xxx'+sid
+                elif field_type == 'html':
+                    anonymized_value = 'xxx'+sid
                 elif field_type == 'boolean':
                     anonymized_value = random.choice([True, False])
                 elif field_type == 'date':
@@ -459,7 +459,7 @@ class ir_model_fields_anonymize_wizard(osv.osv_memory):
 
         # save pickle:
         fn = open(abs_filepath, 'w')
-        pickle.dump(data, fn, pickle.HIGHEST_PROTOCOL)
+        pickle.dump(data, fn, -1)
 
         # update the anonymization fields:
         values = {

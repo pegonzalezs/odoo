@@ -63,6 +63,19 @@ psycopg2.extensions.register_type(psycopg2.extensions.new_type((700, 701, 1700,)
 
 
 import tools
+
+from tools import parse_version as pv
+if pv(psycopg2.__version__) < pv('2.7'):
+    from psycopg2._psycopg import QuotedString
+    def adapt_string(adapted):
+        """Python implementation of psycopg/psycopg2#459 from v2.7"""
+        if '\x00' in adapted:
+            raise ValueError("A string literal cannot contain NUL (0x00) characters.")
+        return QuotedString(adapted)
+
+    psycopg2.extensions.register_adapter(str, adapt_string)
+    psycopg2.extensions.register_adapter(unicode, adapt_string)
+
 from tools.func import frame_codeinfo
 from datetime import datetime as mdt
 from datetime import timedelta
@@ -404,9 +417,7 @@ class Cursor(object):
 
     @property
     def closed(self):
-        # NOTE: we cannot use `__getattr__` delegation as we
-        #       should not `check` that the cursor is closed
-        return self._obj.closed
+        return self._closed
 
 class TestCursor(Cursor):
     """ A cursor to be used for tests. It keeps the transaction open across
@@ -444,6 +455,40 @@ class TestCursor(Cursor):
     def rollback(self):
         self.execute("ROLLBACK TO SAVEPOINT test_cursor")
         self.execute("SAVEPOINT test_cursor")
+
+class LazyCursor(object):
+    """ A proxy object to a cursor. The cursor itself is allocated only if it is
+        needed. This class is useful for cached methods, that use the cursor
+        only in the case of a cache miss.
+    """
+    def __init__(self, dbname=None):
+        self._dbname = dbname
+        self._cursor = None
+        self._depth = 0
+
+    @property
+    def dbname(self):
+        return self._dbname or threading.currentThread().dbname
+
+    def __getattr__(self, name):
+        cr = self._cursor
+        if cr is None:
+            from openerp import registry
+            cr = self._cursor = registry(self.dbname).cursor()
+            for _ in xrange(self._depth):
+                cr.__enter__()
+        return getattr(cr, name)
+
+    def __enter__(self):
+        self._depth += 1
+        if self._cursor is not None:
+            self._cursor.__enter__()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._depth -= 1
+        if self._cursor is not None:
+            self._cursor.__exit__(exc_type, exc_value, traceback)
 
 class PsycoConnection(psycopg2.extensions.connection):
     pass

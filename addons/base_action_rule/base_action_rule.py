@@ -19,7 +19,10 @@
 #
 ##############################################################################
 
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import datetime as DT
+import dateutil
 import time
 import logging
 
@@ -27,15 +30,16 @@ import openerp
 from openerp import SUPERUSER_ID
 from openerp.osv import fields, osv
 from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT
+from openerp.tools.safe_eval import safe_eval as eval
 
 _logger = logging.getLogger(__name__)
 
 DATE_RANGE_FUNCTION = {
-    'minutes': lambda interval: timedelta(minutes=interval),
-    'hour': lambda interval: timedelta(hours=interval),
-    'day': lambda interval: timedelta(days=interval),
-    'month': lambda interval: timedelta(months=interval),
-    False: lambda interval: timedelta(0),
+    'minutes': lambda interval: relativedelta(minutes=interval),
+    'hour': lambda interval: relativedelta(hours=interval),
+    'day': lambda interval: relativedelta(days=interval),
+    'month': lambda interval: relativedelta(months=interval),
+    False: lambda interval: relativedelta(0),
 }
 
 def get_datetime(date_str):
@@ -124,15 +128,27 @@ class base_action_rule(osv.osv):
         ir_filter = self.pool['ir.filters'].browse(cr, uid, filter_id, context=context)
         return {'value': {'filter_domain': ir_filter.domain}}
 
+    def _get_eval_context(self, cr, uid, context=None):
+        """ Prepare the context used when evaluating python code
+        :returns: dict -- evaluation context given to (safe_)eval """
+        return {
+            'datetime': DT,
+            'dateutil': dateutil,
+            'time': time,
+            'uid': uid,
+            'user': self.pool['res.users'].browse(cr, uid, uid, context=context),
+        }
+
     def _filter(self, cr, uid, action, action_filter, record_ids, domain=False, context=None):
         """ Filter the list record_ids that satisfy the domain or the action filter. """
         if record_ids and (domain is not False or action_filter):
+            eval_context = self._get_eval_context(cr, uid, context=context)
             if domain is not False:
-                new_domain = [('id', 'in', record_ids)] + eval(domain)
+                new_domain = [('id', 'in', record_ids)] + eval(domain, eval_context)
                 ctx = context
             elif action_filter:
                 assert action.model == action_filter.model_id, "Filter model different from action rule model"
-                new_domain = [('id', 'in', record_ids)] + eval(action_filter.domain)
+                new_domain = [('id', 'in', record_ids)] + eval(action_filter.domain, eval_context)
                 ctx = dict(context or {})
                 ctx.update(eval(action_filter.context))
             record_ids = self.pool[action.model].search(cr, uid, new_domain, context=ctx)
@@ -182,7 +198,7 @@ class base_action_rule(osv.osv):
             def create(self, cr, uid, vals, context=None, **kwargs):
                 # avoid loops or cascading actions
                 if context and context.get('action'):
-                    return create.origin(self, cr, uid, vals, context=context)
+                    return create.origin(self, cr, uid, vals, context=context, **kwargs)
 
                 # call original method with a modified context
                 context = dict(context or {}, action=True)
@@ -192,7 +208,7 @@ class base_action_rule(osv.osv):
                 action_model = self.pool.get('base.action.rule')
                 action_dom = [('model', '=', self._name),
                               ('kind', 'in', ['on_create', 'on_create_or_write'])]
-                action_ids = action_model.search(cr, uid, action_dom, context=context)
+                action_ids = action_model.search(cr, uid, action_dom, context=dict(context, active_test=True))
 
                 # check postconditions, and execute actions on the records that satisfy them
                 for action in action_model.browse(cr, uid, action_ids, context=context):
@@ -207,7 +223,7 @@ class base_action_rule(osv.osv):
             def write(self, cr, uid, ids, vals, context=None, **kwargs):
                 # avoid loops or cascading actions
                 if context and context.get('action'):
-                    return write.origin(self, cr, uid, ids, vals, context=context)
+                    return write.origin(self, cr, uid, ids, vals, context=context, **kwargs)
 
                 # modify context
                 context = dict(context or {}, action=True)
@@ -306,7 +322,8 @@ class base_action_rule(osv.osv):
         context = context or {}
         # retrieve all the action rules to run based on a timed condition
         action_dom = [('kind', '=', 'on_time')]
-        action_ids = self.search(cr, uid, action_dom, context=context)
+        action_ids = self.search(cr, uid, action_dom, context=dict(context, active_test=True))
+        eval_context = self._get_eval_context(cr, uid, context=context)
         for action in self.browse(cr, uid, action_ids, context=context):
             now = datetime.now()
             if action.last_run:
@@ -318,9 +335,9 @@ class base_action_rule(osv.osv):
             domain = []
             ctx = dict(context)
             if action.filter_domain is not False:
-                domain = eval(action.filter_domain)
+                domain = eval(action.filter_domain, eval_context)
             elif action.filter_id:
-                domain = eval(action.filter_id.domain)
+                domain = eval(action.filter_id.domain, eval_context)
                 ctx.update(eval(action.filter_id.context))
                 if 'lang' not in ctx:
                     # Filters might be language-sensitive, attempt to reuse creator lang

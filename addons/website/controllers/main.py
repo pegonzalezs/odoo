@@ -40,9 +40,9 @@ class Website(openerp.addons.web.controllers.main.Home):
         else:
             first_menu = main_menu.child_id and main_menu.child_id[0]
             if first_menu:
-                if not (first_menu.url.startswith(('/page/', '/?', '/#')) or (first_menu.url=='/')):
+                if first_menu.url and (not (first_menu.url.startswith(('/page/', '/?', '/#')) or (first_menu.url == '/'))):
                     return request.redirect(first_menu.url)
-                if first_menu.url.startswith('/page/'):
+                if first_menu.url and first_menu.url.startswith('/page/'):
                     return request.registry['ir.http'].reroute(first_menu.url)
         return self.page(page)
 
@@ -53,7 +53,7 @@ class Website(openerp.addons.web.controllers.main.Home):
     @http.route(website=True, auth="public")
     def web_login(self, redirect=None, *args, **kw):
         r = super(Website, self).web_login(redirect=redirect, *args, **kw)
-        if request.params['login_success'] and not redirect:
+        if not redirect and request.params['login_success']:
             if request.registry['res.users'].has_group(request.cr, request.uid, 'base.group_user'):
                 redirect = '/web?' + request.httprequest.query_string
             else:
@@ -70,7 +70,7 @@ class Website(openerp.addons.web.controllers.main.Home):
         redirect.set_cookie('website_lang', lang)
         return redirect
 
-    @http.route('/page/<page:page>', type='http', auth="public", website=True)
+    @http.route('/page/<page:page>', type='http', auth="public", website=True, cache=300)
     def page(self, page, **opt):
         values = {
             'path': page,
@@ -132,11 +132,10 @@ class Website(openerp.addons.web.controllers.main.Home):
 
             pages = 0
             first_page = None
-            locs = request.website.enumerate_pages()
+            locs = request.website.sudo(user=request.website.user_id.id).enumerate_pages()
             while True:
-                start = pages * LOC_PER_SITEMAP
                 values = {
-                    'locs': islice(locs, start, start + LOC_PER_SITEMAP),
+                    'locs': islice(locs, 0, LOC_PER_SITEMAP),
                     'url_root': request.httprequest.url_root[:-1],
                 }
                 urls = iuv.render(cr, uid, 'website.sitemap_locs', values, context=context)
@@ -188,7 +187,7 @@ class Website(openerp.addons.web.controllers.main.Home):
             request.registry['website.menu'].create(
                 request.cr, request.uid, {
                     'name': path,
-                    'url': "/page/" + xml_id,
+                    'url': "/page/" + xml_id[8:],
                     'parent_id': request.website.menu_id.id,
                     'website_id': request.website.id,
                 }, context=request.context)
@@ -441,7 +440,7 @@ class Website(openerp.addons.web.controllers.main.Home):
         '/website/image/<xmlid>/<field>/<int:max_width>x<int:max_height>',
         '/website/image/<model>/<id>/<field>',
         '/website/image/<model>/<id>/<field>/<int:max_width>x<int:max_height>'
-        ], auth="public", website=True)
+        ], auth="public", website=True, multilang=False)
     def website_image(self, model=None, id=None, field=None, xmlid=None, max_width=None, max_height=None):
         """ Fetches the requested field and ensures it does not go above
         (max_width, max_height), resizing it if necessary.
@@ -529,7 +528,7 @@ class Website(openerp.addons.web.controllers.main.Home):
     #------------------------------------------------------
     # Backend html field
     #------------------------------------------------------
-    @http.route('/website/field/html', type='http', auth="public", website=True)
+    @http.route('/website/field/html', type='http', auth="user", website=True)
     def FieldTextHtml(self, model=None, res_id=None, field=None, callback=None, **kwargs):
         record = None
         if model and res_id:

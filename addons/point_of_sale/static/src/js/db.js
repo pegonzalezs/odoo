@@ -380,7 +380,7 @@ openerp.point_of_sale.load_db = function load_db(instance, module){
         search_product_in_category: function(category_id, query){
             try {
                 query = query.replace(/[\[\]\(\)\+\*\?\.\-\!\&\^\$\|\~\_\{\}\:\,\\\/]/g,'.');
-                query = query.replace(' ','.+');
+                query = query.replace(/ /g,'.+');
                 var re = RegExp("([0-9]+):.*?"+query,"gi");
             }catch(e){
                 return [];
@@ -411,6 +411,10 @@ openerp.point_of_sale.load_db = function load_db(instance, module){
                     return order_id;
                 }
             }
+
+            // Only necessary when we store a new, validated order. Orders
+            // that where already stored should already have been removed.
+            this.remove_unpaid_order(order);
 
             orders.push({id: order_id, data: order});
             this.save('orders',orders);

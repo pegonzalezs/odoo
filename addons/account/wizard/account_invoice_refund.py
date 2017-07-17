@@ -23,6 +23,7 @@ import time
 
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
+from openerp.tools.safe_eval import safe_eval as eval
 from openerp.exceptions import UserError
 
 class account_invoice_refund(osv.osv_memory):
@@ -201,7 +202,8 @@ class account_invoice_refund(osv.osv_memory):
                             'invoice_line': invoice_lines,
                             'tax_line': tax_lines,
                             'period_id': period,
-                            'name': description
+                            'name': description,
+                            'fiscal_position': inv.fiscal_position.id
                         })
                         for field in ('partner_id', 'account_id', 'currency_id',
                                          'payment_term', 'journal_id'):

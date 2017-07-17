@@ -30,13 +30,9 @@
             this._temp_col = this.$el.find("data-columns").data("columns");
         },
         drop_and_build_snippet: function() {
-            var uuid = 0;
-            $(".carousel").each(function () {
-                var id = parseInt(($(this).attr('id') || '0').replace(/[^0-9]/, ''));
-                if (id > uuid) uuid = id;
-            });
-            this.$target.find('.carousel').attr('id', 'slideshow_'+ (uuid+1));
-            this.$target.find('[data-target]').attr('data-target', '#slideshow_'+ (uuid+1));
+            var uuid = new Date().getTime();
+            this.$target.find('.carousel').attr('id', 'slideshow_' + uuid);
+            this.$target.find('[data-target]').attr('data-target', '#slideshow_' + uuid);
         },
         styling  : function(type, value) {
             var classes = this.$el.find('li[data-styling]').map(function () {
@@ -186,18 +182,13 @@
 
             var self = this,
                 $imgs    = $(this.get_imgs()),
-                urls = $imgs.map(function() { return $(this).attr("src"); } ).get(),
-                uuid = 0;
-            $(".carousel").each(function () {
-                var id = parseInt(($(this).attr('id') || '0').replace(/[^0-9]/, ''));
-                if (id > uuid) uuid = id;
-            });
+                urls = $imgs.map(function() { return $(this).attr("src"); } ).get();
             var params = {
                     srcs : urls,
-                    index: 1,
+                    index: 0,
                     title: "",
                     interval : this.$target.data("interval") || false,
-                    id: "slideshow_" + (uuid+1)
+                    id: "slideshow_" + new Date().getTime()
                 },
                 $slideshow = $(openerp.qweb.render('website.gallery.slideshow', params));
             this.replace($slideshow);
@@ -229,7 +220,7 @@
             var $container = this.$target.find(".container:first");
             var editor = new website.editor.MediaDialog(this.$target.closest('.o_editable'), null, {select_images: true});
             editor.appendTo(document.body);
-            var index = Math.max(_.map(this.$target.find("img").get(), function (img) { return img.dataset.index | 0; })) + 1;
+            var index = Math.max(0, _.max(_.map(this.$target.find("img").get(), function (img) { return img.dataset.index | 0; })) + 1);
             editor.on('saved', this, function (attachments) {
                 for (var i = 0 ; i < attachments.length; i++) {
                     var img = $('<img class="img img-responsive mb8 mt8"/>')
@@ -336,7 +327,6 @@
             if (type !== "click") return;
 
             var $parent = this.$target.closest("section");
-            this.BuildingBlock.create_overlay($parent);
             var editor = $parent.data('snippet-editor').styles.gallery;
             var imgs = $parent.find('img').get();
             imgs.sort(function (a,b) { return $(a).data('index')-$(b).data('index'); });

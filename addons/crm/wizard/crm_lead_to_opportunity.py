@@ -137,6 +137,7 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             context = {}
 
         lead_obj = self.pool['crm.lead']
+        partner_obj = self.pool['res.partner']
 
         w = self.browse(cr, uid, ids, context=context)[0]
         opp_ids = [o.id for o in w.opportunity_ids]
@@ -160,6 +161,9 @@ class crm_lead2opportunity_partner(osv.osv_memory):
             lead_ids = context.get('active_ids', [])
             vals.update({'lead_ids': lead_ids, 'user_ids': [w.user_id.id]})
             self._convert_opportunity(cr, uid, ids, vals, context=context)
+            for lead in lead_obj.browse(cr, uid, lead_ids, context=context):
+                if lead.partner_id and lead.partner_id.user_id != lead.user_id:
+                    partner_obj.write(cr, uid, [lead.partner_id.id], {'user_id': lead.user_id.id}, context=context)
 
         return self.pool.get('crm.lead').redirect_opportunity_view(cr, uid, lead_ids[0], context=context)
 
@@ -189,7 +193,7 @@ class crm_lead2opportunity_mass_convert(osv.osv_memory):
 
     _columns = {
         'user_ids':  fields.many2many('res.users', string='Salesmen'),
-        'team_id': fields.many2one('crm.team', 'Sales Team', oldname='section_id'),
+        'team_id': fields.many2one('crm.team', 'Sales Team', select=True, oldname='section_id'),
         'deduplicate': fields.boolean('Apply deduplication', help='Merge with existing leads/opportunities of each partner'),        
         'action': fields.selection([
                 ('each_exist_or_create', 'Use existing partner or create'),

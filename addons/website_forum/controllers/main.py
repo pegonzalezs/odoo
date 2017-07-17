@@ -308,15 +308,16 @@ class WebsiteForum(http.Controller):
         })
         return werkzeug.utils.redirect("/forum/%s/question/%s" % (slug(forum), post_parent and slug(post_parent) or new_question.id))
 
-    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/comment', type='http', auth="public", methods=['POST'], website=True)
+    @http.route('/forum/<model("forum.forum"):forum>/post/<model("forum.post"):post>/comment', type='http', auth="public", website=True)
     def post_comment(self, forum, post, **kwargs):
         if not request.session.uid:
             return login_redirect()
         question = post.parent_id if post.parent_id else post
         if kwargs.get('comment') and post.forum_id.id == forum.id:
             # TDE FIXME: check that post_id is the question or one of its answers
+            body = tools.mail.plaintext2html(kwargs['comment'])
             post.with_context(mail_create_nosubscribe=True).message_post(
-                body=kwargs.get('comment'),
+                body=body,
                 type='comment',
                 subtype='mt_comment')
         return werkzeug.utils.redirect("/forum/%s/question/%s" % (slug(forum), slug(question)))
@@ -358,7 +359,7 @@ class WebsiteForum(http.Controller):
     def post_save(self, forum, post, **kwargs):
         if 'post_name' in kwargs and not kwargs.get('post_name').strip():
             return request.website.render('website.http_error', {'status_code': _('Bad Request'), 'status_message': _('Title should not be empty.')})
-        post_tags = forum._tag_to_write_vals(kwargs.get('post_tag', ''))
+        post_tags = forum._tag_to_write_vals(kwargs.get('post_tags', ''))
         vals = {
             'tag_ids': post_tags,
             'name': kwargs.get('post_name'),

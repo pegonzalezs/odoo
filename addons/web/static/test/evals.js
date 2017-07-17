@@ -1,3 +1,16 @@
+openerp.testing.section('eval.basics', {
+    dependencies: ['web.core'],
+    setup: function (instance) {
+        instance.session.uid = 42;
+    }
+}, function (test) {
+    test('not prefix', function (instance) {
+        ok(py.eval('not False'));
+        ok(py.eval('not foo', {foo: false}));
+        ok(py.eval('not a in b', {a: 3, b: [1, 2, 4, 8]}));
+    });
+});
+
 openerp.testing.section('eval.types', {
     dependencies: ['web.core'],
     setup: function (instance) {
@@ -487,7 +500,7 @@ openerp.testing.section('eval.edc.nonliterals', {
     test('domain with time', {asserts: 1}, function (instance) {
         return instance.edc([
             [['type', '=', 'contract']],
-            { "__domains": [["|"], [["state", "in", ["open", "draft"]]], [["state", "=", "pending"]]],
+            { "__domains": [["|"], [["state", "in", ["open", "draft"]]], [["type", "=", "contract"], ["state", "=", "pending"]]],
               "__eval_context": null,
               "__ref": "compound_domain"
             },
@@ -500,7 +513,8 @@ openerp.testing.section('eval.edc.nonliterals', {
             deepEqual(result.domain, [
                 ["type", "=", "contract"],
                 "|", ["state", "in", ["open", "draft"]],
-                     ["state", "=", "pending"],
+                    "&", ["type", "=", "contract"],
+                         ["state", "=", "pending"],
                 "|",
                     "&", ["date", "!=", false],
                          ["date", "<=", today],

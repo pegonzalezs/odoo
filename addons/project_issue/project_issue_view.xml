@@ -289,7 +289,7 @@
             <field name="res_model">project.issue</field>
             <field name="view_type">form</field>
             <field name="name">Issues</field>
-            <field name="view_mode">kanban,tree,form,calendar,graph</field>
+            <field name="view_mode">kanban,tree,form,calendar,graph,pivot</field>
             <field name="context">{
                     'search_default_project_id': [active_id],
                     'default_project_id': active_id,
@@ -310,6 +310,9 @@
             <field name="model">project.project</field>
             <field name="inherit_id" ref="project.edit_project"/>
             <field name="arch" type="xml">
+                <xpath expr='//field[@name="use_tasks"]' position='attributes'>
+                    <attribute name="on_change">on_change_use_tasks_or_issues(use_tasks, use_issues)</attribute>
+                </xpath>
                 <xpath expr='//div[@name="options_active"]' position="attributes">
                     <attribute name="invisible">0</attribute>
                 </xpath>

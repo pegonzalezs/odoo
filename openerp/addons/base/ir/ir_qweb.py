@@ -21,6 +21,7 @@ import babel.dates
 import werkzeug
 from lxml import etree, html
 from PIL import Image
+import psycopg2
 
 import openerp.http
 import openerp.tools
@@ -135,8 +136,9 @@ class QWeb(orm.AbstractModel):
     _name = 'ir.qweb'
 
     _void_elements = frozenset([
-        'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'keygen',
-        'link', 'menuitem', 'meta', 'param', 'source', 'track', 'wbr'])
+        u'area', u'base', u'br', u'col', u'embed', u'hr', u'img', u'input',
+        u'keygen', u'link', u'menuitem', u'meta', u'param', u'source',
+        u'track', u'wbr'])
     _format_regex = re.compile(
         '(?:'
             # ruby-style pattern
@@ -269,7 +271,7 @@ class QWeb(orm.AbstractModel):
                 _logger.warning("@t-debug in template '%s' is only available in --dev mode" % qwebcontext['__template__'])
 
         for (attribute_name, attribute_value) in element.attrib.iteritems():
-            attribute_name = str(attribute_name)
+            attribute_name = unicode(attribute_name)
             if attribute_name == "groups":
                 cr = qwebcontext.get('request') and qwebcontext['request'].cr or None
                 uid = qwebcontext.get('request') and qwebcontext['request'].uid or None
@@ -313,7 +315,7 @@ class QWeb(orm.AbstractModel):
         # generated_attributes: generated attributes
         # qwebcontext: values
         # inner: optional innerXml
-        name = str(element.tag)
+        name = unicode(element.tag)
         if inner:
             g_inner = inner.encode('utf-8') if isinstance(inner, unicode) else inner
         else:
@@ -345,7 +347,7 @@ class QWeb(orm.AbstractModel):
                 for qwebcontext in (name, generated_attributes, inner, name)
             )
         else:
-            return "<%s%s/>" % (name, generated_attributes)
+            return "<%s%s/>" % (name.encode("utf-8"), generated_attributes)
 
     def render_attribute(self, element, name, value, qwebcontext):
         return _build_attribute(name, value)
@@ -646,7 +648,7 @@ class FieldConverter(osv.AbstractModel):
                 _build_attribute(name, value)
                 for name, value in self.attributes(
                     cr, uid, field_name, record, options,
-                    source_element, g_att, t_att, qweb_context)
+                    source_element, g_att, t_att, qweb_context, context=context)
             )
 
         return self.render_element(cr, uid, source_element, t_att, g_att,
@@ -754,6 +756,12 @@ class DateTimeConverter(osv.AbstractModel):
             pattern = pattern.replace(":ss", "").replace(":s", "")
 
         return babel.dates.format_datetime(value, format=pattern, locale=locale)
+
+    def record_to_html(self, cr, uid, field_name, record, options, context=None):
+        field = field = record._fields[field_name]
+        value = record[field_name]
+        return self.value_to_html(
+            cr, uid, value, field, options=options, context=dict(context, **record.env.context))
 
 class TextConverter(osv.AbstractModel):
     _name = 'ir.qweb.field.text'
@@ -1108,6 +1116,7 @@ class AssetsBundle(object):
 
         context = self.context.copy()
         context['inherit_branding'] = False
+        context['inherit_branding_auto'] = False
         context['rendering_bundle'] = True
         self.html = self.registry['ir.ui.view'].render(self.cr, self.uid, xmlid, context=context)
         self.parse()
@@ -1281,14 +1290,18 @@ class AssetsBundle(object):
 
     def set_cache(self, type, content):
         ira = self.registry['ir.attachment']
-        ira.invalidate_bundle(self.cr, openerp.SUPERUSER_ID, type=type, xmlid=self.xmlid)
         url = '/web/%s/%s/%s' % (type, self.xmlid, self.version)
-        ira.create(self.cr, openerp.SUPERUSER_ID, dict(
+        try:
+            with self.cr.savepoint():
+                ira.invalidate_bundle(self.cr, openerp.SUPERUSER_ID, type=type, xmlid=self.xmlid)
+                ira.create(self.cr, openerp.SUPERUSER_ID, dict(
                     datas=content.encode('utf8').encode('base64'),
                     type='binary',
                     name=url,
                     url=url,
                 ), context=self.context)
+        except psycopg2.Error:
+            pass
 
     def css_message(self, message):
         # '\A' == css content carriage return
@@ -1545,22 +1558,27 @@ class PreprocessedCSS(StylesheetAsset):
 
     def to_html(self):
         if self.url:
-            ira = self.registry['ir.attachment']
-            url = self.html_url % self.url
-            domain = [('type', '=', 'binary'), ('url', '=', url)]
-            ira_id = ira.search(self.cr, openerp.SUPERUSER_ID, domain, context=self.context)
-            datas = self.content.encode('utf8').encode('base64')
-            if ira_id:
-                # TODO: update only if needed
-                ira.write(self.cr, openerp.SUPERUSER_ID, ira_id, {'datas': datas}, context=self.context)
-            else:
-                ira.create(self.cr, openerp.SUPERUSER_ID, dict(
-                    datas=datas,
-                    mimetype='text/css',
-                    type='binary',
-                    name=url,
-                    url=url,
-                ), context=self.context)
+            try:
+                ira = self.registry['ir.attachment']
+                url = self.html_url % self.url
+                domain = [('type', '=', 'binary'), ('url', '=', url)]
+                with self.cr.savepoint():
+                    ira_id = ira.search(self.cr, openerp.SUPERUSER_ID, domain, context=self.context)
+                    datas = self.content.encode('utf8').encode('base64')
+                    if ira_id:
+                        # TODO: update only if needed
+                        ira.write(self.cr, openerp.SUPERUSER_ID, ira_id, {'datas': datas},
+                                  context=self.context)
+                    else:
+                        ira.create(self.cr, openerp.SUPERUSER_ID, dict(
+                            datas=datas,
+                            mimetype='text/css',
+                            type='binary',
+                            name=url,
+                            url=url,
+                        ), context=self.context)
+            except psycopg2.Error:
+                pass
         return super(PreprocessedCSS, self).to_html()
 
     def get_source(self):

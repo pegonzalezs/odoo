@@ -19,9 +19,9 @@
 #
 ##############################################################################
 
-from openerp.addons.mail.mail_mail import mail_mail
-from openerp.addons.mail.mail_thread import mail_thread
-from openerp.addons.mail.tests.common import TestMail
+from ..mail_mail import mail_mail
+from ..mail_thread import mail_thread
+from .common import TestMail
 from openerp.tools import mute_logger, email_split, html2plaintext
 from openerp.tools.mail import html_sanitize
 
@@ -208,6 +208,16 @@ class test_mail(TestMail):
         self.assertFalse(subtype_data['Discussions']['followed'], 'Admin should not follow Discussions in pigs')
         self.assertTrue(subtype_data['mt_mg_nodef']['followed'], 'Admin should follow mt_mg_nodef in pigs')
         self.assertTrue(subtype_data['mt_all_nodef']['followed'], 'Admin should follow mt_all_nodef in pigs')
+
+    def test_10_cache_invalidation(self):
+        """ Test that creating a mail-thread record does not invalidate the whole cache. """
+        # make a new record in cache
+        record = self.env['res.partner'].new({'name': 'Brave New Partner'})
+        self.assertTrue(record.name)
+
+        # creating a mail-thread record should not invalidate the whole cache
+        self.env['res.partner'].create({'name': 'Actual Partner'})
+        self.assertTrue(record.name)
 
     def test_11_notification_url(self):
         """ Tests designed to test the URL added in notification emails. """

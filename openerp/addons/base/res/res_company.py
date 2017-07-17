@@ -22,7 +22,7 @@
 import os
 import re
 import openerp
-from openerp import SUPERUSER_ID, tools
+from openerp import SUPERUSER_ID, tools, api
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp.tools.safe_eval import safe_eval as eval
@@ -154,6 +154,19 @@ class res_company(osv.osv):
         ('name_uniq', 'unique (name)', 'The company name must be unique !')
     ]
 
+    @api.multi
+    def copy(self, default=None):
+        """
+        Duplicating a company without specifying a partner duplicate the partner
+        """
+        self.ensure_one()
+        default = dict(default or {})
+        if not default.get('name') and not default.get('partner_id'):
+            copy_partner = self.partner_id.copy()
+            default['partner_id'] = copy_partner.id
+            default['name'] = copy_partner.name
+        return super(res_company, self).copy(default)
+
     def onchange_footer(self, cr, uid, ids, custom_footer, phone, fax, email, website, vat, company_registry, bank_ids, context=None):
         if custom_footer:
             return {}
@@ -232,9 +245,10 @@ class res_company(osv.osv):
         args = [
             ('object_id.model', '=', object),
             ('field_id', '=', field),
+            ('company_id', '=', self.pool['res.users']._get_company(cr, uid, context=context)),
         ]
 
-        ids = proxy.search(cr, uid, args, context=context)
+        ids = proxy.search(cr, uid, args, context=context, order='sequence')
         user = self.pool.get('res.users').browse(cr, SUPERUSER_ID, uid, context=context)
         for rule in proxy.browse(cr, uid, ids, context):
             if eval(rule.expression, {'context': context, 'user': user}):
@@ -275,7 +289,16 @@ class res_company(osv.osv):
             self.cache_restart(cr)
             return super(res_company, self).create(cr, uid, vals, context=context)
         obj_partner = self.pool.get('res.partner')
-        partner_id = obj_partner.create(cr, uid, {'name': vals['name'], 'is_company':True, 'image': vals.get('logo', False)}, context=context)
+        partner_id = obj_partner.create(cr, uid, {
+            'name': vals['name'],
+            'is_company': True,
+            'image': vals.get('logo', False),
+            'customer': False,
+            'email': vals.get('email'),
+            'phone': vals.get('phone'),
+            'website': vals.get('website'),
+            'vat': vals.get('vat'),
+        }, context=context)
         vals.update({'partner_id': partner_id})
         self.cache_restart(cr)
         company_id = super(res_company, self).create(cr, uid, vals, context=context)

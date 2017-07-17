@@ -26,6 +26,7 @@ import time
 from openerp.osv import osv
 from openerp.tools.translate import _
 from openerp.report import report_sxw
+from openerp.tools.safe_eval import safe_eval as eval
 
 
 #
@@ -67,8 +68,9 @@ class report_assert_account(report_sxw.rml_parse):
             'reconciled_inv': reconciled_inv, #specific function used in different tests
             'result': None, #used to store the result of the test
             'column_order': None, #used to choose the display order of columns (in case you are returning a list of dict)
+            '_': _, #used for translation
         }
-        exec code_exec in localdict
+        eval(code_exec, localdict, mode="exec", nocopy=True)
         result = localdict['result']
         column_order = localdict.get('column_order', None)
 

@@ -86,9 +86,7 @@ class QWeb(orm.AbstractModel):
 
     def render_tag_call_assets(self, element, template_attributes, generated_attributes, qwebcontext):
         if request and request.website and request.website.cdn_activated:
-            if qwebcontext.context is None:
-                qwebcontext.context = {}
-            qwebcontext.context['url_for'] = request.website.get_cdn_url
+            qwebcontext.context = dict(qwebcontext.context or {}, url_for=request.website.get_cdn_url)
         return super(QWeb, self).render_tag_call_assets(element, template_attributes, generated_attributes, qwebcontext)
 
     def get_converter_for(self, field_type):
@@ -344,7 +342,12 @@ class Image(orm.AbstractModel):
         if options.get('resize'):
             src = "%s/%s" % (src, options.get('resize'))
 
-        img = '<img class="%s" src="%s" style="%s"/>' % (classes, src, options.get('style', ''))
+        alt = None
+        if options.get('alt-field') and getattr(record, options['alt-field'], None):
+            alt = escape(record[options['alt-field']])
+        elif options.get('alt'):
+            alt = options['alt']
+        img = '<img class="%s" src="%s" style="%s"%s/>' % (classes, src, options.get('style', ''), ' alt="%s"' % alt if alt else '')
         return ir_qweb.HTMLSafe(img)
 
     local_url_re = re.compile(r'^/(?P<module>[^]]+)/static/(?P<rest>.+)$')
