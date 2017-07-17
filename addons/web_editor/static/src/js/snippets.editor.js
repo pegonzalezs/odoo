@@ -18,15 +18,6 @@ var data = {};
 
 /* ----- SNIPPET SELECTOR ---- */
 
-$.extend($.expr[':'], {
-    hasData: function (node) {
-        return !!_.toArray(node.dataset).length;
-    },
-    data: function (node, i, m) {
-        return $(node).data(m[3]);
-    }
-});
-
 data.globalSelector = {
     closest: function () { return $(); },
     all: function () { return $(); },
@@ -260,12 +251,25 @@ data.Class = Widget.extend({
                         $div.find('.oe_snippet_thumbnail_img').css('background-image', 'url(' + thumbnail + ')');
                     }
                     // end
+
+                    var moduleID = $snippet.data('moduleId');
+                    if (moduleID) {
+                        $snippet.addClass('o_snippet_install');
+                        var $installBtn = $('<a/>', {
+                            class: 'btn btn-primary btn-sm o_install_btn',
+                            target: '_blank',
+                            href: '/web#id=' + moduleID + '&view_type=form&model=ir.module.module&action=base.open_module_tree',
+                            text: _t("Install"),
+                        });
+                        $div.append($installBtn);
+                    }
                 }
                 if (!$snippet.data("selector")) {
                     $("> *:not(.oe_snippet_thumbnail)", this).addClass('oe_snippet_body');
                 }
                 number++;
-            });
+            })
+            .not('[data-module-id]');
 
         // hide scroll if no snippets defined
         if (!number) {

@@ -312,7 +312,7 @@ class MassMailing(models.Model):
     create_date = fields.Datetime(string='Creation Date')
     sent_date = fields.Datetime(string='Sent Date', oldname='date', copy=False)
     schedule_date = fields.Datetime(string='Schedule in the Future')
-    body_html = fields.Html(string='Body', translate=html_translate, sanitize_attributes=False)
+    body_html = fields.Html(string='Body', sanitize_attributes=False)
     attachment_ids = fields.Many2many('ir.attachment', 'mass_mailing_ir_attachments_rel',
         'mass_mailing_id', 'attachment_id', string='Attachments')
     keep_archives = fields.Boolean(string='Keep Archives')
@@ -434,15 +434,14 @@ class MassMailing(models.Model):
 
     def _compute_next_departure(self):
         cron_next_call = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue').sudo().nextcall
+        str2dt = fields.Datetime.from_string
+        cron_time = str2dt(cron_next_call)
         for mass_mailing in self:
-            schedule_date = mass_mailing.schedule_date
-            if schedule_date:
-                if datetime.now() > fields.Datetime.from_string(schedule_date):
-                    mass_mailing.next_departure = cron_next_call
-                else:
-                    mass_mailing.next_departure = schedule_date
+            if mass_mailing.schedule_date:
+                schedule_date = str2dt(mass_mailing.schedule_date)
+                mass_mailing.next_departure = max(schedule_date, cron_time)
             else:
-                mass_mailing.next_departure = cron_next_call
+                mass_mailing.next_departure = cron_time
 
     @api.onchange('mass_mailing_campaign_id')
     def _onchange_mass_mailing_campaign_id(self):
@@ -560,7 +559,7 @@ class MassMailing(models.Model):
     def retry_failed_mail(self):
         failed_mails = self.env['mail.mail'].search([('mailing_id', 'in', self.ids), ('state', '=', 'exception')])
         failed_mails.mapped('statistics_ids').unlink()
-        failed_mails.unlink()
+        failed_mails.sudo().unlink()
         self.write({'state': 'in_queue'})
 
     #------------------------------------------------------

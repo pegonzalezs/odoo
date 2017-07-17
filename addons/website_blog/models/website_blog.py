@@ -140,14 +140,8 @@ class BlogPost(models.Model):
     teaser = fields.Text('Teaser', compute='_compute_teaser', inverse='_set_teaser')
     teaser_manual = fields.Text(string='Teaser Content')
 
-    website_message_ids = fields.One2many(
-        'mail.message', 'res_id',
-        domain=lambda self: [
-            '&', '&', ('model', '=', self._name), ('message_type', '=', 'comment'), ('path', '=', False)
-        ],
-        string='Website Messages',
-        help="Website communication history",
-    )
+    website_message_ids = fields.One2many(domain=lambda self: [('model', '=', self._name), ('message_type', '=', 'comment'), ('path', '=', False)])
+
     # creation / update stuff
     create_date = fields.Datetime('Created on', index=True, readonly=True)
     published_date = fields.Datetime('Published Date')
@@ -222,12 +216,13 @@ class BlogPost(models.Model):
         return result
 
     @api.multi
-    def get_access_action(self):
+    def get_access_action(self, access_uid=None):
         """ Instead of the classic form view, redirect to the post on website
         directly if user is an employee or if the post is published. """
         self.ensure_one()
-        if self.env.user.share and not self.sudo().website_published:
-            return super(BlogPost, self).get_access_action()
+        user = access_uid and self.env['res.users'].sudo().browse(access_uid) or self.env.user
+        if user.share and not self.sudo().website_published:
+            return super(BlogPost, self).get_access_action(access_uid)
         return {
             'type': 'ir.actions.act_url',
             'url': self.url,

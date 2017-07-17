@@ -23,6 +23,8 @@ from pprint import pformat
 
 import requests
 
+from odoo.tools import pycompat
+
 try:
     from itertools import zip_longest as izip_longest
 except ImportError:
@@ -158,6 +160,10 @@ class BaseCase(TreeCase):
         doc = self._testMethodDoc
         return doc and ' '.join(l.strip() for l in doc.splitlines() if not l.isspace()) or None
 
+    if not pycompat.PY2:
+        # turns out this thing may not be quite as useful as we thought...
+        def assertItemsEqual(self, a, b, msg=None):
+            self.assertCountEqual(a, b, msg=None)
 
 class TransactionCase(BaseCase):
     """ TestCase in which each test method is run in its own transaction,
@@ -382,6 +388,13 @@ class HttpCase(TransactionCase):
             if phantom.poll() is None:
                 phantom.terminate()
                 phantom.wait()
+
+            # check PhantomJS health
+            from signal import SIGSEGV
+            _logger.info("Phantom JS return code: %d" % phantom.returncode)
+            if phantom.returncode == -SIGSEGV:
+                _logger.error("Phantom JS has crashed (segmentation fault) during testing; log may not be relevant")
+
             self._wait_remaining_requests()
             # we ignore phantomjs return code as we kill it as soon as we have ok
             _logger.info("phantom_run execution finished")

@@ -1,34 +1,30 @@
 <odoo>
 	<template id="portal_my_home_menu_invoice" name="Portal layout : invoice menu entries" inherit_id="website_portal.portal_layout" priority="30">
-        <xpath expr="//ul[contains(@class,'o_portal_submenu')]" position="inside">
-            <li t-if="invoice_count" t-att-class="page_name == 'invoice' and 'active'">
-                <a href="/my/invoices">Invoices</a>		
-            </li>		
-        </xpath>		
+        <xpath expr="//ol[contains(@class,'o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'invoice'" class="active">
+                Invoices
+            </li>
+        </xpath>
     </template>
 
     <template id="portal_my_home_invoice" name="Portal My Home : invoice entries" inherit_id="website_portal.portal_my_home" priority="30">
-        <xpath expr="//div[contains(@class,'o_my_home_content')]" position="inside">
-            <h3 t-if="invoice_count" class="page-header">
-              <a href="/my/invoices">Your Invoices and Payments
-                <small class="ml8">
-                  <span class='badge'><t t-esc="invoice_count"/></span>
-                </small>
-              </a>
-            </h3>
+        <xpath expr="//ul[contains(@class,'o_portal_docs')]" position="inside">
+            <li t-if="invoice_count" class="list-group-item">
+                <span class="badge" t-esc="invoice_count"/>
+                <a href="/my/invoices">Invoices</a>
+            </li>
         </xpath>
     </template>
 
     <template id="portal_my_invoices" name="My Invoices and Payments">
       <t t-call="website_portal.portal_layout">
-        <div class="page-header">
-            <span class="h3">Your Invoices</span>
+        <h3>Invoices
             <t t-call="website_portal.portal_searchbar"/>
-        </div>
+        </h3>
         <t t-if="not invoices">
             <p>There are currently no invoices and payments for your account.</p>
         </t>
-        <t t-if="invoices">
+        <div t-if="invoices" class="panel panel-default">
             <div class="table-responsive"><table class="table table-hover o_my_status_table">
                 <thead>
                   <tr class="active">
@@ -68,7 +64,7 @@
             <div t-if="pager" class="o_portal_pager text-center">
                 <t t-call="website.pager"/>
             </div>
-        </t>
+        </div>
       </t>
     </template>
 </odoo>

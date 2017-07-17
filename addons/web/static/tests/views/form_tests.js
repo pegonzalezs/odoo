@@ -4,6 +4,8 @@ odoo.define('web.form_tests', function (require) {
 var concurrency = require('web.concurrency');
 var core = require('web.core');
 var FormView = require('web.FormView');
+var pyeval = require('web.pyeval');
+var RainbowMan = require('web.rainbow_man');
 var testUtils = require('web.test_utils');
 
 var _t = core._t;
@@ -625,10 +627,10 @@ QUnit.module('Views', {
             res_id: 2,
         });
 
-        assert.strictEqual(form.$('.o_field_widget.o_field_empty').length, 2,
-            "should have 2 empty fields with correct class");
-        assert.strictEqual(form.$('.o_form_label_empty').length, 2,
-            "should have 2 muted labels (for the empty fieds) in readonly");
+        assert.strictEqual(form.$('.o_field_widget.o_field_empty').length, 1,
+            "should have 1 empty field with correct class");
+        assert.strictEqual(form.$('.o_form_label_empty').length, 1,
+            "should have 1 muted label (for the empty fied) in readonly");
 
         form.$buttons.find('.o_form_button_edit').click();
 
@@ -771,7 +773,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('required float fields works as expected', function (assert) {
-        assert.expect(8);
+        assert.expect(10);
 
         this.data.partner.fields.qux.required = true;
         var form = createView({
@@ -793,24 +795,26 @@ QUnit.module('Views', {
 
         assert.ok(form.$('input[name="qux"]').hasClass('o_required_modifier'),
             "qux input is flagged as required");
-        assert.strictEqual(form.$('input[name="qux"]').val(), "",
-            "qux input is empty");
+        assert.strictEqual(form.$('input[name="qux"]').val(), "0.0",
+            "qux input is 0 by default (float field)");
 
         form.$buttons.find('.o_form_button_save').click();
 
-        assert.ok(form.$('input[name="qux"]').hasClass('o_field_invalid'),
-            "qux input is displayed as invalid");
+        assert.notOk(form.$('input[name="qux"]').hasClass('o_field_invalid'),
+            "qux input is not displayed as invalid");
 
-        form.$('input[name="qux"]').val("0").trigger('input');
+        form.$buttons.find('.o_form_button_edit').click();
+
+        form.$('input[name="qux"]').val("1").trigger('input');
 
         form.$buttons.find('.o_form_button_save').click();
 
         form.$buttons.find('.o_form_button_edit').click();
 
-        assert.strictEqual(form.$('input[name="qux"]').val(), "0.0",
+        assert.strictEqual(form.$('input[name="qux"]').val(), "1.0",
             "qux input is properly formatted");
 
-        assert.verifySteps(['default_get', 'create', 'read']);
+        assert.verifySteps(['default_get', 'create', 'read', 'write', 'read']);
         form.destroy();
     });
 
@@ -918,7 +922,7 @@ QUnit.module('Views', {
 
     QUnit.test('buttons in form view, new record', function (assert) {
         // this simulates a situation similar to the settings forms.
-        assert.expect(6);
+        assert.expect(7);
 
         var resID;
 
@@ -958,12 +962,12 @@ QUnit.module('Views', {
         });
         form.$('.o_form_statusbar button.p').click();
 
-        assert.verifySteps(['default_get', 'create', 'execute_action', 'read']);
+        assert.verifySteps(['default_get', 'create', 'read', 'execute_action', 'read']);
         form.destroy();
     });
 
     QUnit.test('buttons in form view, new record, with field id in view', function (assert) {
-        assert.expect(6);
+        assert.expect(7);
         // buttons in form view are one of the rare example of situation when we
         // save a record without reloading it immediately, because we only care
         // about its id for the next step.  But at some point, if the field id
@@ -1008,7 +1012,7 @@ QUnit.module('Views', {
         });
         form.$('.o_form_statusbar button.p').click();
 
-        assert.verifySteps(['default_get', 'create', 'execute_action', 'read']);
+        assert.verifySteps(['default_get', 'create', 'read', 'execute_action', 'read']);
         form.destroy();
     });
 
@@ -1140,6 +1144,53 @@ QUnit.module('Views', {
 
         form.$buttons.find('.o_form_button_edit').click();
         form.$('input:first').val("tralala").trigger('input');
+
+        form.destroy();
+    });
+
+    QUnit.test('onchange only send present fields value', function (assert) {
+        assert.expect(1);
+        this.data.partner.onchanges.foo = function (obj) {};
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<field name="display_name"/>' +
+                    '<field name="foo"/>' +
+                    '<field name="p">' +
+                        '<tree editable="top">' +
+                            '<field name="display_name"/>' +
+                            '<field name="qux"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (args.method === "onchange") {
+                    assert.deepEqual(args.args[1], {
+                        display_name: "first record",
+                        foo: "tralala",
+                        id: 1,
+                        p: [[0, false, {"display_name": "valid line", "qux": 12.4}]]
+                    }, "should send the values for the present fields");
+                }
+                return this._super(route, args);
+            },
+        });
+
+        form.$buttons.find('.o_form_button_edit').click();
+
+        // add a o2m row
+        form.$('.o_field_x2many_list_row_add a').click();
+        form.$('.o_field_one2many input:first').focus();
+        form.$('.o_field_one2many input:first').val('valid line').trigger('input');
+        form.$('.o_field_one2many input:last').focus();
+        form.$('.o_field_one2many input:last').val('12.4').trigger('input');
+
+        // trigger an onchange by modifying foo
+        form.$('input[name="foo"]:first').val("tralala").trigger('input');
 
         form.destroy();
     });
@@ -1472,7 +1523,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('clicking on stat buttons in edit mode', function (assert) {
-        assert.expect(8);
+        assert.expect(9);
 
         var form = createView({
             View: FormView,
@@ -1517,7 +1568,49 @@ QUnit.module('Views', {
 
         assert.strictEqual(form.mode, "edit", "form view should be in edit mode");
         assert.strictEqual(count, 2, "should have triggered a execute action");
-        assert.verifySteps(['read', 'write']);
+        assert.verifySteps(['read', 'write', 'read']);
+        form.destroy();
+    });
+
+    QUnit.test('clicking on stat buttons save and reload in edit mode', function (assert) {
+        assert.expect(2);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<sheet>' +
+                        '<div name="button_box">' +
+                            '<button class="oe_stat_button" type="action">' +
+                                '<field name="int_field" widget="statinfo" string="Some number"/>' +
+                            '</button>' +
+                        '</div>' +
+                        '<group>' +
+                            '<field name="name"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 2,
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    // simulate an override of the model...
+                    args.args[1].display_name = "GOLDORAK";
+                    args.args[1].name = "GOLDORAK";
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        assert.strictEqual(form.getTitle(), 'second record',
+            "should have correct display_name");
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('input[name="name"]').val('some other name').trigger('input');
+
+        form.$('.oe_stat_button').first().click();
+        assert.strictEqual(form.getTitle(), 'GOLDORAK',
+            "should have correct display_name");
+
         form.destroy();
     });
 
@@ -1569,7 +1662,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('buttons with attr "special=save" save', function (assert) {
-        assert.expect(4);
+        assert.expect(5);
 
         var form = createView({
             View: FormView,
@@ -1596,7 +1689,7 @@ QUnit.module('Views', {
 
         form.$('input').val("tralala").trigger('input'); // make the record dirty
         form.$('button').click(); // click on Save
-        assert.verifySteps(['read', 'write', 'execute_action']);
+        assert.verifySteps(['read', 'write', 'read', 'execute_action']);
 
         form.destroy();
     });
@@ -2966,6 +3059,53 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('discarding before save returns', function (assert) {
+        assert.expect(4);
+
+        var def = $.Deferred();
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<group><field name="foo"/></group>' +
+                '</form>',
+            res_id: 2,
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                if (args.method === 'write') {
+                    return def.then(_.constant(result));
+                }
+                return result;
+            },
+            viewOptions: {
+                mode: 'edit',
+            },
+        });
+
+        form.$('input').val("1234").trigger('input');
+
+        // save the value and discard directly
+        form.$buttons.find('.o_form_button_save').click();
+        form.discardChanges(); // Simulate click on breadcrumb
+
+        assert.strictEqual(form.$('.o_field_widget[name="foo"]').val(), "1234",
+            "field foo should still contain new value");
+        assert.strictEqual($('.modal').length, 0,
+            "Confirm dialog should not be displayed");
+
+        // complete the write
+        def.resolve();
+
+        assert.strictEqual($('.modal').length, 0,
+            "Confirm dialog should not be displayed");
+        assert.strictEqual(form.$('.o_field_widget[name="foo"]').text(), "1234",
+            "value should have been saved and rerendered in readonly");
+
+        form.destroy();
+    });
+
     QUnit.test('unchanged relational data is sent for onchanges', function (assert) {
         assert.expect(1);
 
@@ -3278,7 +3418,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('navigation with tab key in form view', function (assert) {
-        assert.expect(2);
+        assert.expect(3);
 
         var form = createView({
             View: FormView,
@@ -3287,8 +3427,9 @@ QUnit.module('Views', {
             arch: '<form string="Partners">' +
                     '<sheet>' +
                         '<group>' +
-                            '<field name="foo"/>' +
+                            '<field name="foo" widget="email"/>' +
                             '<field name="bar"/>' +
+                            '<field name="display_name" widget="url"/>' +
                         '</group>' +
                     '</sheet>' +
                 '</form>',
@@ -3300,14 +3441,69 @@ QUnit.module('Views', {
 
         // focus first input, trigger tab
         form.$('input[name="foo"]').focus();
+
         form.$('input[name="foo"]').trigger($.Event('keydown', {which: $.ui.keyCode.TAB}));
         assert.ok($.contains(form.$('div[name="bar"]')[0], document.activeElement),
             "bar checkbox should be focused");
 
+        form.$('div[name="bar"]').trigger($.Event('keydown', {which: $.ui.keyCode.TAB}));
+        assert.strictEqual(form.$('input[name="display_name"]')[0], document.activeElement,
+            "display_name should be focused");
+
         // simulate shift+tab on active element
+        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
         $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
         assert.strictEqual(document.activeElement, form.$('input[name="foo"]')[0],
             "first input should be focused");
+
+        form.destroy();
+    });
+
+    QUnit.test('navigation with tab key in readonly form view', function (assert) {
+        // The behavior of the phone widget is completely altered by crm_voip so
+        // this test fails if crm_voip is installed. The enterprise module is
+        // responsible for testing its own behavior in its own tests.
+        if ('crm.voip' in odoo.__DEBUG__.services) {
+            assert.expect(0);
+            return;
+        }
+
+        assert.expect(3);
+
+        this.data.partner.records[1].product_id = 37;
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="trululu"/>' +
+                            '<field name="foo"/>' +
+                            '<field name="product_id"/>' +
+                            '<field name="foo" widget="phone"/>' +
+                            '<field name="display_name" widget="url"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 2,
+        });
+
+        // focus first field, trigger tab
+        form.$('[name="trululu"]').focus();
+        form.$('[name="trululu"]').trigger($.Event('keydown', {which: $.ui.keyCode.TAB}));
+        assert.strictEqual(form.$('[name="product_id"]')[0], document.activeElement,
+            "product_id should be focused");
+        form.$('[name="product_id"]').trigger($.Event('keydown', {which: $.ui.keyCode.TAB}));
+        assert.strictEqual(form.$('[name="display_name"]')[0], document.activeElement,
+            "display_name should be focused (emails are focusable but phone aren't)");
+
+        // simulate shift+tab on active element
+        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
+        $(document.activeElement).trigger($.Event('keydown', {which: $.ui.keyCode.TAB, shiftKey: true}));
+        assert.strictEqual(document.activeElement, form.$('[name="trululu"]')[0],
+            "first many2one should be focused");
 
         form.destroy();
     });
@@ -4303,7 +4499,7 @@ QUnit.module('Views', {
     });
 
     QUnit.test('default_order on x2many embedded view', function (assert) {
-        assert.expect(8);
+        assert.expect(11);
 
         this.data.partner.fields.display_name.sortable = true;
         this.data.partner.records[0].p = [1, 4];
@@ -4360,6 +4556,18 @@ QUnit.module('Views', {
             "record zop should be first");
         assert.ok(form.$('.o_field_one2many tbody tr:eq(1) td:contains(yop)').length,
             "record yop should be second");
+        assert.ok(form.$('.o_field_one2many tbody tr:eq(2) td:contains(xop)').length,
+            "record xop should be third");
+
+        // client-side sort on edit
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('.o_field_one2many tbody tr:eq(1) td:contains(yop)').click();
+        $('.modal input[name="foo"]').val('zzz').trigger("input");
+        $('.modal .modal-footer button:first').click(); // Save
+        assert.ok(form.$('.o_field_one2many tbody tr:eq(0) td:contains(zzz)').length,
+            "record zzz should be first");
+        assert.ok(form.$('.o_field_one2many tbody tr:eq(1) td:contains(zop)').length,
+            "record zop should be second");
         assert.ok(form.$('.o_field_one2many tbody tr:eq(2) td:contains(xop)').length,
             "record xop should be third");
 
@@ -4637,6 +4845,64 @@ QUnit.module('Views', {
 
         form.destroy();
 
+        _t.database.multi_lang = multi_lang;
+    });
+
+    QUnit.test('translate event correctly handled with multiple controllers', function (assert) {
+        assert.expect(3);
+
+        this.data.product.fields.name.translate = true;
+        this.data.partner.records[0].product_id = 37;
+        var nbTranslateCalls = 0;
+
+        var multi_lang = _t.database.multi_lang;
+        _t.database.multi_lang = true;
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<sheet>' +
+                        '<group>' +
+                            '<field name="product_id"/>' +
+                        '</group>' +
+                    '</sheet>' +
+                '</form>',
+            archs: {
+                'product,false,form': '<form>' +
+                        '<sheet>' +
+                            '<group>' +
+                                '<field name="name"/>' +
+                                '<field name="partner_type_id"/>' +
+                            '</group>' +
+                        '</sheet>' +
+                    '</form>',
+            },
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/call_kw/product/get_formview_id') {
+                    return $.when(false);
+                } else if (route === "/web/dataset/call_button" && args.method === 'translate_fields') {
+                    assert.deepEqual(args.args, ["product",37,"name",{}], 'should call "call_button" route');
+                    nbTranslateCalls++;
+                    return $.when();
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('[name="product_id"] .o_external_button').click();
+
+        assert.strictEqual($('.modal-body .o_field_translate').length, 1,
+            "there should be a translate button in the modal");
+
+        $('.modal-body .o_field_translate').click();
+
+        assert.strictEqual(nbTranslateCalls, 1, "should call_button translate once");
+
+        form.destroy();
         _t.database.multi_lang = multi_lang;
     });
 
@@ -4978,42 +5244,6 @@ QUnit.module('Views', {
         form.destroy();
     });
 
-    QUnit.test('wow effect', function (assert) {
-        assert.expect(3);
-
-        this.data.partner.fields.model_name = { string: "Model name", type: "char" };
-
-        var clickCount = 0;
-        var form = createView({
-            View: FormView,
-            model: 'partner',
-            data: this.data,
-            arch: '<form string="Partners">' +
-                    '<button name="test" string="Mark Won" type="object" class="o_wow"/>' +
-                '</form>',
-            intercepts: {
-                execute_action: function (event) {
-                    if (clickCount === 0) {
-                        event.data.on_success();
-                    } else {
-                        event.data.on_fail();
-                    }
-                    clickCount++;
-                },
-                show_wow: function () {
-                    assert.step('wow');
-                },
-            },
-        });
-
-        form.$('button.o_wow').click();
-        assert.verifySteps(['wow']);
-        form.$('button.o_wow').click();
-        assert.verifySteps(['wow']);
-
-        form.destroy();
-    });
-
     QUnit.test('readonly fields are not sent when saving', function (assert) {
         assert.expect(6);
 
@@ -5155,5 +5385,30 @@ QUnit.module('Views', {
 
         form.destroy();
     });
+
+    QUnit.test('rainbowman attributes correctly passed on button click', function (assert) {
+        assert.expect(1);
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<header>' +
+                        '<button name="action_won" string="Won" type="object" effect="{\'message\': \'Congrats!\'}"/>' +
+                    '</header>' +
+                '</form>',
+            intercepts: {
+                execute_action: function (event) {
+                    var effectDescription = pyeval.py_eval(event.data.action_data.effect);
+                    assert.deepEqual(effectDescription, {message: 'Congrats!'}, "should have correct effect description");
+                }
+            }
+        });
+
+        form.$('.o_form_statusbar .btn-default').click();
+        form.destroy();
+    });
+
 });
 });

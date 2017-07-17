@@ -74,6 +74,7 @@ class AccountAccount(models.Model):
     company_id = fields.Many2one('res.company', string='Company', required=True,
         default=lambda self: self.env['res.company']._company_default_get('account.account'))
     tag_ids = fields.Many2many('account.account.tag', 'account_account_account_tag', string='Tags', help="Optional tags you may want to assign for custom reporting")
+    group_id = fields.Many2one('account.group')
 
     _sql_constraints = [
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
@@ -111,6 +112,22 @@ class AccountAccount(models.Model):
     def onchange_internal_type(self):
         if self.internal_type in ('receivable', 'payable'):
             self.reconcile = True
+
+    @api.onchange('code')
+    def onchange_code(self):
+        AccountGroup = self.env['account.group']
+
+        group = False
+        code_prefix = self.code
+
+        # find group with longest matching prefix
+        while code_prefix:
+            matching_group = AccountGroup.search([('code_prefix', '=', code_prefix)], limit=1)
+            if matching_group:
+                group = matching_group
+                break
+            code_prefix = code_prefix[:-1]
+        self.group_id = group
 
     @api.multi
     @api.depends('name', 'code')
@@ -177,6 +194,35 @@ class AccountAccount(models.Model):
         }
 
 
+class AccountGroup(models.Model):
+    _name = "account.group"
+
+    _parent_store = True
+    _order = 'code_prefix'
+
+    parent_id = fields.Many2one('account.group', index=True, ondelete='cascade')
+    parent_left = fields.Integer('Left Parent', index=True)
+    parent_right = fields.Integer('Right Parent', index=True)
+    name = fields.Char(required=True)
+    code_prefix = fields.Char()
+
+    def name_get(self):
+        result = []
+        for group in self:
+            name = group.name
+            if group.code_prefix:
+                name = group.code_prefix + ' ' + name
+            result.append((group.id, name))
+        return result
+
+    @api.model
+    def name_search(self, name='', args=None, operator='ilike', limit=100):
+        if not args:
+            args = []
+        criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
+        domain = criteria_operator + [('code_prefix', '=ilike', name + '%'), ('name', operator, name)]
+        return self.search(domain + args, limit=limit).name_get()
+
 class AccountJournal(models.Model):
     _name = "account.journal"
     _description = "Journal"
@@ -235,12 +281,14 @@ class AccountJournal(models.Model):
 
     inbound_payment_method_ids = fields.Many2many('account.payment.method', 'account_journal_inbound_payment_method_rel', 'journal_id', 'inbound_payment_method',
         domain=[('payment_type', '=', 'inbound')], string='Debit Methods', default=lambda self: self._default_inbound_payment_methods(),
-        help="Means of payment for collecting money. Odoo modules offer various payments handling facilities, "
-             "but you can always use the 'Manual' payment method in order to manage payments outside of the software.")
+        help="Manual: Get paid by cash, check or any other method outside of Odoo.\n"\
+             "Electronic: Get paid automatically through a payment acquirer by requesting a transaction on a card saved by the customer when buying or subscribing online (payment token).\n"\
+             "Batch Deposit: Encash several customer checks at once by generating a batch deposit to submit to your bank. When encoding the bank statement in Odoo,you are suggested to reconcile the transaction with the batch deposit. Enable this option from the settings.")
     outbound_payment_method_ids = fields.Many2many('account.payment.method', 'account_journal_outbound_payment_method_rel', 'journal_id', 'outbound_payment_method',
         domain=[('payment_type', '=', 'outbound')], string='Payment Methods', default=lambda self: self._default_outbound_payment_methods(),
-        help="Means of payment for sending money. Odoo modules offer various payments handling facilities, "
-             "but you can always use the 'Manual' payment method in order to manage payments outside of the software.")
+        help="Manual:Pay bill by cash or any other method outside of Odoo.\n"\
+             "Check:Pay bill by check and print it from Odoo.\n"\
+             "SEPA Credit Transfer: Pay bill from a SEPA Credit Transfer file you submit to your bank. Enable this option from the settings.")
     at_least_one_inbound = fields.Boolean(compute='_methods_compute', store=True)
     at_least_one_outbound = fields.Boolean(compute='_methods_compute', store=True)
     profit_account_id = fields.Many2one('account.account', string='Profit Account', domain=[('deprecated', '=', False)], help="Used to register a profit when the ending balance of a cash register differs from what the system computes")
@@ -271,6 +319,8 @@ class AccountJournal(models.Model):
             if journal.sequence_id:
                 sequence = journal.sequence_id._get_current_sequence()
                 journal.sequence_number_next = sequence.number_next_actual
+            else:
+                journal.sequence_number_next = 1
 
     @api.multi
     def _inverse_seq_number_next(self):
@@ -293,6 +343,8 @@ class AccountJournal(models.Model):
             if journal.refund_sequence_id and journal.refund_sequence:
                 sequence = journal.refund_sequence_id._get_current_sequence()
                 journal.refund_sequence_number_next = sequence.number_next_actual
+            else:
+                journal.refund_sequence_number_next = 1
 
     @api.multi
     def _inverse_refund_seq_number_next(self):

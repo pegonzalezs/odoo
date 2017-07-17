@@ -97,6 +97,8 @@ class IrModel(models.Model):
     transient = fields.Boolean(string="Transient Model")
     modules = fields.Char(compute='_in_modules', string='In Apps', help='List of modules in which the object is defined or inherited')
     view_ids = fields.One2many('ir.ui.view', compute='_view_ids', string='Views')
+    count = fields.Integer(compute='_compute_count', string="Count (incl. archived)",
+                           help="Total number of records in this model")
 
     @api.depends()
     def _inherited_models(self):
@@ -118,6 +120,15 @@ class IrModel(models.Model):
     def _view_ids(self):
         for model in self:
             model.view_ids = self.env['ir.ui.view'].search([('model', '=', model.model)])
+
+    @api.depends()
+    def _compute_count(self):
+        cr = self.env.cr
+        for model in self:
+            records = self.env[model.model]
+            if not records._abstract:
+                cr.execute('SELECT COUNT(*) FROM "%s"' % records._table)
+                model.count = cr.fetchone()[0]
 
     @api.constrains('model')
     def _check_model_name(self):
@@ -700,12 +711,19 @@ class IrModelFields(models.Model):
             res.append((field.id, '%s (%s)' % (field.field_description, field.model)))
         return res
 
-    @tools.ormcache('model_name')
-    def _existing_field_data(self, model_name):
-        """ Return the given model's existing field data. """
+    @tools.ormcache()
+    def _all_field_data(self):
+        """ Return all fields data, indexed by model name, then field name. """
         cr = self._cr
-        cr.execute("SELECT * FROM ir_model_fields WHERE model=%s", [model_name])
-        return {row['name']: row for row in cr.dictfetchall()}
+        cr.execute("SELECT * FROM ir_model_fields")
+        result = defaultdict(dict)
+        for row in cr.dictfetchall():
+            result[row['model']][row['name']] = row
+        return result
+
+    def _get_field_data(self, model_name):
+        """ Return the given model's existing field data. """
+        return self._all_field_data()[model_name]
 
     def _reflect_field_params(self, field):
         """ Return the values to write to the database for the given field. """
@@ -735,7 +753,7 @@ class IrModelFields(models.Model):
 
     def _reflect_field(self, field):
         """ Reflect the given field and return its corresponding record. """
-        fields_data = self._existing_field_data(field.model_name)
+        fields_data = self._get_field_data(field.model_name)
         field_data = fields_data.get(field.name)
         params = self._reflect_field_params(field)
 
@@ -783,7 +801,7 @@ class IrModelFields(models.Model):
 
         if not self.pool._init:
             # remove ir.model.fields that are not in self._fields
-            fields_data = self._existing_field_data(model._name)
+            fields_data = self._get_field_data(model._name)
             extra_names = set(fields_data) - set(model._fields)
             if extra_names:
                 # add key MODULE_UNINSTALL_FLAG in context to (1) force the
@@ -814,17 +832,17 @@ class IrModelFields(models.Model):
                 return
             attrs['comodel_name'] = field_data['relation']
             attrs['ondelete'] = field_data['on_delete']
-            attrs['domain'] = safe_eval(field_data['domain']) if field_data['domain'] else None
+            attrs['domain'] = safe_eval(field_data['domain'] or '[]')
         elif field_data['ttype'] == 'one2many':
             if not self.pool.loaded and not (
                 field_data['relation'] in self.env and (
                     field_data['relation_field'] in self.env[field_data['relation']]._fields or
-                    field_data['relation_field'] in self._existing_field_data(field_data['relation'])
+                    field_data['relation_field'] in self._get_field_data(field_data['relation'])
             )):
                 return
             attrs['comodel_name'] = field_data['relation']
             attrs['inverse_name'] = field_data['relation_field']
-            attrs['domain'] = safe_eval(field_data['domain']) if field_data['domain'] else None
+            attrs['domain'] = safe_eval(field_data['domain'] or '[]')
         elif field_data['ttype'] == 'many2many':
             if not self.pool.loaded and field_data['relation'] not in self.env:
                 return
@@ -833,7 +851,7 @@ class IrModelFields(models.Model):
             attrs['relation'] = field_data['relation_table'] or rel
             attrs['column1'] = field_data['column1'] or col1
             attrs['column2'] = field_data['column2'] or col2
-            attrs['domain'] = safe_eval(field_data['domain']) if field_data['domain'] else None
+            attrs['domain'] = safe_eval(field_data['domain'] or '[]')
         # add compute function if given
         if field_data['compute']:
             attrs['compute'] = make_compute(field_data['compute'], field_data['depends'])
@@ -847,7 +865,7 @@ class IrModelFields(models.Model):
 
     def _add_manual_fields(self, model):
         """ Add extra fields on model. """
-        fields_data = self._existing_field_data(model._name)
+        fields_data = self._get_field_data(model._name)
         for name, field_data in pycompat.items(fields_data):
             if name not in model._fields and field_data['state'] == 'manual':
                 field = self._instanciate(field_data)

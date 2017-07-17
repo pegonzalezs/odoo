@@ -151,7 +151,6 @@
             <li><a href="#" data-action="set_defaults">Set Defaults</a></li>
             <t t-if="view.controller.getSelectedIds().length === 1">
                 <li><a href="#" data-action="get_metadata">View Metadata</a></li>
-                <li><a href="#" data-action="print_workflow">Print Workflow</a></li>
             </t>
         </t>
         <li><a href="#" data-action="fvg">Fields View Get</a></li>
@@ -538,7 +537,7 @@
         </button>
         <span t-else="" class="text-warning"><i class="fa fa-exclamation-triangle"/> Invalid domain</span>
 
-        <button t-if="inDialogEdit" class="btn btn-xs btn-primary o_field_domain_dialog_button">Edit domain</button>
+        <button t-if="inDialogEdit" class="btn btn-xs btn-primary o_field_domain_dialog_button">Edit Domain</button>
     </div>
     <div t-else="">Select a model to add a filter.</div>
 </t>
@@ -725,15 +724,11 @@
         t-att-autofocus="widget.attrs.autofocus"
         t-att-id="widget.idForLabel"/>
 </t>
-<t t-name="FieldRadio">
-    <span t-if="widget.mode === 'readonly'"/>
-
-    <div t-if="widget.mode !== 'readonly'" t-attf-class="o_field_radio #{widget.nodeOptions.horizontal ? 'o_horizontal' : 'o_vertical'}">
-        <div t-foreach="widget.values" t-as="value" class="o_radio_item">
-            <input type="radio" class="o_radio_input" t-att-id="widget.unique_id + '_' + value[0]"
-                   t-att-name="widget.unique_id" t-att-data-value="value[0]" t-att-data-index="value_index"/>
-            <label t-if="!widget.nodeOptions.no_radiolabel" class="o_form_label" t-att-for="widget.unique_id + '_' + value[0]"><t t-esc="value[1]"/></label>
-        </div>
+<t t-name="FieldRadio.button">
+    <div class="o_radio_item">
+        <input type="radio" class="o_radio_input" t-att-checked="checked ? true : undefined"
+            t-att-data-value="value[0]" t-att-data-index="index" t-att-id="id"/>
+        <label class="o_form_label" t-att-for="id"><t t-esc="value[1]"/></label>
     </div>
 </t>
 <t t-name="FieldMany2One">
@@ -754,9 +749,17 @@
         <button type="button" t-if="!widget.nodeOptions.no_open" class="fa fa-external-link btn btn-default o_external_button" tabindex="-1" draggable="false"/>
     </div>
 </t>
+<t t-name="FieldReference" t-extend="FieldMany2One">
+    <t t-jquery=".o_input_dropdown" t-operation="before">
+        <select class="o_input o_field_widget">
+            <option/>
+            <option t-foreach="widget.field.selection" t-as="model" t-att-value="model[0]"><t t-esc="model[1]"/></option>
+        </select>
+    </t>
+</t>
 <t t-name="FieldMany2ManyTag">
     <t t-foreach="elements" t-as="el">
-        <span t-attf-class="badge dropdown o_tag_color_#{el.color || 10}" t-att-data-color="el.color || 10" t-att-data-index="el_index" t-att-data-id="el.id">
+        <span t-attf-class="badge dropdown o_tag_color_#{el[colorField] || 10}" t-att-data-color="el[colorField] || 10" t-att-data-index="el_index" t-att-data-id="el.id">
             <span class="o_badge_text"><t t-raw="el.display_name"/></span>
             <span t-if="!readonly" class="fa fa-times o_delete"/>
         </span>
@@ -961,7 +964,8 @@
         <span t-if="attrs.help">?</span>
     </label>
     <div t-att-style="style">
-        <input type="text" size="15" t-att-name="attrs.name"
+        <input type="text" size="15" class="o_input"
+               t-att-name="attrs.name"
                t-att-autofocus="attrs.default_focus === '1' ? 'autofocus' : undefined"
                t-att-id="element_id"
                t-att-value="defaults[attrs.name] || ''"/>
@@ -990,7 +994,9 @@
         <span t-if="attrs.help">?</span>
     </label>
     <div t-att-style="style">
-        <select t-att-name="attrs.name" t-att-id="element_id"
+        <select class="o_input"
+                t-att-name="attrs.name"
+                t-att-id="element_id"
                 t-att-autofocus="attrs.default_focus === '1' || undefined">
             <option t-if="prepend_empty"/>
             <t t-foreach="attrs.selection" t-as="option">
@@ -1012,7 +1018,7 @@
     <li class="o_filter_condition">
         <span class="o_or_filter">or</span>
         <span>
-            <select class="o_searchview_extended_prop_field">
+            <select class="o_input o_searchview_extended_prop_field">
                 <t t-foreach="widget.attrs.fields" t-as="field">
                     <option t-att="{'selected': field === widget.attrs.selected ? 'selected' : null}"
                             t-att-value="field.name">
@@ -1022,18 +1028,19 @@
             </select>
             <span class="o_searchview_extended_delete_prop fa fa-trash-o"/>
         </span>
-        <select class="o_searchview_extended_prop_op"/>
+        <select class="o_input o_searchview_extended_prop_op"/>
         <span class="o_searchview_extended_prop_value"/>
     </li>
 </t>
 <t t-name="SearchView.extended_search.proposition.float">
-    <input t-att-type="widget.decimal_point === '.' ? 'number' : 'text'"
+    <input class="o_input"
+        t-att-type="widget.decimal_point === '.' ? 'number' : 'text'"
         t-attf-title="Number using #{widget.decimal_point  || '.' } as decimal separator."
         t-attf-pattern="[0-9]+([\\#{widget.decimal_point || '.' }][0-9]+)?"
         t-attf-value="0#{widget.decimal_point || '.' }0" step="0.01"/>
 </t>
 <t t-name="SearchView.extended_search.proposition.selection">
-    <select>
+    <select class="o_input">
         <option t-foreach="widget.field.selection" t-as="element" t-att-value="element[0]">
             <t t-esc="element[1]"/>
         </option>
@@ -1051,7 +1058,7 @@
     </ul>
 </div>
 <t t-name="GroupByMenuSelector">
-    <li><select class="o_add_group o_group_selector">
+    <li><select class="o_input o_add_group o_group_selector">
         <t t-foreach="groupableFields" t-as="field">
             <option t-att-data-name="field.name"><t t-esc="field.string"/></option>
         </t>
@@ -1247,6 +1254,15 @@
             <li><a href="#" data-menu="account">My Odoo.com account</a></li>
             <li><a href="#" data-menu="logout">Log out</a></li>
         </ul>
+    </li>
+</t>
+
+<t t-name="SwitchCompanyMenu">
+    <li class="o_switch_company_menu">
+        <a class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false" href="#">
+            <span t-attf-class="#{widget.isMobile ? 'fa fa-building-o' : 'oe_topbar_name'}"/> <span class="caret"/>
+        </a>
+        <ul class="dropdown-menu" role="menu"/>
     </li>
 </t>
 

@@ -91,6 +91,14 @@ class Location(models.Model):
             ret_list.append((orig_location.id, name))
         return ret_list
 
+    @api.model
+    def name_search(self, name, args=None, operator='ilike', limit=100):
+        """ search full name and barcode """
+        if args is None:
+            args = []
+        recs = self.search(['|', ('barcode', operator, name), ('complete_name', operator, name)] + args, limit=limit)
+        return recs.name_get()
+
     def get_putaway_strategy(self, product):
         ''' Returns the location where the product has to be put, if any compliant putaway strategy is found. Otherwise returns None.'''
         current_location = self
@@ -108,6 +116,10 @@ class Location(models.Model):
         return self.env['stock.warehouse'].search([
             ('view_location_id.parent_left', '<=', self.parent_left),
             ('view_location_id.parent_right', '>=', self.parent_left)], limit=1)
+
+    def should_impact_quants(self):
+        self.ensure_one()
+        return False if self.usage in ('supplier', 'inventory', 'production', 'customer') else True
 
 
 class Route(models.Model):
@@ -215,7 +227,7 @@ class PushedFlow(models.Model):
         else:
             new_move_vals = self._prepare_move_copy_values(move, new_date)
             new_move = move.copy(new_move_vals)
-            move.write({'move_dest_id': new_move.id})
+            move.write({'move_dest_ids': [(4, new_move.id)]})
             new_move.action_confirm()
 
     def _prepare_move_copy_values(self, move_to_copy, new_date):

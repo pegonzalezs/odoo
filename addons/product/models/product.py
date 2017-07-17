@@ -57,6 +57,10 @@ class ProductCategory(models.Model):
             raise ValidationError(_('Error ! You cannot create recursive categories.'))
         return True
 
+    @api.model
+    def name_create(self, name):
+        return self.create({'name': name}).name_get()[0]
+
 
 class ProductPriceHistory(models.Model):
     """ Keep track of the ``product.template`` standard prices as they are changed. """
@@ -127,7 +131,7 @@ class ProductProduct(models.Model):
         'Cost', company_dependent=True,
         digits=dp.get_precision('Product Price'),
         groups="base.group_user",
-        help="Cost of the product template used for standard stock valuation in accounting and used as a base price on purchase orders. "
+        help="Cost used for standard stock valuation in accounting and used as a base price on purchase orders. "
              "Expressed in the default unit of measure of the product.")
     volume = fields.Float('Volume', help="The volume in m3.")
     weight = fields.Float(

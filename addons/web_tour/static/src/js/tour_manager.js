@@ -4,6 +4,7 @@ odoo.define('web_tour.TourManager', function(require) {
 var core = require('web.core');
 var local_storage = require('web.local_storage');
 var mixins = require('web.mixins');
+var RainbowMan = require('web.rainbow_man');
 var ServicesMixin = require('web.ServicesMixin');
 var session = require('web.session');
 var Tip = require('web_tour.Tip');
@@ -11,34 +12,6 @@ var Tip = require('web_tour.Tip');
 var _t = core._t;
 
 var RUNNING_TOUR_TIMEOUT = 10000;
-
-$.extend($.expr[':'],{
-    containsExact: function(element, index, matches){
-        return $.trim(element.innerHTML.toLowerCase()) === matches[3].toLowerCase();
-    },
-    containsExactCase: function(element, index, matches){
-        return $.trim(element.innerHTML) === matches[3];
-    },
-    // Note all escaped characters need to be double escaped
-    // inside of the containsRegex, so "\(" needs to be "\\("
-    containsRegex: function(element, index, matches){
-        var regreg =  /^\/((?:\\\/|[^\/])+)\/([mig]{0,3})$/,
-        reg = regreg.exec(matches[3]);
-        return reg ? new RegExp(reg[1], reg[2]).test($.trim(element.innerHTML)) : false;
-    },
-    propChecked: function(element, index, matches) {
-        return $(element).prop("checked") === true;
-    },
-    propSelected: function(element, index, matches) {
-        return $(element).prop("selected") === true;
-    },
-    propValue: function(element, index, matches) {
-        return $(element).prop("value") === matches[3];
-    },
-    propValueContains: function(element, index, matches) {
-        return $(element).prop("value") && $(element).prop("value").indexOf(matches[3]) !== -1;
-    },
-});
 
 function get_step_key(name) {
     return 'tour_' + name + '_step';
@@ -431,6 +404,14 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     },
     _consume_tour: function (tour_name, error) {
         delete this.active_tooltips[tour_name];
+        //display rainbow at the end of any tour
+        if (this.tours[tour_name].current_step === this.tours[tour_name].steps.length){
+            var $rainbow_message = $('<strong>' +
+                                '<b>Good job!</b>' +
+                                ' You went through all steps of this tour.' +
+                                '</strong>');
+            new RainbowMan({message: $rainbow_message, click_close: false}).appendTo(this.$body);
+        };
         this.tours[tour_name].current_step = 0;
         local_storage.removeItem(get_step_key(tour_name));
         if (this.running_tour === tour_name) {

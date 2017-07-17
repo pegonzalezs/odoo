@@ -17,8 +17,8 @@
                              <field name="name"/>
                              <field name="user_type_id" widget="selection"/>
                              <field name="tax_ids" widget="many2many_tags"/>
-                             <field name="tag_ids" widget="many2many_tags" domain="[('applicability', '!=', 'taxes')]" context="{'default_applicability': 'accounts'}" options="
-                             {'no_create_edit': True}"/>
+                             <field name="tag_ids" widget="many2many_tags" domain="[('applicability', '!=', 'taxes')]" context="{'default_applicability': 'accounts'}" options="{'no_create_edit': True}"/>
+                             <field name="group_id"/>
                              <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                              <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
                              <field name="internal_type" invisible="1" readonly="1"/>
@@ -304,8 +304,8 @@
                                 <group>
                                     <group string="Control-Access" groups="base.group_no_one">
                                         <div class="text-muted" colspan="2">Keep empty for no control</div>
-                                        <field name="type_control_ids" widget="many2many_tags"/>
-                                        <field name="account_control_ids" widget="many2many_tags"/>
+                                        <field name="type_control_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                        <field name="account_control_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
                                     </group>
                                     <group string="Miscellaneous">
                                         <field name="inbound_payment_method_ids" widget="many2many_checkboxes" attrs="{'invisible': [('type', 'not in', ['bank', 'cash'])]}"/>
@@ -362,11 +362,24 @@
                             <group>
                                 <field name="bank_acc_number"/>
                                 <field name="bank_id"/>
-                            </group><group>
+                            </group>
+                            <group>
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                 <field name="currency_id" options="{'no_create': True}" groups="base.group_multi_currency"/>
+                            </group>
+                        </group>
+                        <group>
+                            <group string="Receivables">
                                 <field name="inbound_payment_method_ids" widget="many2many_checkboxes"/>
+                            </group>
+                            <group string="Payables">
                                 <field name="outbound_payment_method_ids" widget="many2many_checkboxes"/>
+                            </group>
+                            <group name="bank_statement" string="Bank Statements">
+                                <label for="bank_statements_source"/>
+                                <div name="bank_source">
+                                    <field name="bank_statements_source" widget="radio" attrs="{'required': [('type', '=', 'bank')]}"/>
+                                </div>
                             </group>
                         </group>
                     </sheet>
@@ -729,7 +742,7 @@
             <field name="name">Bank Statement Lines</field>
             <field name="res_model">account.bank.statement.line</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree</field>
+            <field name="view_mode">tree,form</field>
             <field name="domain">[]</field>
             <field name="context">{}</field>
             <field name="search_view_id" ref="view_bank_statement_line_search"/>
@@ -1213,6 +1226,29 @@
                 </tree>
             </field>
         </record>
+
+        <record id="view_move_line_tax_audit_tree" model="ir.ui.view">
+            <field name="name">account.move.line.tax.audit.tree</field>
+            <field name="model">account.move.line</field>
+            <field name="mode">primary</field>
+            <field name="inherit_id" ref="account.view_move_line_tree"/>
+            <field name="arch" type="xml">
+                <field name="full_reconcile_id" position="after">
+                    <field name="tax_line_id"/>
+                    <field name="tax_base_amount"/>
+                </field>
+                <field name="date_maturity" position="replace"/>
+            </field>
+        </record>
+
+        <act_window
+            id="action_move_line_select_tax_audit"
+            name="Journal Items"
+            context="{'search_default_account_id': [active_id]}"
+            res_model="account.move.line"
+            src_model="account.account"
+            view_id="account.view_move_line_tax_audit_tree"/>
+
         <record id="account_move_line_graph_date" model="ir.ui.view">
             <field name="name">account.move.line.graph</field>
             <field name="model">account.move.line</field>
@@ -1240,8 +1276,6 @@
                 <search string="Search Journal Items">
                     <field name="name" filter_domain="['|', ('name','ilike',self), ('ref','ilike',self)]" string="Move"/>
                     <field name="date"/>
-                    <field name="tax_line_id"/>
-                    <field name="tax_ids" />
                     <separator/>
                     <filter string="Unposted" domain="[('move_id.state','=','draft')]" help="Unposted Journal Items"/>
                     <filter name="posted" string="Posted" domain="[('move_id.state','=','posted')]" help="Posted Journal Items"/>
@@ -1251,10 +1285,12 @@
                     <filter string="Payable" domain="[('account_id.internal_type', '=', 'payable')]" help="From Payable accounts" name="payable"/>
                     <filter string="Receivable" domain="[('account_id.internal_type', '=', 'receivable')]" help="From Receivable accounts" name="receivable"/>
                     <separator/>
-                    <field name="move_id" string="Number (Move)"/>
                     <field name="account_id"/>
                     <field name="partner_id"/>
                     <field name="journal_id"/>
+                    <field name="move_id" string="Number (Move)"/>
+                    <field name="tax_line_id"/>
+                    <field name="tax_ids" />
                     <group expand="0" string="Group By">
                         <filter string="Partner" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Journal" domain="[]" context="{'group_by':'journal_id'}"/>
@@ -1374,7 +1410,6 @@
                     <header>
                         <button name="post" states="draft" string="Post" type="object" class="oe_highlight" groups="account.group_account_invoice"/>
                         <button name="%(action_view_account_move_reversal)d" states="posted" string="Reverse Entry" type="action" groups="account.group_account_invoice"/>
-                        <button name="button_cancel" states="posted" string="Cancel Entry" type="object" groups="account.group_account_invoice"/>
                         <field name="state" widget="statusbar"/>
                     </header>
                     <sheet>
@@ -1424,10 +1459,6 @@
                         </page>
                     </notebook>
                     </sheet>
-                    <div class="oe_chatter">
-                        <field name="message_follower_ids" widget="mail_followers"/>
-                        <field name="message_ids" widget="mail_thread"/>
-                    </div>
                 </form>
             </field>
         </record>
@@ -2015,8 +2046,8 @@
                     <field name="name"/>
                     <field name="attribute_value_ids" widget="many2many_tags" groups="product.group_product_variant"/>
                     <field name="lst_price"/>
-                    <field name="taxes_id" widget="many2many_tags"/>
-                    <field name="supplier_taxes_id" widget="many2many_tags"/>
+                    <field name="taxes_id" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                    <field name="supplier_taxes_id" widget="many2many_tags" options="{'color_field': 'color'}"/>
                 </tree>
             </field>
         </record>
@@ -2035,7 +2066,7 @@
         <menuitem id="menu_product_product_action" name="Products" action="product_product_action" parent="product_configuration_menu" sequence="1"/>
 
 
-        <menuitem id="menu_product_template_action" name="Sellable Products"
+        <menuitem id="menu_product_template_action" name="Products"
             parent="menu_finance_receivables"
             action="product.product_template_action" sequence="110"/>
 
@@ -2144,5 +2175,54 @@
         </record>
 
         <menuitem id="menu_action_manual_reconciliation" parent="menu_finance_entries" action="action_manual_reconciliation" sequence="25"/>
+
+        <record id="view_account_group_form" model="ir.ui.view">
+            <field name="name">account.group.form</field>
+            <field name="model">account.group</field>
+            <field name="arch" type="xml">
+                <form string="Account Group">
+                    <group>
+                        <field name="name"/>
+                        <field name="code_prefix"/>
+                        <field name="parent_id"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_account_group_search" model="ir.ui.view">
+            <field name="name">account.group.search</field>
+            <field name="model">account.group</field>
+            <field name="arch" type="xml">
+                <search string="Account groups">
+                    <field name="name"
+                           filter_domain="['|', ('code_prefix', '=like', str(self) + '%'), ('name', 'ilike', self)]"
+                           string="Account group"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_account_group_tree" model="ir.ui.view">
+            <field name="name">account.group.tree</field>
+            <field name="model">account.group</field>
+            <field name="arch" type="xml">
+                <tree string="Account Group">
+                    <field name="code_prefix"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_account_group_tree" model="ir.actions.act_window">
+            <field name="name">Account Group</field>
+            <field name="res_model">account.group</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="view_account_group_search"/>
+        </record>
+
+        <menuitem id="menu_account_group" name="Groups"
+            parent="account.account_account_menu"
+            action="account.action_account_group_tree" sequence="110"/>
     </data>
 </odoo>

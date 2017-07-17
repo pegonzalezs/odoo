@@ -3,6 +3,7 @@
 from odoo.exceptions import AccessError
 from odoo import api, fields, models, _
 from odoo import SUPERUSER_ID
+from odoo.exceptions import UserError
 
 import logging
 
@@ -71,6 +72,7 @@ class AccountAccountTemplate(models.Model):
         help="This optional field allow you to link an account template to a specific chart template that may differ from the one its root parent belongs to. This allow you "
             "to define chart templates that extend another and complete it with few new accounts (You don't need to define the whole structure that is common to both several times).")
     tag_ids = fields.Many2many('account.account.tag', 'account_account_template_account_tag', string='Account tag', help="Optional tags you may want to assign for custom reporting")
+    group_id = fields.Many2one('account.group')
 
     @api.multi
     @api.depends('name', 'code')
@@ -147,7 +149,7 @@ class AccountChartTemplate(models.Model):
             todo = self.env['ir.actions.todo']
             action_rec = self.env['ir.model.data'].xmlid_to_object('account.action_wizard_multi_chart')
             if action_rec:
-                todo.create({'action_id': action_rec.id, 'name': _('Choose Accounting Template'), 'type': 'automatic'})
+                todo.create({'action_id': action_rec.id, 'name': _('Choose Accounting Template')})
         return True
 
     @api.model
@@ -827,19 +829,47 @@ class WizardMultiChartsAccounts(models.TransientModel):
         return True
 
     @api.multi
+    def existing_accounting(self, company_id):
+        model_to_check = ['account.move.line', 'account.invoice', 'account.move', 'account.payment', 'account.bank.statement']
+        for model in model_to_check:
+            if len(self.env[model].search([('company_id', '=', company_id.id)])) > 0:
+                return True
+        return False
+
+    @api.multi
     def execute(self):
         '''
         This function is called at the confirmation of the wizard to generate the COA from the templates. It will read
         all the provided information to create the accounts, the banks, the journals, the taxes, the
         accounting properties... accordingly for the chosen company.
         '''
-        if len(self.env['account.account'].search([('company_id', '=', self.company_id.id)])) > 0:
-            # We are in a case where we already have some accounts existing, meaning that user has probably
-            # created its own accounts and does not need a coa, so skip installation of coa.
-            _logger.info('Could not install chart of account since some accounts already exists for the company (%s)', (self.company_id.id,))
-            return {}
         if not self.env.user._is_admin():
             raise AccessError(_("Only administrators can change the settings"))
+
+        existing_accounts = self.env['account.account'].search([('company_id', '=', self.company_id.id)])
+        if existing_accounts:
+            # we tolerate switching from accounting package (localization module) as long as there isn't yet any accounting
+            # entries created for the company.
+            if self.existing_accounting(self.company_id):
+                raise UserError(_('Could not install new chart of account as there are already accounting entries existing'))
+
+            # delete accounting properties
+            prop_values = ['account.account,%s' % (account_id,) for account_id in existing_accounts.ids]
+            existing_journals = self.env['account.journal'].search([('company_id', '=', self.company_id.id)])
+            if existing_journals:
+                prop_values.extend(['account.journal,%s' % (journal_id,) for journal_id in existing_journals.ids])
+            accounting_props = self.env['ir.property'].search([('value_reference', 'in', prop_values)])
+            if accounting_props:
+                accounting_props.unlink()
+
+            # delete account, journal, tax, fiscal position and reconciliation model
+            models_to_delete = ['account.reconcile.model', 'account.fiscal.position', 'account.tax', 'account.journal']
+            for model in models_to_delete:
+                res = self.env[model].search([('company_id', '=', self.company_id.id)])
+                if len(res):
+                    res.unlink()
+            existing_accounts.unlink()
+
         ir_values_obj = self.env['ir.values']
         company = self.company_id
         self.company_id.write({'currency_id': self.currency_id.id,
@@ -897,15 +927,17 @@ class WizardMultiChartsAccounts(models.TransientModel):
             of the accounts that have been generated from them.
         '''
         self.ensure_one()
+        bank_journals = self.env['account.journal']
         # Create the journals that will trigger the account.account creation
         for acc in self.bank_account_ids:
-            self.env['account.journal'].create({
+            bank_journals += self.env['account.journal'].create({
                 'name': acc.acc_name,
                 'type': acc.account_type,
                 'company_id': company.id,
                 'currency_id': acc.currency_id.id,
                 'sequence': 10
             })
+        return bank_journals
 
 
 class AccountBankAccountsWizard(models.TransientModel):

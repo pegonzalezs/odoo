@@ -252,9 +252,6 @@ class Project(models.Model):
 
     @api.model
     def create(self, vals):
-        ir_values = self.env['ir.values'].get_default('project.config.settings', 'generate_project_alias')
-        if ir_values:
-            vals['alias_name'] = vals.get('alias_name') or vals.get('name')
         # Prevent double project creation when 'use_tasks' is checked
         self = self.with_context(project_creation_in_progress=True, mail_create_nosubscribe=True)
         project = super(Project, self).create(vals)
@@ -437,7 +434,8 @@ class Task(models.Model):
         default_partner = self.env['res.partner'].browse(default_partner_id) if default_partner_id else None
         if self.project_id:
             self.partner_id = self.project_id.partner_id or default_partner
-            self.stage_id = self.stage_find(self.project_id.id, [('fold', '=', False)])
+            if self.project_id not in self.stage_id.project_ids:
+                self.stage_id = self.stage_find(self.project_id.id, [('fold', '=', False)])
         else:
             self.partner_id = default_partner
             self.stage_id = False

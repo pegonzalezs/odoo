@@ -104,39 +104,15 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
         return true;
     },
     /**
-     * Discards the changes made to the record whose ID is given, if necessary.
-     * Automatically leaves to default mode for the given record.
+     * Waits for the mutex to be unlocked and then calls _.discardChanges.
+     * This ensures that the confirm dialog isn't displayed directly if there is
+     * a pending 'write' rpc.
      *
-     * @param {string} [recordID] - default to main recordID
-     * @param {Object} [options]
-     * @param {boolean} [options.readonlyIfRealDiscard=false]
-     *        After discarding record changes, the usual option is to make the
-     *        record readonly. However, the view manager calls this function
-     *        at inappropriate times in the current code and in that case, we
-     *        don't want to go back to readonly if there is nothing to discard
-     *        (e.g. when switching record in edit mode in form view, we expect
-     *        the new record to be in edit mode too, but the view manager calls
-     *        this function as the URL changes...) @todo get rid of this when
-     *        the view manager is improved.
-     * @returns {Deferred}
+     * @see _.discardChanges
      */
     discardChanges: function (recordID, options) {
-        var self = this;
-        recordID = recordID || this.handle;
-        return this.canBeDiscarded(recordID).then(function (needDiscard) {
-            if (options && options.readonlyIfRealDiscard && !needDiscard) {
-                return;
-            }
-
-            if (needDiscard) { // Just some optimization
-                self.model.discardChanges(recordID);
-            }
-            if (self.model.isNew(recordID)) {
-                self._abandonRecord(recordID);
-                return;
-            }
-            return self._confirmSave(recordID);
-        });
+        return this.mutex.exec(function () {})
+            .then(this._discardChanges.bind(this, recordID || this.handle, options));
     },
     /**
      * Method that will be overriden by the views with the ability to have selected ids
@@ -274,7 +250,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
             on_fail: function (reason) {
                 reload().always(function() {
                     def.reject(reason);
-                })
+                });
             },
             on_success: def.resolve.bind(def),
         });
@@ -325,6 +301,42 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
         if (this.$buttons) {
             this.$buttons.find('button').attr('disabled', true);
         }
+    },
+    /**
+     * Discards the changes made to the record whose ID is given, if necessary.
+     * Automatically leaves to default mode for the given record.
+     *
+     * @private
+     * @param {string} [recordID] - default to main recordID
+     * @param {Object} [options]
+     * @param {boolean} [options.readonlyIfRealDiscard=false]
+     *        After discarding record changes, the usual option is to make the
+     *        record readonly. However, the view manager calls this function
+     *        at inappropriate times in the current code and in that case, we
+     *        don't want to go back to readonly if there is nothing to discard
+     *        (e.g. when switching record in edit mode in form view, we expect
+     *        the new record to be in edit mode too, but the view manager calls
+     *        this function as the URL changes...) @todo get rid of this when
+     *        the view manager is improved.
+     * @returns {Deferred}
+     */
+    _discardChanges: function (recordID, options) {
+        var self = this;
+        recordID = recordID || this.handle;
+        return this.canBeDiscarded(recordID)
+            .then(function (needDiscard) {
+                if (options && options.readonlyIfRealDiscard && !needDiscard) {
+                    return;
+                }
+                if (needDiscard) { // Just some optimization
+                    self.model.discardChanges(recordID);
+                }
+                if (self.model.isNew(recordID)) {
+                    self._abandonRecord(recordID);
+                    return;
+                }
+                return self._confirmSave(recordID);
+            });
     },
     /**
      * Enables buttons so they can be clicked again.
@@ -423,7 +435,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
             });
             if (!options.stayInEdit) {
                 saveDef = saveDef.then(function (fieldNames) {
-                    var def = fieldNames.length ? self._confirmSave(recordID) : self._setMode('readonly');
+                    var def = fieldNames.length ? self._confirmSave(recordID) : self._setMode('readonly', recordID);
                     return def.then(function () {
                         return fieldNames;
                     });
@@ -501,11 +513,8 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
         var self = this;
         ev.stopPropagation();
         var recordID = ev.data.recordID;
-        this.discardChanges(recordID)
+        this._discardChanges(recordID)
             .done(function () {
-                if (self.model.isNew(recordID)) {
-                    self._abandonRecord(recordID);
-                }
                 // TODO this will tell the renderer to rerender the widget that
                 // asked for the discard but will unfortunately lose the click
                 // made on another row if any
@@ -534,6 +543,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      * @param {function} ev.data.action the function to execute in the mutex
      */
     _onMutexify: function (ev) {
+        ev.stopPropagation(); // prevent other controllers from handling this request
         this.mutex.exec(ev.data.action);
     },
     /**
@@ -578,6 +588,7 @@ var BasicController = AbstractController.extend(FieldManagerMixin, {
      * @param {OdooEvent} event
      */
     _onTranslate: function (event) {
+        event.stopPropagation();
         var record = this.model.get(event.data.id, {raw: true});
         this._rpc({
             route: '/web/dataset/call_button',
