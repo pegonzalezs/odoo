@@ -35,7 +35,7 @@ class SignupError(Exception):
 def random_token():
     # the token has an entropy of about 120 bits (6 bits/char * 20 chars)
     chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    return ''.join(random.choice(chars) for i in xrange(20))
+    return ''.join(random.SystemRandom().choice(chars) for i in xrange(20))
 
 def now(**kwargs):
     dt = datetime.now() + timedelta(**kwargs)
@@ -299,3 +299,9 @@ class res_users(osv.Model):
             except MailDeliveryException:
                 self.pool.get('res.partner').signup_cancel(cr, uid, [user.partner_id.id], context=context)
         return user_id
+
+    def copy(self, cr, uid, id, default=None, context=None):
+        if not default or not default.get('email'):
+            # avoid sending email to the user we are duplicating
+            context = dict(context or {}, reset_password=False)
+        return super(res_users, self).copy(cr, uid, id, default=default, context=context)

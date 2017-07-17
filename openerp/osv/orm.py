@@ -76,7 +76,7 @@ _schema = logging.getLogger(__name__ + '.schema')
 # List of etree._Element subclasses that we choose to ignore when parsing XML.
 from openerp.tools import SKIPPED_ELEMENT_TYPES
 
-regex_order = re.compile('^( *([a-z0-9_]+|"[a-z0-9_]+")( *desc| *asc)?( *, *|))+$', re.I)
+regex_order = re.compile('^(\s*([a-z0-9:_]+|"[a-z0-9:_]+")(\s+(desc|asc))?\s*(,|$))+(?<!,)$', re.I)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
 
 AUTOINIT_RECALCULATE_STORED_FIELDS = 1000
@@ -2527,7 +2527,7 @@ class BaseModel(object):
                 # if val is a many2one, just write the ID
                 if type(val) == tuple:
                     val = val[0]
-                if val is not False:
+                if f._type == 'boolean' or val is not False:
                     cr.execute(update_query, (ss[1](val), key))
 
     def _check_selection_field_value(self, cr, uid, field, value, context=None):

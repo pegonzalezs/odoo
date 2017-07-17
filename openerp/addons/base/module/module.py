@@ -47,6 +47,7 @@ from openerp import modules, tools, addons
 from openerp.modules.db import create_categories
 from openerp.tools.parse_version import parse_version
 from openerp.tools.translate import _
+from openerp.tools import html_sanitize
 from openerp.osv import fields, osv, orm
 
 _logger = logging.getLogger(__name__)
@@ -164,11 +165,12 @@ class module(osv.osv):
                     for element, attribute, link, pos in html.iterlinks():
                         if element.get('src') and not '//' in element.get('src') and not 'static/' in element.get('src'):
                             element.set('src', "/%s/static/description/%s" % (module.name, element.get('src')))
-                    res[module.id] = lxml.html.tostring(html)
+                    res[module.id] = html_sanitize(lxml.html.tostring(html))
             else:
-                overrides = dict(embed_stylesheet=False, doctitle_xform=False, output_encoding='unicode')
+                overrides = dict(embed_stylesheet=False, doctitle_xform=False,
+                                 output_encoding='unicode', xml_declaration=False)
                 output = publish_string(source=module.description, settings_overrides=overrides, writer=MyWriter())
-                res[module.id] = output
+                res[module.id] = html_sanitize(output)
         return res
 
     def _get_latest_version(self, cr, uid, ids, field_name=None, arg=None, context=None):
@@ -437,7 +439,7 @@ class module(osv.osv):
         ir_model_data = self.pool.get('ir.model.data')
         modules_to_remove = [m.name for m in self.browse(cr, uid, ids, context)]
         ir_model_data._module_data_uninstall(cr, uid, modules_to_remove, context)
-        self.write(cr, uid, ids, {'state': 'uninstalled'})
+        self.write(cr, uid, ids, {'state': 'uninstalled', 'latest_version': False})
         return True
 
     def downstream_dependencies(self, cr, uid, ids, known_dep_ids=None,

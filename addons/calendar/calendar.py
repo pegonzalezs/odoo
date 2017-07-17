@@ -653,18 +653,18 @@ class ir_model(osv.Model):
 original_exp_report = openerp.service.report.exp_report
 
 
-def exp_report(db, uid, object, ids, data=None, context=None):
+def exp_report(db, uid, object, ids, datas=None, context=None):
     """
     Export Report
     """
     if object == 'printscreen.list':
-        original_exp_report(db, uid, object, ids, data, context)
+        original_exp_report(db, uid, object, ids, datas, context)
     new_ids = []
     for id in ids:
         new_ids.append(calendar_id2real_id(id))
-    if data.get('id', False):
-        data['id'] = calendar_id2real_id(data['id'])
-    return original_exp_report(db, uid, object, new_ids, data, context)
+    if datas.get('id', False):
+        datas['id'] = calendar_id2real_id(datas['id'])
+    return original_exp_report(db, uid, object, new_ids, datas, context)
 
 
 openerp.service.report.exp_report = exp_report
@@ -881,7 +881,7 @@ class calendar_event(osv.Model):
         'allday': fields.boolean('All Day', states={'done': [('readonly', True)]}),
         'user_id': fields.many2one('res.users', 'Responsible', states={'done': [('readonly', True)]}),
         'color_partner_id': fields.related('user_id', 'partner_id', 'id', type="integer", string="colorize", store=False),  # Color of creator
-        'active': fields.boolean('Active', help="If the active field is set to true, it will allow you to hide the event alarm information without removing it."),
+        'active': fields.boolean('Active', help="If the active field is set to false, it will allow you to hide the event alarm information without removing it."),
         'categ_ids': fields.many2many('calendar.event.type', 'meeting_category_rel', 'event_id', 'type_id', 'Tags'),
         'attendee_ids': fields.one2many('calendar.attendee', 'event_id', 'Attendees', ondelete='cascade'),
         'partner_ids': fields.many2many('res.partner', string='Attendees', states={'done': [('readonly', True)]}),
