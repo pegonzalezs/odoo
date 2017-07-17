@@ -95,7 +95,7 @@ def _tz_get(self,cr,uid, context=None):
 
 class users(osv.osv):
     __admin_ids = {}
-    _uid_cache = {}
+    _uid_cache__ = {}
     _name = "res.users"
     _order = 'name'
 
@@ -276,6 +276,23 @@ class users(osv.osv):
                 result = map(override_password, result)
         return result
 
+    def read_group(self, cr, uid, domain, fields, groupby, offset=0, limit=None, context=None, orderby=False):
+        if uid != 1:
+            groupby_fields = set([groupby] if isinstance(groupby, basestring) else groupby)
+            if 'password' in groupby_fields:
+                raise security.ExceptionNoTb('Invalid groupby')
+        return super(users, self).read_group(
+            cr, uid, domain, fields, groupby, offset=offset, limit=limit, context=context, orderby=orderby)
+
+    def _search(self, cr, user, args, offset=0, limit=None, order=None, context=None, count=False, access_rights_uid=None):
+        if user != 1 and args:
+            domain_terms = [term for term in args if isinstance(term, (tuple, list))]
+            domain_fields = set(left for (left, op, right) in domain_terms)
+            if 'password' in domain_fields:
+                raise security.ExceptionNoTb('Invalid search criterion')
+        return super(users, self)._search(
+            cr, user, args, offset=offset, limit=limit, order=order, context=context, count=count,
+            access_rights_uid=access_rights_uid)
 
     def _check_company(self, cr, uid, ids, context=None):
         return all(((this.company_id in this.company_ids) or not this.company_ids) for this in self.browse(cr, uid, ids, context))
@@ -380,10 +397,10 @@ class users(osv.osv):
         clear = partial(self.pool.get('ir.rule').clear_cache, cr)
         map(clear, ids)
         db = cr.dbname
-        if db in self._uid_cache:
+        if db in self._uid_cache__:
             for id in ids:
-                if id in self._uid_cache[db]:
-                    del self._uid_cache[db][id]
+                if id in self._uid_cache__[db]:
+                    del self._uid_cache__[db][id]
 
         return res
 
@@ -391,10 +408,10 @@ class users(osv.osv):
         if 1 in ids:
             raise osv.except_osv(_('Can not remove root user!'), _('You can not remove the admin user as it is used internally for resources created by OpenERP (updates, module installation, ...)'))
         db = cr.dbname
-        if db in self._uid_cache:
+        if db in self._uid_cache__:
             for id in ids:
-                if id in self._uid_cache[db]:
-                    del self._uid_cache[db][id]
+                if id in self._uid_cache__[db]:
+                    del self._uid_cache__[db][id]
         return super(users, self).unlink(cr, uid, ids, context=context)
 
     def name_search(self, cr, user, name='', args=None, operator='ilike', context=None, limit=100):
@@ -487,7 +504,7 @@ class users(osv.osv):
         if not passwd:
             # empty passwords disallowed for obvious security reasons
             raise security.ExceptionNoTb('AccessDenied')
-        if self._uid_cache.get(db, {}).get(uid) == passwd:
+        if self._uid_cache__.get(db, {}).get(uid) == passwd:
             return
         cr = pooler.get_db(db).cursor()
         try:
@@ -496,11 +513,11 @@ class users(osv.osv):
             res = cr.fetchone()[0]
             if not res:
                 raise security.ExceptionNoTb('AccessDenied')
-            if self._uid_cache.has_key(db):
-                ulist = self._uid_cache[db]
+            if self._uid_cache__.has_key(db):
+                ulist = self._uid_cache__[db]
                 ulist[uid] = passwd
             else:
-                self._uid_cache[db] = {uid:passwd}
+                self._uid_cache__[db] = {uid:passwd}
         finally:
             cr.close()
 
