@@ -891,6 +891,9 @@ class crm_lead(format_address, osv.osv):
             context['default_team_id'] = vals.get('team_id')
         if vals.get('user_id') and 'date_open' not in vals:
             vals['date_open'] = fields.datetime.now()
+        if context.get('default_partner_id') and not vals.get('email_from'):
+            partner_id = self.pool['res.partner'].browse(cr, uid, context.get('default_partner_id'))
+            vals['email_from'] = partner_id.email
 
         # context: no_log, because subtype already handle this
         create_context = dict(context, mail_create_nolog=True)
@@ -1144,7 +1147,7 @@ Update your business card, phone book, social media,... Send an email right now 
                     res['closing']['today'] += 1
                 if date_deadline >= date.today() and date_deadline <= date.today() + timedelta(days=7):
                     res['closing']['next_7_days'] += 1
-                if date_deadline < date.today():
+                if date_deadline < date.today() and not opp['date_closed']:
                     res['closing']['overdue'] += 1
 
             # Next activities
