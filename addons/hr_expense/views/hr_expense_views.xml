@@ -60,7 +60,7 @@
                         </group><group>
                             <field name="reference"/>
                             <field name="date"/>
-                            <field name="account_id"/>
+                            <field name="account_id" domain="[('internal_type', '=', 'other')]"/>
                             <field name="employee_id"/>
                             <field name="sheet_id" invisible="1"/>
                             <field name="currency_id" groups="base.group_multi_currency"/>
@@ -299,7 +299,7 @@
                             </group>
                             <group string="Accounting">
                                 <field name="property_account_expense_id"/>
-                                <field name="supplier_taxes_id" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                <field name="supplier_taxes_id" widget="many2many_tags"/>
                             </group>
                         </group>
                     </sheet>
@@ -464,7 +464,7 @@
                                 <field name="message_unread" invisible="1"/>
                                 <field name="attachment_number" string=" "/>
                                 <button name="action_get_attachment_view" string="View Attachments" type="object" icon="fa-paperclip"/>
-                                <field name="tax_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                <field name="tax_ids" widget="many2many_tags"/>
                                 <field name="total_amount" sum="Total Amount" widget="monetary"/>
                            </tree>
                         </field>
