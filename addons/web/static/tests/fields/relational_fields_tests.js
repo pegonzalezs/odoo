@@ -2005,6 +2005,49 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.test('one2many list: unlink one record', function (assert) {
+        assert.expect(5);
+        this.data.partner.records[0].p = [2, 4];
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<field name="p" widget="many2many">' +
+                        '<tree>' +
+                            '<field name="display_name"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+            res_id: 1,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/call_kw/partner/write') {
+                    var commands = args.args[1].p;
+                    assert.strictEqual(commands.length, 2,
+                        'should have generated two commands');
+                    assert.ok(commands[0][0] === 4 && commands[0][1] === 4,
+                        'should have generated the command 4 (LINK_TO) with id 4');
+                    assert.ok(commands[1][0] === 3 && commands[1][1] === 2,
+                        'should have generated the command 3 (UNLINK) with id 2');
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        form.$buttons.find('.o_form_button_edit').click();
+
+        assert.strictEqual(form.$('td.o_list_record_delete span').length, 2,
+            "should have 2 delete buttons");
+
+        form.$('td.o_list_record_delete span').first().click();
+
+        assert.strictEqual(form.$('td.o_list_record_delete span').length, 1,
+            "should have 1 delete button (a record is supposed to have been unlinked)");
+
+        // save and check that the correct command has been generated
+        form.$buttons.find('.o_form_button_save').click();
+        form.destroy();
+    });
+
     QUnit.test('one2many list: deleting one record', function (assert) {
         assert.expect(5);
         this.data.partner.records[0].p = [2, 4];
@@ -6921,7 +6964,7 @@ QUnit.module('relational_fields', {
                 "should do a do_action with correct parameters");
         });
 
-        assert.strictEqual(form.$('a.o_form_uri:contains(xphone)').length, 1,
+        assert.strictEqual(form.$('a.o_form_uri:contains(first record)').length, 1,
                         "should contain a link");
         form.$('a.o_form_uri').click(); // click on the link in readonly mode (should trigger do_action)
 
@@ -6933,7 +6976,7 @@ QUnit.module('relational_fields', {
             "should contain one many2one");
         assert.strictEqual(form.$('.o_field_widget select').val(), "product",
             "widget should contain one select with the model");
-        assert.strictEqual(form.$('.o_field_widget input').val(), "xphone",
+        assert.strictEqual(form.$('.o_field_widget input').val(), "first record",
             "widget should contain one input with the record");
 
         var options = _.map(form.$('.o_field_widget select > option'), function (el) {
@@ -6941,7 +6984,6 @@ QUnit.module('relational_fields', {
         });
         assert.deepEqual(options, ['', 'product', 'partner_type', 'partner'],
             "the options should be correctly set");
-
 
         form.$('.o_external_button').click(); // click on the external button (should do an RPC)
 
@@ -6959,7 +7001,7 @@ QUnit.module('relational_fields', {
         $dropdown.find('li:first()').click();
 
         form.$buttons.find('.o_form_button_save').click();
-        assert.strictEqual(form.$('a.o_form_uri:contains(gold)').length, 1,
+        assert.strictEqual(form.$('a.o_form_uri').length, 1,
                         "should contain a link with the new value");
 
         form.destroy();
