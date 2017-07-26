@@ -890,7 +890,7 @@ QUnit.module('Views', {
                 return this._super.apply(this, arguments);
             },
         });
-        assert.strictEqual(form.$('button.btn.btn-sm div.fa.fa-check').length, 1,
+        assert.strictEqual(form.$('button.btn.btn-sm i.fa.fa-check').length, 1,
                         "should contain a button with correct content");
 
         assert.strictEqual(form.$('.o_form_statusbar button').length, 2,
@@ -3555,10 +3555,13 @@ QUnit.module('Views', {
                     '</sheet>' +
                 '</form>',
             res_id: 2,
+            viewOptions: {
+                context: {some_context: true},
+            },
             intercepts: {
                 execute_action: function (e) {
                     assert.deepEqual(e.data.action_data.context, {test: 2},
-                        "button context should have been evaluated and given to the action");
+                        "button context should have been evaluated and given to the action, without previous context");
                 },
             },
         });

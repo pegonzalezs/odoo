@@ -2,15 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
+import psycopg2
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, registry, SUPERUSER_ID, _
 
 _logger = logging.getLogger(__name__)
 
 
 class DeliveryCarrier(models.Model):
     _name = 'delivery.carrier'
-    _inherits = {'product.product': 'product_id'}
     _description = "Carrier"
     _order = 'sequence, id'
 
@@ -33,15 +33,16 @@ class DeliveryCarrier(models.Model):
     # Internals for shipping providers #
     # -------------------------------- #
 
+    name = fields.Char(required=True)
+    active = fields.Boolean(default=True)
     sequence = fields.Integer(help="Determine the display order", default=10)
     # This field will be overwritten by internal shipping providers by adding their own type (ex: 'fedex')
     delivery_type = fields.Selection([('fixed', 'Fixed Price')], string='Provider', default='fixed', required=True)
     integration_level = fields.Selection([('rate', 'Get Rate'), ('rate_and_ship', 'Get Rate and Create Shipment')], string="Integration Level", default='rate_and_ship', help="Action while validating Delivery Orders")
     prod_environment = fields.Boolean("Environment", help="Set to True if your credentials are certified for production.")
-
-    product_type = fields.Selection(related='product_id.type', default='service')
-    product_sale_ok = fields.Boolean(related='product_id.sale_ok', default=False)
-    product_id = fields.Many2one('product.product', string='Delivery Product', required=True, ondelete="cascade")
+    debug_logging = fields.Boolean('Debug logging', help="Log requests in order to ease debugging")
+    company_id = fields.Many2one('res.company', string='Company', related='product_id.company_id', store=True)
+    product_id = fields.Many2one('product.product', string='Delivery Product', required=True, ondelete='restrict')
 
     country_ids = fields.Many2many('res.country', 'delivery_carrier_country_rel', 'carrier_id', 'country_id', 'Countries')
     state_ids = fields.Many2many('res.country.state', 'delivery_carrier_state_rel', 'carrier_id', 'state_id', 'States')
@@ -49,7 +50,7 @@ class DeliveryCarrier(models.Model):
     zip_to = fields.Char('Zip To')
 
     margin = fields.Integer(help='This percentage will be added to the shipping price.')
-    free_over = fields.Boolean('Free if Order total is more than', help="If the order is more expensive than a certain amount, the customer can benefit from a free shipping", default=False, oldname='free_if_more_than')
+    free_over = fields.Boolean('Free if order total is more than', help="If the order is more expensive than a certain amount, the customer can benefit from a free shipping", default=False, oldname='free_if_more_than')
     amount = fields.Float(string='Amount', help="Amount of the order to benefit from a free shipping, expressed in the company currency")
 
     _sql_constraints = [
@@ -59,6 +60,10 @@ class DeliveryCarrier(models.Model):
     def toggle_prod_environment(self):
         for c in self:
             c.prod_environment = not c.prod_environment
+
+    def toggle_debug(self):
+        for c in self:
+            c.debug_logging = not c.debug_logging
 
     @api.multi
     def install_more_provider(self):
@@ -116,7 +121,7 @@ class DeliveryCarrier(models.Model):
             # apply margin on computed price
             res['price'] = res['price'] * (1.0 + (float(self.margin) / 100.0))
             # free when order is large enough
-            if res['success'] and self.free_over and order._compute_amount_total_without_delivery >= self.amount:
+            if res['success'] and self.free_over and order._compute_amount_total_without_delivery() >= self.amount:
                 res['warning_message'] = _('Warning:\nTotal amount of this order is over %.2f, free shipping!\n(actual cost: %.2f)') % (self.amount, res['price'])
                 res['price'] = 0.0
             return res
@@ -136,15 +141,15 @@ class DeliveryCarrier(models.Model):
         if hasattr(self, '%s_send_shipping' % self.delivery_type):
             return getattr(self, '%s_send_shipping' % self.delivery_type)(pickings)
 
-    def get_tracking_link(self, pickings):
+    def get_tracking_link(self, picking):
         ''' Ask the tracking link to the service provider
 
-        :param pickings: A recordset of pickings
-        :return list: A list of string URLs, containing the tracking links for every picking
+        :param picking: record of stock.picking
+        :return str: an URL containing the tracking link or False
         '''
         self.ensure_one()
         if hasattr(self, '%s_get_tracking_link' % self.delivery_type):
-            return getattr(self, '%s_get_tracking_link' % self.delivery_type)(pickings)
+            return getattr(self, '%s_get_tracking_link' % self.delivery_type)(picking)
 
     def cancel_shipment(self, pickings):
         ''' Cancel a shipment
@@ -154,6 +159,29 @@ class DeliveryCarrier(models.Model):
         self.ensure_one()
         if hasattr(self, '%s_cancel_shipment' % self.delivery_type):
             return getattr(self, '%s_cancel_shipment' % self.delivery_type)(pickings)
+
+    def log_xml(self, xml_string, func):
+        self.ensure_one()
+
+        if self.debug_logging:
+            db_name = self._cr.dbname
+
+            # Use a new cursor to avoid rollback that could be caused by an upper method
+            try:
+                db_registry = registry(db_name)
+                with db_registry.cursor() as cr:
+                    env = api.Environment(cr, SUPERUSER_ID, {})
+                    IrLogging = env['ir.logging']
+                    IrLogging.sudo().create({'name': 'delivery.carrier',
+                              'type': 'server',
+                              'dbname': db_name,
+                              'level': 'DEBUG',
+                              'message': xml_string,
+                              'path': self.delivery_type,
+                              'func': func,
+                              'line': 1})
+            except psycopg2.Error:
+                pass
 
     # ------------------------------------------------ #
     # Fixed price shipping, aka a very simple provider #
@@ -183,8 +211,8 @@ class DeliveryCarrier(models.Model):
                           'tracking_number': False}]
         return res
 
-    def fixed_get_tracking_link(self, pickings):
-        raise NotImplementedError()
+    def fixed_get_tracking_link(self, picking):
+        return False
 
     def fixed_cancel_shipment(self, pickings):
         raise NotImplementedError()
