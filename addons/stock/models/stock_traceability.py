@@ -57,7 +57,7 @@ class MrpStockReport(models.TransientModel):
                         ('lot_id', '=', move_line.lot_id.id),
                         ('location_id', '=', move_line.location_dest_id.id),
                         ('id', '!=', move_line.id),
-                        ('date', '<', move_line.date),
+                        ('date', '>', move_line.date),
                     ])
         if res:
             res |= self.get_move_lines_downstream(res)
@@ -90,6 +90,7 @@ class MrpStockReport(models.TransientModel):
                 quant_ids = self.env['stock.quant'].search([
                     ('lot_id', '=', context.get('active_id')),
                     ('quantity', '<', 0),
+                    ('location_id.usage', '=', 'internal'),
                 ])
                 res += self._lines(line_id, model_id=model_id, model='stock.quant', level=level,
                                    parent_quant=parent_quant, stream=stream, obj_ids=quant_ids)
@@ -104,6 +105,7 @@ class MrpStockReport(models.TransientModel):
                 quant_ids = self.env['stock.quant'].search([
                     ('lot_id', '=', context.get('active_id')),
                     ('quantity', '>', 0),
+                    ('location_id.usage', '=', 'internal'),
                 ])
                 res += self._lines(line_id, model_id=model_id, model='stock.quant', level=level,
                                    parent_quant=parent_quant, stream=stream, obj_ids=quant_ids)
@@ -276,7 +278,10 @@ class MrpStockReport(models.TransientModel):
         else:
             for move_line in obj_ids:
                 final_vals += self.make_dict_head(level, stream=stream, parent_id=line_id, model=model or 'stock.pack.operation', move_line=move_line)
-        final_vals = sorted(final_vals, key=lambda v: v['date'], reverse=True)
+        reverse_sort = True
+        if stream == "downstream":
+            reverse_sort = False
+        final_vals = sorted(final_vals, key=lambda v: v['date'], reverse=reverse_sort)
         lines = self.final_vals_to_lines(final_vals, level)
         return lines
 
