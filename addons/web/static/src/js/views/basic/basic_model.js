@@ -777,13 +777,14 @@ var BasicModel = AbstractModel.extend({
                     if (newValue instanceof Array) {
                         rec._savePoint = newValue.slice(0);
                     } else {
-                        // save the viewType of edition, so that the correct readonly modifiers
-                        // can be evaluated when the record will be saved
-                        for (var fieldName in (rec._changes || {})) {
-                            rec._editionViewType[fieldName] = options.viewType;
-                        }
                         rec._savePoint = _.extend({}, newValue);
                     }
+                });
+
+                // save the viewType of edition, so that the correct readonly modifiers
+                // can be evaluated when the record will be saved
+                _.each((record._changes || {}), function (value, fieldName) {
+                    record._editionViewType[fieldName] = options.viewType;
                 });
             }
             var shouldReload = 'reload' in options ? options.reload : true;
@@ -919,18 +920,23 @@ var BasicModel = AbstractModel.extend({
      * @returns {Deferred -> string} resolves to the group id
      */
     toggleGroup: function (groupId) {
+        var self = this;
         var group = this.localData[groupId];
         if (group.isOpen) {
             group.isOpen = false;
             group.data = [];
+            group.res_ids = [];
             group.offset = 0;
+            this._updateParentResIDs(group);
             return $.when(groupId);
         }
         if (!group.isOpen) {
             group.isOpen = true;
             var def;
             if (group.count > 0) {
-                def = this._load(group);
+                def = this._load(group).then(function () {
+                    self._updateParentResIDs(group);
+                });
             }
             return $.when(def).then(function () {
                 return groupId;
@@ -3355,6 +3361,7 @@ var BasicModel = AbstractModel.extend({
                 list.data = data;
                 list.res_ids = ids;
             }
+            self._updateParentResIDs(list);
             return list;
         });
     },
@@ -3398,6 +3405,26 @@ var BasicModel = AbstractModel.extend({
                 }
                 return 0;
             });
+        }
+    },
+    /**
+     * Updates the res_ids of the parent of a given element of type list.
+     *
+     * After some operations (e.g. loading more records, folding/unfolding a
+     * group), the res_ids list of an element may be updated. When this happens,
+     * the res_ids of its ancestors need to be updated as well. This is the
+     * purpose of this function.
+     *
+     * @param {Object} element
+     */
+    _updateParentResIDs: function (element) {
+        var self = this;
+        if (element.parentID) {
+            var parent = this.localData[element.parentID];
+            parent.res_ids =  _.flatten(_.map(parent.data, function (dataPointID) {
+                return self.localData[dataPointID].res_ids;
+            }));
+            this._updateParentResIDs(parent);
         }
     },
     /**
