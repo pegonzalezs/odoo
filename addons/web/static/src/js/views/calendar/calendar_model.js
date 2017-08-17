@@ -45,32 +45,38 @@ return AbstractModel.extend({
         if (event.allDay || end.diff(start) % 86400000 === 0) {
             event.allDay = true;
 
-            if (this.scale === 'month') {
+            if (this.data.scale === 'month') {
+                // In month, FullCalendar gives the end day as the
+                // next day at midnight (instead of 23h59).
+                end.add(-1, 'days');
                 if (event.r_start) {
                     start.hours(event.r_start.hours())
                          .minutes(event.r_start.minutes())
                          .seconds(event.r_start.seconds())
                          .utc();
-                    end.add(-1, 'days')
-                       .hours(event.r_end.hours())
+                    end.hours(event.r_end.hours())
                        .minutes(event.r_end.minutes())
                        .seconds(event.r_end.seconds())
                        .utc();
-                } else {
+                } else if (this.mapping.all_day) {
                     start.utc();
                     end.utc();
+                } else {
+                    // default hours in the user's timezone
+                    start.hours(7).add(-this.getSession().getTZOffset(start), 'minutes');
+                    end.hours(19).add(-this.getSession().getTZOffset(end), 'minutes');
                 }
             } else if (this.mapping.all_day) {
                 start.startOf('day');
                 end.startOf('day').add(-1, 'days');
             } else {
                 // default hours in the user's timezone
-                start.hours(7).add(-this.getSession().tzOffset, 'minutes');
-                end.hours(19).add(-this.getSession().tzOffset, 'minutes');
+                start.hours(7).add(-this.getSession().getTZOffset(start), 'minutes');
+                end.hours(19).add(-this.getSession().getTZOffset(end), 'minutes');
             }
         } else {
-            start.add(-this.getSession().tzOffset, 'minutes');
-            end.add(-this.getSession().tzOffset, 'minutes');
+            start.add(-this.getSession().getTZOffset(start), 'minutes');
+            end.add(-this.getSession().getTZOffset(end), 'minutes');
         }
 
         if (this.mapping.all_day) {
@@ -599,8 +605,8 @@ return AbstractModel.extend({
             date_stop = date_start.clone().add(date_delay,'hours');
         }
 
-        date_start.add(this.getSession().tzOffset, 'minutes');
-        date_stop.add(this.getSession().tzOffset, 'minutes');
+        date_start.add(this.getSession().getTZOffset(date_start), 'minutes');
+        date_stop.add(this.getSession().getTZOffset(date_stop), 'minutes');
 
         if (this.mapping.all_day && evt[this.mapping.all_day]) {
             date_stop.add(1, 'days');
@@ -622,6 +628,10 @@ return AbstractModel.extend({
             // r.start = date_start.format('YYYY-MM-DD');
             // r.end = date_stop.format('YYYY-MM-DD');
         } else if (this.data.scale === 'month' && this.fields[this.mapping.date_start].type !== 'date') {
+            // In month, FullCalendar gives the end day as the
+            // next day at midnight (instead of 23h59).
+            date_stop.add(1, 'days');
+
             // allow to resize in month mode
             r.reset_allday = r.allDay;
             r.allDay = true;
