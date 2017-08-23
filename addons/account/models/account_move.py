@@ -982,26 +982,10 @@ class AccountMoveLine(models.Model):
             vals['amount_currency'] = sign * abs(sum([r.amount_residual_currency for r in self]))
 
         # Writeoff line in the account of self
-        first_line_dict = vals.copy()
-        first_line_dict['account_id'] = self[0].account_id.id
-        if 'analytic_account_id' in first_line_dict:
-            del first_line_dict['analytic_account_id']
-        if 'tax_ids' in first_line_dict:
-            tax_ids = []
-            #vals['tax_ids'] is a list of commands [[4, tax_id, None], ...]
-            for tax_id in vals['tax_ids']:
-                tax_ids.append(tax_id[1])
-            amount = first_line_dict['credit'] - first_line_dict['debit']
-            amount_tax = self.env['account.tax'].browse(tax_ids).compute_all(amount)['total_included']
-            first_line_dict['credit'] = amount_tax > 0 and amount_tax or 0.0
-            first_line_dict['debit'] = amount_tax < 0 and abs(amount_tax) or 0.0
-            del first_line_dict['tax_ids']
+        first_line_dict = self._prepare_writeoff_first_line_values(vals)
 
         # Writeoff line in specified writeoff account
-        second_line_dict = vals.copy()
-        second_line_dict['debit'], second_line_dict['credit'] = second_line_dict['credit'], second_line_dict['debit']
-        if 'amount_currency' in vals:
-            second_line_dict['amount_currency'] = -second_line_dict['amount_currency']
+        second_line_dict = self._prepare_writeoff_second_line_values(vals)
 
         # Create the move
         writeoff_move = self.env['account.move'].with_context(apply_taxes=True).create({
@@ -1014,6 +998,32 @@ class AccountMoveLine(models.Model):
 
         # Return the writeoff move.line which is to be reconciled
         return writeoff_move.line_ids.filtered(lambda r: r.account_id == self[0].account_id)
+
+    @api.multi
+    def _prepare_writeoff_first_line_values(self, values):
+        line_values = values.copy()
+        line_values['account_id'] = self[0].account_id.id
+        if 'analytic_account_id' in line_values:
+            del line_values['analytic_account_id']
+        if 'tax_ids' in line_values:
+            tax_ids = []
+            # vals['tax_ids'] is a list of commands [[4, tax_id, None], ...]
+            for tax_id in values['tax_ids']:
+                tax_ids.append(tax_id[1])
+            amount = line_values['credit'] - line_values['debit']
+            amount_tax = self.env['account.tax'].browse(tax_ids).compute_all(amount)['total_included']
+            line_values['credit'] = amount_tax > 0 and amount_tax or 0.0
+            line_values['debit'] = amount_tax < 0 and abs(amount_tax) or 0.0
+            del line_values['tax_ids']
+        return line_values
+
+    @api.multi
+    def _prepare_writeoff_second_line_values(self, values):
+        line_values = values.copy()
+        line_values['debit'], line_values['credit'] = line_values['credit'], line_values['debit']
+        if 'amount_currency' in values:
+            line_values['amount_currency'] = -line_values['amount_currency']
+        return line_values
 
     @api.model
     def compute_full_after_batch_reconcile(self):
@@ -1712,17 +1722,20 @@ class AccountPartialReconcile(models.Model):
             return self
         #check if the reconcilation is full
         #first, gather all journal items involved in the reconciliation just created
-        partial_rec_set = OrderedDict.fromkeys([x for x in self])
         aml_set = aml_to_balance = self.env['account.move.line']
         total_debit = 0
         total_credit = 0
         total_amount_currency = 0
         #make sure that all partial reconciliations share the same secondary currency otherwise it's not
         #possible to compute the exchange difference entry and it has to be done manually.
-        currency = list(partial_rec_set)[0].currency_id
+        currency = self[0].currency_id
         maxdate = '0000-00-00'
 
-        for partial_rec in partial_rec_set:
+        seen = set()
+        todo = set(self)
+        while todo:
+            partial_rec = todo.pop()
+            seen.add(partial_rec)
             if partial_rec.currency_id != currency:
                 #no exchange rate entry will be created
                 currency = None
@@ -1741,13 +1754,15 @@ class AccountPartialReconcile(models.Model):
                         #currency is recorded on the partial rec and in order to check if the reconciliation is total, we need to convert the
                         #aml.balance in that foreign currency
                         total_amount_currency += aml.company_id.currency_id.with_context(date=aml.date).compute(aml.balance, partial_rec.currency_id)
+
                 for x in aml.matched_debit_ids | aml.matched_credit_ids:
-                    partial_rec_set[x] = None
-        partial_rec_ids = [x.id for x in partial_rec_set]
+                    if x not in seen:
+                        todo.add(x)
+
+        partial_rec_ids = [x.id for x in seen]
         aml_ids = aml_set.ids
         #then, if the total debit and credit are equal, or the total amount in currency is 0, the reconciliation is full
         digits_rounding_precision = aml_set[0].company_id.currency_id.rounding
-
         if (currency and float_is_zero(total_amount_currency, precision_rounding=currency.rounding)) or float_compare(total_debit, total_credit, precision_rounding=digits_rounding_precision) == 0:
             exchange_move_id = False
             exchange_partial_rec_id = False
@@ -1847,6 +1862,6 @@ class AccountFullReconcile(models.Model):
         # The move date should be the maximum date between payment and invoice
         # (in case of payment in advance). However, we should make sure the
         # move date is not recorded after the end of year closing.
-        if move_date > company.fiscalyear_lock_date:
+        if move_date > (company.fiscalyear_lock_date or '0000-00-00'):
             res['date'] = move_date
         return res
