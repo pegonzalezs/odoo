@@ -50,6 +50,7 @@ class AccountConfigSettings(models.TransientModel):
         help='This allows you to group received checks before you deposit them to the bank.\n'
              '-This installs the module account_batch_deposit.')
     module_account_sepa = fields.Boolean(string='Use SEPA payments')
+    module_account_sepa_direct_debit = fields.Boolean(string='Use SEPA Direct Debit')
     module_account_plaid = fields.Boolean(string="Plaid Connector")
     module_account_yodlee = fields.Boolean("Bank Interface - Sync your bank feeds automatically")
     module_account_bank_statement_import_qif = fields.Boolean("Import .qif files")
@@ -82,9 +83,9 @@ class AccountConfigSettings(models.TransientModel):
         if self.group_multi_currency:
             self.env.ref('base.group_user').write({'implied_ids': [(4, self.env.ref('product.group_sale_pricelist').id)]})
         """ Set the product taxes if they have changed """
-        ir_values_obj = self.env['ir.values']
-        ir_values_obj.sudo().set_default('product.template', "taxes_id", [self.default_sale_tax_id.id] if self.default_sale_tax_id else False, for_all_users=True, company_id=self.company_id.id)
-        ir_values_obj.sudo().set_default('product.template', "supplier_taxes_id", [self.default_purchase_tax_id.id] if self.default_purchase_tax_id else False, for_all_users=True, company_id=self.company_id.id)
+        IrDefault = self.env['ir.default'].sudo()
+        IrDefault.set('product.template', "taxes_id", self.default_sale_tax_id.ids, company_id=self.company_id.id)
+        IrDefault.set('product.template', "supplier_taxes_id", self.default_purchase_tax_id.ids, company_id=self.company_id.id)
         """ install a chart of accounts for the given company (if required) """
         if self.chart_template_id and self.chart_template_id != self.company_id.chart_template_id:
             wizard = self.env['wizard.multi.charts.accounts'].create({
@@ -143,7 +144,7 @@ class AccountConfigSettings(models.TransientModel):
     def create(self, values):
         # Optimisation purpose, saving a res_config even without changing any values will trigger the write of all
         # related values, including the currency_id field on res_company. This in turn will trigger the recomputation
-        # of account_move_line related field company_currency_id which can be slow depending on the number of entries 
+        # of account_move_line related field company_currency_id which can be slow depending on the number of entries
         # in the database. Thus, if we do not explicitely change the currency_id, we should not write it on the company
         # Same for the field `code_digits` which will trigger a write on all the account.account to complete the
         # code the missing characters to complete the desired number of digit, leading to a sql_constraint.
