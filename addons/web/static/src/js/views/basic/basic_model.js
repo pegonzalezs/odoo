@@ -2043,7 +2043,7 @@ var BasicModel = AbstractModel.extend({
         if (record.data.hasOwnProperty(domainModel)) {
             domainModel = record._changes && record._changes[domainModel] || record.data[domainModel];
         }
-        var domainValue = record._changes && record._changes[fieldName] || record.data[fieldName];
+        var domainValue = record._changes && record._changes[fieldName] || record.data[fieldName] || [];
 
         // avoid rpc if not necessary
         var hasChanged = this._saveSpecialDataCache(record, fieldName, {
@@ -2407,7 +2407,10 @@ var BasicModel = AbstractModel.extend({
                 _.each(list._changes, function (change) {
                     if (change.operation === 'ADD') {
                         relRecordAdded.push(self.localData[change.id]);
-                    } else if (change.operation === 'UPDATE') {
+                    } else if (change.operation === 'UPDATE' && !self.isNew(change.id)) {
+                        // ignore new records that would have been updated
+                        // afterwards, as all their changes would already
+                        // be aggregated in the CREATE command
                         relRecordUpdated.push(self.localData[change.id]);
                     }
                 });
