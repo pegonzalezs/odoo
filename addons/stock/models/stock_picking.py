@@ -9,8 +9,8 @@ from itertools import groupby
 from odoo import api, fields, models, _
 from odoo.tools import DEFAULT_SERVER_DATETIME_FORMAT
 from odoo.tools.float_utils import float_compare, float_round
-from odoo.addons.procurement.models import procurement
 from odoo.exceptions import UserError
+from odoo.addons.stock.models.stock_move import PROCUREMENT_PRIORITIES
 from operator import itemgetter
 
 
@@ -43,7 +43,8 @@ class PickingType(models.Model):
         'Use Existing Lots/Serial Numbers', default=True,
         help="If this is checked, you will be able to choose the Lots/Serial Numbers. You can also decide to not put lots in this operation type.  This means it will create stock with no lot or not put a restriction on the lot taken. ")
     show_operations = fields.Boolean(
-        'Show Operations', default=False)
+        'Show Detailed Operations', default=False,
+        help="If this checkbox is ticked, the pickings lines will represent detailed stock operations. If not, the picking lines will represent an aggregate of detailed stock operations.")
     show_reserved = fields.Boolean(
         'Show Reserved', default=True)
 
@@ -212,7 +213,7 @@ class Picking(models.Model):
         readonly=True, related='move_lines.group_id', store=True)
 
     priority = fields.Selection(
-        procurement.PROCUREMENT_PRIORITIES, string='Priority',
+        PROCUREMENT_PRIORITIES, string='Priority',
         compute='_compute_priority', inverse='_set_priority', store=True,
         # default='1', required=True,  # TDE: required, depending on moves ? strange
         index=True, track_visibility='onchange',
@@ -590,14 +591,25 @@ class Picking(models.Model):
         self.ensure_one()
         if not self.move_lines and not self.move_line_ids:
             raise UserError(_('Please add some lines to move'))
+
+        # If no lots when needed, raise error
+        picking_type = self.picking_type_id
+        no_quantities_done = all(line.qty_done == 0.0 for line in self.move_line_ids)
+        if picking_type.use_create_lots or picking_type.use_existing_lots:
+            lines_to_check = self.move_line_ids
+            if not no_quantities_done:
+                lines_to_check = lines_to_check.filtered(
+                    lambda line: float_compare(line.qty_done, 0,
+                                               precision_rounding=line.product_uom_id.rounding)
+                )
+
+            for line in lines_to_check:
+                product = line.product_id
+                if product and product.tracking != 'none' and (line.qty_done == 0 or (not line.lot_name and not line.lot_id)):
+                    raise UserError(_('You need to supply a lot/serial number for %s.') % product.name)
+
         # In draft or with no pack operations edited yet, ask if we can just do everything
-        if self.state == 'draft' or all([x.qty_done == 0.0 for x in self.move_line_ids]):
-            # If no lots when needed, raise error
-            picking_type = self.picking_type_id
-            if (picking_type.use_create_lots or picking_type.use_existing_lots):
-                for pack in self.move_line_ids:
-                    if pack.product_id and pack.product_id.tracking != 'none':
-                        raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
+        if self.state == 'draft' or no_quantities_done:
             view = self.env.ref('stock.view_immediate_transfer')
             wiz = self.env['stock.immediate.transfer'].create({'pick_id': self.id})
             return {
@@ -697,7 +709,6 @@ class Picking(models.Model):
             'location_id': picking.location_id.id,
             'location_dest_id': picking.location_dest_id.id,
             'product_id': product.id,
-            'procurement_id': proc_id,
             'product_uom': uom_id,
             'product_uom_qty': qty,
             'name': _('Extra Move: ') + name,
