@@ -361,6 +361,14 @@ class Product(models.Model):
         return action
 
     @api.multi
+    def action_open_product_lot(self):
+        self.ensure_one()
+        action = self.env.ref('stock.action_production_lot_form').read()[0]
+        action['domain'] = [('product_id', '=', self.id)]
+        action['context'] = {'default_product_id': self.id}
+        return action
+
+    @api.multi
     def write(self, values):
         res = super(Product, self).write(values)
         if 'active' in values and not values['active'] and self.mapped('orderpoint_ids').filtered(lambda r: r.active):
@@ -516,7 +524,7 @@ class ProductTemplate(models.Model):
         products = self.mapped('product_variant_ids')
         action = self.env.ref('stock.product_open_quants').read()[0]
         action['domain'] = [('product_id', 'in', products.ids)]
-        action['context'] = {'search_default_locationgroup': 1, 'search_default_internal_loc': 1}
+        action['context'] = {'search_default_internal_loc': 1}
         return action
 
     @api.multi
@@ -537,6 +545,13 @@ class ProductTemplate(models.Model):
         action['domain'] = [('product_id.product_tmpl_id', 'in', self.ids)]
         return action
 
+    @api.multi
+    def action_open_product_lot(self):
+        self.ensure_one()
+        action = self.env.ref('stock.action_production_lot_form').read()[0]
+        action['domain'] = [('product_id.product_tmpl_id', '=', self.id)]
+        action['context'] = {}
+        return action
 
 class ProductCategory(models.Model):
     _inherit = 'product.category'
