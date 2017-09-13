@@ -212,11 +212,11 @@ tour.register('main_flow_tour', {
     content: _t('Go to invoicing tab'),
     position: 'bottom',
 }, {
-    trigger: '.o_field_widget[name=invoice_policy] .o_radio_input[data-value="delivery"]',
-    content: _t('Change invoicing policy'),
+    trigger: '.o_field_widget[name=service_policy] .o_radio_input[data-value="delivered_timesheet"]',
+    content: _t('Change service policy'),
     position: 'left',
 }, {
-    trigger: '.o_field_widget[name=track_service] input[data-value="task"]',
+    trigger: '.o_field_widget[name=service_tracking] input[data-value="task_global_project"]',
     content: _t('Change track service'),
     position: 'left',
 }, {
@@ -403,7 +403,7 @@ tour.register('main_flow_tour', {
 }, {
 // Run the schedulers
     edition: "enterprise",
-    trigger: ".o_menu_sections a:contains('Run Schedulers')",
+    trigger: ".o_menu_sections a:contains('Operations')",
     content: _t("Go to Run Schedulers"),
     position: "bottom"
 },{
