@@ -228,7 +228,7 @@ class IrHttp(models.AbstractModel):
         if not hasattr(cls, '_routing_map'):
             _logger.info("Generating routing map")
             installed = request.registry._init_modules - {'web'}
-            if tools.config['test_enable']:
+            if tools.config['test_enable'] and odoo.modules.module.current_test:
                 installed.add(odoo.modules.module.current_test)
             mods = [''] + odoo.conf.server_wide_modules + sorted(installed)
             # Note : when routing map is generated, we put it on the class `cls`
@@ -248,7 +248,10 @@ class IrHttp(models.AbstractModel):
         return content_disposition(filename)
 
     @classmethod
-    def binary_content(cls, xmlid=None, model='ir.attachment', id=None, field='datas', unique=False, filename=None, filename_field='datas_fname', download=False, mimetype=None, default_mimetype='application/octet-stream', env=None):
+    def binary_content(cls, xmlid=None, model='ir.attachment', id=None, field='datas',
+                       unique=False, filename=None, filename_field='datas_fname', download=False,
+                       mimetype=None, default_mimetype='application/octet-stream',
+                       access_token=None, env=None):
         """ Get file, attachment or downloadable content
 
         If the ``xmlid`` and ``id`` parameter is omitted, fetches the default value for the
@@ -265,6 +268,7 @@ class IrHttp(models.AbstractModel):
         :param bool download: apply headers to download the file
         :param str mimetype: mintype of the field (for headers)
         :param str default_mimetype: default mintype if no mintype found
+        :param str access_token: optional token for unauthenticated access
         :param Environment env: by default use request.env
         :returns: (status, headers, content)
         """
