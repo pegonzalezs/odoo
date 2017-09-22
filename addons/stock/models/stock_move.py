@@ -157,6 +157,7 @@ class StockMove(models.Model):
     is_locked = fields.Boolean(related='picking_id.is_locked', readonly=True)
     is_initial_demand_editable = fields.Boolean('Is initial demand editable', compute='_compute_is_initial_demand_editable')
     is_quantity_done_editable = fields.Boolean('Is quantity done editable', compute='_compute_is_quantity_done_editable')
+    reference = fields.Char(compute='_compute_reference', string="Reference", store=True)
 
     @api.depends('product_id', 'has_tracking', 'move_line_ids', 'location_id', 'location_dest_id')
     def _compute_show_details_visible(self):
@@ -207,6 +208,11 @@ class StockMove(models.Model):
                 move.is_quantity_done_editable = False
             else:
                 move.is_quantity_done_editable = True
+
+    @api.depends('picking_id', 'name')
+    def _compute_reference(self):
+        for move in self:
+            move.reference = move.picking_id.name if move.picking_id else move.name
 
     @api.one
     @api.depends('product_id', 'product_uom', 'product_uom_qty')
@@ -494,11 +500,12 @@ class StockMove(models.Model):
         :return: Recordset of moves passed to this method. If some of the passed moves were merged
         into another existing one, return this one and not the (now unlinked) original.
         """
-        distinct_fields = ['price_unit', 'product_id', 'product_packaging',
+        distinct_fields = ['product_id', 'price_unit', 'product_packaging',
                            'product_uom', 'restrict_partner_id', 'scrapped', 'origin_returned_move_id']
 
         def _keys_sorted(move):
-            return tuple([getattr(move, attr) for attr in distinct_fields])
+            return move.product_id.id, move.price_unit, move.product_packaging.id, move.product_uom.id,\
+                   move.restrict_partner_id.id, move.scrapped, move.origin_returned_move_id.id
 
         # Move removed after merge
         moves_to_unlink = self.env['stock.move']

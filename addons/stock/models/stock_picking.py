@@ -225,7 +225,7 @@ class Picking(models.Model):
     date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Completion Date of Transfer")
 
     location_id = fields.Many2one(
-        'stock.location', "Source Location Zone",
+        'stock.location', "Source Location",
         default=lambda self: self.env['stock.picking.type'].browse(self._context.get('default_picking_type_id')).default_location_src_id,
         readonly=True, required=True,
         states={'draft': [('readonly', False)]})
@@ -288,11 +288,22 @@ class Picking(models.Model):
                                'changing the done quantities.')
     # Used to search on pickings
     product_id = fields.Many2one('product.product', 'Product', related='move_lines.product_id')
-    show_operations = fields.Boolean(related='picking_type_id.show_operations')
+    show_operations = fields.Boolean(compute='_compute_show_operations')
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
     ]
+
+    @api.depends('picking_type_id.show_operations')
+    def _compute_show_operations(self):
+        for picking in self:
+            if picking.picking_type_id.show_operations:
+                if (picking.state == 'draft' and not self.env.context.get('planned_picking')) or picking.state != 'draft':
+                    picking.show_operations = True
+                else:
+                    picking.show_operations = False
+            else:
+                picking.show_operations = False
 
     @api.depends('move_type', 'move_lines.state', 'move_lines.picking_id')
     @api.one
@@ -378,10 +389,12 @@ class Picking(models.Model):
             picking.show_check_availability = picking.is_locked and picking.state in ('confirmed', 'waiting') and has_moves_to_reserve
 
     @api.multi
-    @api.depends('state')
+    @api.depends('state', 'move_lines')
     def _compute_show_mark_as_todo(self):
         for picking in self:
-            if self._context.get('planned_picking') and picking.state == 'draft':
+            if not picking.move_lines:
+                picking.show_mark_as_todo = False
+            elif self._context.get('planned_picking') and picking.state == 'draft':
                 picking.show_mark_as_todo = True
             elif picking.state != 'draft' or not picking.id:
                 picking.show_mark_as_todo = False
@@ -634,8 +647,7 @@ class Picking(models.Model):
                 if product and product.tracking != 'none' and (line.qty_done == 0 or (not line.lot_name and not line.lot_id)):
                     raise UserError(_('You need to supply a lot/serial number for %s.') % product.name)
 
-        # In draft or with no pack operations edited yet, ask if we can just do everything
-        if self.state == 'draft' or no_quantities_done:
+        if no_quantities_done:
             view = self.env.ref('stock.view_immediate_transfer')
             wiz = self.env['stock.immediate.transfer'].create({'pick_id': self.id})
             return {
