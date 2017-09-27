@@ -103,9 +103,7 @@ class StockMoveLine(models.Model):
         res = {}
         if self.product_id.tracking == 'serial':
             self.qty_done = 1
-            # we remove the record with _origin, because _get_move_lines will find the record which is the same than
-            # self but with the origin id
-            move_lines_to_check = self._get_similar_move_lines() - self._origin
+            move_lines_to_check = self._get_similar_move_lines() - self
             message = move_lines_to_check._check_for_duplicated_serial_numbers()
             if message:
                 res['warning'] = {'title': _('Warning'), 'message': message}
@@ -130,8 +128,9 @@ class StockMoveLine(models.Model):
     def _get_similar_move_lines(self):
         self.ensure_one()
         lines = self.env['stock.move.line']
-        if self.move_id.picking_id:
-            lines |= self.move_id.picking_id.move_line_ids.filtered(lambda ml: ml.product_id == self.product_id and (ml.lot_id or ml.lot_name))
+        picking_id = self.move_id.picking_id if self.move_id else self.picking_id
+        if picking_id:
+            lines |= picking_id.move_line_ids.filtered(lambda ml: ml.product_id == self.product_id and (ml.lot_id or ml.lot_name))
         return lines
 
     def _check_for_duplicated_serial_numbers(self):
@@ -280,6 +279,11 @@ class StockMoveLine(models.Model):
                     Quant._update_available_quantity(product_id, location_dest_id, quantity, lot_id=lot_id, package_id=result_package_id, owner_id=owner_id, in_date=in_date)
                 # Unreserve and reserve following move in order to have the real reserved quantity on move_line.
                 next_moves |= ml.move_id.move_dest_ids.filtered(lambda move: move.state not in ('done', 'cancel'))
+
+                # Log a note
+                if ml.picking_id:
+                    ml._log_message(ml.picking_id, ml, 'stock.track_move_template', vals)
+
         res = super(StockMoveLine, self).write(vals)
 
         # As stock_account values according to a move's `product_uom_qty`, we consider that any
@@ -383,6 +387,22 @@ class StockMoveLine(models.Model):
                 Quant._update_available_quantity(ml.product_id, ml.location_dest_id, quantity, lot_id=ml.lot_id, package_id=ml.result_package_id, owner_id=ml.owner_id, in_date=in_date)
         # Reset the reserved quantity as we just moved it to the destination location.
         (self - ml_to_delete).with_context(bypass_reservation_update=True).write({'product_uom_qty': 0.00})
+
+    def _log_message(self, record, move, template, vals):
+        data = vals.copy()
+        if 'lot_id' in vals and vals['lot_id'] != move.lot_id.id:
+            data['lot_name'] = self.env['stock.production.lot'].browse(vals.get('lot_id')).name
+        if 'location_id' in vals:
+            data['location_name'] = self.env['stock.location_id'].browse(vals.get('location_id')).name
+        if 'location_dest_id' in vals:
+            data['location_dest_name'] = self.env['stock.location_id'].browse(vals.get('location_dest_id')).name
+        if 'package_id' in vals and vals['package_id'] != move.package_id.id:
+            data['package_name'] = self.env['stock.quant.package'].browse(vals.get('package_id')).name
+        if 'package_result_id' in vals and vals['package_result_id'] != move.package_result_id.id:
+            data['result_package_name'] = self.env['stock.quant.package'].browse(vals.get('result_package_id')).name
+        if 'owner_id' in vals and vals['owner_id'] != move.owner_id.id:
+            data['owner_name'] = self.env['res.partner'].browse(vals.get('owner_id')).name
+        record.message_post_with_view(template, values={'move': move, 'vals': dict(vals, **data)}, subtype_id=self.env.ref('mail.mt_note').id)
 
     def _free_reservation(self, product_id, location_id, quantity, lot_id=None, package_id=None, owner_id=None):
         """ When editing a done move line or validating one with some forced quantities, it is

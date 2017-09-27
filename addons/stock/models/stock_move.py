@@ -154,10 +154,17 @@ class StockMove(models.Model):
     picking_code = fields.Selection(related='picking_id.picking_type_id.code', readonly=True)
     product_type = fields.Selection(related='product_id.type', readonly=True)
     additional = fields.Boolean("Whether the move was added after the picking's confirmation", default=False)
-    is_locked = fields.Boolean(related='picking_id.is_locked', readonly=True)
+    is_locked = fields.Boolean(compute='_compute_is_locked', readonly=True)
     is_initial_demand_editable = fields.Boolean('Is initial demand editable', compute='_compute_is_initial_demand_editable')
     is_quantity_done_editable = fields.Boolean('Is quantity done editable', compute='_compute_is_quantity_done_editable')
     reference = fields.Char(compute='_compute_reference', string="Reference", store=True)
+
+    @api.depends('picking_id.is_locked')
+    def _compute_is_locked(self):
+        for move in self:
+            if move.picking_id:
+                move.is_locked = move.picking_id.is_locked
+
 
     @api.depends('product_id', 'has_tracking', 'move_line_ids', 'location_id', 'location_dest_id')
     def _compute_show_details_visible(self):
@@ -356,7 +363,10 @@ class StockMove(models.Model):
 
     def write(self, vals):
         # FIXME: pim fix your crap
-        if vals.get('product_uom_qty'):
+        if 'product_uom_qty' in vals:
+            for move in self.filtered(lambda m: m.state not in ('done', 'draft') and m.picking_id):
+                if vals['product_uom_qty'] != move.product_uom_qty:
+                    self.env['stock.move.line']._log_message(move.picking_id, move, 'stock.track_move_template', vals)
             if self.env.context.get('do_not_unreserve') is None:
                 move_to_unreserve = self.filtered(lambda m: m.state not in ['draft', 'done', 'cancel'] and m.reserved_availability > vals.get('product_uom_qty'))
                 move_to_unreserve._do_unreserve()
@@ -995,7 +1005,7 @@ class StockMove(models.Model):
                         'move_line_ids': [],
                         'backorder_id': picking.id
                     })
-                picking.message_post('Backorder Created') #message needs to be improved
+                picking.message_post(_('The backorder <a href=# data-oe-model=stock.picking data-oe-id=%d>%s</a> has been created.') % (backorder_picking.id, backorder_picking.name))
                 moves_to_backorder.write({'picking_id': backorder_picking.id})
                 moves_to_backorder.mapped('move_line_ids').write({'picking_id': backorder_picking.id})
             moves_to_backorder._action_assign()

@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from configparser import ConfigParser
+try:
+    from configparser import ConfigParser
+except ImportError:
+    # python2 import
+    from ConfigParser import ConfigParser
 from os.path import join as opj
 import os
 import werkzeug
@@ -37,7 +41,7 @@ class IrTranslation(models.Model):
                 tx_sections.extend(tx_config_file.sections()[1:])
 
         if not base_url or not tx_sections:
-            self.transifex_url = False
+            self.update({'transifex_url': False})
         else:
             base_url = base_url.rstrip('/')
 
