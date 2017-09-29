@@ -996,6 +996,11 @@ class StockMove(models.Model):
         picking = self and self[0].picking_id or False
         moves_todo.write({'state': 'done', 'date': fields.Datetime.now()})
         moves_todo.mapped('move_dest_ids')._action_assign()
+
+        # We don't want to create back order for scrap moves
+        if all(move_todo.scrapped for move_todo in moves_todo):
+            return moves_todo
+
         if picking:
             moves_to_backorder = picking.move_lines.filtered(lambda x: x.state not in ('done', 'cancel'))
             if moves_to_backorder:
@@ -1014,6 +1019,8 @@ class StockMove(models.Model):
     def unlink(self):
         if any(move.state not in ('draft', 'cancel') for move in self):
             raise UserError(_('You can only delete draft moves.'))
+        # With the non plannified picking, draft moves could have some move lines.
+        self.mapped('move_line_ids').unlink()
         return super(StockMove, self).unlink()
 
     def _prepare_move_split_vals(self, uom_qty):

@@ -57,8 +57,8 @@
                     <field name="picking_type_id" invisible="1"/>
                     <field name="create_date" invisible="1" groups="base.group_no_one"/>
                     <field name="product_id"/>
-                    <field name="location_id" groups="stock.group_stock_multi_locations"/>
-                    <field name="location_dest_id" groups="stock.group_stock_multi_locations"/>
+                    <field name="location_id" groups="stock.group_stock_multi_locations" string="From"/>
+                    <field name="location_dest_id" groups="stock.group_stock_multi_locations" string="To"/>
                     <field name="product_uom_qty"/>
                     <field name="product_uom" options="{'no_open': True, 'no_create': True}" string="Unit of Measure" groups="product.group_uom"/>
                     <field name="state"/>
@@ -146,8 +146,8 @@
                             <label for="quantity_done"/>
                             <div class="o_row">
                                 <span><field name="quantity_done" readonly="1" nolabel="1"/></span>
-                                <span> / </span>
-                                <span><field name="reserved_availability" nolabel="1"/></span>
+                                <span attrs="{'invisible': [('state', '=', 'done')]}"> / </span>
+                                <span><field name="reserved_availability" nolabel="1" attrs="{'invisible': [('state', '=', 'done')]}" /></span>
                                 <span><field name="product_uom" readonly="1" nolabel="1"/></span>
                             </div>
 

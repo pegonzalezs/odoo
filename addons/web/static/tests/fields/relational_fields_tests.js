@@ -6002,6 +6002,7 @@ QUnit.module('relational_fields', {
 
         form.destroy();
     });
+
     QUnit.test('editing tabbed one2many (editable=bottom)', function (assert) {
         assert.expect(12);
 
@@ -6114,6 +6115,49 @@ QUnit.module('relational_fields', {
             "should have 40 data rows on the current page");
 
         assert.verifySteps(['read', 'read', 'read', 'default_get', 'write', 'read', 'read']);
+        form.destroy();
+    });
+
+    QUnit.test('focus is correctly reset after an onchange in an x2many', function (assert) {
+        assert.expect(1);
+
+        this.data.partner.onchanges = {
+            int_field: function () {}
+        };
+        var def;
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<field name="p">' +
+                        '<tree editable="bottom">' +
+                            '<field name="int_field"/>' +
+                            '<field name="qux"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+            mockRPC: function (route, args) {
+                var result = this._super.apply(this, arguments);
+                if (args.method === 'onchange') {
+                    // delay the onchange RPC
+                    return $.when(def).then(_.constant(result));
+                }
+                return result;
+            },
+        });
+
+        form.$('.o_field_x2many_list_row_add a').click();
+        def = $.Deferred();
+        form.$('.o_field_widget[name=int_field]')
+            .val('44')
+            .trigger('input')
+            .trigger({type: 'keydown', which: $.ui.keyCode.TAB});
+        def.resolve();
+
+        assert.strictEqual(document.activeElement, form.$('.o_field_widget[name=qux]')[0],
+            "qux field should have the focus");
+
         form.destroy();
     });
 
@@ -6895,9 +6939,7 @@ QUnit.module('relational_fields', {
                 return this._super.apply(this, arguments);
             },
             res_id: 1,
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         assert.strictEqual(count, 1, 'once search_read should have been done to fetch the relational values');
@@ -6946,9 +6988,7 @@ QUnit.module('relational_fields', {
                     '<header><field name="trululu" widget="statusbar" clickable="True"/></header>' +
                 '</form>',
             res_id: 1,
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         var $selectedStatus = form.$('.o_statusbar_status button[data-value="4"]');
@@ -6977,9 +7017,7 @@ QUnit.module('relational_fields', {
                     '<header><field name="product_id" widget="statusbar"/></header>' +
                 '</form>',
             res_id: 1,
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         assert.ok(form.$('.o_statusbar_status').hasClass('o_field_empty'),
@@ -7002,9 +7040,7 @@ QUnit.module('relational_fields', {
                 '<form string="Partners">' +
                     '<header><field name="trululu" widget="statusbar"/></header>' +
                 '</form>',
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         assert.strictEqual(form.$('.o_statusbar_status button:disabled').length, 2, "should have 2 status");
@@ -7026,9 +7062,7 @@ QUnit.module('relational_fields', {
                     '<header><field name="trululu" widget="statusbar" clickable="True"/></header>' +
                 '</form>',
             res_id: 1,
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         form.$buttons.find('.o_form_button_edit').click();
@@ -7057,9 +7091,7 @@ QUnit.module('relational_fields', {
                     '<field name="color" widget="statusbar" statusbar_visible="red"/></header>' +
                 '</form>',
             res_id: 1,
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         form.$buttons.find('.o_form_button_edit').click();
@@ -7094,9 +7126,7 @@ QUnit.module('relational_fields', {
                 return this._super.apply(this, arguments);
             },
             res_id: 1,
-            config: {
-                isMobile: false,
-            },
+            config: {device: {isMobile: false}},
         });
 
         form.$buttons.find('.o_form_button_edit').click();
@@ -8318,6 +8348,40 @@ QUnit.module('relational_fields', {
             "the second name_get should have been done");
         assert.strictEqual(form.$('a[name="foo"]').text(), "xpad",
             "foo field should have been updated");
+        form.destroy();
+    });
+
+    QUnit.test('one2many invisible depends on parent field', function (assert) {
+        assert.expect(2);
+
+        this.data.partner.records[0].p = [2];
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch:'<form string="Partners">' +
+                    '<sheet>' +
+                        '<notebook>' +
+                            '<page string="Partner page">' +
+                                '<field name="bar"/>' +
+                                '<field name="p">' +
+                                    '<tree>' +
+                                        '<field name="foo"/>' +
+                                        '<field name="bar" attrs="{\'column_invisible\': [(\'parent.bar\', \'=\', False)]}"/>' +
+                                    '</tree>' +
+                                '</field>' +
+                            '</page>' +
+                        '</notebook>' +
+                    '</sheet>' +
+                '</form>',
+            res_id: 1,
+        });
+        assert.strictEqual(form.$('th').length, 2,
+            "should be 2 columns in the one2many");
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('.o_field_boolean[name="bar"] input').click();
+        assert.strictEqual(form.$('th').length, 1,
+            "should be 1 column after the value change");
         form.destroy();
     });
 
