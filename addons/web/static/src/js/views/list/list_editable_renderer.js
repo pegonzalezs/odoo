@@ -48,6 +48,7 @@ ListRenderer.include({
 
         this.currentRow = null;
         this.currentCol = null;
+        this.currentFieldIndex = null;
     },
     /**
      * @override
@@ -134,7 +135,7 @@ ListRenderer.include({
         var currentRowID, currentWidget, focusedElement, selectionRange;
         if (self.currentRow !== null) {
             currentRowID = this.state.data[this.currentRow].id;
-            currentWidget = this.allFieldWidgets[currentRowID][this.currentCol];
+            currentWidget = this.allFieldWidgets[currentRowID][this.currentFieldIndex];
             focusedElement = currentWidget.getFocusableElement().get(0);
             selectionRange = dom.getSelectionRange(focusedElement);
         }
@@ -159,6 +160,7 @@ ListRenderer.include({
                 }
             });
             var newRowIndex = _.findIndex(state.data, {id: id});
+            var $lastRow = $row;
             _.each(state.data, function (record, index) {
                 if (index === newRowIndex) {
                     return;
@@ -167,7 +169,8 @@ ListRenderer.include({
                 if (index < newRowIndex) {
                     $newRow.insertBefore($row);
                 } else {
-                    $newRow.insertAfter($row);
+                    $newRow.insertAfter($lastRow);
+                    $lastRow = $newRow;
                 }
             });
             if (self.currentRow !== null) {
@@ -175,7 +178,7 @@ ListRenderer.include({
                 return self._selectCell(newRowIndex, self.currentCol, {force: true}).then(function () {
                     // restore the cursor position
                     currentRowID = self.state.data[newRowIndex].id;
-                    currentWidget = self.allFieldWidgets[currentRowID][self.currentCol];
+                    currentWidget = self.allFieldWidgets[currentRowID][self.currentFieldIndex];
                     focusedElement = currentWidget.getFocusableElement().get(0);
                     dom.setSelectionRange(focusedElement, selectionRange);
                 });
@@ -456,6 +459,7 @@ ListRenderer.include({
     _render: function () {
         this.currentRow = null;
         this.currentCol = null;
+        this.currentFieldIndex = null;
         return this._super.apply(this, arguments);
     },
     /**
@@ -595,6 +599,7 @@ ListRenderer.include({
             }
 
             self.currentCol = fieldIndex + getNbButtonBefore(fieldIndex);
+            self.currentFieldIndex = fieldIndex;
 
             function getNbButtonBefore(index) {
                 var nbButtons = 0;
