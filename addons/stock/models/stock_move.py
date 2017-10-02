@@ -182,7 +182,7 @@ class StockMove(models.Model):
             has_package = move.move_line_ids.mapped('package_id') | move.move_line_ids.mapped('result_package_id')
             consignment_enabled = self.user_has_groups('stock.group_tracking_owner')
             if move.picking_id.picking_type_id.show_operations is False\
-                    and move.state != 'draft'\
+                    and (move.state != 'draft' or (not self._context.get('planned_picking') and move.state == 'draft'))\
                     and (multi_locations_enabled or move.has_tracking != 'none' or len(move.move_line_ids) > 1 or has_package or consignment_enabled):
                 move.show_details_visible = True
             else:
@@ -206,12 +206,16 @@ class StockMove(models.Model):
                 move.is_initial_demand_editable = False
 
     @api.multi
-    @api.depends('state', 'picking_id')
+    @api.depends('state', 'picking_id', 'product_id')
     def _compute_is_quantity_done_editable(self):
         for move in self:
-            if self._context.get('planned_picking') and move.picking_id.state == 'draft':
+            if not move.product_id:
+                move.is_quantity_done_editable = False
+            elif self._context.get('planned_picking') and move.picking_id.state == 'draft':
                 move.is_quantity_done_editable = False
             elif move.picking_id.is_locked and move.state in ('done', 'cancel'):
+                move.is_quantity_done_editable = False
+            elif move.show_details_visible:
                 move.is_quantity_done_editable = False
             else:
                 move.is_quantity_done_editable = True
@@ -775,11 +779,21 @@ class StockMove(models.Model):
 
         taken_quantity = min(available_quantity, need)
 
+        quants = []
+        try:
+            quants = self.env['stock.quant']._update_reserved_quantity(
+                self.product_id, location_id, taken_quantity, lot_id=lot_id,
+                package_id=package_id, owner_id=owner_id, strict=strict
+            )
+        except UserError:
+            # If it raises here, it means that the `available_quantity` brought by a done move line
+            # is not available on the quants itself. This could be the result of an inventory
+            # adjustment that removed totally of partially `available_quantity`. When this happens, we
+            # chose to do nothing. This situation could not happen on MTS move, because in this case
+            # `available_quantity` is directly the quantity on the quants themselves.
+            taken_quantity = 0
+
         # Find a candidate move line to update or create a new one.
-        quants = self.env['stock.quant']._update_reserved_quantity(
-            self.product_id, location_id, taken_quantity, lot_id=lot_id,
-            package_id=package_id, owner_id=owner_id, strict=strict
-        )
         for reserved_quant, quantity in quants:
             to_update = self.move_line_ids.filtered(lambda m: m.location_id.id == reserved_quant.location_id.id and m.lot_id.id == reserved_quant.lot_id.id and m.package_id.id == reserved_quant.package_id.id and m.owner_id.id == reserved_quant.owner_id.id)
             if to_update:
