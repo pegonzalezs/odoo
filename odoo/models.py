@@ -895,7 +895,7 @@ class BaseModel(object):
                 # avoid broken transaction) and keep going
                 cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
             except Exception as e:
-                message = (_('Unknown error during import:') + ' %s: %s' % (type(e), unicode(e)))
+                message = (_('Unknown error during import:') + ' %s: %s' % (type(e), unicode(e.message or e.name)))
                 moreinfo = _('Resolve other errors first')
                 messages.append(dict(info, type='error', message=message, moreinfo=moreinfo))
                 # Failed for some reason, perhaps due to invalid data supplied,
@@ -2589,7 +2589,7 @@ class BaseModel(object):
 
     @api.model_cr
     def _table_exist(self):
-        query = "SELECT relname FROM pg_class WHERE relkind IN ('r','v') AND relname=%s"
+        query = "SELECT relname FROM pg_class WHERE relkind IN ('r','v','m') AND relname=%s"
         self._cr.execute(query, (self._table,))
         return self._cr.rowcount
 
@@ -3057,10 +3057,6 @@ class BaseModel(object):
                     fs.discard(f)
                 else:
                     records &= self._in_cache_without(f)
-
-        # prefetch at most PREFETCH_MAX records
-        if len(records) > PREFETCH_MAX:
-            records = records[:PREFETCH_MAX] | self
 
         # fetch records with read()
         assert self in records and field in fs
@@ -4363,7 +4359,7 @@ class BaseModel(object):
                 trans_name, source_id, target_id = get_trans(field, old, new)
                 domain = [('name', '=', trans_name), ('res_id', '=', source_id)]
                 new_val = new_wo_lang[name]
-                if old.env.lang:
+                if old.env.lang and callable(field.translate):
                     # the new value *without lang* must be the old value without lang
                     new_wo_lang[name] = old_wo_lang[name]
                 for vals in Translation.search_read(domain):
@@ -4372,6 +4368,7 @@ class BaseModel(object):
                     del vals['module']      # duplicated vals is not linked to any module
                     vals['res_id'] = target_id
                     if vals['lang'] == old.env.lang and field.translate is True:
+                        vals['source'] = old_wo_lang[name]
                         # the value should be the new value (given by copy())
                         vals['value'] = new_val
                     Translation.create(vals)
@@ -5231,13 +5228,16 @@ class BaseModel(object):
         return RecordCache(self)
 
     @api.model
-    def _in_cache_without(self, field):
-        """ Make sure ``self`` is present in cache (for prefetching), and return
-            the records of model ``self`` in cache that have no value for ``field``
-            (:class:`Field` instance).
+    def _in_cache_without(self, field, limit=PREFETCH_MAX):
+        """ Return records to prefetch that have no value in cache for ``field``
+            (:class:`Field` instance), including ``self``.
+            Return at most ``limit`` records.
         """
         ids = filter(None, self._prefetch[self._name] - set(self.env.cache[field]))
-        return self.browse(ids)
+        recs = self.browse(ids)
+        if limit and len(recs) > limit:
+            recs = self + (recs - self)[:(limit - len(self))]
+        return recs
 
     @api.model
     def refresh(self):
