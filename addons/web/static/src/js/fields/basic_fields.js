@@ -352,7 +352,7 @@ var FieldChar = InputField.extend(TranslatableFieldMixin, {
 var FieldDate = InputField.extend({
     className: "o_field_date",
     tagName: "span",
-    supportedFieldTypes: ['date'],
+    supportedFieldTypes: ['date', 'datetime'],
 
     /**
      * @override
@@ -411,12 +411,13 @@ var FieldDate = InputField.extend({
      * @override
      * @private
      * @param {Moment|false} value
+     * @returns {boolean}
      */
     _isSameValue: function (value) {
         if (value === false) {
             return this.value === false;
         }
-        return value.isSame(this.value);
+        return value.isSame(this.value, 'day');
     },
     /**
      * Instantiates a new DateWidget datepicker.
@@ -455,7 +456,16 @@ var FieldDateTime = FieldDate.extend({
         var value = this.datewidget.getValue();
         return value && value.add(-this.getSession().getTZOffset(value), 'minutes');
     },
-
+    /**
+     * @override
+     * @private
+     */
+    _isSameValue: function (value) {
+        if (value === false) {
+            return this.value === false;
+        }
+        return value.isSame(this.value);
+    },
     /**
      * Instantiates a new DateTimeWidget datepicker rather than DateWidget.
      *
@@ -1129,7 +1139,6 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
     supportedFieldTypes: ['binary'],
     _render: function () {
         var self = this;
-        var attrs = this.attrs;
         var url = this.placeholder;
         if (this.value) {
             if (!utils.is_bin_size(this.value)) {
@@ -1144,11 +1153,7 @@ var FieldBinaryImage = AbstractFieldBinary.extend({
                 });
             }
         }
-        var $img = $('<img>').attr('src', url);
-        $img.css({
-            width: this.nodeOptions.size ? this.nodeOptions.size[0] : attrs.img_width || attrs.width,
-            height: this.nodeOptions.size ? this.nodeOptions.size[1] : attrs.img_height || attrs.height,
-        });
+        var $img = $(qweb.render("FieldBinaryImage-img", {widget: this, url: url}));
         this.$('> img').remove();
         this.$el.prepend($img);
         $img.on('error', function () {
