@@ -1185,7 +1185,11 @@ var FormView = View.extend(common.FieldManagerMixin, {
         return this.fields[field_name].get_value();
     },
     compute_domain: function(expression) {
-        return data.compute_domain(expression, this.fields);
+    	var parent_fields = null;
+    	if (this.dataset.parent_view) {
+    		parent_fields = this.dataset.parent_view.get_fields_values();
+    	}
+        return data.compute_domain(expression, this.fields, parent_fields);
     },
     _build_view_fields_values: function() {
         var a_dataset = this.dataset;
