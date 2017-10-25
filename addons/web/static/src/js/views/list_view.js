@@ -1034,6 +1034,7 @@ ListView.List = Class.extend({
     },
     render_cell: function (record, column) {
         var value;
+        var parent_fields = null;
         if(column.type === 'reference') {
             value = record.get(column.id);
             var ref_match;
@@ -1100,10 +1101,13 @@ ListView.List = Class.extend({
                 record.set(column.id + '__display', false);
             }
         }
+        if (this.dataset.parent_view) {
+            parent_fields = this.dataset.parent_view.get_fields_values();
+        }
         return column.format(record.toForm().data, {
             model: this.dataset.model,
             id: record.get('id')
-        });
+        }, parent_fields);
     },
     render: function () {
         var self = this;
@@ -1713,7 +1717,7 @@ var Column = Class.extend({
             this.invisible = '1';
         } else { delete this.invisible; }
     },
-    modifiers_for: function (fields) {
+    modifiers_for: function (fields, parent_fields) {
         var out = {};
         var domain_computer = data.compute_domain;
 
@@ -1722,7 +1726,7 @@ var Column = Class.extend({
             var modifier = this.modifiers[attr];
             out[attr] = _.isBoolean(modifier)
                 ? modifier
-                : domain_computer(modifier, fields);
+                : domain_computer(modifier, fields, parent_fields);
         }
 
         return out;
@@ -1760,11 +1764,11 @@ var Column = Class.extend({
      * @param {Number} [options.id] current record's id
      * @return {String}
      */
-    format: function (row_data, options) {
+    format: function (row_data, options, parent_fields) {
         options = options || {};
         var attrs = {};
         if (options.process_modifiers !== false) {
-            attrs = this.modifiers_for(row_data);
+            attrs = this.modifiers_for(row_data, parent_fields);
         }
         if (attrs.invisible) { return ''; }
 
