@@ -1068,7 +1068,9 @@ QUnit.module('relational_fields', {
             assert.deepEqual(
                 obj.turtles,
                 [
+                    [4, 2, false],
                     [1, 2, {turtle_foo: 'blip'}],
+                    [4, 3, false],
                     [1, 3, {turtle_foo: 'kawa'}]
                 ],
                 "should have properly created the x2many command list");
@@ -1097,7 +1099,9 @@ QUnit.module('relational_fields', {
                     // unchanged state with the command 1, but this seems more
                     // difficult.
                     assert.deepEqual(args.args[0].turtles, [
+                        [4, 2, false],
                         [1, 2, {turtle_foo: 'blip'}],
+                        [4, 3, false],
                         [1, 3, {turtle_foo: 'kawa'}]
                     ], 'should send proper commands to create method');
                 }
@@ -5986,6 +5990,46 @@ QUnit.module('relational_fields', {
         form.destroy();
     });
 
+    QUnit.test('default value for nested one2manys (coming from onchange)', function (assert) {
+        assert.expect(3);
+
+        this.data.partner.onchanges.p = function (obj) {
+            obj.p = [
+                [5],
+                [0, 0, {turtles: [[5], [4, 1]]}], // link record 1 by default
+            ];
+        };
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<sheet>' +
+                        '<field name="p">' +
+                            '<tree><field name="turtles"/></tree>' +
+                        '</field>' +
+                    '</sheet>' +
+                '</form>',
+            mockRPC: function (route, args) {
+                if (args.method === 'create') {
+                    assert.strictEqual(args.args[0].p[0][0], 0,
+                        "should send a command 0 (CREATE) for p");
+                    assert.deepEqual(args.args[0].p[0][2], {turtles: [[4, 1, false]]},
+                        "should send the correct values");
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+
+        assert.strictEqual(form.$('.o_data_cell').text(), '1 record',
+            "should correctly display the value of the inner o2m");
+
+        form.$buttons.find('.o_form_button_save').click();
+
+        form.destroy();
+    });
+
     QUnit.test('display correct value after validation error', function (assert) {
         assert.expect(4);
 
@@ -6074,7 +6118,6 @@ QUnit.module('relational_fields', {
 
         form.destroy();
     });
-
 
     QUnit.module('FieldMany2Many');
 
