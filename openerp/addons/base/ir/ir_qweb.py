@@ -1183,35 +1183,17 @@ class AssetsBundle(object):
         if sep is None:
             sep = '\n            '
         response = []
-        if debug:
-            if css and self.stylesheets:
-                if not self.is_css_preprocessed():
-                    self.preprocess_css(debug=debug)
-                    if self.css_errors:
-                        msg = '\n'.join(self.css_errors)
-                        self.stylesheets.append(StylesheetAsset(self, inline=self.css_message(msg)))
-                for style in self.stylesheets:
-                    response.append(style.to_html())
-            if js:
-                for jscript in self.javascripts:
-                    response.append(jscript.to_html())
-        else:
-            if qwebcontext is None:
-                qwebcontext = QWebContext(self.cr, self.uid, {})
-            if css and self.stylesheets:
-                css_attachments = self.css()
-                if not self.css_errors:
-                    for attachment in css_attachments:
-                        el = etree.fromstring('<link href="%s" rel="stylesheet"/>' % attachment.url)
-                        response.append(self.registry['ir.qweb'].render_node(el, qwebcontext))
-                else:
+        if css and self.stylesheets:
+            if not self.is_css_preprocessed():
+                self.preprocess_css(debug=debug)
+                if self.css_errors:
                     msg = '\n'.join(self.css_errors)
                     self.stylesheets.append(StylesheetAsset(self, inline=self.css_message(msg)))
-                    for style in self.stylesheets:
-                        response.append(style.to_html())
-            if js and self.javascripts:
-                el = etree.fromstring('<script %s type="text/javascript" src="%s"></script>' % (async and 'async="async"' or '', self.js().url))
-                response.append(self.registry['ir.qweb'].render_node(el, qwebcontext))
+            for style in self.stylesheets:
+                response.append(style.to_html())
+        if js:
+            for jscript in self.javascripts:
+                response.append(jscript.to_html())
         response.extend(self.remains)
         return sep + sep.join(response)
 
