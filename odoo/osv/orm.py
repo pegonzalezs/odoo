@@ -55,7 +55,7 @@ def transfer_node_to_modifiers(node, modifiers, context=None, in_tree_view=False
         context = {}
     if node.get('attrs'):
         if 'uid' in context and 'uid' in node.get('attrs'):
-            modifiers.update(safe_eval(node.get('attrs'), context))
+            modifiers.update(safe_eval(node.get('attrs'), context.copy()))
         else:
             modifiers.update(safe_eval(node.get('attrs'), {'context': context or {}}))
 
