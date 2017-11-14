@@ -55,7 +55,7 @@ QUnit.module('Views', {
         });
 
 
-        var dialog = new dialogs.FormViewDialog(parent, {
+        new dialogs.FormViewDialog(parent, {
             res_model: 'partner',
             res_id: 1,
         }).open();
@@ -64,7 +64,7 @@ QUnit.module('Views', {
             "should not have any button in body");
         assert.strictEqual($('div.modal .modal-footer button').length, 1,
             "should have only one button in footer");
-        dialog.destroy();
+        parent.destroy();
     });
 
     QUnit.test('SelectCreateDialog use domain, group_by and search default', function (assert) {
@@ -95,6 +95,7 @@ QUnit.module('Views', {
                         domain: [["display_name","like","a"], ["display_name","ilike","piou"], ["foo","ilike","piou"]],
                         fields:["display_name","foo","bar"],
                         groupby:["bar"],
+                        orderby: '',
                         lazy: true
                     }, "should search with the complete domain (domain + search), and group by 'bar'");
                 }
@@ -137,7 +138,7 @@ QUnit.module('Views', {
         dialog.$('.o_searchview_facet:contains(groupby_bar) .o_facet_remove').click();
         dialog.$('.o_searchview_facet .o_facet_remove').click();
 
-        dialog.destroy();
+        parent.destroy();
     });
 
     QUnit.test('SelectCreateDialog correctly evaluates domains', function (assert) {
@@ -168,14 +169,14 @@ QUnit.module('Views', {
             },
         });
 
-        var dialog = new dialogs.SelectCreateDialog(parent, {
+        new dialogs.SelectCreateDialog(parent, {
             no_create: true,
             readonly: true,
             res_model: 'partner',
             domain: "[['id', '=', uid]]",
         }).open();
 
-        dialog.destroy();
+        parent.destroy();
     });
 
     QUnit.test('SelectCreateDialog list view in readonly', function (assert) {
@@ -204,7 +205,7 @@ QUnit.module('Views', {
         assert.equal(dialog.$('.o_list_view tbody tr:first td:not(.o_list_record_selector):first input').length, 0,
             "list view should not be editable in a SelectCreateDialog");
 
-        dialog.destroy();
+        parent.destroy();
     });
 
 });
