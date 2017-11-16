@@ -7,6 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.tools import float_is_zero, float_compare, pycompat
+from odoo.tools.misc import formatLang
 
 from odoo.exceptions import UserError, RedirectWarning, ValidationError, Warning
 
@@ -1181,7 +1182,9 @@ class AccountInvoice(models.Model):
             res.setdefault(line.tax_id.tax_group_id, 0.0)
             res[line.tax_id.tax_group_id] += line.amount
         res = sorted(res.items(), key=lambda l: l[0].sequence)
-        res = map(lambda l: (l[0].name, l[1]), res)
+        res = [(
+            r[0].name, r[1], formatLang(self.with_context(lang=self.partner_id.lang).env, r[1], currency_obj=currency)
+        ) for r in res]
         return res
 
 
