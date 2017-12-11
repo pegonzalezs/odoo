@@ -113,7 +113,9 @@ class Employee(models.Model):
     birthday = fields.Date('Date of Birth', groups='hr.group_hr_user')
     ssnid = fields.Char('SSN No', help='Social Security Number', groups='hr.group_hr_user')
     sinid = fields.Char('SIN No', help='Social Insurance Number', groups='hr.group_hr_user')
-    identification_id = fields.Char(string='Identification No', groups='hr.group_hr_user')
+    # HACK: 06.12.17 16:07: jool1: changed temporarily to integer directly in here as long we are waiting for a reply from belgium (ticket 786891)
+    # identification_id = fields.Char(string='Identification No', groups='hr.group_hr_user')
+    identification_id = fields.Integer('Identification No', required=False)
     gender = fields.Selection([
         ('male', 'Male'),
         ('female', 'Female'),
