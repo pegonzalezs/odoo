@@ -662,7 +662,7 @@ class AccountInvoice(models.Model):
             # If partner has no warning, check its company
             if p.invoice_warn == 'no-message' and p.parent_id:
                 p = p.parent_id
-            if p.invoice_warn != 'no-message':
+            if p.invoice_warn and p.invoice_warn != 'no-message':
                 # Block if partner only has warning but parent company is blocked
                 if p.invoice_warn != 'block' and p.parent_id and p.parent_id.invoice_warn == 'block':
                     p = p.parent_id
@@ -805,9 +805,7 @@ class AccountInvoice(models.Model):
 
     @api.multi
     def action_invoice_cancel(self):
-        if self.filtered(lambda inv: inv.state not in ['draft', 'open']):
-            raise UserError(_("Invoice must be in draft or open state in order to be cancelled."))
-        return self.action_cancel()
+        return self.filtered(lambda inv: inv.state == 'cancel').action_cancel()
 
     @api.multi
     def _notification_recipients(self, message, groups):
