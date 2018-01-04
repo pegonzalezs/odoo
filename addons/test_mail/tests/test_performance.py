@@ -62,7 +62,7 @@ class TestMailPerformance(TestPerformance):
 
         records.write({'value': self.int(20)})
 
-    @queryCount(admin=20, demo=31)
+    @queryCount(admin=33, demo=47)
     def test_write_mail_with_tracking(self):
         """ Write records inheriting from 'mail.thread' (with field tracking). """
         record = self.env['test_performance.mail'].search([], limit=1)
@@ -77,13 +77,13 @@ class TestMailPerformance(TestPerformance):
         model = self.env['test_performance.mail']
         model.with_context(tracking_disable=True).create({'name': self.str('X')})
 
-    @queryCount(admin=38, demo=54)
+    @queryCount(admin=63, demo=85)
     def test_create_mail_with_tracking(self):
         """ Create records inheriting from 'mail.thread' (with field tracking). """
         model = self.env['test_performance.mail']
         model.create({'name': self.str('Y')})
 
-    @queryCount(admin=22, emp=29)
+    @queryCount(admin=33, emp=43)
     def test_simple(self):
         """ Create records inheriting from 'mail.thread' (simple models) """
         self.env['mail.test.simple'].create({'name': self.str('Test')})
@@ -111,11 +111,11 @@ class TestAdvMailPerformance(TestPerformance):
         self.admin = self.env.user
         self.admin.login = 'admin'
 
-    @queryCount(admin=25, emp=32)
+    @queryCount(admin=36, emp=46)
     def test_activity(self):
         self.env['mail.test.activity'].create({'name': self.str('Test')})
 
-    @queryCount(admin=46, emp=51)
+    @queryCount(admin=57, emp=65)
     def test_activity_full(self):
         test_record_activity = self.env['mail.test.activity'].create({'name': self.str('Test')})
         res_id = test_record_activity.id
