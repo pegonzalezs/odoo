@@ -405,10 +405,12 @@ class Picking(models.Model):
         """
         for picking in self:
             packages = self.env['stock.quant.package']
-            for ml in picking.move_line_ids:
-                if ml.package_id.id == ml.result_package_id.id:
-                    if picking._check_move_lines_map_quant_package(ml.package_id):
-                        packages |= ml.package_id
+            packages_to_check = picking.move_line_ids\
+                .filtered(lambda ml: ml.result_package_id and ml.package_id.id == ml.result_package_id.id)\
+                .mapped('package_id')
+            for package_to_check in packages_to_check:
+                if picking.state in ('done', 'cancel') or picking._check_move_lines_map_quant_package(package_to_check):
+                    packages |= package_to_check
             picking.entire_package_ids = packages
             picking.entire_package_detail_ids = packages
 
@@ -542,7 +544,19 @@ class Picking(models.Model):
         # call `_action_assign` on every confirmed move which location_id bypasses the reservation
         self.filtered(lambda picking: picking.location_id.usage in ('supplier', 'inventory', 'production') and picking.state == 'confirmed')\
             .mapped('move_lines')._action_assign()
-        return True
+        if self.env.context.get('planned_picking') and len(self) == 1:
+            action = self.env.ref('stock.action_picking_form')
+            result = action.read()[0]
+            result['res_id'] = self.id
+            result['context'] = {
+                'search_default_picking_type_id': [self.picking_type_id.id],
+                'default_picking_type_id': self.picking_type_id.id,
+                'contact_display': 'partner_address',
+                'planned_picking': False,
+            }
+            return result
+        else:
+            return True
 
     @api.multi
     def action_assign(self):
@@ -623,7 +637,12 @@ class Picking(models.Model):
         self.write({'date_done': fields.Datetime.now()})
         return True
 
-    do_transfer = action_done #TODO:replace later
+    # Backward compatibility
+    # Problem with fixed reference to a function:
+    # it doesn't allow for overriding action_done() through do_transfer
+    # get rid of me in master (and make me private ?)
+    def do_transfer(self):
+        return self.action_done()
 
     def _check_move_lines_map_quant_package(self, package):
         """ This method checks that all product of the package (quant) are well present in the move_line_ids of the picking. """
@@ -654,10 +673,8 @@ class Picking(models.Model):
 
     @api.multi
     def do_unreserve(self):
-        for move in self:
-            for move_line in move.move_lines:
-                move_line._do_unreserve()
-        self.write({'state': 'confirmed'})
+        for picking in self:
+            picking.move_lines._do_unreserve()
 
     @api.multi
     def button_validate(self):

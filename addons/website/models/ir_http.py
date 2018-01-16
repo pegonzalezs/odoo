@@ -62,7 +62,7 @@ class Http(models.AbstractModel):
         if not request.session.uid:
             env = api.Environment(request.cr, SUPERUSER_ID, request.context)
             website = env['website'].get_current_website()
-            if website:
+            if website and website.user_id:
                 request.uid = website.user_id.id
         if not request.uid:
             super(Http, cls)._auth_method_public()
@@ -83,7 +83,7 @@ class Http(models.AbstractModel):
         super(Http, cls)._add_dispatch_parameters(func)
 
         if request.routing_iteration == 1:
-            request.website = request.website.with_context(context)
+            request.website = request.website.with_context(request.context)
 
     @classmethod
     def _get_languages(cls):
