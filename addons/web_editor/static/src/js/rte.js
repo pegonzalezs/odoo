@@ -271,10 +271,11 @@ var RTE = Widget.extend({
      * @param {DOM} target where the dom is changed is editable zone
      */
     historyRecordUndo: function ($target, event, internal_history) {
+        $target = $($target);
         var rng = range.create();
         var $editable = $(rng && rng.sc).closest(".o_editable");
         if (!rng || !$editable.length) {
-            $editable = $($target).closest(".o_editable");
+            $editable = $target.closest(".o_editable");
             rng = range.create($target.closest("*")[0],0);
         } else {
             rng = $editable.data('range') || rng;
@@ -355,8 +356,8 @@ var RTE = Widget.extend({
                 var $el = $(this);
 
                 $el.find('[class]').filter(function () {
-                    if (!this.className.match(/\S/)) {
-                        this.removeAttribute("class");
+                    if (!this.getAttribute('class').match(/\S/)) {
+                        this.removeAttribute('class');
                     }
                 });
 

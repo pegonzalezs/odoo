@@ -19,6 +19,57 @@ var editor = eventHandler.modules.editor;
 var renderer = $.summernote.renderer;
 var options = $.summernote.options;
 
+// Browser-unify execCommand
+var oldJustify = {};
+_.each(['Left', 'Right', 'Full', 'Center'], function (align) {
+    oldJustify[align] = editor['justify' + align];
+    editor['justify' + align] = function ($editable, value) {
+        // Before calling the standard function, check all elements which have
+        // an 'align' attribute and mark them with their value
+        var $align = $editable.find('[align]');
+        _.each($align, function (el) {
+            var $el = $(el);
+            $el.data('__align', $el.attr('align'));
+        });
+
+        // Call the standard function
+        oldJustify[align].apply(this, arguments);
+
+        // Then:
+
+        // Remove the text-align of elements which lost the 'align' attribute
+        var $newAlign = $editable.find('[align]');
+        $align.not($newAlign).css('text-align', '');
+
+        // Transform the 'align' attribute into the 'text-align' css
+        // property for elements which received the 'align' attribute or whose
+        // 'align' attribute changed
+        _.each($newAlign, function (el) {
+            var $el = $(el);
+
+            var oldAlignValue = $align.data('__align');
+            var alignValue = $el.attr('align');
+            if (oldAlignValue === alignValue) {
+                // If the element already had an 'align' attribute and that it
+                // did not changed, do nothing (compatibility)
+                return;
+            }
+
+            $el.removeAttr('align');
+            $el.css('text-align', alignValue);
+
+            // Note the first step (removing the text-align of elemnts which
+            // lost the 'align' attribute) is kinda the same as this one, but
+            // this one handles the elements which have been edited with chrome
+            // or with this new system
+            $el.find('*').css('text-align', '');
+        });
+
+        // Unmark the elements
+        $align.removeData('__align');
+    };
+});
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 /* Add method to Summernote*/
 
@@ -550,6 +601,13 @@ dom.removeBetween = function (sc, so, ec, eo, towrite) {
         so = 0;
         eo = 1;
     }
+
+    var parentNode = sc && sc.parentNode;
+    if (parentNode && sc.tagName === 'BR') {
+        sc = parentNode;
+        ec = parentNode;
+    }
+
     return {
         sc: sc,
         so: so,
@@ -828,37 +886,67 @@ range.WrappedRange.prototype.reRange = function (keep_end, isNotBreakable) {
 
     return new range.WrappedRange(sc, so, ec, eo);
 };
-// isOnImg: judge whether range is an image node or not
+/**
+ * Returns the image the range is in or matches (if any, false otherwise).
+ *
+ * @todo this implementation may not cover all corner cases but should do the
+ * trick for all reproductible ones
+ * @returns {DOMElement|boolean}
+ */
 range.WrappedRange.prototype.isOnImg = function () {
+    // If not a selection but a cursor position, just check if a point's
+    // ancestor is an image or not
+    if (this.sc === this.ec && this.so === this.eo) {
+        return dom.ancestor(this.sc, dom.isImg);
+    }
+
+    var startPoint = {node: this.sc, offset: this.so};
+    var endPoint = {node: this.ec, offset: this.eo};
+
     var nb = 0;
     var image;
-    var startPoint = {node: this.sc.childNodes.length && this.sc.childNodes[this.so] || this.sc};
-    startPoint.offset = startPoint.node === this.sc ? this.so : 0;
-    var endPoint = {node: this.ec.childNodes.length && this.ec.childNodes[this.eo] || this.ec};
-    endPoint.offset = endPoint.node === this.ec ? this.eo : 0;
-
-    if (dom.isImg(startPoint.node)) {
-        nb ++;
-        image = startPoint.node;
-    }
+    var textNode;
     dom.walkPoint(startPoint, endPoint, function (point) {
-        if (!dom.isText(endPoint.node) && point.node === endPoint.node && point.offset === endPoint.offset) {
+        // If the element has children (not a text node and not empty node),
+        // the element cannot be considered as selected (these children will
+        // be processed to determine that)
+        if (dom.hasChildren(point.node)) {
             return;
         }
-        var node = point.node.childNodes.length && point.node.childNodes[point.offset] || point.node;
-        var offset = node === point.node ? point.offset : 0;
-        var isImg = dom.ancestor(node, dom.isImg);
-        if (!isImg && ((!dom.isBR(node) && !dom.isText(node)) || (offset && node.textContent.length !== offset && node.textContent.match(/\S|\u00A0/)))) {
+
+        // Check if an ancestor of the current point is an image
+        var pointImg = dom.ancestor(point.node, dom.isImg);
+        var isText = dom.isText(point.node);
+
+        // Check if a visible element is selected, i.e.
+        // - If an ancestor of the current is an image we did not see yet
+        // - If the point is not in a br or a text (so a node with no children)
+        // - If the point is in a non empty text node we already saw
+        if (pointImg ?
+            (image !== pointImg) :
+            ((!dom.isBR(point.node) && !isText) || (textNode === point.node && point.node.textContent.match(/\S|\u00A0/)))) {
             nb++;
         }
-        if (isImg && image !== isImg) {
-            image = isImg;
-            nb ++;
+
+        // If an ancestor of the current point is an image, then save it as the
+        // image we are looking for
+        if (pointImg) {
+            image = pointImg;
+        }
+        // If the current point is a text node save it as the last text node
+        // seen (if we see it again, this might mean it is selected)
+        if (isText) {
+            textNode = point.node;
         }
     });
+
     return nb === 1 && image;
 };
 range.WrappedRange.prototype.deleteContents = function (towrite) {
+    if (this.sc === this.ec && this.so === this.eo) {
+        return this;
+    }
+
     var prevBP = dom.removeBetween(this.sc, this.so, this.ec, this.eo, towrite);
 
     $(dom.node(prevBP.sc)).trigger("click"); // trigger click to disable and reanable editor and image handler
@@ -1169,9 +1257,9 @@ $.summernote.pluginEvents.visible = function (event, editor, layoutInfo) {
     if (!r) return;
 
     if (!r.isCollapsed()) {
-        if (dom.isCell(dom.node(r.sc)) || dom.isCell(dom.node(r.ec))) {
+        if ((dom.isCell(dom.node(r.sc)) || dom.isCell(dom.node(r.ec))) && dom.node(r.sc) !== dom.node(r.ec)) {
             remove_table_content(r);
-            r = range.create(r.ec, 0).select();
+            r = range.create(r.ec, 0);
         }
         r.select();
     }
@@ -2310,26 +2398,6 @@ eventHandler.modules.popover.update = function ($popover, oStyle, isAirMode) {
     if(!!(isAirMode ? $popover : $popover.parent()).find('.note-table').length) {
         summernote_table_update(oStyle);
     }
-};
-
-// override summernote clipboard functionality
-eventHandler.modules.clipboard.attach = function(layoutInfo) {
-    var $editable = layoutInfo.editable();
-    $editable.on('paste', function(e) {
-        var clipboardData = ((e.originalEvent || e).clipboardData || window.clipboardData);
-        // Change nothing if pasting html (copy from text editor / web / ...) or
-        // if clipboardData is not available (IE / ...)
-        if (clipboardData && clipboardData.types && clipboardData.types.length === 1 && clipboardData.types[0] === "text/plain") {
-            e.preventDefault();
-            $editable.data('NoteHistory').recordUndo($editable); // FIXME
-            var pastedText = clipboardData.getData("text/plain");
-            // Try removing linebreaks which are not really linebreaks (in a PDF,
-            // when a sentence goes over the next line, copying it considers it
-            // a linebreak for example).
-            var formattedText = pastedText.replace(/([\w-])\r?\n([\w-])/g, "$1 $2").trim();
-            document.execCommand("insertText", false, formattedText);
-        }
-    });
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
