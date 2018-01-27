@@ -127,6 +127,23 @@ var createActionManager = function (params) {
 };
 
 /**
+ * performs a fields_view_get, and mocks the postprocessing done by the
+ * data_manager to return an equivalent structure.
+ *
+ * @param {MockServer} server
+ * @param {Object} params
+ * @param {string} params.model
+ * @returns {Object} an object with 3 keys: arch, fields and viewFields
+ */
+function fieldsViewGet(server, params) {
+    var fieldsView = server.fieldsViewGet(params);
+    // mock the structure produced by the DataManager
+    fieldsView.viewFields = fieldsView.fields;
+    fieldsView.fields = server.fieldsGet(params.model);
+    return fieldsView;
+}
+
+/**
  * create a view synchronously.  This method uses the createAsyncView method.
  * Most views are synchronous, so the deferred can be resolved immediately and
  * this method will work.
@@ -189,8 +206,7 @@ function createAsyncView(params) {
 
     // add mock environment: mock server, session, fieldviewget, ...
     var mockServer = addMockEnvironment(widget, params);
-    var viewInfo = mockServer.fieldsViewGet(params);
-
+    var viewInfo = fieldsViewGet(mockServer, params);
     // create the view
     var viewOptions = {
         modelName: params.model || 'foo',
@@ -330,6 +346,7 @@ function addMockEnvironment(widget, params) {
         initialConfig.device = _.clone(config.device);
         if ('device' in params.config) {
             _.extend(config.device, params.config.device);
+            config.device.isMobile = config.device.size_class <= config.device.SIZES.XS;
         }
         if ('debug' in params.config) {
             config.debug = params.config.debug;
@@ -398,7 +415,10 @@ function addMockEnvironment(widget, params) {
 
     intercept(widget, 'load_action', function (event) {
         mockServer.performRpc('/web/action/load', {
-            kwargs: {action_id: event.data.actionID},
+            kwargs: {
+                action_id: event.data.actionID,
+                additional_context: event.data.context,
+            },
         }).then(function (action) {
             event.data.on_success(action);
         });
@@ -416,7 +436,7 @@ function addMockEnvironment(widget, params) {
             model: event.data.modelName,
         }).then(function (views) {
             views = _.mapObject(views, function (viewParams) {
-                return mockServer.fieldsViewGet(viewParams);
+                return fieldsViewGet(mockServer, viewParams);
             });
             event.data.on_success(views);
         });
@@ -691,6 +711,7 @@ return $.when(
         createParent: createParent,
         createView: createView,
         dragAndDrop: dragAndDrop,
+        fieldsViewGet: fieldsViewGet,
         intercept: intercept,
         observe: observe,
         patch: patch,

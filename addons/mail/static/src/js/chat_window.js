@@ -132,13 +132,13 @@ return Widget.extend({
         event.stopPropagation(); // to prevent jquery's blockUI to cancel event
         // ENTER key (avoid requiring jquery ui for external livechat)
         if (event.which === 13) {
-            var content = _.str.trim(this.$input.text());
+            var content = _.str.trim(this.$input.val());
             var message = {
                 content: content,
                 attachment_ids: [],
                 partner_ids: [],
             };
-            this.$input.text('');
+            this.$input.val('');
             if (content) {
                 this.trigger('post_message', message, this.channel_id);
             }
@@ -150,7 +150,7 @@ return Widget.extend({
         this.trigger("close_chat_session");
     },
     on_click_fold: function () {
-        if (config.device.size_class !== config.device.SIZES.XS) {
+        if (!config.device.isMobile) {
             this.toggle_fold();
             this.trigger("fold_channel", this.channel_id, this.folded);
         }
