@@ -230,7 +230,7 @@ class MailThread(models.AbstractModel):
         # automatic logging unless asked not to (mainly for various testing purpose)
         if not self._context.get('mail_create_nolog'):
             doc_name = self.env['ir.model']._get(self._name).name
-            thread.message_post(body=_('%s created') % doc_name)
+            thread._message_log(body=_('%s created') % doc_name)
 
         # auto_subscribe: take values and defaults into account
         create_values = dict(values)
@@ -461,8 +461,7 @@ class MailThread(models.AbstractModel):
     def _get_tracked_fields(self, updated_fields):
         """ Return a structure of tracked fields for the current model.
             :param list updated_fields: modified field names
-            :return dict: a dict mapping field name to description, containing
-                always tracked fields and modified on_change fields
+            :return dict: a dict mapping field name to description, containing on_change fields
         """
         tracked_fields = []
         for name, field in self._fields.items():
@@ -521,14 +520,11 @@ class MailThread(models.AbstractModel):
          - a set of updated column names
          - a list of changes (initial value, new value, column name, column info) """
         self.ensure_one()
-        changes = set()  # contains always and onchange tracked fields that changed
-        displays = set()  # contains always tracked field that did not change but displayed for information
+        changes = set()  # contains onchange tracked fields that changed
         tracking_value_ids = []
-        display_values_ids = []
 
         # generate tracked_values data structure: {'col_name': {col_info, new_value, old_value}}
         for col_name, col_info in tracked_fields.items():
-            track_visibility = getattr(self._fields[col_name], 'track_visibility', 'onchange')
             initial_value = initial[col_name]
             new_value = getattr(self, col_name)
 
@@ -539,15 +535,6 @@ class MailThread(models.AbstractModel):
 
                 if col_name in tracked_fields:
                     changes.add(col_name)
-            # 'always' tracked fields in separate variable; added if other changes
-            elif new_value == initial_value and track_visibility == 'always' and col_name in tracked_fields:
-                tracking = self.env['mail.tracking.value'].create_tracking_values(initial_value, initial_value, col_name, col_info)
-                if tracking:
-                    display_values_ids.append([0, 0, tracking])
-                    displays.add(col_name)
-
-        if changes and displays:
-            tracking_value_ids = display_values_ids + tracking_value_ids
 
         return changes, tracking_value_ids
 
@@ -579,7 +566,7 @@ class MailThread(models.AbstractModel):
                     continue
                 record.message_post(subtype=subtype_xmlid, tracking_value_ids=tracking_value_ids)
             elif tracking_value_ids:
-                record.message_post(tracking_value_ids=tracking_value_ids)
+                record._message_log(tracking_value_ids=tracking_value_ids)
 
         self._message_track_post_template(tracking)
 
@@ -1966,6 +1953,41 @@ class MailThread(models.AbstractModel):
             update_values = composer.onchange_template_id(template_id, kwargs['composition_mode'], self._name, res_id)['value']
             composer.write(update_values)
         return composer.send_mail()
+
+    def _message_log(self, body='', subject=False, message_type='notification', **kwargs):
+        """ Shortcut allowing to post note on a document. It does not perform
+        any notification and pre-computes some values to have a short code
+        as optimized as possible. This method is private as it does not check
+        access rights and perform the message creation as sudo to speedup
+        the log process. This method should be called within methods where
+        access rights are already granted to avoid privilege escalation. """
+        if len(self.ids) > 1:
+            raise exceptions.Warning(_('Invalid record set: should be called as model (without records) or on single-record recordset'))
+
+        kw_author = kwargs.pop('author_id', False)
+        if kw_author:
+            author = self.env['res.partner'].sudo().browse(kw_author)
+            email_from = formataddr((author.name, author.email))
+        else:
+            author = self.env.user.partner_id
+            email_from = formataddr((author.name, author.email))
+
+        message_values = {
+            'subject': subject,
+            'body': body,
+            'author_id': author.id,
+            'email_from': email_from,
+            'message_type': message_type,
+            'model': kwargs.get('model', self._name),
+            'res_id': self.ids[0] if self.ids else False,
+            'subtype_id': self.env.ref('mail.mt_note').id,
+            'record_name': False,
+            'reply_to': self.env['mail.thread'].sudo()._notify_get_reply_to([0])[0],
+            'message_id': tools.generate_tracking_message_id('message-notify'),
+        }
+        message_values.update(kwargs)
+        message = self.env['mail.message'].sudo().create(message_values)
+        return message
 
     # ------------------------------------------------------
     # Followers API
