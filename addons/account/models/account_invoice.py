@@ -41,7 +41,7 @@ MAGIC_COLUMNS = ('id', 'create_uid', 'create_date', 'write_uid', 'write_date')
 
 class AccountInvoice(models.Model):
     _name = "account.invoice"
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'portal.mixin']
+    _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
     _description = "Invoice"
     _order = "date_invoice desc, number desc, id desc"
 
@@ -875,10 +875,11 @@ class AccountInvoice(models.Model):
     def _notification_recipients(self, message, groups):
         groups = super(AccountInvoice, self)._notification_recipients(message, groups)
 
-        for group_name, group_method, group_data in groups:
-            if group_name == 'customer':
-                continue
-            group_data['has_button_access'] = True
+        if self.state not in ('draft', 'cancel'):
+            for group_name, group_method, group_data in groups:
+                if group_name == 'customer':
+                    continue
+                group_data['has_button_access'] = True
 
         return groups
 
@@ -1257,24 +1258,7 @@ class AccountInvoice(models.Model):
 
     @api.model
     def line_get_convert(self, line, part):
-        return {
-            'date_maturity': line.get('date_maturity', False),
-            'partner_id': part,
-            'name': line['name'],
-            'debit': line['price'] > 0 and line['price'],
-            'credit': line['price'] < 0 and -line['price'],
-            'account_id': line['account_id'],
-            'amount_currency': line['price'] > 0 and abs(line.get('amount_currency', False)) or -abs(line.get('amount_currency', False)),
-            'currency_id': line.get('currency_id', False),
-            'quantity': line.get('quantity', 1.00),
-            'product_id': line.get('product_id', False),
-            'product_uom_id': line.get('uom_id', False),
-            'analytic_account_id': line.get('account_analytic_id', False),
-            'invoice_id': line.get('invoice_id', False),
-            'tax_ids': line.get('tax_ids', False),
-            'tax_line_id': line.get('tax_line_id', False),
-            'analytic_tag_ids': line.get('analytic_tag_ids', False),
-        }
+        return self.env['product.product']._convert_prepared_anglosaxon_line(line, part)
 
     @api.multi
     def action_cancel(self):
