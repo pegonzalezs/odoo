@@ -3,13 +3,14 @@
 # * purchase
 # 
 # Translators:
+# Sebastian Bollatti <sebastian.bollatti@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-10-09 09:18+0000\n"
-"PO-Revision-Date: 2016-11-07 17:46+0000\n"
-"Last-Translator: Gonzalo Ruzafa <gr@ingadhoc.com>\n"
+"PO-Revision-Date: 2018-01-31 11:40+0000\n"
+"Last-Translator: Martin Trigaux\n"
 "Language-Team: Spanish (Argentina) (http://www.transifex.com/odoo/odoo-9/language/es_AR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -31,7 +32,7 @@ msgid ""
 "       &nbsp;&nbsp;<strong>REFERENCES</strong><br />\n"
 "       &nbsp;&nbsp;Order number: <strong>${object.name}</strong><br />\n"
 "       &nbsp;&nbsp;Order total: <strong>${object.amount_total} ${object.currency_id.name}</strong><br />\n"
-"       &nbsp;&nbsp;Order date: ${object.date_order}<br />\n"
+"       &nbsp;&nbsp;Order date: ${format_tz(object.date_order, tz=user.tz, context={'lang':object.partner_id.lang})}<br />\n"
 "       % if object.origin:\n"
 "       &nbsp;&nbsp;Order reference: ${object.origin}<br />\n"
 "       % endif\n"
@@ -85,7 +86,7 @@ msgid ""
 "    <p style=\"border-left: 1px solid #8e0000; margin-left: 30px;\">\n"
 "       &nbsp;&nbsp;<strong>REFERENCES</strong><br />\n"
 "       &nbsp;&nbsp;RFQ number: <strong>${object.name}</strong><br />\n"
-"       &nbsp;&nbsp;RFQ date: ${object.date_order}<br />\n"
+"       &nbsp;&nbsp;RFQ date: ${format_tz(object.date_order, tz=user.tz, context={'lang':object.partner_id.lang})}<br />\n"
 "       % if object.origin:\n"
 "       &nbsp;&nbsp;RFQ reference: ${object.origin}<br />\n"
 "       % endif\n"
@@ -153,12 +154,12 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_invoice_count
 msgid "# of Invoices"
-msgstr ""
+msgstr "Nº de facturas"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_nbr
 msgid "# of Lines"
-msgstr ""
+msgstr "# de líneas"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_partner_purchase_order_count
@@ -312,7 +313,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_account_analytic_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_account_analytic_id
 msgid "Analytic Account"
-msgstr ""
+msgstr "Cuenta Analítica"
 
 #. module: purchase
 #: model:res.groups,name:purchase.group_analytic_accounting
@@ -394,7 +395,7 @@ msgid ""
 "Calls for tenders are used when you want to generate requests for quotations to several vendors for a given set of products.\n"
 "                    You can configure per product if you directly do a Request for Quotation\n"
 "                    to one vendor or if you want a Call for Tenders to compare offers from several vendors."
-msgstr ""
+msgstr "Las licitaciones se usan cuando quiere generar solicitudes de presupuesto a varios proveedores para un conjunto de productos dado. Puede configurar por producto si hace una SdP directamente a un proveedor, o si quiere licitar para comparar ofertas de varios proveedores."
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_product_product_purchase_ok
@@ -421,12 +422,12 @@ msgstr ""
 #: model:ir.ui.view,arch_db:purchase.purchase_order_form
 #: model:ir.ui.view,arch_db:purchase.view_purchase_configuration
 msgid "Cancel"
-msgstr ""
+msgstr "Cancelar"
 
 #. module: purchase
 #: selection:purchase.order,state:0 selection:purchase.report,state:0
 msgid "Cancelled"
-msgstr ""
+msgstr "Cancelada"
 
 #. module: purchase
 #: code:addons/purchase/purchase.py:529
@@ -473,12 +474,12 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_commercial_partner_id
 msgid "Commercial Entity"
-msgstr ""
+msgstr "Entidad comercial"
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_res_company
 msgid "Companies"
-msgstr ""
+msgstr "Compañías"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_company_id
@@ -486,7 +487,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_company_id
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Company"
-msgstr ""
+msgstr "Compañía"
 
 #. module: purchase
 #: code:addons/purchase/purchase.py:237
@@ -535,21 +536,21 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_config_settings_create_uid
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Creado por"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_config_settings_create_date
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_create_date
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_create_date
 msgid "Created on"
-msgstr ""
+msgstr "Creado en"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_currency_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_currency_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_currency_id
 msgid "Currency"
-msgstr ""
+msgstr "Moneda"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_date_approve
@@ -597,7 +598,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_name
 msgid "Description"
-msgstr ""
+msgstr "Descripción"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_default_location_dest_id_usage
@@ -610,7 +611,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_display_name
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_display_name
 msgid "Display Name"
-msgstr ""
+msgstr "Mostrar Nombre"
 
 #. module: purchase
 #: selection:purchase.order,state:0 selection:purchase.report,state:0
@@ -645,7 +646,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model,name:purchase.model_mail_compose_message
 msgid "Email composition wizard"
-msgstr ""
+msgstr "Asistente de composición de e-mail"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_account_invoice_purchase_id
@@ -669,7 +670,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_fiscal_position_id
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Fiscal Position"
-msgstr ""
+msgstr "Posición fiscal"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_message_follower_ids
@@ -701,7 +702,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Group By"
-msgstr ""
+msgstr "Agrupar por"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.purchase_order_line_search
@@ -714,7 +715,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_id
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_id
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. module: purchase
 #: model:web.tip,description:purchase.purchase_tip_2
@@ -783,17 +784,17 @@ msgstr ""
 #. module: purchase
 #: model:ir.model,name:purchase.model_account_invoice
 msgid "Invoice"
-msgstr ""
+msgstr "Factura"
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_account_invoice_line
 msgid "Invoice Line"
-msgstr ""
+msgstr "Línea de factura"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_invoice_lines
 msgid "Invoice Lines"
-msgstr ""
+msgstr "Líneas de la factura"
 
 #. module: purchase
 #: selection:purchase.order,invoice_status:0
@@ -803,18 +804,18 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_invoice_status
 msgid "Invoice Status"
-msgstr ""
+msgstr "Estado de la Factura"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "Invoiced"
-msgstr ""
+msgstr "Facturado"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_invoice_ids
 #: model:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Invoices"
-msgstr ""
+msgstr "Facturas"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.purchase_order_form
@@ -837,21 +838,21 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line___last_update
 #: model:ir.model.fields,field_description:purchase.field_purchase_report___last_update
 msgid "Last Modified on"
-msgstr ""
+msgstr "Última modificación en"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_config_settings_write_uid
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_write_uid
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Última actualización realizada por"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_config_settings_write_date
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_write_date
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Última actualización el"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_company_po_double_validation
@@ -986,12 +987,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_date
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 msgid "Order Date"
-msgstr ""
+msgstr "Fecha del pedido"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_order_line
 msgid "Order Lines"
-msgstr ""
+msgstr "Líneas de la orden"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
@@ -1003,12 +1004,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_name
 #: model:ir.ui.view,arch_db:purchase.purchase_order_line_search
 msgid "Order Reference"
-msgstr ""
+msgstr "Referencia de la orden"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_state
 msgid "Order Status"
-msgstr ""
+msgstr "Estado del Pedido"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
@@ -1034,7 +1035,7 @@ msgstr ""
 #: model:ir.model,name:purchase.model_res_partner
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_partner_id
 msgid "Partner"
-msgstr ""
+msgstr "Partner"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_country_id
@@ -1095,7 +1096,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_product_id
 #: model:ir.ui.view,arch_db:purchase.purchase_order_line_search
 msgid "Product"
-msgstr ""
+msgstr "Producto"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_product_category_config_purchase
@@ -1107,7 +1108,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_category_id
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Product Category"
-msgstr ""
+msgstr "Categoría de Producto"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_quantity
@@ -1118,7 +1119,7 @@ msgstr ""
 #: model:ir.model,name:purchase.model_product_template
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_product_tmpl_id
 msgid "Product Template"
-msgstr ""
+msgstr "Plantilla de Producto"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_product_uom
@@ -1128,7 +1129,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_config_settings_group_product_variant
 msgid "Product Variants"
-msgstr ""
+msgstr "Variantes del producto"
 
 #. module: purchase
 #: model:ir.actions.act_window,name:purchase.product_normal_action_puchased
@@ -1136,7 +1137,7 @@ msgstr ""
 #: model:ir.ui.menu,name:purchase.menu_product_in_config_purchase
 #: model:ir.ui.view,arch_db:purchase.purchase_order_form
 msgid "Products"
-msgstr ""
+msgstr "Productos"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_price_standard
@@ -1168,7 +1169,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_procurement_management
 msgid "Purchase"
-msgstr ""
+msgstr "Compra"
 
 #. module: purchase
 #: model:ir.actions.act_window,name:purchase.action_purchase_order_report_all
@@ -1276,7 +1277,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:purchase.res_partner_view_purchase_buttons
 #: model:ir.ui.view,arch_db:purchase.view_product_template_purchase_buttons_from
 msgid "Purchases"
-msgstr ""
+msgstr "Compras"
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_purchase_report
@@ -1293,13 +1294,13 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_product_qty
 msgid "Quantity"
-msgstr ""
+msgstr "Cantidad"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Quotations"
-msgstr ""
+msgstr "Presupuestos"
 
 #. module: purchase
 #: model:mail.message.subtype,name:purchase.mt_rfq_approved
@@ -1475,7 +1476,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_origin
 msgid "Source Document"
-msgstr ""
+msgstr "Documento Origen"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_state
@@ -1483,7 +1484,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:purchase.purchase_order_line_search
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Status"
-msgstr ""
+msgstr "Estado"
 
 #. module: purchase
 #: model:ir.model,name:purchase.model_stock_move
@@ -1498,7 +1499,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_price_subtotal
 msgid "Subtotal"
-msgstr ""
+msgstr "Subtotal"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_res_partner_property_purchase_currency_id
@@ -1525,7 +1526,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_taxes_id
 #: model:ir.ui.view,arch_db:purchase.report_purchaseorder_document
 msgid "Taxes"
-msgstr ""
+msgstr "Impuestos"
 
 #. module: purchase
 #: model:ir.model.fields,help:purchase.field_purchase_order_default_location_dest_id_usage
@@ -1602,12 +1603,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_amount_total
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_price_total
 msgid "Total"
-msgstr ""
+msgstr "Total"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_report_price_total
 msgid "Total Price"
-msgstr ""
+msgstr "Precio total"
 
 #. module: purchase
 #: model:ir.ui.view,arch_db:purchase.purchase_order_tree
@@ -1643,7 +1644,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_line_price_unit
 msgid "Unit Price"
-msgstr ""
+msgstr "Precio unitario"
 
 #. module: purchase
 #: model:ir.ui.menu,name:purchase.menu_purchase_uom_categ_form_action
@@ -1664,7 +1665,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_message_unread
 msgid "Unread Messages"
-msgstr ""
+msgstr "Mensajes No Leídos"
 
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_message_unread_counter
@@ -1679,7 +1680,7 @@ msgstr ""
 #. module: purchase
 #: model:ir.model.fields,field_description:purchase.field_purchase_order_amount_untaxed
 msgid "Untaxed Amount"
-msgstr ""
+msgstr "Importe sin impuestos"
 
 #. module: purchase
 #: selection:purchase.config.settings,group_costing_method:0
@@ -1723,7 +1724,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_filter
 #: model:ir.ui.view,arch_db:purchase.view_purchase_order_search
 msgid "Vendor"
-msgstr ""
+msgstr "Proveedores"
 
 #. module: purchase
 #: model:ir.actions.act_window,name:purchase.act_res_partner_2_supplier_invoices
