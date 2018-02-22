@@ -3,14 +3,13 @@
 # * barcodes
 # 
 # Translators:
-# Shaima Safar <shaima.safar@open-inside.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-14 10:27+0000\n"
-"PO-Revision-Date: 2017-09-26 10:34+0000\n"
-"Last-Translator: Shaima Safar <shaima.safar@open-inside.com>\n"
+"PO-Revision-Date: 2016-03-18 08:46+0000\n"
+"Last-Translator: Martin Trigaux\n"
 "Language-Team: Arabic (http://www.transifex.com/odoo/odoo-9/language/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,7 +27,7 @@ msgstr ""
 #: code:addons/barcodes/barcodes.py:221
 #, python-format
 msgid ": a rule can only contain one pair of braces."
-msgstr ": القاعدة تستطيع ان تحوي زوج واحد من الاقواس فقط."
+msgstr ""
 
 #. module: barcodes
 #: code:addons/barcodes/barcodes.py:217
@@ -40,7 +39,7 @@ msgstr ""
 #: code:addons/barcodes/barcodes.py:219
 #, python-format
 msgid ": empty braces."
-msgstr ": اقواس فارغة."
+msgstr ""
 
 #. module: barcodes
 #: model:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -84,39 +83,39 @@ msgstr ""
 #: code:addons/barcodes/barcodes.py:183
 #, python-format
 msgid "Any"
-msgstr "أي"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule_barcode_nomenclature_id
 #: model:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid "Barcode Nomenclature"
-msgstr "تسمية الباركود"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.actions.act_window,name:barcodes.action_barcode_nomenclature_form
 #: model:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_tree
 msgid "Barcode Nomenclatures"
-msgstr "التسميات الباركود"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule_pattern
 msgid "Barcode Pattern"
-msgstr "نمط الباركود"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.ui.view,arch_db:barcodes.view_barcode_rule_form
 msgid "Barcode Rule"
-msgstr " القاعدة الباركود"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcodes_barcode_events_mixin__barcode_scanned
 msgid "Barcode Scanned"
-msgstr "الباركود الممسوحة ضوئيا"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.actions.act_window,help:barcodes.action_barcode_nomenclature_form
 msgid "Click to add a Barcode Nomenclature ."
-msgstr "انقر لإضافة تسمية الباركود."
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature_create_uid
@@ -145,21 +144,21 @@ msgstr ""
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule_encoding
 msgid "Encoding"
-msgstr "التشفير"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/form_view_barcode_handler.js:122
 #, python-format
 msgid "Error : Document not editable"
-msgstr "خطأ: وثيقة غير قابلة للتعديل"
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/form_view_barcode_handler.js:56
 #, python-format
 msgid "Error : No last scanned barcode"
-msgstr "خطأ: لا يوجد الباركود الممسوحة ضوئيا السابق"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature_id
@@ -195,7 +194,7 @@ msgstr "أبداً"
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_nomenclature_name
 msgid "Nomenclature Name"
-msgstr "اسم التسميات"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
@@ -228,22 +227,22 @@ msgstr "المسلسل"
 #: code:addons/barcodes/static/src/js/form_view_barcode_handler.js:68
 #, python-format
 msgid "Set quantity"
-msgstr "يحدد كمية"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.ui.view,arch_db:barcodes.view_barcode_nomenclature_form
 msgid "Tables"
-msgstr "الجداول"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule_pattern
 msgid "The barcode matching pattern"
-msgstr "نمط مطابقة الباركود "
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_nomenclature_rule_ids
 msgid "The list of barcode rules"
-msgstr "قائمة القواعد الباركود"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule_alias
@@ -255,7 +254,7 @@ msgstr ""
 #: code:addons/barcodes/barcodes.py:221
 #, python-format
 msgid "There is a syntax error in the barcode pattern "
-msgstr "هناك خطأ في تركيب نمط الباركود"
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcode_rule_encoding
@@ -269,14 +268,14 @@ msgstr ""
 #: code:addons/barcodes/static/src/js/form_view_barcode_handler.js:122
 #, python-format
 msgid "To modify this document, please first start edition."
-msgstr "لتعديل هذا المستند, الرجاء بدء تحرير أولا."
+msgstr ""
 
 #. module: barcodes
 #. openerp-web
 #: code:addons/barcodes/static/src/js/form_view_barcode_handler.js:56
 #, python-format
 msgid "To set the quantity please scan a barcode first."
-msgstr "لتحديد الكمية الرجاء مسح الباركود أولا."
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model.fields,field_description:barcodes.field_barcode_rule_type
@@ -316,7 +315,7 @@ msgstr ""
 #. module: barcodes
 #: model:ir.model.fields,help:barcodes.field_barcodes_barcode_events_mixin__barcode_scanned
 msgid "Value of the last barcode scanned."
-msgstr "قيمة من الماضي الباركود الممسوحة ضوئيا."
+msgstr ""
 
 #. module: barcodes
 #: model:ir.model,name:barcodes.model_barcode_nomenclature

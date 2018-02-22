@@ -158,15 +158,13 @@ odoo.define('website_form.animation', function (require) {
 
                     // Special cases for dates and datetimes
                     } else if ($(input).hasClass('o_website_form_date')) {
-                        if (!self.is_datetime_valid(input.value, 'date')) {
-                            return true;
-                        }
+                        return !self.is_datetime_valid(input.value, 'date');
                     } else if ($(input).hasClass('o_website_form_datetime')) {
-                        if (!self.is_datetime_valid(input.value, 'datetime')) {
-                            return true;
-                        }
+                        return !self.is_datetime_valid(input.value, 'datetime');
+
+                    } else {
+                        return !input.checkValidity();
                     }
-                    return !input.checkValidity();
                 })
 
                 // Update field color if invalid or erroneous

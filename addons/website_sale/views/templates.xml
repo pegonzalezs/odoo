@@ -17,7 +17,7 @@
   </xpath>
 </template>
 
-<template id="assets_editor" inherit_id="website.assets_editor" name="Shop Editor">
+<template id="assets_editor" inherit_id="website.assets_editor" name="Shop Editor" groups="base.group_sale_manager">
   <xpath expr="." position="inside">
       <script type="text/javascript" src="/website_sale/static/src/js/website_sale.editor.js"></script>
       <script type="text/javascript" src="/website_sale/static/src/js/website_sale_tour_shop.js"></script>
@@ -366,8 +366,7 @@
                 <h1 itemprop="name" t-field="product.name">Product Name</h1>
                 <span itemprop="url" style="display:none;" t-esc="'/shop/product/%s' % slug(product)"/>
 
-                <t t-set="attribute_value_ids" t-value="get_attribute_value_ids(product)"/>
-                <form t-att-action="keep('/shop/cart/update')" class="js_add_cart_variants" t-att-data-attribute_value_ids="attribute_value_ids" method="POST">
+                <form t-att-action="keep('/shop/cart/update')" class="js_add_cart_variants" t-att-data-attribute_value_ids="product.product_variant_ids.ids" method="POST">
                   <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                   <div class="js_product">
                     <t t-placeholder="select">
@@ -435,7 +434,7 @@
           <span itemprop="price" style="display:none;" t-esc="product.price"/>
           <span itemprop="priceCurrency" style="display:none;" t-esc="website.currency_id.name"/>
       </h4>
-      <h4 class="css_non_editable_mode_hidden decimal_precision" t-att-data-precision="product.currency_id.decimal_places">
+      <h4 class="css_non_editable_mode_hidden">
         <span t-field="product.lst_price"
             t-field-options='{
                "widget": "monetary",
@@ -973,7 +972,7 @@
                       </div>
                   </div>
                   <div t-attf-class="form-group #{error.get('name') and 'has-error' or ''} col-lg-6">
-                      <label class="control-label" for="name">Your Name</label>
+                      <label class="control-label" for="contact_name">Your Name</label>
                       <input type="text" name="name" class="form-control" t-att-value="checkout.get('name')"/>
                   </div>
                   <div t-if="has_check_vat" class="clearfix"/>
@@ -986,7 +985,7 @@
                       <input type="text" name="vat" class="form-control" t-att-value="checkout.get('vat')"/>
                   </div>
                   <div t-attf-class="form-group #{error.get('email') and 'has-error' or ''} col-lg-6">
-                      <label class="control-label" for="email">Email</label>
+                      <label class="control-label" for="contact_name">Email</label>
                       <input type="email" name="email" class="form-control" t-att-value="checkout.get('email')"/>
                   </div>
                   <div t-attf-class="form-group #{error.get('phone') and 'has-error' or ''} col-lg-6">
@@ -1312,7 +1311,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="3"/>
+                                <td></td><td></td>
                                 <td class="text-right"><strong>Total:</strong></td>
                                 <td class="text-right">
                                     <strong t-field="order.amount_total"
@@ -1396,7 +1395,7 @@
 
 <!-- Page Shop my cart and payment total -->
 <template id="total">
-  <div id="cart_total" t-if="website_sale_order and website_sale_order.website_order_line">
+  <div id="cart_total" t-if="website_sale_order">
         <div class="row" id="order_total_untaxed">
               <span class="col-xs-6 text-right text-muted">Subtotal:</span>
               <span class="col-xs-6 text-left text-muted">

@@ -1,7 +1,5 @@
 # -*- coding: utf-'8' "-*-"
 
-# Copyright 2015 Eezee-It
-
 import json
 import logging
 from hashlib import sha256

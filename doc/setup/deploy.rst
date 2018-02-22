@@ -192,10 +192,6 @@ Instead you must have a proxy redirecting requests whose URL starts with
 ``/longpolling/`` to the longpolling port. Other request should be proxied to
 the :option:`normal HTTP port <odoo.py --xmlrpc-port>`
 
-.. warning:: The livechat worker requires the ``psycogreen`` Python module,
-             which is not always included with all installation packages.
-             It can be manually installed with ``pip install psycogreen``.
-
 Configuration sample
 --------------------
 
@@ -225,7 +221,7 @@ HTTPS
 =====
 
 Whether it's accessed via website/web client or the webservice, Odoo transmits
-authentication information in cleartext. This means a secure deployment of
+authentication information in cleatext. This means a secure deployment of
 Odoo must use HTTPS\ [#switching]_. SSL termination can be implemented via
 just about any SSL termination proxy, but requires the following setup:
 

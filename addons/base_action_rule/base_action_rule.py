@@ -175,18 +175,13 @@ class base_action_rule(osv.osv):
     @openerp.api.multi
     def _process(self, records):
         """ Process action ``self`` on the ``records`` that have not been done yet. """
-        # filter out the records on which self has already been done
+        # filter out the records on which self has already been done, then mark
+        # remaining records as done (to avoid recursive processing)
         action_done = self._context['__action_done']
-        records_done = action_done.get(self, records.browse())
-        records -= records_done
+        records -= action_done.setdefault(self, records.browse())
         if not records:
             return
-
-        # mark the remaining records as done (to avoid recursive processing)
-        action_done = dict(action_done)
-        action_done[self] = records_done + records
-        self = self.with_context(__action_done=action_done)
-        records = records.with_context(__action_done=action_done)
+        action_done[self] |= records
 
         # modify records
         values = {}

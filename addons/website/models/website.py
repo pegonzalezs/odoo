@@ -157,7 +157,7 @@ class website(osv.osv):
         'domain': fields.char('Website Domain'),
         'company_id': fields.many2one('res.company', string="Company"),
         'language_ids': fields.many2many('res.lang', 'website_lang_rel', 'website_id', 'lang_id', 'Languages'),
-        'default_lang_id': fields.many2one('res.lang', string="Default language", required=True),
+        'default_lang_id': fields.many2one('res.lang', string="Default language"),
         'default_lang_code': fields.related('default_lang_id', 'code', type="char", string="Default language code", store=True),
         'social_twitter': fields.char('Twitter Account'),
         'social_facebook': fields.char('Facebook Account'),
@@ -166,7 +166,7 @@ class website(osv.osv):
         'social_youtube': fields.char('Youtube Account'),
         'social_googleplus': fields.char('Google+ Account'),
         'google_analytics_key': fields.char('Google Analytics Key'),
-        'user_id': fields.many2one('res.users', string='Public User', required=True),
+        'user_id': fields.many2one('res.users', string='Public User'),
         'compress_html': fields.boolean('Compress HTML'),
         'cdn_activated': fields.boolean('Activate CDN for assets'),
         'cdn_url': fields.char('CDN Base URL'),
@@ -511,7 +511,6 @@ class website(osv.osv):
                   of the same.
         :rtype: list({name: str, url: str})
         """
-        request.context = dict(request.context, **context)
         router = request.httprequest.app.get_db_router(request.db)
         # Force enumeration to be performed as public user
         url_set = set()

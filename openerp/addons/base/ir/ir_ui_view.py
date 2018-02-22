@@ -50,7 +50,7 @@ def keep_query(*keep_params, **additional_params):
     if not keep_params and not additional_params:
         keep_params = ('*',)
     params = additional_params.copy()
-    qs_keys = request.httprequest.args.keys() if request else []
+    qs_keys = request.httprequest.args.keys()
     for keep_param in keep_params:
         for param in fnmatch.filter(qs_keys, keep_param):
             if param not in additional_params and param in qs_keys:
@@ -133,7 +133,6 @@ TRANSLATED_ATTRS_RE = re.compile(r"@(%s)\b" % "|".join(TRANSLATED_ATTRS))
 
 class view(osv.osv):
     _name = 'ir.ui.view'
-    _parent_name = 'inherit_id'     # used for recursion check
 
     def _get_model_data(self, cr, uid, ids, fname, args, context=None):
         result = dict.fromkeys(ids, False)
@@ -284,10 +283,6 @@ class view(osv.osv):
         return True
 
     def _check_xml(self, cr, uid, ids, context=None):
-        # As all constraints are verified on create/write, we must re-check that there is no
-        # recursion before calling `read_combined` to avoid an infinite loop.
-        if not self._check_recursion(cr, uid, ids, context=context):
-            return True     # pretend arch is valid to avoid misleading user about the error.
         if context is None:
             context = {}
         context = dict(context, check_view_ids=ids)
@@ -327,7 +322,6 @@ class view(osv.osv):
     ]
     _constraints = [
         (_check_xml, 'Invalid view definition', ['arch', 'arch_base']),
-        (osv.osv._check_recursion, 'You cannot create recursive inherited views.', ['inherit_id']),
     ]
 
     def _auto_init(self, cr, context=None):
@@ -1172,7 +1166,7 @@ class view(osv.osv):
         cr.execute("""SELECT max(v.id)
                         FROM ir_ui_view v
                    LEFT JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
-                       WHERE md.module NOT IN (SELECT name FROM ir_module_module)
+                       WHERE md.module IS NULL
                          AND v.model = %s
                          AND v.active = true
                     GROUP BY coalesce(v.inherit_id, v.id)

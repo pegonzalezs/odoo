@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-22 13:18+0000\n"
-"PO-Revision-Date: 2017-11-03 11:06+0000\n"
+"PO-Revision-Date: 2016-10-14 03:18+0000\n"
 "Last-Translator: Yoshi Tashiro <tashiro@roomsfor.hk>\n"
 "Language-Team: Japanese (http://www.transifex.com/odoo/odoo-9/language/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -369,7 +369,7 @@ msgstr ""
 #: code:addons/calendar/static/src/js/base_calendar.js:34
 #, python-format
 msgid " [Me]"
-msgstr " [自分]"
+msgstr ""
 
 #. module: calendar
 #: model:mail.template,subject:calendar.calendar_template_meeting_invitation
@@ -384,7 +384,7 @@ msgstr ""
 #. module: calendar
 #: model:mail.template,subject:calendar.calendar_template_meeting_reminder
 msgid "${object.event_id.name} - Reminder"
-msgstr "${object.event_id.name} - リマインダー"
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:776
@@ -404,13 +404,13 @@ msgstr ""
 #: code:addons/calendar/calendar.py:263
 #, python-format
 msgid "%s has accepted invitation"
-msgstr "%s 招待が承認されました"
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:278
 #, python-format
 msgid "%s has declined invitation"
-msgstr "%s 招待が断られました"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -461,7 +461,7 @@ msgstr "終日"
 #: code:addons/calendar/calendar.py:770
 #, python-format
 msgid "AllDay , %s"
-msgstr "終日 , %s"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_duration
@@ -488,7 +488,7 @@ msgstr "出席者"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_attendee_status
 msgid "Attendee Status"
-msgstr "出席者の状況"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_calendar_attendee
@@ -540,12 +540,12 @@ msgstr "カレンダアラーム"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:43
 #, python-format
 msgid "Calendar Invitation"
-msgstr "カレンダーで 招待"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Click here to update only this instance and not all recurrences."
-msgstr "すべての定例開催ではなく、このインスタンスだけを更新するには、ここをクリックしてください。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.actions.act_window,help:calendar.action_calendar_event
@@ -609,7 +609,7 @@ msgstr "記録上の最後のメッセージが投稿された日"
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Day of Month"
-msgstr "月日"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.event,month_by:0
@@ -714,7 +714,7 @@ msgstr "終了日"
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Ending at"
-msgstr "終了"
+msgstr ""
 
 #. module: calendar
 #: constraint:calendar.event:0
@@ -729,7 +729,7 @@ msgstr "イベント"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_display_time
 msgid "Event Time"
-msgstr "イベント 時間"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_calendar_alarm
@@ -740,14 +740,14 @@ msgstr "イベントアラーム"
 #: code:addons/calendar/calendar.py:1252
 #, python-format
 msgid "Event recurrence interval cannot be negative."
-msgstr "イベントの定例開催間隔を負の値にすることはできません。"
+msgstr ""
 
 #. module: calendar
 #. openerp-web
 #: code:addons/calendar/static/src/js/base_calendar.js:44
 #, python-format
 msgid "Everybody's calendars"
-msgstr "全員のカレンダー"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.event,class:0
@@ -768,7 +768,7 @@ msgstr "先頭"
 #: code:addons/calendar/calendar.py:143
 #, python-format
 msgid "First you have to specify the date of the invitation."
-msgstr "最初に招待日を指定します。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_follower_ids
@@ -820,12 +820,12 @@ msgstr "グループ化"
 #: code:addons/calendar/calendar.py:1659
 #, python-format
 msgid "Group by date is not supported, use the calendar view instead."
-msgstr "日付でのグループ化はサポートされていません。 代わりにカレンダービューを使用してください。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_ir_http
 msgid "HTTP routing"
-msgstr "HTTPルーティング"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.alarm,interval:0
@@ -845,29 +845,29 @@ msgstr "ID"
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_message_unread
 msgid "If checked new messages require your attention."
-msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "チェックされている場合は、新しいメッセージに注意が必要です。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_active
 msgid ""
 "If the active field is set to false, it will allow you to hide the event "
 "alarm information without removing it."
-msgstr "アクティブなフィールドがfalseに設定されると、それを削除せずにイベントのアラーム情報を非表示にすることができます。"
+msgstr ""
 
 #. module: calendar
 #: model:mail.message.subtype,name:calendar.subtype_invitation
 msgid "Invitation"
-msgstr "招待"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_attendee_access_token
 msgid "Invitation Token"
-msgstr "招待 トークン"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -882,7 +882,7 @@ msgstr "招待"
 #. module: calendar
 #: model:ir.model,name:calendar.model_mail_wizard_invite
 msgid "Invite wizard"
-msgstr "招待ウィザード"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_is_follower
@@ -950,7 +950,7 @@ msgstr "イベント場所"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_contacts_user_id
 msgid "Me"
-msgstr "自分"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_search
@@ -982,7 +982,7 @@ msgstr "打ち合わせタイプ"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_attendee_event_id
 msgid "Meeting linked"
-msgstr "リンクされたミーティング"
+msgstr ""
 
 #. module: calendar
 #: model:ir.actions.act_window,name:calendar.action_calendar_event
@@ -1056,12 +1056,12 @@ msgstr "要アクション"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:36
 #, python-format
 msgid "No I'm not going."
-msgstr "いいえ、そのつもりはありません"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.alarm,type:0
 msgid "Notification"
-msgstr "通知"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_needaction_counter
@@ -1071,7 +1071,7 @@ msgstr "アクションの数"
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_message_needaction_counter
 msgid "Number of messages which requires an action"
-msgstr "アクションを必要とするメッセージの数"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.event,end_type:0
@@ -1124,7 +1124,7 @@ msgstr "取引先"
 #: code:addons/calendar/calendar.py:1265
 #, python-format
 msgid "Please select a proper day of the month."
-msgstr "適切な月日を選択してください。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_class
@@ -1177,7 +1177,7 @@ msgstr "リマインド"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:26
 #, python-format
 msgid "Remove this favorite from the list"
-msgstr "このリストからこのお気に入りを削除"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_count
@@ -1250,7 +1250,7 @@ msgstr "時間表示"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:19
 #, python-format
 msgid "Snooze"
-msgstr "居眠り"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_start
@@ -1271,7 +1271,7 @@ msgstr "開始日時"
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_start
 msgid "Start date of an event, without time for full days events"
-msgstr "全日開催のための時間設定のないイベントの開始日"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -1298,7 +1298,7 @@ msgstr "停止"
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_stop
 msgid "Stop date of an event, without time for full days events"
-msgstr "全日開催のための時間設定のないイベントの終了日"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_tree
@@ -1336,7 +1336,7 @@ msgid ""
 "The calendar is shared between employees and fully integrated with\n"
 "            other applications such as the employee holidays or the business\n"
 "            opportunities."
-msgstr "カレンダーは、従業員の間で共有され、従業員の休日やビジネスチャンスなど、他のアプリケーションと完全に統合されています。"
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1382
@@ -1459,14 +1459,14 @@ msgstr "平日"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:48
 #, python-format
 msgid "When"
-msgstr "日時"
+msgstr ""
 
 #. module: calendar
 #. openerp-web
 #: code:addons/calendar/static/src/xml/base_calendar.xml:52
 #, python-format
 msgid "Where"
-msgstr "場所"
+msgstr ""
 
 #. module: calendar
 #. openerp-web
@@ -1485,7 +1485,7 @@ msgstr "年"
 #: code:addons/calendar/static/src/xml/base_calendar.xml:35
 #, python-format
 msgid "Yes I'm going."
-msgstr "はい、そのつもりです。"
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:106
@@ -1511,13 +1511,13 @@ msgstr "calendar.contacts"
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "e.g. Business Lunch"
-msgstr "例: ○○さんとビジネスランチ"
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1250
 #, python-format
 msgid "interval cannot be negative."
-msgstr "繰り返しは負の値にできません。"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_ir_attachment
@@ -1527,4 +1527,4 @@ msgstr "ir.attachment"
 #. module: calendar
 #: model:ir.model,name:calendar.model_ir_values
 msgid "ir.values"
-msgstr "ir.values"
+msgstr ""

@@ -790,7 +790,7 @@ var ActionManager = Widget.extend({
             });
         });
     },
-    ir_actions_act_url: function (action, options) {
+    ir_actions_act_url: function (action) {
         var url = action.url;
         if (session.debug && url && url.length && url[0] === '/') {
             url = $.param.querystring(url, 'debug');
@@ -800,7 +800,6 @@ var ActionManager = Widget.extend({
             framework.redirect(url);
         } else {
             window.open(url, '_blank');
-            options.on_close();
         }
         return $.when();
     },

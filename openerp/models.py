@@ -747,12 +747,8 @@ class BaseModel(object):
         cls = type(self)
         methods = []
         for attr, func in getmembers(cls, is_constraint):
-            for name in func._constrains:
-                field = cls._fields.get(name)
-                if not field:
-                    _logger.warning("method %s.%s: @constrains parameter %r is not a field name", cls._name, attr, name)
-                elif not (field.store or field.column and field.column._fnct_inv or field.inherited):
-                    _logger.warning("method %s.%s: @constrains parameter %r is not writeable", cls._name, attr, name)
+            if not all(name in cls._fields for name in func._constrains):
+                _logger.warning("@constrains%r parameters must be field names", func._constrains)
             methods.append(func)
 
         # optimization: memoize result on cls, it will not be recomputed
@@ -1914,8 +1910,7 @@ class BaseModel(object):
                     order = '"%s" %s' % (order_field, '' if len(order_split) == 1 else order_split[1])
                     orderby_terms.append(order)
             elif order_field in aggregated_fields:
-                order_split[0] = '"' + order_field + '"'
-                orderby_terms.append(' '.join(order_split))
+                orderby_terms.append(order_part)
             else:
                 # Cannot order by a field that will not appear in the results (needs to be grouped or aggregated)
                 _logger.warn('%s: read_group order by `%s` ignored, cannot sort on empty columns (not grouped/aggregated)',
@@ -2113,7 +2108,7 @@ class BaseModel(object):
         prefix_term = lambda prefix, term: ('%s %s' % (prefix, term)) if term else ''
 
         query = """
-            SELECT min("%(table)s".id) AS id, count("%(table)s".id) AS "%(count_field)s" %(extra_fields)s
+            SELECT min(%(table)s.id) AS id, count(%(table)s.id) AS %(count_field)s %(extra_fields)s
             FROM %(from)s
             %(where)s
             %(groupby)s
@@ -3078,11 +3073,6 @@ class BaseModel(object):
             if field.compute:
                 cls._field_computed[field] = group = groups[field.compute]
                 group.append(field)
-        for fields in groups.itervalues():
-            compute_sudo = fields[0].compute_sudo
-            if not all(field.compute_sudo == compute_sudo for field in fields):
-                _logger.warning("%s: inconsistent 'compute_sudo' for computed fields: %s",
-                                self._name, ", ".join(field.name for field in fields))
 
     @api.model
     def _setup_complete(self):
@@ -3658,8 +3648,6 @@ class BaseModel(object):
             return True
         if isinstance(ids, (int, long)):
             ids = [ids]
-        if not context:
-            context = {}
 
         result_store = self._store_get_values(cr, uid, ids, self._fields.keys(), context)
 
@@ -3735,8 +3723,7 @@ class BaseModel(object):
                     obj._store_set_values(cr, uid, rids, fields, context)
 
         # recompute new-style fields
-        if recs.env.recompute and context.get('recompute', True):
-            recs.recompute()
+        recs.recompute()
 
         # auditing: deletions are infrequent and leave no trace in the database
         _unlink.info('User #%s deleted %s records with IDs: %r', uid, self._name, ids)
@@ -4974,7 +4961,7 @@ class BaseModel(object):
                     # duplicated record is not linked to any module
                     del record['module']
                     record.update({'res_id': target_id})
-                    if user_lang and user_lang == record['lang'] and field.translate is True:
+                    if user_lang and user_lang == record['lang']:
                         # 'source' to force the call to _set_src
                         # 'value' needed if value is changed in copy(), want to see the new_value
                         record['source'] = old_record[field_name]
@@ -5788,19 +5775,16 @@ class BaseModel(object):
         return RecordCache(self)
 
     @api.model
-    def _in_cache_without(self, field, limit=PREFETCH_MAX):
-        """ Return records to prefetch that have no value in cache for ``field``
-            (:class:`Field` instance), including ``self``.
-            Return at most ``limit`` records.
+    def _in_cache_without(self, field):
+        """ Make sure ``self`` is present in cache (for prefetching), and return
+            the records of model ``self`` in cache that have no value for ``field``
+            (:class:`Field` instance).
         """
         env = self.env
         prefetch_ids = env.prefetch[self._name]
         prefetch_ids.update(self._ids)
         ids = filter(None, prefetch_ids - set(env.cache[field]))
-        recs = self.browse(ids)
-        if limit and len(recs) > limit:
-            recs = self + (recs - self)[:(limit - len(self))]
-        return recs
+        return self.browse(ids)
 
     @api.model
     def refresh(self):

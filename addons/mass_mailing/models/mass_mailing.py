@@ -487,7 +487,7 @@ class MassMailing(osv.Model):
         'create_date': fields.datetime('Creation Date'),
         'sent_date': fields.datetime('Sent Date', oldname='date', copy=False),
         'schedule_date': fields.datetime('Schedule in the Future'),
-        'body_html': fields.html('Body'),
+        'body_html': fields.html('Body', translate=True),
         'attachment_ids': fields.many2many(
             'ir.attachment', 'mass_mailing_ir_attachments_rel',
             'mass_mailing_id', 'attachment_id', 'Attachments'
@@ -666,8 +666,7 @@ class MassMailing(osv.Model):
             email_fname = 'email_from'
             if 'email' in model._fields:
                 email_fname = 'email'
-            ctx = dict(context or {}, active_test=False)
-            record_ids = model.search(cr, uid, [('id', 'in', res_ids), (email_fname, 'ilike', email)], context=ctx)
+            record_ids = model.search(cr, uid, [('id', 'in', res_ids), (email_fname, 'ilike', email)], context=context)
             model.write(cr, uid, record_ids, {'opt_out': value}, context=context)
 
     #------------------------------------------------------

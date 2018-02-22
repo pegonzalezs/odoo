@@ -671,7 +671,7 @@ Model Reference
     .. automethod:: fields_get
     .. automethod:: fields_view_get
 
-    .. rubric:: Miscellaneous methods
+    .. rubric:: ???
 
     .. automethod:: default_get
     .. automethod:: copy

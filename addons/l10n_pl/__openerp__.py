@@ -5,7 +5,7 @@
 
 {
     'name' : 'Poland - Accounting',
-    'version' : '2.0',
+    'version' : '1.02',
     'author' : 'Grzegorz Grzelak (OpenGLOBE)',
     'website': 'http://www.openglobe.pl',
     'category': 'Localization',
@@ -30,5 +30,4 @@ Wewnętrzny numer wersji OpenGLOBE 1.02
               'account_chart_template.yml'
     ],
     'installable': True,
-    'post_init_hook': '_preserve_tag_on_taxes',
 }

@@ -714,15 +714,14 @@ var KanbanView = View.extend({
     add_new_column: function (event) {
         var self = this;
         var model = new Model(this.relation, this.search_context);
-        var name = event.data.value;
-        model.call('name_create', [name], {
+        model.call('create', [{name: event.data.value}], {
             context: this.search_context,
-        }).then(function (result) {
+        }).then(function (id) {
             var dataset = new data.DataSetSearch(self, self.dataset.model, self.dataset.get_context(), []);
             var group_data = {
                 records: [],
                 title: event.data.value,
-                id: result[0],
+                id: id,
                 attributes: {folded: false},
                 dataset: dataset,
                 values: {},

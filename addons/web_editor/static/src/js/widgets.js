@@ -299,9 +299,7 @@ var ImageDialog = Widget.extend({
             self.display_attachments();
         });
         this.fetch_existing().then(function () {
-            if (o.url) {
-                self.set_image(_.find(self.records, function (record) { return record.url === o.url;}) || o);
-            }
+            self.set_image(_.find(self.records, function (record) { return record.url === o.url;}) || o);
         });
         return res;
     },
@@ -549,12 +547,16 @@ var getCssSelectors = function(filter) {
     var sheets = document.styleSheets;
     for(var i = 0; i < sheets.length; i++) {
         var rules;
-        // try...catch because browser may not able to enumerate rules for cross-domain stylesheets
-        try {
-            rules = sheets[i].rules || sheets[i].cssRules;
-        } catch(e) {
-            console.warn("Can't read the css rules of: " + sheets[i].href, e);
-            continue;
+        if (sheets[i].rules) {
+            rules = sheets[i].rules;
+        } else {
+            //try...catch because Firefox not able to enumerate document.styleSheets[].cssRules[] for cross-domain stylesheets.
+            try {
+                rules = sheets[i].cssRules;
+            } catch(e) {
+                console.warn("Can't read the css rules of: " + sheets[i].href, e);
+                continue;
+            }
         }
         if (rules) {
             for(var r = 0; r < rules.length; r++) {
@@ -569,7 +571,6 @@ var getCssSelectors = function(filter) {
                             if (!data) {
                                 data = [match[1], rules[r].cssText.replace(/(^.*\{\s*)|(\s*\}\s*$)/g, ''), clean, [clean]];
                             } else {
-                                data[0] += (", " + match[1]);
                                 data[3].push(clean);
                             }
                         }

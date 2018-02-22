@@ -351,8 +351,7 @@ var DateField = Field.extend(/** @lends instance.web.search.DateField# */{
             return $.when(null);
         }
 
-        // THIS SHOULD BE FORWARDPORTED UP TO SAAS-15, NOT LATER
-        var m = moment.utc(v, t === 'datetime' ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
+        var m = moment(v, t === 'datetime' ? 'YYYY-MM-DD HH:mm:ss' : 'YYYY-MM-DD');
         if (!m.isValid()) { return $.when(null); }
         var d = m.toDate();
         var date_string = formats.format_value(d, this.attrs);

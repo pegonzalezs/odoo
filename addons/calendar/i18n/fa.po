@@ -3,15 +3,13 @@
 # * calendar
 # 
 # Translators:
-# Hamed Mohammadi <hamed@dehongi.com>, 2017
-# morteza zakaye <zibazokaye@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-22 13:18+0000\n"
-"PO-Revision-Date: 2017-09-27 06:45+0000\n"
-"Last-Translator: Hamed Mohammadi <hamed@dehongi.com>\n"
+"PO-Revision-Date: 2016-09-23 10:01+0000\n"
+"Last-Translator: Martin Trigaux\n"
 "Language-Team: Persian (http://www.transifex.com/odoo/odoo-9/language/fa/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -423,12 +421,12 @@ msgstr ""
 #: code:addons/calendar/calendar.py:1613
 #, python-format
 msgid "A email has been send to specify that the date has been changed !"
-msgstr "یک ایمیل برای اعلام اینکه تاریخ تغییر کرده است، ارسال شد!"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Accept"
-msgstr "پذیرفتن"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.attendee,state:0
@@ -451,7 +449,7 @@ msgstr "فعال"
 #: code:addons/calendar/static/src/js/base_calendar.js:120
 #, python-format
 msgid "Add Favorite Calendar"
-msgstr "تقویم محبوب را اضافه کنید"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_allday
@@ -462,7 +460,7 @@ msgstr "کل روز"
 #: code:addons/calendar/calendar.py:770
 #, python-format
 msgid "AllDay , %s"
-msgstr "کل روز , %s"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_duration
@@ -473,13 +471,13 @@ msgstr "مقدار"
 #: code:addons/calendar/calendar.py:1090
 #, python-format
 msgid "An invitation email has been sent to attendee %s"
-msgstr "یک ایمیل دعوت به شرکت کننده %s ارسال شد."
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1424
 #, python-format
 msgid "An invitation email has been sent to attendee(s)"
-msgstr "یک ایمیل دعوت برای شرکت کننده(گان) ارسال شد"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_is_attendee
@@ -520,7 +518,7 @@ msgstr "مشغول"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_byday
 msgid "By day"
-msgstr "بر اساس روز"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.menu,name:calendar.mail_menu_calendar
@@ -534,14 +532,14 @@ msgstr "گاهشمار"
 #: model:ir.ui.view,arch_db:calendar.calendar_alarm_view_form
 #: model:ir.ui.view,arch_db:calendar.view_calendar_alarm_tree
 msgid "Calendar Alarm"
-msgstr "هشدار تقویم"
+msgstr ""
 
 #. module: calendar
 #. openerp-web
 #: code:addons/calendar/static/src/xml/base_calendar.xml:43
 #, python-format
 msgid "Calendar Invitation"
-msgstr "دعوت تقویم"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -600,7 +598,7 @@ msgstr "تاریخ"
 #: selection:calendar.event,month_by:0
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_day
 msgid "Date of month"
-msgstr "تاریخ از ماه"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_event_message_last_post
@@ -653,14 +651,14 @@ msgstr "جزییات"
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_display_name
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_type_display_name
 msgid "Display Name"
-msgstr "نام نشان داده شده"
+msgstr "نام نمایشی"
 
 #. module: calendar
 #. openerp-web
 #: code:addons/calendar/static/src/js/base_calendar.js:153
 #, python-format
 msgid "Do you really want to delete this filter from favorite?"
-msgstr "واقعا می خواهید این فیلتر را از محبوب ها حذف کنید؟"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_duration
@@ -672,7 +670,7 @@ msgstr "مدت"
 #: model:ir.model.fields,field_description:calendar.field_calendar_alarm_duration_minutes
 #: model:ir.model.fields,help:calendar.field_calendar_alarm_duration_minutes
 msgid "Duration in minutes"
-msgstr "مدت به دقیقه"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.alarm,type:0
@@ -684,12 +682,12 @@ msgstr "پست الکترونیک"
 #: code:addons/calendar/calendar.py:1386
 #, python-format
 msgid "Email addresses not found"
-msgstr "نشانی ایمیل یافت نشد"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,help:calendar.field_calendar_attendee_email
 msgid "Email of Invited Person"
-msgstr "ایمیل شخص دعوت شده"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_contacts_partner_id
@@ -705,7 +703,7 @@ msgstr "تاریخ پایان"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_stop_datetime
 msgid "End Datetime"
-msgstr "تاریخ و زمان پایان"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.event,end_type:0
@@ -715,12 +713,12 @@ msgstr "تاریخ پایان"
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Ending at"
-msgstr "پایان در"
+msgstr ""
 
 #. module: calendar
 #: constraint:calendar.event:0
 msgid "Error ! End date cannot be set before start date."
-msgstr "خطا! تاریخ پایان نمی تواند قبل از تاریخ شروع قرار داد."
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_calendar_event
@@ -730,18 +728,18 @@ msgstr "رویداد"
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_display_time
 msgid "Event Time"
-msgstr "زمان رویداد"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_calendar_alarm
 msgid "Event alarm"
-msgstr "هشدار رویداد"
+msgstr ""
 
 #. module: calendar
 #: code:addons/calendar/calendar.py:1252
 #, python-format
 msgid "Event recurrence interval cannot be negative."
-msgstr "بازه انجام رویداد نمی تواند منفی باشد."
+msgstr ""
 
 #. module: calendar
 #. openerp-web
@@ -769,7 +767,7 @@ msgstr "نخستین"
 #: code:addons/calendar/calendar.py:143
 #, python-format
 msgid "First you have to specify the date of the invitation."
-msgstr "ابتدا باید تاریخ دعوت را مشخص کنید."
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_follower_ids
@@ -821,12 +819,12 @@ msgstr "گروه‌بندی برمبنای"
 #: code:addons/calendar/calendar.py:1659
 #, python-format
 msgid "Group by date is not supported, use the calendar view instead."
-msgstr "گروه بر اساس تاریخ پشتیبانی نشده، از چیدمان تقویم به جای آن استفاده کنید."
+msgstr ""
 
 #. module: calendar
 #: model:ir.model,name:calendar.model_ir_http
 msgid "HTTP routing"
-msgstr "مسیریابی پروتکل HTTP"
+msgstr ""
 
 #. module: calendar
 #: selection:calendar.alarm,interval:0
@@ -873,7 +871,7 @@ msgstr ""
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
 msgid "Invitation details"
-msgstr "جزئیات دعوت"
+msgstr ""
 
 #. module: calendar
 #: model:ir.ui.view,arch_db:calendar.view_calendar_event_form
@@ -883,7 +881,7 @@ msgstr "دعوت‌نامه‌ها"
 #. module: calendar
 #: model:ir.model,name:calendar.model_mail_wizard_invite
 msgid "Invite wizard"
-msgstr "ویزارد دعوت"
+msgstr ""
 
 #. module: calendar
 #: model:ir.model.fields,field_description:calendar.field_calendar_event_message_is_follower

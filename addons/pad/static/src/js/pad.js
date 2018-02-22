@@ -17,9 +17,7 @@ var FieldPad = form_common.AbstractField.extend(form_common.ReinitializeWidgetMi
             event.preventDefault();
             self.set("configured", true);
         });
-        // CHANGES ONLY NEEDED UNTIL SAAS-15
-        // deferred for request getting pad content (readonly) or new pad url (edit)
-        this._pad_loading_deferred = null;
+        this.pad_loading_request = null;
     },
     initialize_content: function() {
         var self = this;
@@ -38,25 +36,14 @@ var FieldPad = form_common.AbstractField.extend(form_common.ReinitializeWidgetMi
     },
     render_value: function() {
         var self = this;
-        $.when(this._configured_deferred).always(function() {
+        $.when(this._configured_deferred, this.pad_loading_request).always(function() {
             if (!self.get('configured')){
                 return;
             }
-
-            // reject previously ongoing _pad_loading_deferred
-            if (self._pad_loading_deferred !== null) {
-                self._pad_loading_deferred.reject();
-                self.$('.oe_pad_content').removeClass('oe_pad_loading').html('');
-            }
-            self._pad_loading_deferred = $.Deferred();
-            // keep reference to current _pad_loading_deferred
-            var loading_def = self._pad_loading_deferred;
-
             var value = self.get('value');
             if (self.get('effective_readonly')) {
                 if (_.str.startsWith(value, 'http')) {
-                    self.view.dataset.call('pad_get_content', {url: value}).then(loading_def.resolve, loading_def.reject);
-                    loading_def.done(function(data) {
+                    self.pad_loading_request = self.view.dataset.call('pad_get_content', {url: value}).done(function(data) {
                         self.$('.oe_pad_content').removeClass('oe_pad_loading').html('<div class="oe_pad_readonly"><div>');
                         self.$('.oe_pad_readonly').html(data);
                     }).fail(function() {
@@ -67,37 +54,21 @@ var FieldPad = form_common.AbstractField.extend(form_common.ReinitializeWidgetMi
                 }
             }
             else {
-                var def = $.Deferred();
+                var def = $.when();
                 if (! value || !_.str.startsWith(value, 'http')) {
-                    var deferreds = [
-                        self.view.dataset.call('pad_generate_url', {
-                            context: {
-                                model: self.view.model,
-                                field_name: self.name,
-                                object_id: self.view.datarecord.id
-                            }
-                        }),
-                        // change record only after record_loaded and its call stack is finished
-                        self.view.record_loaded.then(function() {
-                            var call_stack_ended = $.Deferred();
-                            _.defer(call_stack_ended.resolve);
-                            return call_stack_ended;
-                        })
-                    ];
-                    // delay onchange after x2many views are loaded
-                    deferreds = deferreds.concat(_.compact(_.pluck(self.view.fields, 'is_loaded')));
-                    $.when.apply($, deferreds).then(function(data) {
-                        // update value only if loading_def has not been previously rejected
-                        loading_def.resolve().done(function(){
-                            if (! data.url) {
-                                self.set("configured", false);
-                            } else {
-                                self.internal_set_value(data.url);
-                            }
-                        }).then(def.resolve, def.reject);
+                    def = self.view.dataset.call('pad_generate_url', {
+                        context: {
+                            model: self.view.model,
+                            field_name: self.name,
+                            object_id: self.view.datarecord.id
+                        },
+                    }).then(function(data) {
+                        if (! data.url) {
+                            self.set("configured", false);
+                        } else {
+                            self.internal_set_value(data.url);
+                        }
                     });
-                } else {
-                    def.resolve();
                 }
                 def.then(function() {
                     value = self.get('value');

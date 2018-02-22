@@ -5,14 +5,13 @@
 # Translators:
 # David Hernandez <davidhernandez.ctam@gmail.com>, 2016
 # Jesús Alan Ramos Rodríguez <alan.ramos@jarsa.com.mx>, 2016
-# Raúl Pérez <raul@carbotecnia.com.mx>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-29 10:26+0000\n"
-"PO-Revision-Date: 2016-12-12 07:37+0000\n"
-"Last-Translator: Raúl Pérez <raul@carbotecnia.com.mx>\n"
+"PO-Revision-Date: 2016-07-08 16:46+0000\n"
+"Last-Translator: Jesús Alan Ramos Rodríguez <alan.ramos@jarsa.com.mx>\n"
 "Language-Team: Spanish (Mexico) (http://www.transifex.com/odoo/odoo-9/language/es_MX/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -554,12 +553,12 @@ msgstr "Proveedor de solicitud de compra"
 #: code:addons/purchase_requisition/purchase_requisition.py:431
 #, python-format
 msgid "Purchase Requisition created"
-msgstr "Requisición de compra creada"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisitions
 msgid "Purchase Requisitions (exclusive)"
-msgstr "Requisición de compra (exclusiva)"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.actions.act_window,name:purchase_requisition.action_purchase_requisition
@@ -582,13 +581,13 @@ msgstr "Cantidad"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_order_line_quantity_tendered
 msgid "Quantity Tendered"
-msgstr "Cantidad Licitada"
+msgstr ""
 
 #. module: purchase_requisition
 #: code:addons/purchase_requisition/purchase_requisition.py:201
 #, python-format
 msgid "RFQ created"
-msgstr "RFQ creado"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
@@ -608,12 +607,12 @@ msgstr "Solicitar un presupuesto"
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Requests for Quotation"
-msgstr "Solicitudes de cotización"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisitions
 msgid "Requests for Quotation Details"
-msgstr "Detalles de las solicitudes de cotización"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.purchase_order_search_inherit
@@ -640,17 +639,17 @@ msgstr "Fecha planificada"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_ordering_date
 msgid "Scheduled Ordering Date"
-msgstr "Fecha del pedido programado"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Search Call for Tenders"
-msgstr "Buscar solicitudes de licitación"
+msgstr ""
 
 #. module: purchase_requisition
 #: selection:purchase.requisition,exclusive:0
 msgid "Select multiple RFQ"
-msgstr "Seleccionar múltiples RFQ"
+msgstr ""
 
 #. module: purchase_requisition
 #: selection:purchase.requisition,exclusive:0
@@ -667,7 +666,7 @@ msgstr ""
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Send RFQ by Email"
-msgstr "Enviar RFQ por email"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -700,7 +699,7 @@ msgstr ""
 #. module: purchase_requisition
 #: model:ir.actions.act_window,name:purchase_requisition.purchase_line_tree
 msgid "Tender Lines"
-msgstr "Líneas de licitación"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_exclusive
@@ -710,7 +709,7 @@ msgstr ""
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "Terms and Conditions"
-msgstr "Términos y condiciones"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.model.fields,help:purchase_requisition.field_purchase_requisition_schedule_date
@@ -726,7 +725,7 @@ msgstr "No asignado"
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
 msgid "Unassigned  Requisition"
-msgstr "Requisición sin asignar"
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_message_unread
@@ -767,13 +766,13 @@ msgstr "Sitio Web historial de comunicación"
 #: code:addons/purchase_requisition/purchase_requisition.py:72
 #, python-format
 msgid "You can not confirm call because there is no product line."
-msgstr "No puede confirmar el pedido porque no hay línea de productos."
+msgstr ""
 
 #. module: purchase_requisition
 #: code:addons/purchase_requisition/purchase_requisition.py:249
 #, python-format
 msgid "You have already generate the purchase order(s)."
-msgstr "Ya ha generado orden(es) de compra."
+msgstr ""
 
 #. module: purchase_requisition
 #: code:addons/purchase_requisition/purchase_requisition.py:198
@@ -787,9 +786,9 @@ msgstr ""
 #: code:addons/purchase_requisition/purchase_requisition.py:258
 #, python-format
 msgid "You have no line selected for buying."
-msgstr "No tiene ninguna línea seleccionada para comprar."
+msgstr ""
 
 #. module: purchase_requisition
 #: model:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
 msgid "e.g. PO0025"
-msgstr "Ejem. PO0025"
+msgstr ""

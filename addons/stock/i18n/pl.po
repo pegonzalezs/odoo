@@ -3,7 +3,7 @@
 # * stock
 # 
 # Translators:
-# zbik2607 <darek@krokus.com.pl>, 2016-2017
+# zbik2607 <darek@krokus.com.pl>, 2016
 # Grzegorz Grzelak <grzegorz.grzelak@openglobe.pl>, 2015-2016
 # Piotr Szlązak <szlazakpiotr@gmail.com>, 2016
 msgid ""
@@ -11,14 +11,14 @@ msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-01-13 09:40+0000\n"
-"PO-Revision-Date: 2017-11-21 00:23+0000\n"
-"Last-Translator: Martin Trigaux\n"
+"PO-Revision-Date: 2016-10-19 16:59+0000\n"
+"Last-Translator: zbik2607 <darek@krokus.com.pl>\n"
 "Language-Team: Polish (http://www.transifex.com/odoo/odoo-9/language/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Language: pl\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. module: stock
 #: model:ir.model.fields,help:stock.field_stock_picking_state
@@ -529,7 +529,7 @@ msgstr "<strong>Produkt</strong>"
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.report_inventory
 msgid "<strong>Production Lot</strong>"
-msgstr "<strong>Partia</strong>"
+msgstr "<strong>dużo produkcji</strong>"
 
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.report_delivery_document
@@ -916,7 +916,7 @@ msgstr "Kod kreskowy"
 #. module: stock
 #: model:ir.ui.view,arch_db:stock.view_stock_config_settings
 msgid "Barcode Interface"
-msgstr "Interfejs kodów kreskowych"
+msgstr ""
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_picking_type_barcode_nomenclature_id
@@ -3877,12 +3877,6 @@ msgid "Original Move"
 msgstr "Pochodzenie przesunięcia"
 
 #. module: stock
-#: code:addons/stock/stock.py:576
-#, python-format
-msgid "Otherwise make sure the right stock/owner is set."
-msgstr ""
-
-#. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_warehouse_out_type_id
 msgid "Out Type"
 msgstr "Typ wydania"
@@ -6202,7 +6196,7 @@ msgstr "Cena jednostkowa"
 #: model:ir.ui.view,arch_db:stock.view_move_tree_receipt_picking
 #: model:ir.ui.view,arch_db:stock.view_move_tree_receipt_picking_board
 msgid "Unit of Measure"
-msgstr "Jednostka miary"
+msgstr "Jednostka Miary"
 
 #. module: stock
 #: model:ir.ui.menu,name:stock.menu_stock_uom_categ_form_action
@@ -6746,7 +6740,7 @@ msgstr "Nie można dzielić wykonanego przesunięcia"
 msgid ""
 "You do not have any products reserved for this picking.  Please click the 'Reserve' button\n"
 "                                to check if products are available."
-msgstr "Nie masz żadnych produktów zarezerwowanych do tego przesunięcia. Proszę kliknąć przycisk \"Rezerwuj\", aby sprawdzić, czy dostępne są produkty."
+msgstr ""
 
 #. module: stock
 #: code:addons/stock/stock.py:2595
@@ -6827,14 +6821,6 @@ msgstr ""
 #: code:addons/stock/stock.py:4447
 #, python-format
 msgid "You should provide a different serial number for each piece"
-msgstr ""
-
-#. module: stock
-#: code:addons/stock/product.py:349
-#, python-format
-msgid ""
-"You still have some active reordering rules on this product. Please archive "
-"or delete them first."
 msgstr ""
 
 #. module: stock

@@ -1,7 +1,6 @@
 #-*- coding:utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import babel
 import time
 from datetime import date
 from datetime import datetime
@@ -456,9 +455,7 @@ class hr_payslip(osv.osv):
         def _sum_salary_rule_category(localdict, category, amount):
             if category.parent_id:
                 localdict = _sum_salary_rule_category(localdict, category.parent_id, amount)
-            if category.code in localdict['categories'].dict:
-                amount += localdict['categories'].dict[category.code]
-            localdict['categories'].dict[category.code] = amount
+            localdict['categories'].dict[category.code] = category.code in localdict['categories'].dict and localdict['categories'].dict[category.code] + amount or amount
             return localdict
 
         class BrowsableObject(object):
@@ -640,7 +637,7 @@ class hr_payslip(osv.osv):
         ttyme = datetime.fromtimestamp(time.mktime(time.strptime(date_from, "%Y-%m-%d")))
         employee_id = empolyee_obj.browse(cr, uid, employee_id, context=context)
         res['value'].update({
-                    'name': _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(babel.dates.format_date(date=ttyme, format='MMMM-y', locale=context.get('lang', 'en_US')))),
+                    'name': _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(ttyme.strftime('%B-%Y'))),
                     'company_id': employee_id.company_id.id
         })
 
@@ -699,7 +696,7 @@ class hr_payslip(osv.osv):
         date_to = self.date_to
 
         ttyme = datetime.fromtimestamp(time.mktime(time.strptime(date_from, "%Y-%m-%d")))
-        self.name = _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(babel.dates.format_date(date=ttyme, format='MMMM-y', locale=self.env.context.get('lang', 'en_US'))))
+        self.name = _('Salary Slip of %s for %s') % (employee_id.name, tools.ustr(ttyme.strftime('%B-%Y')))
         self.company_id = employee_id.company_id
 
         if not self.env.context.get('contract') or not self.contract_id:

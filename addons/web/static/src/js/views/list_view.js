@@ -1027,11 +1027,9 @@ ListView.List = Class.extend( /** @lends instance.web.ListView.List# */{
                         '[data-id=' + record.get('id') + ']');
                 }
 
-                if ($row.length) {
-                    var $newRow = $(self.render_record(record));
-                    $newRow.find('.oe_list_record_selector input').prop('checked', !!$row.find('.oe_list_record_selector input').prop('checked'));
-                    $row.replaceWith($newRow);
-                }
+                var $newRow = $(self.render_record(record));
+                $newRow.find('.oe_list_record_selector input').prop('checked', !!$row.find('.oe_list_record_selector input').prop('checked'));
+                $row.replaceWith($newRow);
             },
             'add': function (ev, records, record, index) {
                 var $new_row = $(self.render_record(record));

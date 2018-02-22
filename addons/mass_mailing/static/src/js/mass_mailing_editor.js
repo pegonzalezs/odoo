@@ -228,15 +228,14 @@ snippets_editor.Class.include({
         var theme = ($("#o_left_bar .o_panel_body > div:not(.hidden)").attr("class") || "").replace(/^\s*|\s*o_mail_block[^\s]+\s*|\s*oe_snippet\s*|\s*ui-draggable\s*|\s*$/g, '');
         var $theme = $("#editable_area [data-snippet-theme]").removeAttr("data-snippet-theme").removeData("snippet-theme");
         $editable.children().first().attr("data-snippet-theme", theme);
-        // before jQuery 3, google chrome needs the `:not(:has(:visible))` part
-        $editable.find(":not(br):hidden:not(:has(:visible))").remove();
+        $editable.find(":not(br):hidden").remove();
     },
 });
 
 var _set_value = window.top.odoo[callback+"_updown"];
 var odoo_top = window.top.odoo;
 window.top.odoo[callback+"_updown"] = function (value, fields_values, field_name) {
-    if (!window || window.closed) {
+    if (!window) {
         delete odoo_top[callback+"_updown"];
         return;
     }
@@ -281,15 +280,4 @@ if ($("#editable_area").html().indexOf('on_change_model_and_list') !== -1) {
     $("#editable_area").empty();
 }
 
-// Adding compatibility for the outlook compliance of mailings.
-// Commit of such compatibility : a14f89c8663c9cafecb1cc26918055e023ecbe42
-options.registry.background.include({
-    start: function() {
-        this._super();
-        var $table_target = this.$target.find('table:first');
-        if ($table_target) {
-            this.$target = $table_target;
-        }
-    }
-});
 });

@@ -254,94 +254,75 @@
 
 <!-- Account Tax Tags -->
 
-    <record id="tag_th_01" model="account.account.tag">
-        <field name="name">Taxes to be paid</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_02" model="account.account.tag">
-        <field name="name">Withholding Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_03" model="account.account.tag">
-        <field name="name">Personal Withholding Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_04" model="account.account.tag">
-        <field name="name">Personal Withholding Tax (Service)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_05" model="account.account.tag">
-        <field name="name">Personal Withholding Tax (Other)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_06" model="account.account.tag">
-        <field name="name">Company Withholding Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_07" model="account.account.tag">
-        <field name="name">Company Withholding Tax (Service)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_08" model="account.account.tag">
-        <field name="name">Company Withholding Tax (Other)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_09" model="account.account.tag">
-        <field name="name">Value Added Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_10" model="account.account.tag">
-        <field name="name">Output VAT</field>
-        <field name="applicability">taxes</field>
-    </record>
-     <record id="tag_th_11" model="account.account.tag">
-        <field name="name">Input VAT</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_12" model="account.account.tag">
-        <field name="name">Taxable amounts</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_13" model="account.account.tag">
-        <field name="name">Withholding Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_14" model="account.account.tag">
-        <field name="name">Personal Withholding Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_15" model="account.account.tag">
-        <field name="name">Personal Withholding Tax (Service)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_16" model="account.account.tag">
-        <field name="name">Personal Withholding Tax (Other)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_17" model="account.account.tag">
-        <field name="name">Company Withholding Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_18" model="account.account.tag">
-        <field name="name">Company Withholding Tax (Service)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_19" model="account.account.tag">
-        <field name="name">Company Withholding Tax (Other)</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_20" model="account.account.tag">
-        <field name="name">Value Added Tax</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_21" model="account.account.tag">
-        <field name="name">Output VAT</field>
-        <field name="applicability">taxes</field>
-    </record>
-    <record id="tag_th_22" model="account.account.tag">
-        <field name="name">Input VAT</field>
-        <field name="applicability">taxes</field>
-    </record>
+<record id="tag_input_vat_7" model="account.account.tag">
+    <field name="name">Input VAT 7%</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_output_7" model="account.account.tag">
+    <field name="name">Output VAT 7%</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_comp_tax_trans_1" model="account.account.tag">
+    <field name="name">Company Tax 1% (Transportation)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_comp_tax_advt_2" model="account.account.tag">
+    <field name="name">Company Tax 2% (Advertising)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_comp_tax_serv_3" model="account.account.tag">
+    <field name="name">Company Tax 3% (Service)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_comp_tax_rent_5" model="account.account.tag">
+    <field name="name">Company Tax 5% (Rental)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_pers_tax_trans_1" model="account.account.tag">
+    <field name="name">Personal Tax 1% (Transportation)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_pers_tax_advt_2" model="account.account.tag">
+    <field name="name">Personal Tax 2% (Advertising)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_pers_tax_serv_3" model="account.account.tag">
+    <field name="name">Personal Tax 3% (Service)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_pers_tax_rent_5" model="account.account.tag">
+    <field name="name">Personal Tax 5% (Rental)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_income_tax_trans_1" model="account.account.tag">
+    <field name="name">Income Tax 1% (Transportation)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_income_tax_advt_2" model="account.account.tag">
+    <field name="name">Income Tax 2% (Advertising)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_income_tax_serv_3" model="account.account.tag">
+    <field name="name">Income Tax 3% (Service)</field>
+    <field name="applicability">taxes</field>
+</record>
+
+<record id="tag_income_tax_rent_5" model="account.account.tag">
+    <field name="name">Income Tax 5% (Rental)</field>
+    <field name="applicability">taxes</field>
+</record>
 
 <!-- TAXES -->
 
@@ -353,7 +334,7 @@
     <field name="account_id" ref="a_input_vat"/>
     <field name="refund_account_id" ref="a_input_vat"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_22'), ref('tag_th_11')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_input_vat_7')])]"/>
 </record>
 
 <record id="tax_output_vat" model="account.tax.template">
@@ -364,7 +345,7 @@
     <field name="account_id" ref="a_output_vat"/>
     <field name="refund_account_id" ref="a_output_vat"/>
     <field name="type_tax_use">sale</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_21'), ref('tag_th_10')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_output_7')])]"/>
 </record>
 
 <record id="tax_wht_co_1" model="account.tax.template">
@@ -375,7 +356,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_19'),ref('tag_th_08')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_comp_tax_trans_1')])]"/>
 </record>
 
 <record id="tax_wht_co_2" model="account.tax.template">
@@ -386,7 +367,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_19'),ref('tag_th_08')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_comp_tax_advt_2')])]"/>
 </record>
 
 <record id="tax_wht_co_3" model="account.tax.template">
@@ -397,7 +378,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_18'),ref('tag_th_07')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_comp_tax_serv_3')])]"/>
 </record>
 
 <record id="tax_wht_co_5" model="account.tax.template">
@@ -408,7 +389,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_19'),ref('tag_th_08')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_comp_tax_rent_5')])]"/>
 </record>
 
 <record id="tax_wht_pers_1" model="account.tax.template">
@@ -419,7 +400,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_05'),ref('tag_th_19')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_pers_tax_trans_1')])]"/>
 </record>
 
 <record id="tax_wht_pers_2" model="account.tax.template">
@@ -430,7 +411,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_05'),ref('tag_th_19')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_pers_tax_advt_2')])]"/>
 </record>
 
 <record id="tax_wht_pers_3" model="account.tax.template">
@@ -441,7 +422,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_15'),ref('tag_th_04')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_pers_tax_serv_3')])]"/>
 </record>
 
 <record id="tax_wht_pers_5" model="account.tax.template">
@@ -452,7 +433,7 @@
     <field name="account_id" ref="a_wht"/>
     <field name="refund_account_id" ref="a_wht"/>
     <field name="type_tax_use">purchase</field>
-    <field name="tag_ids" eval="[(6,0,[ref('tag_th_05'),ref('tag_th_19')])]"/>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_pers_tax_rent_5')])]"/>
 </record>
 
 <record id="tax_wht_income_1" model="account.tax.template">
@@ -463,6 +444,7 @@
     <field name="account_id" ref="a_wht_income"/>
     <field name="refund_account_id" ref="a_wht_income"/>
     <field name="type_tax_use">sale</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_income_tax_trans_1')])]"/>
 </record>
 
 <record id="tax_wht_income_2" model="account.tax.template">
@@ -473,6 +455,7 @@
     <field name="account_id" ref="a_wht_income"/>
     <field name="refund_account_id" ref="a_wht_income"/>
     <field name="type_tax_use">sale</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_income_tax_advt_2')])]"/>
 </record>
 
 <record id="tax_wht_income_3" model="account.tax.template">
@@ -483,6 +466,7 @@
     <field name="account_id" ref="a_wht_income"/>
     <field name="refund_account_id" ref="a_wht_income"/>
     <field name="type_tax_use">sale</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_income_tax_serv_3')])]"/>
 </record>
 
 <record id="tax_wht_income_5" model="account.tax.template">
@@ -493,6 +477,7 @@
     <field name="account_id" ref="a_wht_income"/>
     <field name="refund_account_id" ref="a_wht_income"/>
     <field name="type_tax_use">sale</field>
+    <field name="tag_ids" eval="[(6,0,[ref('tag_income_tax_rent_5')])]"/>
 </record>
 
 </odoo>

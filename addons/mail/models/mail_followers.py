@@ -60,16 +60,11 @@ class Followers(models.Model):
         default_subtypes = self.env['mail.message.subtype'].search([
             ('default', '=', True),
             '|', ('res_model', '=', res_model), ('res_model', '=', False)])
-        external_default_subtypes = default_subtypes.filtered(lambda subtype: not subtype.internal)
 
         if force_mode:
-            employee_pids = self.env['res.users'].sudo().search([('partner_id', 'in', partner_data.keys()), ('share', '=', False)]).mapped('partner_id').ids
             for pid, data in partner_data.iteritems():
                 if not data:
-                    if pid not in employee_pids:
-                        partner_data[pid] = external_default_subtypes.ids
-                    else:
-                        partner_data[pid] = default_subtypes.ids
+                    partner_data[pid] = default_subtypes.ids
             for cid, data in channel_data.iteritems():
                 if not data:
                     channel_data[cid] = default_subtypes.ids
@@ -112,31 +107,23 @@ class Followers(models.Model):
     # Modifying followers change access rights to individual documents. As the
     # cache may contain accessible/inaccessible data, one has to refresh it.
     #
-    @api.multi
-    def _invalidate_documents(self):
-        """ Invalidate the cache of the documents followed by ``self``. """
-        for record in self:
-            if record.res_id:
-                self.env[record.res_model].invalidate_cache(ids=[record.res_id])
-
     @api.model
     def create(self, vals):
         res = super(Followers, self).create(vals)
-        res._invalidate_documents()
+        self.invalidate_cache()
         return res
 
     @api.multi
     def write(self, vals):
-        if 'res_model' in vals or 'res_id' in vals:
-            self._invalidate_documents()
         res = super(Followers, self).write(vals)
-        self._invalidate_documents()
+        self.invalidate_cache()
         return res
 
     @api.multi
     def unlink(self):
-        self._invalidate_documents()
-        return super(Followers, self).unlink()
+        res = super(Followers, self).unlink()
+        self.invalidate_cache()
+        return res
 
     _sql_constraints = [
         ('mail_followers_res_partner_res_model_id_uniq', 'unique(res_model,res_id,partner_id)', 'Error, a partner cannot follow twice the same object.'),

@@ -29,7 +29,9 @@ var TranslationDataBase = Class.extend(/** @lends instance.TranslationDataBase# 
         });
         if (translation_bundle.lang_parameters) {
             this.parameters = translation_bundle.lang_parameters;
-            this.parameters.grouping = JSON.parse(this.parameters.grouping);
+            if (typeof(py) !== "undefined") {
+                this.parameters.grouping = py.eval(this.parameters.grouping);
+            }
         }
     },
     add_module_translation: function(mod) {

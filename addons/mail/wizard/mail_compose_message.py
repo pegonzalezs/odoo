@@ -12,17 +12,18 @@ from openerp.tools.safe_eval import safe_eval as eval
 EXPRESSION_PATTERN = re.compile('(\$\{.+?\})')
 
 
-def _reopen(self, res_id, model, context=None):
-    # save original model in context, because selecting the list of available
-    # templates requires a model in context
-    context = dict(context or {}, default_model=model)
+def _reopen(self, res_id, model):
     return {'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'view_type': 'form',
             'res_id': res_id,
             'res_model': self._name,
             'target': 'new',
-            'context': context,
+            # save original model in context, because selecting the list of available
+            # templates requires a model in context
+            'context': {
+                'default_model': model,
+            },
             }
 
 
@@ -396,7 +397,7 @@ class MailComposer(models.TransientModel):
             # generate the saved template
             record.write({'template_id': template.id})
             record.onchange_template_id_wrapper()
-            return _reopen(self, record.id, record.model, context=self._context)
+            return _reopen(self, record.id, record.model)
 
     #------------------------------------------------------
     # Template rendering

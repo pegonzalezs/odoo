@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-22 13:16+0000\n"
-"PO-Revision-Date: 2018-01-10 07:50+0000\n"
+"PO-Revision-Date: 2016-10-07 00:23+0000\n"
 "Last-Translator: Yoshi Tashiro <tashiro@roomsfor.hk>\n"
 "Language-Team: Japanese (http://www.transifex.com/odoo/odoo-9/language/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -60,20 +60,20 @@ msgstr "予約完了前"
 msgid ""
 "Choose an event and it will automatically create a registration for this "
 "event."
-msgstr "イベントを選択すると、自動的にこのイベントの登録が作成されます。"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_sale_order_line_event_ticket_id
 msgid ""
 "Choose an event ticket and it will automatically create a registration for "
 "this event ticket."
-msgstr "イベントチケットを選択すると、自動的にこのイベントチケットの登録が作成されます。"
+msgstr ""
 
 #. module: event_sale
 #: model:product.product,name:event_sale.event_2_product
 #: model:product.template,name:event_sale.event_2_product_product_template
 msgid "Conference on Business Applications"
-msgstr "ビジネスアプリケーションに関する会議"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket_create_uid
@@ -100,7 +100,7 @@ msgid ""
 "Define the number of available tickets. If you have too much registrations "
 "you will not be able to sell tickets anymore. Set 0 to ignore this rule set "
 "as unlimited."
-msgstr "使用可能なチケットの数を定義します。 あまりにも多くの登録がある場合は、もうチケットを販売することはできません。 このルールセットを無制限として無視するには、0を設定します。"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,help:event_sale.field_product_product_event_ok
@@ -108,7 +108,7 @@ msgstr "使用可能なチケットの数を定義します。 あまりにも�
 msgid ""
 "Determine if a product needs to create automatically an event registration "
 "at the confirmation of a sales order line."
-msgstr "受注明細の確認でイベント登録を自動的に作成する必要があるかどうかを判断します。"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket_display_name
@@ -138,7 +138,7 @@ msgstr "イベント"
 #. module: event_sale
 #: model:ir.actions.act_window,name:event_sale.action_sale_order_event_registration
 msgid "Event Registrations"
-msgstr "イベント登録"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_product_product_event_ok
@@ -155,12 +155,12 @@ msgstr "イベント參加"
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line_event_ticket_id
 #: model:ir.model.fields,field_description:event_sale.field_sale_order_line_event_ticket_id
 msgid "Event Ticket"
-msgstr "イベントチケット"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_product_product_event_ticket_ids
 msgid "Event Tickets"
-msgstr "イベントのチケット"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_sale_order_line_event_type_id
@@ -188,7 +188,7 @@ msgstr "ID"
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket_is_expired
 msgid "Is Expired"
-msgstr "期限切れです"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket___last_update
@@ -231,19 +231,19 @@ msgstr "名称"
 #: code:addons/event_sale/models/event.py:131
 #, python-format
 msgid "No more available seats for the ticket"
-msgstr "チケットの利用可能な席はもうありません"
+msgstr ""
 
 #. module: event_sale
 #: code:addons/event_sale/models/event.py:153
 #, python-format
 msgid "No more available seats for this ticket"
-msgstr "チケットの利用可能な席はもうありません"
+msgstr ""
 
 #. module: event_sale
 #: model:product.product,name:event_sale.event_0_product
 #: model:product.template,name:event_sale.event_0_product_product_template
 msgid "Open Days in Los Angeles"
-msgstr "ロサンゼルスでOpen Days"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.ui.view,arch_db:event_sale.view_event_registration_ticket_form
@@ -253,7 +253,7 @@ msgstr "起点"
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line_registration_id
 msgid "Original Registration"
-msgstr "オリジナル登録"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_line_phone
@@ -268,7 +268,7 @@ msgstr "価格"
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket_price_reduce
 msgid "Price Reduce"
-msgstr "価格低下"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_product_product
@@ -294,7 +294,7 @@ msgstr "参加者"
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_registration_editor_event_registration_ids
 msgid "Registrations to Edit"
-msgstr "編集登録"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model.fields,field_description:event_sale.field_event_event_ticket_seats_reserved
@@ -368,7 +368,7 @@ msgstr "サブスクリプション"
 #: model:product.product,name:event_sale.event_3_product
 #: model:product.template,name:event_sale.event_3_product_product_template
 msgid "Technical Training"
-msgstr "技術トレーニング"
+msgstr ""
 
 #. module: event_sale
 #: code:addons/event_sale/models/event.py:168
@@ -382,7 +382,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:event_sale.event_event_report_template_badge
 #: model:ir.ui.view,arch_db:event_sale.view_event_registration_ticket_search
 msgid "Ticket Type"
-msgstr "チケットタイプ"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.ui.view,arch_db:event_sale.view_event_form_inherit_ticket
@@ -420,14 +420,14 @@ msgstr ""
 #. module: event_sale
 #: model:ir.ui.view,arch_db:event_sale.view_event_registration_editor_form
 msgid "please give details about the registrations"
-msgstr "登録の詳細を教えてください"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_registration_editor
 msgid "registration.editor"
-msgstr "registration.editor"
+msgstr ""
 
 #. module: event_sale
 #: model:ir.model,name:event_sale.model_registration_editor_line
 msgid "registration.editor.line"
-msgstr "registration.editor.line"
+msgstr ""

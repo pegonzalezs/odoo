@@ -5,4 +5,3 @@ import crm_partner_assign
 import crm_lead
 import wizard
 import report
-from . import tests

@@ -272,9 +272,8 @@ var ScaleScreenWidget = ScreenWidget.extend({
         });
 
         this.$('.next,.buy-product').click(function(){
-            self.gui.show_screen(self.next_screen);
-            // add product *after* switching screen to scroll properly
             self.order_product();
+            self.gui.show_screen(self.next_screen);
         });
 
         queue.schedule(function(){
@@ -938,12 +937,10 @@ var ProductScreenWidget = ScreenWidget.extend({
        }
     },
 
-    show: function(reset){
+    show: function(){
         this._super();
-        if (reset) {
-            this.product_categories_widget.reset_category();
-            this.numpad.state.reset();
-        }
+        this.product_categories_widget.reset_category();
+        this.numpad.state.reset();
     },
 
     close: function(){
@@ -1018,10 +1015,10 @@ var ClientListScreenWidget = ScreenWidget.extend({
         this.$('.searchbox input').on('keypress',function(event){
             clearTimeout(search_timeout);
 
-            var searchbox = this;
+            var query = this.value;
 
             search_timeout = setTimeout(function(){
-                self.perform_search(searchbox.value, event.which === 13);
+                self.perform_search(query,event.which === 13);
             },70);
         });
 
@@ -1177,14 +1174,9 @@ var ClientListScreenWidget = ScreenWidget.extend({
             self.saved_client_details(partner_id);
         },function(err,event){
             event.preventDefault();
-            var error_body = _t('Your Internet connection is probably down.');
-            if (err.data) {
-                var except = err.data;
-                error_body = except.arguments && except.arguments[0] || except.message || error_body;
-            }
             self.gui.show_popup('error',{
                 'title': _t('Error: Could not Save Changes'),
-                'body': error_body,
+                'body': _t('Your Internet connection is probably down.'),
             });
         });
     },
@@ -1304,9 +1296,6 @@ var ClientListScreenWidget = ScreenWidget.extend({
             var new_height   = contents.height();
 
             if(!this.details_visible){
-                // resize client list to take into account client details
-                parent.height('-=' + new_height);
-
                 if(clickpos < scroll + new_height + 20 ){
                     parent.scrollTop( clickpos - 20 );
                 }else{
@@ -1324,16 +1313,6 @@ var ClientListScreenWidget = ScreenWidget.extend({
             contents.append($(QWeb.render('ClientDetailsEdit',{widget:this,partner:partner})));
             this.toggle_save_button();
 
-            // Browsers attempt to scroll invisible input elements
-            // into view (eg. when hidden behind keyboard). They don't
-            // seem to take into account that some elements are not
-            // scrollable.
-            contents.find('input').blur(function() {
-                setTimeout(function() {
-                    self.$('.window').scrollTop(0);
-                }, 0);
-            });
-
             contents.find('.image-uploader').on('change',function(event){
                 self.load_image_file(event.target.files[0],function(res){
                     if (res) {
@@ -1346,7 +1325,6 @@ var ClientListScreenWidget = ScreenWidget.extend({
             });
         } else if (visibility === 'hide') {
             contents.empty();
-            parent.height('100%');
             if( height > scroll ){
                 contents.css({height:height+'px'});
                 contents.animate({height:0},400,function(){
@@ -1853,7 +1831,7 @@ var PaymentScreenWidget = ScreenWidget.extend({
         var plines = order.get_paymentlines();
         for (var i = 0; i < plines.length; i++) {
             if (plines[i].get_type() === 'bank' && plines[i].get_amount() < 0) {
-                this.gui.show_popup('error',{
+                this.pos_widget.screen_selector.show_popup('error',{
                     'message': _t('Negative Bank Payment'),
                     'comment': _t('You cannot have a negative amount in a Bank payment. Use a cash payment method to return money to the customer.'),
                 });
@@ -1913,7 +1891,6 @@ var PaymentScreenWidget = ScreenWidget.extend({
         }
 
         order.initialize_validation_date();
-        order.finalized = true;
 
         if (order.is_to_invoice()) {
             var invoiced = this.pos.push_and_invoice_order(order);
@@ -1921,7 +1898,6 @@ var PaymentScreenWidget = ScreenWidget.extend({
 
             invoiced.fail(function(error){
                 self.invoicing = false;
-                order.finalized = false;
                 if (error.message === 'Missing Customer') {
                     self.gui.show_popup('confirm',{
                         'title': _t('Please select the Customer'),
@@ -2017,3 +1993,4 @@ return {
 };
 
 });
+

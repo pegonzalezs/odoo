@@ -9,7 +9,8 @@ from openerp import tools
 from openerp import SUPERUSER_ID
 from openerp.osv import osv, fields
 
-from openerp.addons.link_tracker.models.link_tracker import URL_REGEX
+
+URL_REGEX = r'(\bhref=[\'"]([^\'"]+)[\'"])'
 
 
 class MailMail(osv.Model):
@@ -62,14 +63,15 @@ class MailMail(osv.Model):
         body = super(MailMail, self).send_get_mail_body(cr, uid, ids, partner=partner, context=context)
         mail = self.browse(cr, uid, ids[0], context=context)
 
+        links_blacklist = ['/unsubscribe_from_list']
+
         if mail.mailing_id and body and mail.statistics_ids:
             for match in re.findall(URL_REGEX, mail.body_html):
+
                 href = match[0]
                 url = match[1]
 
-                parsed = urlparse.urlparse(url, scheme='http')
-
-                if parsed.scheme.startswith('http') and parsed.path.startswith('/r/'):
+                if not [s for s in links_blacklist if s in href]:
                     new_href = href.replace(url, url + '/m/' + str(mail.statistics_ids[0].id))
                     body = body.replace(href, new_href)
 

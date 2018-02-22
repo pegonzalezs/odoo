@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-22 13:16+0000\n"
-"PO-Revision-Date: 2017-11-18 00:01+0000\n"
+"POT-Creation-Date: 2016-01-15 10:41+0000\n"
+"PO-Revision-Date: 2016-09-09 08:51+0000\n"
 "Last-Translator: Martin Trigaux\n"
 "Language-Team: Swedish (http://www.transifex.com/odoo/odoo-9/language/sv/)\n"
 "MIME-Version: 1.0\n"
@@ -44,14 +44,14 @@ msgstr "<i>Arbeta i en rolig atmosfär</i>"
 #: model:hr.job,website_description:hr.job_marketing
 #: model:hr.job,website_description:hr.job_trainee
 msgid "<i>You are passionate</i>"
-msgstr "<i>Du är passionerad</i>"
+msgstr ""
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_cto
 #: model:hr.job,website_description:hr.job_developer
 #: model:hr.job,website_description:hr.job_trainee
 msgid "<i>You autonomously and quickly learn</i>"
-msgstr "<i>Du lär dig självständigt och snabbt</i>"
+msgstr ""
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_ceo
@@ -76,12 +76,12 @@ msgstr "<span>Rapporter</span>"
 #. module: hr
 #: model:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "<span>To Approve</span>"
-msgstr "<span>Att godkänna</span>"
+msgstr ""
 
 #. module: hr
 #: model:ir.ui.view,arch_db:hr.hr_department_view_kanban
 msgid "<span>To Do</span>"
-msgstr "<span>Att göra</span>"
+msgstr ""
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_ceo
@@ -188,7 +188,7 @@ msgstr "Underavdelning"
 #. module: hr
 #: model:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Citizenship & Other Information"
-msgstr "Medborgarskap och övrig information"
+msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_city
@@ -204,12 +204,12 @@ msgstr ""
 #: model:ir.actions.act_window,help:hr.act_employee_from_department
 #: model:ir.actions.act_window,help:hr.open_view_employee_list_my
 msgid "Click to add a new employee."
-msgstr "Klicka för att lägga till ny medarbetare"
+msgstr ""
 
 #. module: hr
 #: model:ir.actions.act_window,help:hr.open_module_tree_department
 msgid "Click to create a department."
-msgstr "Klicka för att skapa en avdelning"
+msgstr ""
 
 #. module: hr
 #: model:ir.actions.act_window,help:hr.view_department_form_installer
@@ -219,7 +219,7 @@ msgstr ""
 #. module: hr
 #: model:ir.actions.act_window,help:hr.action_hr_job
 msgid "Click to define a new job position."
-msgstr "Klicka för att definiera en ny arbetsroll"
+msgstr ""
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_ceo
@@ -272,7 +272,7 @@ msgstr "Konfiguration"
 #. module: hr
 #: model:hr.job,name:hr.job_consultant
 msgid "Consultant"
-msgstr "Konsult"
+msgstr ""
 
 #. module: hr
 #: model:ir.ui.view,arch_db:hr.view_employee_form
@@ -329,7 +329,7 @@ msgstr "Datum för senast publicerade meddelandet i loggen."
 #: model:hr.job,website_description:hr.job_hrm
 #: model:hr.job,website_description:hr.job_marketing
 msgid "Define a clear communication strategy"
-msgstr "Definiera en tydligt kommunikationsstrategi"
+msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee_calendar_id
@@ -436,22 +436,24 @@ msgstr "Struktur för de anställda"
 #. module: hr
 #: model:ir.ui.view,arch_db:hr.view_employee_category_list
 msgid "Employees Tags"
-msgstr "Medarbetares etiketter"
+msgstr ""
 
 #. module: hr
-#: constraint:hr.department:0
+#: code:addons/hr/hr.py:299 constraint:hr.department:0
+#, python-format
 msgid "Error! You cannot create recursive departments."
 msgstr "Fel! Rekursiv avdelningsstruktur ej tillåten."
 
 #. module: hr
-#: constraint:hr.employee:0
+#: code:addons/hr/hr.py:269 constraint:hr.employee:0
+#, python-format
 msgid "Error! You cannot create recursive hierarchy of Employee(s)."
 msgstr "Fel! Rekusriva hierarkier med anställda ej möjligt-"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job_no_of_recruitment
 msgid "Expected New Employees"
-msgstr "Förväntade nya medarbetare"
+msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_job_expected_employees
@@ -462,7 +464,7 @@ msgstr "Väntat antal anställda vid denna befattning efter en ny rekryteringsom
 #. module: hr
 #: model:hr.job,name:hr.job_developer
 msgid "Experienced Developer"
-msgstr "Erfaren utvecklare"
+msgstr ""
 
 #. module: hr
 #: selection:hr.employee,gender:0
@@ -505,11 +507,6 @@ msgstr "Följare (Partners)"
 #: model:ir.model.fields,field_description:hr.field_hr_employee_gender
 msgid "Gender"
 msgstr "Kön"
-
-#. module: hr
-#: model:web.tip,description:hr.hr_tip_1
-msgid "Get all applications related to this job position."
-msgstr ""
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_developer
@@ -646,7 +643,7 @@ msgstr "Om det aktiva fältet är satt till False, kommer det att du kan dölja 
 #: model:hr.job,website_description:hr.job_hrm
 #: model:hr.job,website_description:hr.job_marketing
 msgid "Improve our communication to customers"
-msgstr "Förbättra vår kundkommunikation"
+msgstr ""
 
 #. module: hr
 #: model:ir.ui.view,arch_db:hr.view_job_filter
@@ -670,7 +667,7 @@ msgstr ""
 #: model:hr.job,website_description:hr.job_hrm
 #: model:hr.job,website_description:hr.job_marketing
 msgid "Increase the visibility of the product"
-msgstr "Öka produktens synlighet"
+msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department_message_is_follower
@@ -748,6 +745,11 @@ msgstr "Senast meddelandedatum"
 #: model:ir.model.fields,field_description:hr.field_hr_job___last_update
 msgid "Last Modified on"
 msgstr "Senast redigerad"
+
+#. module: hr
+#: model:ir.model.fields,field_description:hr.field_res_users_last_website_so_id
+msgid "Last Online Sale Order"
+msgstr ""
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department_write_uid
@@ -880,7 +882,7 @@ msgstr "Namn"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_country_id
 msgid "Nationality (Country)"
-msgstr "Nationalitet (land)"
+msgstr ""
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_ceo
@@ -978,11 +980,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:hr.field_hr_department_parent_id
 msgid "Parent Department"
 msgstr "Huvudavdelning"
-
-#. module: hr
-#: model:ir.model,name:hr.model_res_partner
-msgid "Partner"
-msgstr "Företag"
 
 #. module: hr
 #: model:hr.job,website_description:hr.job_developer

@@ -27,5 +27,6 @@
         'base_data.xml',
         'account_chart_type.xml',
     ],
+    'license': 'GPL-3',
     'installable': True,
 }

@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 9.0c\n"
+"Project-Id-Version: Odoo Server 9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-12-07 10:39+0000\n"
-"PO-Revision-Date: 2016-12-07 10:39+0000\n"
+"POT-Creation-Date: 2015-09-29 10:26+0000\n"
+"PO-Revision-Date: 2015-09-29 10:26+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -21,6 +21,7 @@ msgid "&amp;bull;"
 msgstr ""
 
 #. module: report
+#: model:ir.ui.view,arch_db:report.layout
 #: model:ir.ui.view,arch_db:report.minimal_layout
 msgid "&lt;!DOCTYPE html&gt;"
 msgstr ""
@@ -141,7 +142,7 @@ msgid "B9  23  33 x 62 mm"
 msgstr ""
 
 #. module: report
-#: code:addons/report/models/report.py:274
+#: code:addons/report/models/report.py:257
 #, python-format
 msgid "Bad Report Reference"
 msgstr ""
@@ -194,7 +195,6 @@ msgid "Default paper format ?"
 msgstr ""
 
 #. module: report
-#: model:ir.model.fields,field_description:report.field_ir_qweb_field_barcode_display_name
 #: model:ir.model.fields,field_description:report.field_report_abstract_report_display_name
 #: model:ir.model.fields,field_description:report.field_report_display_name
 #: model:ir.model.fields,field_description:report.field_report_paperformat_display_name
@@ -257,7 +257,6 @@ msgid "Header spacing"
 msgstr ""
 
 #. module: report
-#: model:ir.model.fields,field_description:report.field_ir_qweb_field_barcode_id
 #: model:ir.model.fields,field_description:report.field_report_abstract_report_id
 #: model:ir.model.fields,field_description:report.field_report_id
 #: model:ir.model.fields,field_description:report.field_report_paperformat_id
@@ -270,7 +269,6 @@ msgid "Landscape"
 msgstr ""
 
 #. module: report
-#: model:ir.model.fields,field_description:report.field_ir_qweb_field_barcode___last_update
 #: model:ir.model.fields,field_description:report.field_report___last_update
 #: model:ir.model.fields,field_description:report.field_report_abstract_report___last_update
 #: model:ir.model.fields,field_description:report.field_report_paperformat___last_update
@@ -393,7 +391,6 @@ msgstr ""
 #: code:addons/report/static/src/js/qwebactionmanager.js:76
 #: code:addons/report/static/src/js/qwebactionmanager.js:84
 #: code:addons/report/static/src/js/qwebactionmanager.js:91
-#: code:addons/report/static/src/js/qwebactionmanager.js:96
 #: model:ir.model,name:report.model_report
 #, python-format
 msgid "Report"
@@ -442,7 +439,7 @@ msgid "This is a sample of an internal report."
 msgstr ""
 
 #. module: report
-#: code:addons/report/models/report.py:274
+#: code:addons/report/models/report.py:257
 #, python-format
 msgid "This report is not loaded into the database: %s."
 msgstr ""
@@ -462,18 +459,12 @@ msgid "Unable to find Wkhtmltopdf on this \n"
 msgstr ""
 
 #. module: report
-#: code:addons/report/models/report.py:164
-#, python-format
-msgid "Unable to find Wkhtmltopdf on this system. The PDF can not be created."
-msgstr ""
-
-#. module: report
 #: model:ir.ui.view,arch_db:report.external_layout_footer
 msgid "Website:"
 msgstr ""
 
 #. module: report
-#: code:addons/report/models/report.py:464
+#: code:addons/report/models/report.py:413
 #, python-format
 msgid "Wkhtmltopdf failed (error code: %s). Message: %s"
 msgstr ""
@@ -497,9 +488,12 @@ msgid "You should upgrade your version of\n"
 msgstr ""
 
 #. module: report
-#. openerp-web
-#: code:addons/report/static/src/js/qwebactionmanager.js:96
-#, python-format
-msgid "Your installation of Wkhtmltopdf seems to be broken. The \n"
-"report will be shown in html.<br><br><a href=\"http://wkhtmltopdf.org/\" target=\"_blank\">wkhtmltopdf.org</a>"
+#: model:ir.model,name:report.model_ir_actions_report_xml
+msgid "ir.actions.report.xml"
 msgstr ""
+
+#. module: report
+#: model:ir.model,name:report.model_report_abstract_report
+msgid "report.abstract_report"
+msgstr ""
+

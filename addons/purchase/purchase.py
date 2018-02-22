@@ -22,12 +22,7 @@ class PurchaseOrder(models.Model):
             amount_untaxed = amount_tax = 0.0
             for line in order.order_line:
                 amount_untaxed += line.price_subtotal
-                # FORWARDPORT UP TO 10.0
-                if order.company_id.tax_calculation_rounding_method == 'round_globally':
-                    taxes = line.taxes_id.compute_all(line.price_unit, line.order_id.currency_id, line.product_qty, product=line.product_id, partner=line.order_id.partner_id)
-                    amount_tax += sum(t.get('amount', 0.0) for t in taxes.get('taxes', []))
-                else:
-                    amount_tax += line.price_tax
+                amount_tax += line.price_tax
             order.update({
                 'amount_untaxed': order.currency_id.round(amount_untaxed),
                 'amount_tax': order.currency_id.round(amount_tax),
@@ -358,10 +353,6 @@ class PurchaseOrder(models.Model):
                 moves = order.order_line.filtered(lambda r: r.product_id.type in ['product', 'consu'])._create_stock_moves(picking)
                 move_ids = moves.action_confirm()
                 moves = self.env['stock.move'].browse(move_ids)
-                seq = 0
-                for move in sorted(moves, key=lambda move: move.date_expected):
-                    seq += 5
-                    move.sequence = seq
                 moves.force_assign()
         return True
 
@@ -402,7 +393,6 @@ class PurchaseOrder(models.Model):
         result = action.read()[0]
 
         #override the context to get rid of the default filtering on picking type
-        result.pop('id', None)
         result['context'] = {}
         pick_ids = sum([order.picking_ids.ids for order in self], [])
         #choose the view_mode accordingly
@@ -451,13 +441,10 @@ class PurchaseOrder(models.Model):
 
     @api.multi
     def action_set_date_planned(self):
-        # implementation for 9.0 where PO date_planned is not stored
-        date_planned = self.env.context.get('date_planned')
-        if not date_planned:
-            return
         for order in self:
+            #DO NOT FORWARD PORT
             for line in order.order_line:
-                line.update({'date_planned': date_planned})
+                line.update({'date_planned': order.date_planned})
 
 
 class PurchaseOrderLine(models.Model):
@@ -480,10 +467,7 @@ class PurchaseOrderLine(models.Model):
             qty = 0.0
             for inv_line in line.invoice_lines:
                 if inv_line.invoice_id.state not in ['cancel']:
-                    if inv_line.invoice_id.type == 'in_invoice':
-                        qty += inv_line.uom_id._compute_qty_obj(inv_line.uom_id, inv_line.quantity, line.product_uom)
-                    elif inv_line.invoice_id.type == 'in_refund':
-                        qty -= inv_line.uom_id._compute_qty_obj(inv_line.uom_id, inv_line.quantity, line.product_uom)
+                    qty += inv_line.uom_id._compute_qty_obj(inv_line.uom_id, inv_line.quantity, line.product_uom)
             line.qty_invoiced = qty
 
     @api.depends('order_id.state', 'move_ids.state')
@@ -616,16 +600,15 @@ class PurchaseOrderLine(models.Model):
             diff_quantity = line.product_qty
             for procurement in line.procurement_ids:
                 procurement_qty = procurement.product_uom._compute_qty_obj(procurement.product_uom, procurement.product_qty, line.product_uom)
-                if float_compare(procurement_qty, 0.0, precision_rounding=procurement.product_uom.rounding) > 0 and float_compare(diff_quantity, 0.0, precision_rounding=line.product_uom.rounding) > 0:
-                    tmp = template.copy()
-                    tmp.update({
-                        'product_uom_qty': min(procurement_qty, diff_quantity),
-                        'move_dest_id': procurement.move_dest_id.id,  #move destination is same as procurement destination
-                        'procurement_id': procurement.id,
-                        'propagate': procurement.rule_id.propagate,
-                    })
-                    done += moves.create(tmp)
-                    diff_quantity -= min(procurement_qty, diff_quantity)
+                tmp = template.copy()
+                tmp.update({
+                    'product_uom_qty': min(procurement_qty, diff_quantity),
+                    'move_dest_id': procurement.move_dest_id.id,  #move destination is same as procurement destination
+                    'procurement_id': procurement.id,
+                    'propagate': procurement.rule_id.propagate,
+                })
+                done += moves.create(tmp)
+                diff_quantity -= min(procurement_qty, diff_quantity)
             if float_compare(diff_quantity, 0.0, precision_rounding=line.product_uom.rounding) > 0:
                 template['product_uom_qty'] = diff_quantity
                 done += moves.create(template)
@@ -824,7 +807,7 @@ class ProcurementOrder(models.Model):
     @api.v8
     def _get_purchase_order_date(self, schedule_date):
         self.ensure_one()
-        seller_delay = int(self.product_id._select_seller(product_id=self.product_id, quantity=self.product_qty).delay)
+        seller_delay = int(self.product_id._select_seller(self.product_id).delay)
         return schedule_date - relativedelta(days=seller_delay)
 
     @api.v7
@@ -990,7 +973,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _get_buy_route(self):
-        buy_route = self.env.ref('purchase.route_warehouse0_buy', raise_if_not_found=False)
+        buy_route = self.env.ref('purchase.route_warehouse0_buy')
         if buy_route:
             return buy_route.ids
         return []

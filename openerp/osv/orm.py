@@ -123,13 +123,13 @@ def test_modifiers(what, expected):
         node = etree.fromstring(what)
         transfer_node_to_modifiers(node, modifiers)
         simplify_modifiers(modifiers)
-        dumped = json.dumps(modifiers)
-        assert dumped == expected, "%s != %s" % (dumped, expected)
+        json = json.dumps(modifiers)
+        assert json == expected, "%s != %s" % (json, expected)
     elif isinstance(what, dict):
         transfer_field_to_modifiers(what, modifiers)
         simplify_modifiers(modifiers)
-        dumped = json.dumps(modifiers)
-        assert dumped == expected, "%s != %s" % (dumped, expected)
+        json = json.dumps(modifiers)
+        assert json == expected, "%s != %s" % (json, expected)
 
 
 # To use this test:

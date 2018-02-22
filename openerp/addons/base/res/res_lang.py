@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import json
 import locale
 from locale import localeconv
 import logging
@@ -116,7 +115,7 @@ class lang(osv.osv):
     def _check_grouping(self, cr, uid, ids, context=None):
         for lang in self.browse(cr, uid, ids, context=context):
             try:
-                if not all(isinstance(x, int) for x in json.loads(lang.grouping)):
+                if not all(isinstance(x, int) for x in eval(lang.grouping)):
                     return False
             except Exception:
                 return False

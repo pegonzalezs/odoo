@@ -1836,9 +1836,8 @@ class stock_move(osv.osv):
     def _quantity_normalize(self, cr, uid, ids, name, args, context=None):
         uom_obj = self.pool.get('product.uom')
         res = {}
-        rounding_method = (context or {}).get('rounding_method', 'UP')
         for m in self.browse(cr, uid, ids, context=context):
-            res[m.id] = uom_obj._compute_qty_obj(cr, uid, m.product_uom, m.product_uom_qty, m.product_id.uom_id, rounding_method=rounding_method, context=context)
+            res[m.id] = uom_obj._compute_qty_obj(cr, uid, m.product_uom, m.product_uom_qty, m.product_id.uom_id, context=context)
         return res
 
     def _get_remaining_qty(self, cr, uid, ids, field_name, args, context=None):
@@ -2074,7 +2073,7 @@ class stock_move(osv.osv):
                 raise UserError(_('Cannot unreserve a done move'))
             quant_obj.quants_unreserve(cr, uid, move, context=context)
             if not context.get('no_state_change'):
-                if move.procure_method == 'make_to_order' or self.find_move_ancestors(cr, uid, move, context=context):
+                if self.find_move_ancestors(cr, uid, move, context=context):
                     self.write(cr, uid, [move.id], {'state': 'waiting'}, context=context)
                 else:
                     self.write(cr, uid, [move.id], {'state': 'confirmed'}, context=context)
@@ -2430,7 +2429,6 @@ class stock_move(osv.osv):
         main_domain = {}
         todo_moves = []
         operations = set()
-        ancestors_list = {}
         self.do_unreserve(cr, uid, [x.id for x in self.browse(cr, uid, ids, context=context) if x.reserved_quant_ids and x.state in ['confirmed', 'waiting', 'assigned']], context=context)
         for move in self.browse(cr, uid, ids, context=context):
             if move.state not in ('confirmed', 'waiting', 'assigned'):
@@ -2451,7 +2449,6 @@ class stock_move(osv.osv):
 
                 #if the move is preceeded, restrict the choice of quants in the ones moved previously in original move
                 ancestors = self.find_move_ancestors(cr, uid, move, context=context)
-                ancestors_list[move.id] = True if ancestors else False
                 if move.state == 'waiting' and not ancestors:
                     #if the waiting move hasn't yet any ancestor (PO/MO not confirmed yet), don't find any quant available in stock
                     main_domain[move.id] += [('id', '=', False)]
@@ -2494,10 +2491,6 @@ class stock_move(osv.osv):
                             lot_qty[lot] -= qty
                             move_qty -= qty
 
-
-        # Sort moves to reserve first the ones with ancestors, in case the same product is listed in
-        # different stock moves.
-        todo_moves.sort(key=lambda x: -1 if ancestors_list.get(x.id) else 0)
         for move in todo_moves:
             #then if the move isn't totally assigned, try to find quants without any specific domain
             if (move.state != 'assigned') and not context.get("reserve_only_ops"):
@@ -2532,8 +2525,7 @@ class stock_move(osv.osv):
             else:
                 if move.move_dest_id:
                     if move.propagate:
-                        if move.move_dest_id.state not in ('done', 'cancel'):
-                            self.action_cancel(cr, uid, [move.move_dest_id.id], context=context)
+                        self.action_cancel(cr, uid, [move.move_dest_id.id], context=context)
                     elif move.move_dest_id.state == 'waiting':
                         #If waiting, the chain will be broken and we are not sure if we can still wait for it (=> could take from stock instead)
                         self.write(cr, uid, [move.move_dest_id.id], {'state': 'confirmed'}, context=context)
@@ -2574,7 +2566,7 @@ class stock_move(osv.osv):
             if len(reserved_quant_ids) == 0 and move.partially_available:
                 vals['partially_available'] = False
             if move.state == 'assigned':
-                if move.procure_method == 'make_to_order' or self.find_move_ancestors(cr, uid, move, context=context):
+                if self.find_move_ancestors(cr, uid, move, context=context):
                     vals['state'] = 'waiting'
                 else:
                     vals['state'] = 'confirmed'
@@ -2890,11 +2882,9 @@ class stock_move(osv.osv):
 
         if context.get('source_location_id'):
             defaults['location_id'] = context['source_location_id']
+        new_move = self.copy(cr, uid, move.id, defaults, context=context)
 
         ctx = context.copy()
-        ctx['rounding_method'] = 'HALF-UP'
-        new_move = self.copy(cr, uid, move.id, defaults, context=ctx)
-
         ctx['do_not_propagate'] = True
         self.write(cr, uid, [move.id], {
             'product_uom_qty': move.product_uom_qty - uom_qty,
@@ -3021,11 +3011,6 @@ class stock_inventory(osv.osv):
         'filter': 'none',
     }
 
-    @api.onchange('location_id')
-    def onchange_location_id(self):
-        if self.location_id.company_id:
-            self.company_id = self.location_id.company_id
-
     def reset_real_qty(self, cr, uid, ids, context=None):
         inventory = self.browse(cr, uid, ids[0], context=context)
         line_ids = [line.id for line in inventory.line_ids]
@@ -3097,9 +3082,6 @@ class stock_inventory(osv.osv):
         location_ids = location_obj.search(cr, uid, [('id', 'child_of', [inventory.location_id.id])], context=context)
         domain = ' location_id in %s'
         args = (tuple(location_ids),)
-        if inventory.company_id.id:
-            domain += ' and company_id = %s'
-            args += (inventory.company_id.id,)
         if inventory.partner_id:
             domain += ' and owner_id = %s'
             args += (inventory.partner_id.id,)
@@ -3157,19 +3139,6 @@ class stock_inventory(osv.osv):
         if filter != 'pack':
             to_clean['value']['package_id'] = False
         return to_clean
-
-    def action_inventory_line_tree(self, cr, uid, ids, context=None):
-        inv = self.browse(cr, uid, ids, context=context)
-        action = self.pool['ir.model.data'].xmlid_to_object(cr, uid, 'stock.action_inventory_line_tree', context=context).read()[0]
-        action['context'] = {
-            'default_location_id': inv.location_id.id,
-            'default_product_id': inv.product_id.id,
-            'default_prod_lot_id': inv.lot_id.id,
-            'default_package_id': inv.package_id.id,
-            'default_partner_id': inv.partner_id.id,
-            'default_inventory_id': inv.id,
-        }
-        return action
 
     _constraints = [
         (_check_filter_product, 'The selected inventory options are not coherent.',
@@ -3229,8 +3198,6 @@ class stock_inventory_line(osv.osv):
         'prodlot_name': fields.related('prod_lot_id', 'name', type='char', string='Serial Number Name', store={
                                                                                             'stock.production.lot': (_get_prodlot_change, ['name'], 20),
                                                                                             'stock.inventory.line': (lambda self, cr, uid, ids, c={}: ids, ['prod_lot_id'], 20),}),
-        'inventory_location_id': fields.related(
-            'inventory_id', 'location_id', type='many2one', relation='stock.location', string='Location'),
     }
 
     _defaults = {
@@ -3286,64 +3253,35 @@ class stock_inventory_line(osv.osv):
             res['value']['product_qty'] = th_qty
         return res
 
-    # Do not forward port in 10.0 and beyond
-    def _get_move_values(self, cr, uid, inventory_line, qty, location_id, location_dest_id):
-        return {
+    def _resolve_inventory_line(self, cr, uid, inventory_line, context=None):
+        stock_move_obj = self.pool.get('stock.move')
+        quant_obj = self.pool.get('stock.quant')
+        diff = inventory_line.theoretical_qty - inventory_line.product_qty
+        if not diff:
+            return
+        #each theorical_lines where difference between theoretical and checked quantities is not 0 is a line for which we need to create a stock move
+        vals = {
             'name': _('INV:') + (inventory_line.inventory_id.name or ''),
             'product_id': inventory_line.product_id.id,
             'product_uom': inventory_line.product_uom_id.id,
-            'product_uom_qty': qty,
             'date': inventory_line.inventory_id.date,
             'company_id': inventory_line.inventory_id.company_id.id,
             'inventory_id': inventory_line.inventory_id.id,
             'state': 'confirmed',
             'restrict_lot_id': inventory_line.prod_lot_id.id,
             'restrict_partner_id': inventory_line.partner_id.id,
-            'location_id': location_id,
-            'location_dest_id': location_dest_id,
-        }
-
-    def _fixup_negative_quants(self, cr, uid, inventory_line):
-        """ This will handle the irreconciable quants created by a force availability followed by a
-        return. When generating the moves of an inventory line, we look for quants of this line's
-        product created to compensate a force availability. If there are some and if the quant
-        which it is propagated from is still in the same location, we move it to the inventory
-        adjustment location before getting it back. Getting the quantity from the inventory
-        location will allow the negative quant to be compensated.
-        """
-        quant_obj = self.pool.get('stock.quant')
-        stock_move_obj = self.pool.get('stock.move')
-        quant_ids = self._get_quants(cr, uid, inventory_line)
-        for quant in quant_obj.browse(cr, uid, quant_ids).filtered(lambda q: q.propagated_from_id.location_id.id == inventory_line.location_id.id):
-            # send the quantity to the inventory adjustment location
-            move_out_vals = self._get_move_values(cr, uid, inventory_line, quant.qty, inventory_line.location_id.id, inventory_line.product_id.property_stock_inventory.id)
-            move_out = stock_move_obj.create(cr, uid, move_out_vals)
-            move_out = stock_move_obj.browse(cr, uid, [move_out])
-            quant_obj.quants_reserve(cr, uid, [(quant, quant.qty)], move_out)
-            move_out.action_done()
-
-            # get back the quantity from the inventory adjustment location
-            move_in_vals = self._get_move_values(cr, uid, inventory_line, quant.qty, inventory_line.product_id.property_stock_inventory.id, inventory_line.location_id.id)
-            move_in = stock_move_obj.create(cr, uid, move_in_vals)
-            move_in = stock_move_obj.browse(cr, uid, [move_in])
-            move_in.action_done()
-
-    def _resolve_inventory_line(self, cr, uid, inventory_line, context=None):
-        stock_move_obj = self.pool.get('stock.move')
-        quant_obj = self.pool.get('stock.quant')
-        self._fixup_negative_quants(cr, uid, inventory_line)
-
-        if float_compare(inventory_line.theoretical_qty, inventory_line.product_qty, precision_rounding=inventory_line.product_id.uom_id.rounding) == 0:
-            return False
-        diff = inventory_line.theoretical_qty - inventory_line.product_qty
-
-        #each theorical_lines where difference between theoretical and checked quantities is not 0 is a line for which we need to create a stock move
+         }
         inventory_location_id = inventory_line.product_id.property_stock_inventory.id
-        if diff < 0:  # found more than expected
-            vals = self._get_move_values(cr, uid, inventory_line, abs(diff), inventory_location_id, inventory_line.location_id.id)
+        if diff < 0:
+            #found more than expected
+            vals['location_id'] = inventory_location_id
+            vals['location_dest_id'] = inventory_line.location_id.id
+            vals['product_uom_qty'] = -diff
         else:
-            vals = self._get_move_values(cr, uid, inventory_line, abs(diff), inventory_line.location_id.id, inventory_location_id)
-
+            #found less than expected
+            vals['location_id'] = inventory_line.location_id.id
+            vals['location_dest_id'] = inventory_location_id
+            vals['product_uom_qty'] = diff
         move_id = stock_move_obj.create(cr, uid, vals, context=context)
         move = stock_move_obj.browse(cr, uid, move_id, context=context)
         if diff > 0:
@@ -4058,15 +3996,15 @@ class stock_warehouse(osv.osv):
                     name = vals.get('name', warehouse.name)
                 self._handle_renaming(cr, uid, warehouse, name, vals.get('code', warehouse.code), context=context_with_inactive)
                 if warehouse.in_type_id:
-                    seq_obj.write(cr, uid, warehouse.in_type_id.sequence_id.id, {'name': name + _(' Sequence in'), 'prefix': vals.get('code', warehouse.code) + '/IN/'}, context=context)
+                    seq_obj.write(cr, uid, warehouse.in_type_id.sequence_id.id, {'name': name + _(' Sequence in'), 'prefix': vals.get('code', warehouse.code) + '\IN\\'}, context=context)
                 if warehouse.out_type_id:
-                    seq_obj.write(cr, uid, warehouse.out_type_id.sequence_id.id, {'name': name + _(' Sequence out'), 'prefix': vals.get('code', warehouse.code) + '/OUT/'}, context=context)
+                    seq_obj.write(cr, uid, warehouse.out_type_id.sequence_id.id, {'name': name + _(' Sequence out'), 'prefix': vals.get('code', warehouse.code) + '\OUT\\'}, context=context)
                 if warehouse.pack_type_id:
-                    seq_obj.write(cr, uid, warehouse.pack_type_id.sequence_id.id, {'name': name + _(' Sequence packing'), 'prefix': vals.get('code', warehouse.code) + '/PACK/'}, context=context)
+                    seq_obj.write(cr, uid, warehouse.pack_type_id.sequence_id.id, {'name': name + _(' Sequence packing'), 'prefix': vals.get('code', warehouse.code) + '\PACK\\'}, context=context)
                 if warehouse.pick_type_id:
-                    seq_obj.write(cr, uid, warehouse.pick_type_id.sequence_id.id, {'name': name + _(' Sequence picking'), 'prefix': vals.get('code', warehouse.code) + '/PICK/'}, context=context)
+                    seq_obj.write(cr, uid, warehouse.pick_type_id.sequence_id.id, {'name': name + _(' Sequence picking'), 'prefix': vals.get('code', warehouse.code) + '\PICK\\'}, context=context)
                 if warehouse.int_type_id:
-                    seq_obj.write(cr, uid, warehouse.int_type_id.sequence_id.id, {'name': name + _(' Sequence internal'), 'prefix': vals.get('code', warehouse.code) + '/INT/'}, context=context)
+                    seq_obj.write(cr, uid, warehouse.int_type_id.sequence_id.id, {'name': name + _(' Sequence internal'), 'prefix': vals.get('code', warehouse.code) + '\INT\\'}, context=context)
         if vals.get('resupply_wh_ids') and not vals.get('resupply_route_ids'):
             for cmd in vals.get('resupply_wh_ids'):
                 if cmd[0] == 6:
@@ -4340,6 +4278,7 @@ class stock_package(osv.osv):
         context = dict(context or {}, active_ids=ids)
         return self.pool.get("report").get_action(cr, uid, ids, 'stock.report_package_barcode_small', context=context)
     
+    
     def unpack(self, cr, uid, ids, context=None):
         quant_obj = self.pool.get('stock.quant')
         for package in self.browse(cr, uid, ids, context=context):
@@ -4347,6 +4286,8 @@ class stock_package(osv.osv):
             quant_obj.write(cr, SUPERUSER_ID, quant_ids, {'package_id': package.parent_id.id or False}, context=context)
             children_package_ids = [child_package.id for child_package in package.children_ids]
             self.write(cr, uid, children_package_ids, {'parent_id': package.parent_id.id or False}, context=context)
+        #delete current package since it contains nothing anymore
+        self.unlink(cr, uid, ids, context=context)
         return self.pool.get('ir.actions.act_window').for_xml_id(cr, uid, 'stock', 'action_package_view', context=context)
 
     def get_content(self, cr, uid, ids, context=None):

@@ -268,7 +268,7 @@ class product_pricelist(osv.osv):
 class product_pricelist_item(osv.osv):
     _name = "product.pricelist.item"
     _description = "Pricelist item"
-    _order = "applied_on, min_quantity desc, categ_id desc, id"
+    _order = "applied_on, min_quantity desc, categ_id desc"
 
     def _check_recursion(self, cr, uid, ids, context=None):
         for obj_list in self.browse(cr, uid, ids, context=context):
@@ -324,12 +324,10 @@ class product_pricelist_item(osv.osv):
         'company_id': fields.related('pricelist_id','company_id',type='many2one',
             readonly=True, relation='res.company', string='Company', store={
                 'product.pricelist': (_get_product_pricelist, ['company_id'], 30),
-                'product.pricelist.item': (lambda self, cr, uid, ids, c=None: ids, ['pricelist_id'], 30),
             }),
         'currency_id': fields.related('pricelist_id', 'currency_id', type='many2one',
             readonly=True, relation='res.currency', string='Currency', store={
                 'product.pricelist': (_get_product_pricelist, ['currency_id'], 30),
-                'product.pricelist.item': (lambda self, cr, uid, ids, c=None: ids, ['pricelist_id'], 30),
             }),
         'date_start': fields.date('Start Date', help="Starting date for the pricelist item validation"),
         'date_end': fields.date('End Date', help="Ending valid for the pricelist item validation"),

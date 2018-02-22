@@ -11,7 +11,6 @@ class ReportPartnerLedger(models.AbstractModel):
 
     def _lines(self, data, partner):
         full_account = []
-        currency = self.env['res.currency']
         query_get_data = self.env['account.move.line'].with_context(data['form'].get('used_context', {}))._query_get()
         reconcile_clause = "" if data['form']['reconciled'] else ' AND "account_move_line".reconciled = false '
         params = [partner.id, tuple(data['computed']['move_state']), tuple(data['computed']['account_ids'])] + query_get_data[2]
@@ -41,7 +40,6 @@ class ReportPartnerLedger(models.AbstractModel):
             )
             sum += r['debit'] - r['credit']
             r['progress'] = sum
-            r['currency_id'] = currency.browse(r.get('currency_id'))
             full_account.append(r)
         return full_account
 

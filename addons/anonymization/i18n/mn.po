@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-07 14:40+0000\n"
-"PO-Revision-Date: 2017-08-04 02:07+0000\n"
-"Last-Translator: Otgonbayar.A <gobi.mn@gmail.com>\n"
+"PO-Revision-Date: 2015-11-15 12:15+0000\n"
+"Last-Translator: Martin Trigaux\n"
 "Language-Team: Mongolian (http://www.transifex.com/odoo/odoo-9/language/mn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -29,7 +29,7 @@ msgstr "Нэр мэдэгдэхгүй болгосон түүх"
 #: model:ir.actions.act_window,name:anonymization.action_ir_model_fields_anonymize_wizard
 #: model:ir.ui.view,arch_db:anonymization.view_ir_model_fields_anonymize_wizard_form
 msgid "Anonymize Database"
-msgstr "Өгөгдлийн баазын нэрийг мэдэгдэхгүй болгох"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.ui.menu,name:anonymization.menu_administration_anonymization_wizard
@@ -40,7 +40,7 @@ msgstr "Өгөгдлийн баазыг нэр мэдэгдэхгүй болго
 #: selection:ir.model.fields.anonymization,state:0
 #: selection:ir.model.fields.anonymize.wizard,state:0
 msgid "Anonymized"
-msgstr "Нэр мэдэгдэхгүй болгосон"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.ui.view,arch_db:anonymization.view_ir_model_fields_anonymization_form
@@ -58,7 +58,7 @@ msgstr "Нэр мэдэгдэхгүй болсон талбарууд"
 #: code:addons/anonymization/anonymization.py:431
 #, python-format
 msgid "Anonymized value can not be empty."
-msgstr "Нэр мэдэгдэхгүй болгосон утга хоосон байх боломжгүй."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:283
@@ -66,7 +66,7 @@ msgstr "Нэр мэдэгдэхгүй болгосон утга хоосон б�
 msgid ""
 "Before executing the anonymization process, you should make a backup of your"
 " database."
-msgstr "Нэрийг мэдэгдэхгүй болгохоос өмнө өгөгдлийн баазыг нөөцлөх шаардлагатай."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:427
@@ -74,7 +74,7 @@ msgstr "Нэрийг мэдэгдэхгүй болгохоос өмнө өгөг
 msgid ""
 "Cannot anonymize fields of these types: binary, many2many, many2one, "
 "one2many, reference."
-msgstr "Дараах төрлийн талбаруудын нэрийг мэдэгдэхгүй болгох боломжгүй: binary, many2many, many2one, one2many, reference."
+msgstr ""
 
 #. module: anonymization
 #: selection:ir.model.fields.anonymization,state:0
@@ -106,7 +106,7 @@ msgstr "Өгөгдлийн Баазыг Нэргүйжүүлэх"
 #. module: anonymization
 #: model:ir.ui.menu,name:anonymization.menu_administration_anonymization
 msgid "Database anonymization"
-msgstr "Өгөгдлийн баазыг нэргүйжүүлэх"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_history_date
@@ -141,7 +141,7 @@ msgstr "Алдаа!"
 #. module: anonymization
 #: selection:ir.model.fields.anonymization.history,state:0
 msgid "Exception occured"
-msgstr "Саатал гарлаа"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymize_wizard_file_export
@@ -194,7 +194,7 @@ msgstr "Импортлох"
 msgid ""
 "It is not possible to reverse the anonymization process without supplying "
 "the anonymization export file."
-msgstr "Нэргүйжүүлсэн экспорт файлгүйгээр нэргүйжүүлэлтийг буцаах боломжгүй."
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization___last_update
@@ -261,7 +261,7 @@ msgstr "Хүсэлт"
 #. module: anonymization
 #: model:ir.ui.view,arch_db:anonymization.view_ir_model_fields_anonymize_wizard_form
 msgid "Reverse the Database Anonymization"
-msgstr "Өгөгдлийн баазын нэргүйжүүлэлтийг буцаах"
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,field_description:anonymization.field_ir_model_fields_anonymization_migration_fix_sequence
@@ -296,7 +296,7 @@ msgid ""
 "The database anonymization is currently in an unstable state. Some fields "
 "are anonymized, while some fields are not anonymized. You should try to "
 "solve this problem before trying to create, write or delete fields."
-msgstr "Өгөгдлийн баазын нэргүйжүүлэлт одоогоор тогтворгүй байдалд байна. Зарим талбарыг нэргүйжүүлсэн ч заримыг нь чадаагүй. Талбар үүсгэх, бичих, устгахаас өмнө энэ асуудлыг шийднэ үү."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:341
@@ -305,7 +305,7 @@ msgid ""
 "The database anonymization is currently in an unstable state. Some fields "
 "are anonymized, while some fields are not anonymized. You should try to "
 "solve this problem before trying to do anything else."
-msgstr "Өгөгдлийн баазын нэргүйжүүлэлт одоогоор тогтворгүй байдалд байна. Зарим талбарыг нэргүйжүүлсэн ч заримыг нь чадаагүй. Өөр үйлдэл хийхээс өмнө энэ асуудлыг шийднэ үү."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:374
@@ -315,13 +315,13 @@ msgid ""
 "The database anonymization is currently in an unstable state. Some fields "
 "are anonymized, while some fields are not anonymized. You should try to "
 "solve this problem before trying to do anything."
-msgstr "Өгөгдлийн баазын нэргүйжүүлэлт одоогоор тогтворгүй байдалд байна. Зарим талбарыг нэргүйжүүлсэн ч заримыг нь чадаагүй. Үйлдэл хийхээс өмнө энэ асуудлыг шийднэ үү."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:372
 #, python-format
 msgid "The database is currently anonymized, you cannot anonymize it again."
-msgstr "Одоогоор өгөгдлийн баазыг нэргүйжүүлсэн байна, та үүнийг дахиж нэргүйжүүлэх боломжгүй."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:72
@@ -329,7 +329,7 @@ msgstr "Одоогоор өгөгдлийн баазыг нэргүйжүүлс�
 msgid ""
 "The database is currently anonymized, you cannot create, modify or delete "
 "fields."
-msgstr "Одоогоор өгөгдлийн баазыг нэргүйжүүлсэн байна, та талбар үүсгэх, өөрчлөх, устгах боломжгүй."
+msgstr ""
 
 #. module: anonymization
 #: code:addons/anonymization/anonymization.py:510
@@ -337,14 +337,14 @@ msgstr "Одоогоор өгөгдлийн баазыг нэргүйжүүлс�
 msgid ""
 "The database is not currently anonymized, you cannot reverse the "
 "anonymization."
-msgstr "Одоогоор өгөгдлийн баазыг нэргүйжүүлээгүй байна, тиймээс нэргүйжүүлэлтийг буцаах боломжгүй."
+msgstr ""
 
 #. module: anonymization
 #: model:ir.model.fields,help:anonymization.field_ir_model_fields_anonymize_wizard_file_import
 msgid ""
 "This is the file created by the anonymization process. It should have the "
 "'.pickle' extention."
-msgstr "Энэ бол нэргүйжүүлэлтээс үүссэн файл. '.pickle' өргөтгөлтэй байх ёстой."
+msgstr ""
 
 #. module: anonymization
 #: selection:ir.model.fields.anonymize.wizard,state:0
@@ -356,7 +356,7 @@ msgstr "Тогтмол биш"
 #: sql_constraint:ir.model.fields.anonymization:0
 #, python-format
 msgid "You cannot have two fields with the same name on the same object!"
-msgstr "Нэг обьект дээр ижил нэртэй хоёр талбар байх боломжгүй!"
+msgstr ""
 
 #. module: anonymization
 #: selection:ir.model.fields.anonymization.history,direction:0

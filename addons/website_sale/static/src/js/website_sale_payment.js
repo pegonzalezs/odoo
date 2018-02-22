@@ -6,10 +6,9 @@ var ajax = require('web.ajax');
 $(document).ready(function () {
     // If option is enable
     if ($("#checkbox_cgv").length) {
-      $("#checkbox_cgv").change(function() {
+      $("#checkbox_cgv").click(function() {
         $("div.oe_sale_acquirer_button").find('input, button').prop("disabled", !this.checked);
       });
-      $('#checkbox_cgv').trigger('change');
     }
 
     // When choosing an acquirer, display its Pay Now button

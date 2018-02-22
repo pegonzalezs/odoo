@@ -958,8 +958,7 @@ def trans_generate(lang, modules, cr):
     def get_module_from_path(path):
         for (mp, rec) in path_list:
             mp = os.path.join(mp, '')
-            dirname = os.path.join(os.path.dirname(path), '')
-            if rec and path.startswith(mp) and dirname != mp:
+            if rec and path.startswith(mp) and os.path.dirname(path) != mp:
                 path = path[len(mp):]
                 return path.split(os.path.sep)[0]
         return 'base' # files that are not in a module are considered as being in 'base' module

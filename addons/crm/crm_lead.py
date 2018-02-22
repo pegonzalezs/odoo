@@ -729,11 +729,9 @@ class crm_lead(format_address, osv.osv):
         return True
 
     def _lead_create_contact(self, cr, uid, lead, name, is_company, parent_id=False, context=None):
-        if context is None:
-            context = {}
         partner = self.pool.get('res.partner')
         vals = {'name': name,
-            'user_id': context.get('default_user_id') or lead.user_id.id,
+            'user_id': lead.user_id.id,
             'comment': lead.description,
             'team_id': lead.team_id.id or False,
             'parent_id': parent_id,
@@ -891,9 +889,6 @@ class crm_lead(format_address, osv.osv):
             context['default_team_id'] = vals.get('team_id')
         if vals.get('user_id') and 'date_open' not in vals:
             vals['date_open'] = fields.datetime.now()
-        if context.get('default_partner_id') and not vals.get('email_from'):
-            partner_id = self.pool['res.partner'].browse(cr, uid, context.get('default_partner_id'))
-            vals['email_from'] = partner_id.email
 
         # context: no_log, because subtype already handle this
         create_context = dict(context, mail_create_nolog=True)
@@ -1147,7 +1142,7 @@ Update your business card, phone book, social media,... Send an email right now 
                     res['closing']['today'] += 1
                 if date_deadline >= date.today() and date_deadline <= date.today() + timedelta(days=7):
                     res['closing']['next_7_days'] += 1
-                if date_deadline < date.today() and not opp['date_closed']:
+                if date_deadline < date.today():
                     res['closing']['overdue'] += 1
 
             # Next activities
@@ -1158,7 +1153,7 @@ Update your business card, phone book, social media,... Send an email right now 
                     res['activity']['today'] += 1
                 if date_action >= date.today() and date_action <= date.today() + timedelta(days=7):
                     res['activity']['next_7_days'] += 1
-                if date_action < date.today() and not opp['date_closed']:
+                if date_action < date.today():
                     res['activity']['overdue'] += 1
 
             # Won in Opportunities

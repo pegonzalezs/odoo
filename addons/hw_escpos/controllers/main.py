@@ -86,15 +86,10 @@ class EscposDriver(Thread):
             printers = usb.core.find(find_all=True, idVendor=0x0519)
 
         for printer in printers:
-            try:
-                description = usb.util.get_string(printer, 256, printer.iManufacturer) + " " + usb.util.get_string(printer, 256, printer.iProduct)
-            except Exception as e:
-                _logger.error("Can not get printer description: %s" % (e.message or repr(e)))
-                description = 'Unknown printer'
             connected.append({
                 'vendor': printer.idVendor,
                 'product': printer.idProduct,
-                'name': description
+                'name': usb.util.get_string(printer, 256, printer.iManufacturer) + " " + usb.util.get_string(printer, 256, printer.iProduct)
             })
 
         return connected

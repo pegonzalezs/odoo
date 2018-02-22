@@ -66,8 +66,7 @@ return Widget.extend({
             values = [];
             if (this.groupbys.length === 1) data_pt.value = [data_pt.value];
             for (j = 0; j < data_pt.value.length; j++) {
-                var field = _.isArray(data_pt.grouped_on) ? data_pt.grouped_on[j] : data_pt.grouped_on;
-                values[j] = this.sanitize_value(data_pt.value[j], field);
+                values[j] = this.sanitize_value(data_pt.value[j], data_pt.grouped_on[j]);
             }
             value = is_count ? data_pt.length : data_pt.aggregates[this.measure];
             this.data.push({
@@ -99,9 +98,7 @@ return Widget.extend({
             }));
         } else {
             var chart = this['display_' + this.mode]();
-            if (chart && chart.tooltip.chartContainer) {
-                chart.tooltip.chartContainer(this.$el[0]);
-            }
+            chart.tooltip.chartContainer(this.$el[0]);
         }
     },
     display_bar: function () {
@@ -168,7 +165,7 @@ return Widget.extend({
         var chart = nv.models.multiBarChart();
         var maxVal = _.max(values, function(v) {return v.y})
         chart.options({
-          margin: {left: 12 * String(maxVal && maxVal.y || 10000000).length, bottom: 60},
+          margin: {left: 12 * String(maxVal && maxVal.y || 10000000).length},
           delay: 250,
           transition: 10,
           showLegend: _.size(data) <= MAX_LEGEND_LENGTH,
@@ -177,7 +174,7 @@ return Widget.extend({
           rightAlignYAxis: false,
           stacked: this.stacked,
           reduceXTicks: false,
-          rotateLabels: -20,
+          // rotateLabels: 40,
           showControls: (this.groupbys.length > 1)
         });
         chart.yAxis.tickFormat(function(d) { return formats.format_value(d, { type : 'float' });});

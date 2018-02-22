@@ -80,11 +80,10 @@ class SaleAdvancePaymentInv(models.TransientModel):
         else:
             amount = self.amount
             name = _('Down Payment')
-        taxes = self.product_id.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id)
-        if order.fiscal_position_id and taxes:
-            tax_ids = order.fiscal_position_id.map_tax(taxes).ids
+        if order.fiscal_position_id and self.product_id.taxes_id:
+            tax_ids = order.fiscal_position_id.map_tax(self.product_id.taxes_id).ids
         else:
-            tax_ids = taxes.ids
+            tax_ids = self.product_id.taxes_id.ids
 
         invoice = inv_obj.create({
             'name': order.client_order_ref or order.name,
@@ -139,11 +138,10 @@ class SaleAdvancePaymentInv(models.TransientModel):
                     raise UserError(_('The product used to invoice a down payment should have an invoice policy set to "Ordered quantities". Please update your deposit product to be able to create a deposit invoice.'))
                 if self.product_id.type != 'service':
                     raise UserError(_("The product used to invoice a down payment should be of type 'Service'. Please use another product or update this product."))
-                taxes = self.product_id.taxes_id.filtered(lambda r: not order.company_id or r.company_id == order.company_id)
-                if order.fiscal_position_id and taxes:
-                    tax_ids = order.fiscal_position_id.map_tax(taxes).ids
+                if order.fiscal_position_id and self.product_id.taxes_id:
+                    tax_ids = order.fiscal_position_id.map_tax(self.product_id.taxes_id).ids
                 else:
-                    tax_ids = taxes.ids
+                    tax_ids = self.product_id.taxes_id.ids
                 so_line = sale_line_obj.create({
                     'name': _('Advance: %s') % (time.strftime('%m %Y'),),
                     'price_unit': amount,

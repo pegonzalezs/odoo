@@ -75,7 +75,7 @@ class pad_common(osv.osv_memory):
         if url:
             try:
                 page = urllib2.urlopen('%s/export/html'%url).read()
-                mo = re.search('<body>(.*)</body>', page, re.DOTALL)
+                mo = re.search('<body>(.*)</body>',page)
                 if mo:
                     content = mo.group(1)
             except:
@@ -113,7 +113,7 @@ class pad_common(osv.osv_memory):
     # Set the pad content in vals
     def _set_pad_value(self, cr, uid, vals, context=None):
         for k,v in vals.items():
-            field = self._fields.get(k)
+            field = self._fields[k]
             if hasattr(field,'pad_content_field'):
                 vals[field.pad_content_field] = self.pad_get_content(cr, uid, v, context=context)        
 

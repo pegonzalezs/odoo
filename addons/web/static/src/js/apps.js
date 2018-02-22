@@ -62,7 +62,7 @@ var Apps = Widget.extend({
     },
 
     destroy: function() {
-        $(window).off("message." + this.uniq);
+        $(window).off("message.apps");
         if (this.$ifr) {
             this.$ifr.remove();
             this.$ifr = null;
@@ -114,12 +114,10 @@ var Apps = Widget.extend({
 
                 var qs = (session.debug ? 'debug&' : '') + 'db=' + client.dbname;
                 var u = client.origin + '/apps/embed/client?' + qs;
-
-                var css = {width: '100%', height: '750px'};
+                var css = {width: '100%', height: '400px'};
                 self.$ifr = $('<iframe>').attr('src', u);
 
-                self.uniq = _.uniqueId('apps');
-                $(window).on("message." + self.uniq, self.proxy('_on_message'));
+                $(window).on("message.apps", self.proxy('_on_message'));
 
                 self.on('message:ready', self, function(m) {
                     var w = this.$ifr[0].contentWindow;

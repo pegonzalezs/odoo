@@ -4,14 +4,13 @@
 # 
 # Translators:
 # Arma Gedonsky <armagedonsky@hot.ee>, 2016
-# Rivo Zängov <eraser@eraser.ee>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo 9.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-06-22 07:25+0000\n"
-"PO-Revision-Date: 2018-02-01 15:10+0000\n"
-"Last-Translator: Rivo Zängov <eraser@eraser.ee>\n"
+"PO-Revision-Date: 2016-09-23 09:41+0000\n"
+"Last-Translator: Martin Trigaux\n"
 "Language-Team: Estonian (http://www.transifex.com/odoo/odoo-9/language/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -119,7 +118,7 @@ msgid ""
 "[1] See https://github.com/odoo/odoo/pull/6470 for detail.\n"
 "\n"
 "    "
-msgstr "\n\nÜlevaade:\n---------\n\n* Kontoplaan ja maksude näidis Jaapani ettevõtetele. \n* See arvatavasti ei hõlma kõiki teie ettevõtte vajalikke kontosid. Peaksite selle näite põhjal lisama/kustutama/muutma kontosid.\n\nPange tähele:\n-----\n\n* Eelarvepositsioonid '内税' ja '外税' on lisatud, et hallata erinõudeid POS seadistamisel. [1]  Tavalistes tingimustes ei pruugi teil neid üldse vaja minna.\n\n[1] Rohkem infot leiate https://github.com/odoo/odoo/pull/6470.\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_deferred_revenue
@@ -141,7 +140,7 @@ msgid ""
 "\n"
 "\n"
 "This addon is already installed on your system"
-msgstr "\n\nSee lisa on juba teie süsteemi installeeritud"
+msgstr ""
 
 #. module: base
 #: code:addons/model.py:152
@@ -150,7 +149,7 @@ msgid ""
 "\n"
 "\n"
 "[object with reference: %s - %s]"
-msgstr "\n\n[objekt viitega: %s - %s]"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_invoice_bba
@@ -176,7 +175,7 @@ msgid ""
 "generated if no algorithm is specified on the Partner record. \n"
 "\n"
 "    "
-msgstr "\n    \nBelgia sissetulevate ja väljaminevate arvete lokaliseerimine:\n============================================================================\n    - Nimeta 'Viide' väli ümber 'Kommunikatsioon'\n    - Lisage toetus Belgia Strukturiseeritud Kommunikatsioonile\n\nStrukturiseeritud Kommunikatsioon luuakse automaatselt väljaminevatel arvetel järgides alljärgnevaid algoritme:\n---------------------------------------------------------------------------------------------------------------------\n    1) Random : +++RRR/RRRR/RRRDD+++\n        **R..R =** Random Digits, **DD =** Check Digits\n    2) Date : +++DOY/YEAR/SSSDD+++\n        **DOY =** Day of the Year, **SSS =** Sequence Number, **DD =** Check Digits\n    3) Customer Reference +++RRR/RRRR/SSSDDD+++\n        **R..R =** Customer Reference without non-numeric characters, **SSS =** Sequence Number, **DD =** Check Digits  \n        \nThe preferred type of Structured Communication and associated Algorithm can be\nspecified on the Partner records. A 'random' Structured Communication will\ngenerated if no algorithm is specified on the Partner record. \n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_tax_python
@@ -188,7 +187,7 @@ msgid ""
 "\n"
 "        \"Python Code\" defines the amount of the tax.\n"
 "        "
-msgstr "\n        Maks, defineeritud kui pythoni kood, koosneb kahest pythoni koodi lõigust, mis viiakse läbi kohalikus keskkonnas, mis sisaldab selliseid andmeid nagu ühikhind, toode või partner. \n\n        \"Kohaldatav kood\" kirjeldab, kas lisatakse maks.\n\n        \"Pythoni kood\" kirjeldab maksu summat.\n        "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_reports
@@ -196,7 +195,7 @@ msgid ""
 "\n"
 "        Accounting reports for Belgium\n"
 "    "
-msgstr "\n        Belgia raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_br_reports
@@ -204,7 +203,7 @@ msgid ""
 "\n"
 "        Accounting reports for Brazilian\n"
 "    "
-msgstr "\n        Brasiilia raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cl_reports
@@ -212,7 +211,7 @@ msgid ""
 "\n"
 "        Accounting reports for Chile\n"
 "    "
-msgstr "\n        Tšiili raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hu_reports
@@ -220,7 +219,7 @@ msgid ""
 "\n"
 "        Accounting reports for Hungarian\n"
 " "
-msgstr "\n        Ungari raamatupidamisaruanne\n "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_nl_reports
@@ -228,7 +227,7 @@ msgid ""
 "\n"
 "        Accounting reports for Netherlands\n"
 "    "
-msgstr "\n        Hollandi raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ro_reports
@@ -236,7 +235,7 @@ msgid ""
 "\n"
 "        Accounting reports for Romania\n"
 "    "
-msgstr "\n        Rumeenia raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_si_reports
@@ -244,7 +243,7 @@ msgid ""
 "\n"
 "        Accounting reports for Slovenian\n"
 "    "
-msgstr "\n        Sloveenia raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_es_reports
@@ -252,7 +251,7 @@ msgid ""
 "\n"
 "        Accounting reports for Spain\n"
 "    "
-msgstr "\n        Hispaania raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_ch_reports
@@ -260,7 +259,7 @@ msgid ""
 "\n"
 "        Accounting reports for Switzerland\n"
 "    "
-msgstr "\n        Šveitsi raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_uk_reports
@@ -268,7 +267,7 @@ msgid ""
 "\n"
 "        Accounting reports for UK\n"
 "    "
-msgstr "\n        Suurbritannia raamatupidamisaruanne\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_uy_reports
@@ -276,7 +275,7 @@ msgid ""
 "\n"
 "        Accounting reports for Uruguay\n"
 "\n"
-msgstr "\n        Uruguay raamatupidamisaruanne\n\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_extension
@@ -286,14 +285,14 @@ msgid ""
 "\n"
 "        This module will be auto installed if account module and enterprise edition are present\n"
 "    "
-msgstr "\n        Kohanda baasraamatupidamise moodulit Enterprise versiooni jaoks.\n\n        See moodul installeeritakse automaatselt kui raamatupidamismoodul ja Enterprise versioon on olemas\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_tax_python
 msgid ""
 "\n"
 "        Allows to use python code to define taxes"
-msgstr "\n        Luba kasutada pythoni koodi, et kirjeldada makse"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_crm_voip
@@ -307,7 +306,7 @@ msgstr ""
 msgid ""
 "\n"
 "        Enable a cache on products for a lower POS loading time."
-msgstr "\n        Luba toodete vahemällu salvestamine, et vähendada POS laadimise aega."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_sepa
@@ -386,14 +385,14 @@ msgid ""
 "\n"
 "        This module adds support for barcodes scanning to the warehouse management system.\n"
 "    "
-msgstr "\n        See moodul lisab tuge laohaldamise süsteemi ribakoodide skaneerimisele.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_online_sync
 msgid ""
 "\n"
 "        This module is used for Online bank synchronization."
-msgstr "\n        Seda moodulit kasutatakse internetipanga sünkroniseerimiseks."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_online_sync
@@ -401,7 +400,7 @@ msgid ""
 "\n"
 "        This module is used for Online bank synchronization. It provides basic methods to synchronize bank statement.\n"
 "    "
-msgstr "\n        Seda moodulit kasutatakse internetipangaga sünkroniseerimiseks. See pakub baasmeetodit pangaväljavõttega sünkroniseerimiseks.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_equipment
@@ -415,7 +414,7 @@ msgstr ""
 msgid ""
 "\n"
 "        Use Plaid.com to retrieve bank statements"
-msgstr "\n        Kasutage Plaid.com'i pangaväljavõtte haldamiseks"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_plaid
@@ -423,7 +422,7 @@ msgid ""
 "\n"
 "        Use Plaid.com to retrieve bank statements.\n"
 "    "
-msgstr "\n        Kasutage Plaid.com'i pangaväljavõtte haldamiseks."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_multilang
@@ -435,7 +434,7 @@ msgid ""
 "        - Copy translations for COA, Tax, Tax Code and Fiscal Position from\n"
 "          templates to target objects.\n"
 "    "
-msgstr "\n    * Mitmekeelne tugi kontoplaanile, maksud, maksukoodid, andmikud,\n      raamatupidamise mallid, analüütiline kontoplaan ja analüütilised kontod.\n    * Seadistamise abimees muutub\n        - Kopeeri COA tõlked, maks, maksukood ja eelarvepositsioon alates sihtobjektide näidistest.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_tax_cash_basis
@@ -454,14 +453,14 @@ msgid ""
 "    (via the ``literalinclude`` directive) in situations where they can be\n"
 "    syntax-checked and tested.\n"
 "    "
-msgstr "\n    Sisaldab koodijuppe, mida tuleks kasutada tehnilise dokumentatsiooni näidetena\n    (läbi ``literalinclude`` direktiivi) olukordades, kus need võivad olla\n    süntaksi poolt kontrollitud ja testitud.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_sale_stock
 msgid ""
 "\n"
 "    Display delivery orders (picking) infos on the website\n"
-msgstr "\n    Kuva kohaletoimetamise tellimuse (korjamise) informatsioon veebilehel\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_holidays_gantt
@@ -469,7 +468,7 @@ msgid ""
 "\n"
 "    Gantt view for Leaves Dashboard\n"
 "    "
-msgstr "\n    Gantt'i vaade puhkuste töölaual\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_project_forecast
@@ -484,7 +483,7 @@ msgstr ""
 msgid ""
 "\n"
 "  Publish your products on eBay"
-msgstr "\n  Avalda oma tooted eBay's"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_report_intrastat
@@ -495,7 +494,7 @@ msgid ""
 "\n"
 "This module gives the details of the goods traded between the countries of\n"
 "European Union."
-msgstr "\nMoodul, mis lisab intrastat aruanded.\n=====================================\n\nSee moodul annab üksikasjalikud andmed kaubeldavate kaupade kohta Euroopa Liidu riikide lõikes."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_accountant
@@ -506,7 +505,7 @@ msgid ""
 "It gives the Administrator user access to all accounting features such as journal items and the chart of accounts.\n"
 "\n"
 "It assigns manager and user access rights to the Administrator for the accounting application and only user rights to the Demo user.\n"
-msgstr "\nRaamatupidamise ligipääsuõigused\n========================\nSee annab administraatorile ligipääsu kõigile raamatupidamisfunktsioonidele nagu andmikukanded ja kontoplaan.\n\nSee annab raamatupidamisrakenduse halduri ja kasutaja õigused administraatorile ja ainult kasutajaõigused demo-kasutajale.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_contract_dashboard
@@ -527,7 +526,7 @@ msgid ""
 "Accounting Data for Belgian Payroll Rules.\n"
 "==========================================\n"
 "    "
-msgstr "\nBelgia palgaarvestusreeglite raamatupidamisandmed\n==========================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_reports
@@ -546,7 +545,7 @@ msgid ""
 "================================\n"
 "\n"
 "    "
-msgstr "\nAccounting reports for Argentina\n================================\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_bo_reports
@@ -556,7 +555,7 @@ msgid ""
 "================================\n"
 "\n"
 "    "
-msgstr "\nBoliivia raamatupidamisaruanded\n================================\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_co_reports
@@ -565,7 +564,7 @@ msgid ""
 "Accounting reports for Colombia\n"
 "================================\n"
 "    "
-msgstr "\nColumbia raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hr_reports
@@ -574,7 +573,7 @@ msgid ""
 "Accounting reports for Croatia\n"
 "================================\n"
 "    "
-msgstr "\nHorvaatia raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_skr03_reports
@@ -600,7 +599,7 @@ msgid ""
 "================================\n"
 "\n"
 "    "
-msgstr "\nEtioopia raamatupidamisaruanded\n================================\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_reports
@@ -610,7 +609,7 @@ msgid ""
 "================================\n"
 "\n"
 "    "
-msgstr "\nPrantsusmaa raamatupidamisaruanded\n================================\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_gr_reports
@@ -620,7 +619,7 @@ msgid ""
 "=============================\n"
 "\n"
 "    "
-msgstr "\nKreeka raamatupidamisaruanded\n=============================\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_in_reports
@@ -629,7 +628,7 @@ msgid ""
 "Accounting reports for India\n"
 "================================\n"
 "    "
-msgstr "\nIndia raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_jp_reports
@@ -638,7 +637,7 @@ msgid ""
 "Accounting reports for Japan\n"
 "================================\n"
 "    "
-msgstr "\nJaapani raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lu_reports
@@ -656,7 +655,7 @@ msgid ""
 "Accounting reports for Maroc\n"
 "================================\n"
 "    "
-msgstr "\nMaroc'i raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_no_reports
@@ -665,7 +664,7 @@ msgid ""
 "Accounting reports for Norway\n"
 "================================\n"
 "    "
-msgstr "\nNorra raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_pl_reports
@@ -674,7 +673,7 @@ msgid ""
 "Accounting reports for Poland\n"
 "================================\n"
 "    "
-msgstr "\nPoola raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_sg_reports
@@ -683,7 +682,7 @@ msgid ""
 "Accounting reports for Singapore\n"
 "================================\n"
 "    "
-msgstr "\nSingapuri raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_th_reports
@@ -692,7 +691,7 @@ msgid ""
 "Accounting reports for Thailand\n"
 "================================\n"
 "    "
-msgstr "\nTai raamatupidamisaruanded\n================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_mass_mailing
@@ -700,7 +699,7 @@ msgid ""
 "\n"
 "Add a snippet in the website builder to subscribe a mass_mailing list\n"
 "    "
-msgstr "\nLisage veebilehe ehitajas mass_mailing nimekirjaga liitumise võimalus\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_order_dates
@@ -714,7 +713,7 @@ msgid ""
 "    * Requested Date (will be used as the expected date on pickings)\n"
 "    * Commitment Date\n"
 "    * Effective Date\n"
-msgstr "\nLisage müügitellimustele täiendavat kuupäeva teavet.\n===================================================\n\nSaate lisada järgmised täiendavad kuupäevad müügitellimustele:\n------------------------------------------------------------\n    * Nõudmise kuupäev (kasutatakse eeldavaks kogumiseks)\n    * Kohustuse kuupäev\n    * Jõustumise kuupäev\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_contract
@@ -730,7 +729,7 @@ msgid ""
 "\n"
 "You can assign several contracts per employee.\n"
 "    "
-msgstr "\nLisage kogu vajalik informatsioon töötaja ankeedile lepingute haldamiseks.\n=============================================================\n\n    * leping\n    * sünnikoht\n    * arstliku kontrolli kuupäev\n    * ettevõtte sõiduk\n\nTe saate määrata töötajale mitu lepingut.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_product_email_template
@@ -742,7 +741,7 @@ msgid ""
 "With this module, link your products to a template to send complete information and tools to your customer.\n"
 "For instance when invoicing a training, the training agenda and materials will automatically be sent to your customers.'\n"
 "    "
-msgstr "\nLisage toodetele e-kirja näidised, mis saadetakse arve kinnitamisel.\n==================================================================\n\nSelle mooduli abil ühendate oma tooted e-kirja näidistega, et saata kliendile täielik teave ja tööriistad.\nNäiteks koolituse arve esitamisel saadetakse kliendile automaatselt koolituse päevakord ja materjalid.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_full_reconcile
@@ -777,7 +776,7 @@ msgid ""
 "=============================================================================================================================\n"
 "\n"
 "The wizard to launch the report has several options to help you get the data you need.\n"
-msgstr "\nLisab toodetele aruandlusmenüü, mis arvutab arvete põhjal müügi, ostu, kasumimarginaali ja teised huvitavad indikaatorid.\n=============================================================================================================================\n\nAruande avamisel käivitub abiline, mis aitab teil saada vajalikud andmed.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_pad
@@ -789,7 +788,7 @@ msgid ""
 "Lets the company customize which Pad installation should be used to link to new\n"
 "pads (by default, http://etherpad.com/).\n"
 "    "
-msgstr "\nLisab rohkem toetust (Ether)Pad manustele veebikliendis.\n===================================================================\n\nVõimaldab ettevõttel kohendada, millist Pad-i paigutust kasutada uute linkimiseks\npad-i (vaikimisi http://etherpad.com/).\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_pos_mercury
@@ -808,7 +807,7 @@ msgid ""
 "* Cashback\n"
 "* Supported cards: Visa, MasterCard, American Express, Discover\n"
 "    "
-msgstr "\nLubage POS-maksed krediitkaardiga\n==============================\n\nSee moodul laseb klientidel tasuda oma tellimuste eest krediitkaardiga.\nTehinguid töötleb Mercury (arendatud Wells Fargo panga poolt). Vajalik on Mercury kaupmehe konto, mis võimaldab järgmist:\n\n* Kiire makse krediitkaardiga viibates makse ekraanil\n* Ühendab sulraha- ja krediitkaardimaksed\n* Raha tagasi\n* Toetatud kaardid: Visa, MasterCard, American Express, Discover\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_auth_oauth
@@ -816,7 +815,7 @@ msgid ""
 "\n"
 "Allow users to login through OAuth2 Provider.\n"
 "=============================================\n"
-msgstr "\nLubage kasutajatel logida sisse OAuth2 teenusepakkuja kaudu.\n=============================================\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_auth_signup
@@ -825,7 +824,7 @@ msgid ""
 "Allow users to sign up and reset their password\n"
 "===============================================\n"
 "    "
-msgstr "\nLubage kasutajatel registreeruda ja lähtestada oma parool\n===============================================\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_cancel
@@ -849,7 +848,7 @@ msgid ""
 "This module set the right product on all timesheet lines\n"
 "according to the order/contract you work on. This allows to\n"
 "have real delivered quantities in sales orders.\n"
-msgstr "\nVõimaldab müüa ajaarvestuslehti müügitellimustel\n=============================================\n\nSee moodul seab õige toote kõigi ajaarvestuslehe ridadele\nvastavalt tellimustele/lepingutele, mille kallal töötate. See võimaldab\nmüügitellimustele lisada reaalselt tarnitud kogused.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_delivery
@@ -860,7 +859,7 @@ msgid ""
 "\n"
 "You can define your own carrier for prices. When creating\n"
 "invoices from picking, the system is able to add and compute the shipping line.\n"
-msgstr "\nVõimaldab teil lisada tarneviise müügitellimustele ja korjetele.\n==============================================================\n\nSaate hindadele seadistada oma vedaja. Korje arvet koostades\non süsteem võimeline lisama ja arvutama tarnerea.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_portal
@@ -880,7 +879,7 @@ msgid ""
 "Plan contable argentino e impuestos de acuerdo a disposiciones vigentes\n"
 "\n"
 "    "
-msgstr "\nArgentiina raamatupidamise kontoplaani ja maksude lokaliseerimine.\n==================================================\n\nPlan contable argentino e impuestos de acuerdo a disposiciones vigentes\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_forum
@@ -888,7 +887,7 @@ msgid ""
 "\n"
 "Ask questions, get answers, no distractions\n"
 "        "
-msgstr "\nKüsige küsimusi, saage vastuseid, ei mingit segadust\n\n        "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_test
@@ -901,7 +900,7 @@ msgid ""
 "You can write a query in order to create Consistency Test and you will get the result of the test \n"
 "in PDF format which can be accessed by Menu Reporting -> Accounting Tests, then select the test \n"
 "and print the report from Print button in header area.\n"
-msgstr "\nRaamatupidamise kinnitused.\n======================\nSelle mooduli abil saate manuaalselt kontrollida järjepidevust ja ebakõlasid raamatupidamismoodulil.\n\nTe saate kirjutada päringu, et teha järjepidevuse test ja te saate vastuse PDF\nfaili kujul. Fail on leitab aruandluse menüüst -> raamatupidamise testid, seejärel\nvali test ja prindi aruanne kasutades printimise nuppu päises.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_asset
@@ -913,7 +912,7 @@ msgid ""
 "Keeps track of depreciations, and creates corresponding journal entries.\n"
 "\n"
 "    "
-msgstr "\nVarade haldamine\n=================\nHalda ettevõtte või inimese varasid.\nHaldab amortisatsioonikulusid ja loob vastavad andmikukanded.\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_document
@@ -923,7 +922,7 @@ msgid ""
 "========================================\n"
 "* Show attachment on the top of the forms\n"
 "* Document Indexation: odt\n"
-msgstr "\nManuste loend ja dokumentide indekseerimine\n========================================\n* Näita ankeedi ülaosas manuseid\n* Dokumendi indekseerimine: odt\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_au
@@ -938,7 +937,7 @@ msgid ""
 "    - activates a number of regional currencies.\n"
 "    - sets up Australian taxes.\n"
 "    "
-msgstr "\nAustraalia raamatupiddamismoodul\n============================\n\nAustraalia raamatupidamise põhikontod ja lokaliseerimine.\n\nK.a:\n    - aktiveerib hulga piirkondlikke valuutasid.\n    - seadistab Austraalia maksud.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_gengo
@@ -954,7 +953,7 @@ msgid ""
 "\n"
 "This wizard will activate the CRON job and the Scheduler and will start the automatic translation via Gengo Services for all the terms where you requested it.\n"
 "    "
-msgstr "\nAutomatiseeritud tõlkimine läbi Gengo API\n========================================\n\nSee moodul installeerib passiivse planeerija töö automaatseks tõlkimiseks kasutades Gengo API-t."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_sale_service
@@ -992,7 +991,7 @@ msgid ""
 "scanner, and is used by the posbox to provide barcode scanner support to the\n"
 "point of sale module. \n"
 "\n"
-msgstr "\nRibakoodi lugeja riistvaradraiver\n================================\n\nSee moodul lubab veebikliendil ligi pääseda installeeritud ribakoodi\nlugejale ja kasutatakse posbox'is, et pakkuda tuge ribakoodi lugeja osas kassasüsteemis.\n\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_et
@@ -1060,7 +1059,7 @@ msgid ""
 "The amount deposited to your bank will then appear as a single transaction on your bank statement.\n"
 "When you proceed with the reconciliation, simply select the corresponding batch deposit to reconcile the payments.\n"
 "    "
-msgstr "\nMass deposiidid\n=============\nMass deposiidid võimaldavad grupeerida tšekke enne nende hoiustamist.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_hr_payroll
@@ -1090,7 +1089,7 @@ msgid ""
 "Plan contable boliviano e impuestos de acuerdo a disposiciones vigentes\n"
 "\n"
 "    "
-msgstr "\nBoliivia raamatupidamise kontoplaan ja maksude lokaliseerimine.\n\nPlan contable boliviano e impuestos de acuerdo a disposiciones vigentes\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_mail
@@ -1157,7 +1156,7 @@ msgid ""
 "\n"
 "Thai accounting chart and localization.\n"
 "    "
-msgstr "\nTai kontoplaan.\n===============================\n\nTai raamatupidamise kontoplaan ja lokaliseerimine.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cr
@@ -1175,7 +1174,7 @@ msgid ""
 "Everything is in English with Spanish translation. Further translations are welcome,\n"
 "please go to http://translations.launchpad.net/openerp-costa-rica.\n"
 "    "
-msgstr "\nCosta Rica kontoplaan.\n=================================\n\nIncludes:\n---------\n    * account.account.template\n    * account.tax.template\n    * account.chart.template\n\nEverything is in English with Spanish translation. Further translations are welcome,\nplease go to http://translations.launchpad.net/openerp-costa-rica.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_cl
@@ -1186,7 +1185,7 @@ msgid ""
 "Plan contable chileno e impuestos de acuerdo a disposiciones vigentes\n"
 "\n"
 "    "
-msgstr "\nTšiili raamatupidamise kontoplaan ja maksude lokaliseerimine.\n==============================================\nPlan contable chileno e impuestos de acuerdo a disposiciones vigentes\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_decimal_precision
@@ -1221,7 +1220,7 @@ msgid ""
 "answers of question and according to that survey is done. Partners are also\n"
 "sent mails with personal token for the invitation of the survey.\n"
 "    "
-msgstr "\nLooge ilusad veebiuuringud ja visualiseerige vastused\n==================================================\n\nSee sõltub erinevate kasutajate antud küsimuste vastustest või arvustustest. Uuringus võib olla mitmeid lehekülgi. Igal lehel võib olla mitu küsimust ja vastust. Erinevad vastajad võivad anda erinevaid vastuseid. Partneritele saadetakse personaalne kutse küsitlusele.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_subscription
@@ -1248,7 +1247,7 @@ msgid ""
 "=====================================================\n"
 "\n"
 "        "
-msgstr "\nLooge lühikesed ja jälgitavad URL'id.\n=====================================================\n\n        "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_event_sale
@@ -1297,7 +1296,7 @@ msgid ""
 " https://www.rrif.hr/dok/preuzimanje/rrif-rp2011.rar\n"
 " https://www.rrif.hr/dok/preuzimanje/rrif-rp2012.rar\n"
 "\n"
-msgstr "\nHorvaatia lokaliseerimine\n======================\n\nAuthor: Goran Kliska, Slobodni programi d.o.o., Zagreb\n        https://www.slobodni-programi.hr\n\nContributions:\n  Tomislav Bošnjaković, Storm Computers: tipovi konta\n  Ivan Vađić, Slobodni programi: tipovi konta\n\nDescription:\n\nCroatian Chart of Accounts (RRIF ver.2012)\n\nRRIF-ov računski plan za poduzetnike za 2012.\nVrste konta\nKontni plan prema RRIF-u, dorađen u smislu kraćenja naziva i dodavanja analitika\nPorezne grupe prema poreznoj prijavi\nPorezi PDV obrasca\nOstali porezi\nOsnovne fiskalne pozicije\n\nIzvori podataka:\n https://www.rrif.hr/dok/preuzimanje/rrif-rp2011.rar\n https://www.rrif.hr/dok/preuzimanje/rrif-rp2012.rar\n\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_portal
@@ -1322,7 +1321,7 @@ msgid ""
 "\n"
 "Delivery Costs\n"
 "==============\n"
-msgstr "\nSaatmiskulud\n==============\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_marketing_campaign_crm_demo
@@ -1353,7 +1352,7 @@ msgid ""
 "\n"
 "German accounting chart and localization.\n"
 "    "
-msgstr "\nDieses  Modul beinhaltet einen deutschen Kontenrahmen basierend auf dem SKR03.\n==============================================================================\n\nSaksamaa raamatupidamise kontoplaan ja lokaliseerimine.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_de_skr04
@@ -1364,7 +1363,7 @@ msgid ""
 "\n"
 "German accounting chart and localization.\n"
 "    "
-msgstr "\nDieses  Modul beinhaltet einen deutschen Kontenrahmen basierend auf dem SKR03.\n==============================================================================\n\nSaksamaa raamatupidamise kontoplaan ja lokaliseerimine.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_twitter
@@ -1374,7 +1373,7 @@ msgid ""
 "========================\n"
 "\n"
 "        "
-msgstr "\nNäita parimaid säutse\n========================\n\n        "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_website_forum_doc
@@ -1382,7 +1381,7 @@ msgid ""
 "\n"
 "Documentation based on question and pertinent answers of Forum\n"
 "        "
-msgstr "\nDokumentatisoon põhineb foorumi asjakohastel küsimustel ja vastustel.\n        "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hw_escpos
@@ -1448,7 +1447,7 @@ msgid ""
 "- Council Implementing Regulation (EU) No 1042/2013\n"
 "\n"
 "    "
-msgstr "\nEU Mini One Stop Shop (MOSS) VAT for telecommunications, broadcasting and electronic services\n=============================================================================================\n\nAs of January 1rst, 2015, telecommunications, broadcasting\nand electronic services sold within the European Union\nhave to be always taxed in the country where the customer\nbelongs. In order to simplify the application of this EU\ndirective, the Mini One Stop Shop (MOSS) registration scheme\nallows businesses to make a unique tax declaration.\n\nThis module makes it possible by helping with the creation\nof the required EU fiscal positions and taxes in order to\nautomatically apply and record the required taxes.\n\nThis module installs a wizard to help setup fiscal positions\nand taxes for selling electronic services inside EU.\n\nThe wizard lets you select:\n - the EU countries to which you are selling these\n   services\n - your national VAT tax for services, to be mapped\n   to the target country's tax\n - optionally: a template fiscal position, in order\n   to copy the account mapping. Should be your\n   existing B2C Intra-EU fiscal position. (defaults\n   to no account mapping)\n - optionally: an account to use for collecting the\n   tax amounts (defaults to the account used by your\n   national VAT tax for services)\n\nIt creates the corresponding fiscal positions and taxes,\nautomatically applicable for EU sales with a customer\nin the selected countries.\nThe wizard can be run again for adding more countries.\n\nThe wizard creates a separate Chart of Taxes for collecting the\nVAT amounts of the MOSS declaration, so extracting the MOSS\ndata should be easy.\nLook for a Chart of Taxes named \"EU MOSS VAT Chart\" in the\nTaxes Report menu (Generic Accounting Report).\n\nReferences\n++++++++++\n- Directive 2008/8/EC\n- Council Implementing Regulation (EU) No 1042/2013\n\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_mass_mailing
@@ -1467,7 +1466,7 @@ msgid ""
 "Enable UTM trackers in shared links.\n"
 "=====================================================\n"
 "        "
-msgstr "\nUTM jagamisseadmete lubamine jagatud linkidel.\n=====================================================\n        "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_auth_crypt
@@ -1498,7 +1497,7 @@ msgid ""
 "by the ``auth_signup`` module (signup for new users does not\n"
 "necessarily have to be enabled).\n"
 "\n"
-msgstr "\nKrüptitud parool\n===================\n\nAsendage vaikimisi paroolide salvestamine tugeva krüptograafilisega.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_account_extra_reports
@@ -1526,7 +1525,7 @@ msgid ""
 "This module does **not** turn an Odoo Point Of Sale module into a certified\n"
 "Belgian cash register. It allows the communication on with a certified Fiscal\n"
 "Data Module but will not modify the behaviour of the Point of Sale.\n"
-msgstr "\nFiskaalandmete mooduli riistvaradraiver\n==================================\n\nSee moodul võimaldab kassasüsteemi kliendil suhelda ühendatud\nBelgia fiskaalandmete mooduliga.\n"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_fr_hr_payroll
@@ -1550,7 +1549,7 @@ msgid ""
 "    - The payslip.line with appears_in_payslip = False should appears in the\n"
 "      payslip interface, but not in the payslip report\n"
 "    "
-msgstr "\nPrantsuse palgareeglid\n=====================\n\n    - Configuration of hr_payroll for French localization\n    - All main contributions rules for French payslip, for 'cadre' and 'non-cadre'\n    - New payslip report\n\nTODO:\n-----\n    - Integration with holidays module for deduction and allowance\n    - Integration with hr_payroll_account for the automatic account_move_line\n      creation from the payslip\n    - Continue to integrate the contribution. Only the main contribution are\n      currently implemented\n    - Remake the report under webkit\n    - The payslip.line with appears_in_payslip = False should appears in the\n      payslip interface, but not in the payslip report\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_gamification
@@ -1586,7 +1585,7 @@ msgid ""
 "Generates Intrastat XML report for declaration\n"
 "Based on invoices.\n"
 "    "
-msgstr "\nLoob Intrastat XML aruande deklaratsiooni jaoks\nPõhineb arvetel.\n    "
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_payroll_account
@@ -4387,36 +4386,36 @@ msgstr ""
 msgid ""
 "'%s' contains too many dots. XML ids should not contain dots ! These are "
 "used to refer to other modules data, as in module.reference_id"
-msgstr "'%s' sisaldab liiga palju punkte. XML id-d ei tohiks sisaldada punkte! Neid kasutatakse muudele moodulite andmetele viitamiseks nagu module.reference_id"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:188
 #, python-format
 msgid "'%s' does not seem to be a number for field '%%(field)s'"
-msgstr "'%s' ei tundu olevat number välja jaoks '%%(field)s'"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:208
 #, python-format
 msgid "'%s' does not seem to be a valid date for field '%%(field)s'"
-msgstr "'%s' ei tundu olevat kuupäev välja jaoks '%%(field)s'"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:240
 #, python-format
 msgid "'%s' does not seem to be a valid datetime for field '%%(field)s'"
-msgstr "'%s' ei tundu olevat üige kuupäev-kellaaeg välja jaoks  '%%(field)s'"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:177
 #, python-format
 msgid "'%s' does not seem to be an integer for field '%%(field)s'"
-msgstr "'%s' ei tundu olevat täisarv välja jaoks  '%%(field)s'"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_partner_form
 msgid "(edit)"
-msgstr "(muuda)"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_company_form
@@ -4443,17 +4442,17 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.wizard_lang_export
 msgid ", or your preferred text editor"
-msgstr "või teie eelistatud tekstitöötlusprogramm"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid ", readonly"
-msgstr ", ainult loetav"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid ", required"
-msgstr ", nõutud"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_values_key
@@ -4470,27 +4469,27 @@ msgstr "- domeen ="
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "- field ="
-msgstr "- väli ="
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "- groups ="
-msgstr "- grupid ="
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "- ondelete ="
-msgstr "- kustutamisel ="
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "- relation ="
-msgstr "- seos ="
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "- selection ="
-msgstr "- valik ="
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -4500,22 +4499,22 @@ msgstr "- suurus ="
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not create menu."
-msgstr "- See moodul ei loo menüüd."
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not create report."
-msgstr "- See moodul ei loo aruannet."
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not create views."
-msgstr "- See moodul ei loo vaateid."
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "-This module does not depends on any other module."
-msgstr "- See moodul ei sõltu ühestki teisest moodulist."
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.res_lang_form
@@ -4585,7 +4584,7 @@ msgstr ""
 #. module: base
 #: model:ir.actions.act_window,help:base.open_module_tree
 msgid "<b>No module found!</b>"
-msgstr "<b>Mooduli ei leitud!</b>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -4623,22 +4622,22 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Apps</strong>"
-msgstr "<strong>Rakendused</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Attribute</strong>"
-msgstr "<strong>Atribuut</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid "<strong>Dependencies :</strong>"
-msgstr "<strong>Sõltuvused :</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Group</strong>"
-msgstr "<strong>Grupp</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -4648,17 +4647,17 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Inherited</strong>"
-msgstr "<strong>Päritud</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Label</strong>"
-msgstr "<strong>Silt</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid "<strong>Menu :</strong>"
-msgstr "<strong>Menüü :</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -4668,7 +4667,7 @@ msgstr "<strong>Nimi</strong>"
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid "<strong>Reports :</strong>"
-msgstr "<strong>Aruanded :</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -4690,7 +4689,7 @@ msgstr ""
 msgid ""
 "<strong>This operation will permanently erase all data currently stored by "
 "the modules!</strong>"
-msgstr "<strong>See operatisoon kustutab jäädavalt kõik andmed, mida hetkel moodul salvestab!</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -4700,38 +4699,38 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>Type</strong>"
-msgstr "<strong>Tüüp</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid "<strong>View :</strong>"
-msgstr "<strong>Vaade :</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<strong>XML ID</strong>"
-msgstr "<strong>XML ID</strong>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<u><strong>Fields</strong></u>"
-msgstr "<u><strong>Väljad</strong></u>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<u><strong>Security</strong></u>"
-msgstr "<u><strong>Turvalisus</strong></u>"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.report_irmodeloverview
 msgid "<u><strong>Views</strong></u>"
-msgstr "<u><strong>Vaated</strong></u>"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:3480
 #, python-format
 msgid "A document was modified since you last viewed it (%s:%d)"
-msgstr "Dokumendi muudeti viimati, kui te vaatasite seda (%s:%d)"
+msgstr ""
 
 #. module: base
 #: model:ir.actions.act_window,help:base.action_res_groups
@@ -4747,13 +4746,13 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_hw_posbox_homepage
 msgid "A homepage for the PosBox"
-msgstr "PosBox kodulehekülg"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_exceptions
 #: model:ir.module.module,description:base.module_test_mimetypes
 msgid "A module to generate exceptions."
-msgstr "Erandite loomise moodul."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_workflow
@@ -4763,22 +4762,22 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,description:base.module_test_impex
 msgid "A module to test import/export."
-msgstr "Impordi/ekspordi testimise moodul."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_new_api
 msgid "A module to test the API."
-msgstr "API testimise moodul"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_uninstall
 msgid "A module to test the uninstall feature."
-msgstr "Moodul deinstalleerimise testimiseks."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_assetsbundle
 msgid "A module to verify the Assets Bundle mechanism."
-msgstr "Assets Bundle mehhanismi tuvastamise moodul."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_inherits
@@ -4809,7 +4808,7 @@ msgstr "A4"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_title_shortcut
 msgid "Abbreviation"
-msgstr "Lühendamine"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank_acc_type
@@ -4830,7 +4829,7 @@ msgstr "Ligipääs"
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_access_view_search
 msgid "Access Control"
-msgstr "Ligipääsukontroll"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups_model_access
@@ -4876,17 +4875,17 @@ msgstr "Ligipääsureeglid"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_analytic_default
 msgid "Account Analytic Defaults"
-msgstr "Konto analüütilised vaikeväärtused"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import
 msgid "Account Bank Statement Import"
-msgstr "Pangaväljavõtte import"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_localization_account_charts
 msgid "Account Charts"
-msgstr "Konto skeemid"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_contract_dashboard
@@ -4896,12 +4895,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_extension
 msgid "Account Extension"
-msgstr "Konto laiend"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank_partner_id
 msgid "Account Holder"
-msgstr "Konto valdaja"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_portal
@@ -4926,12 +4925,12 @@ msgstr "Kontonumber peab olema kordumatu"
 #. module: base
 #: model:ir.module.category,name:base.module_category_localization_account_report
 msgid "Account Report"
-msgstr "Konto aruanne"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_localization_account_reports
 msgid "Account Reports"
-msgstr "Konto aruanded"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_tax_cash_basis
@@ -4952,17 +4951,17 @@ msgstr "Raamatupidamine ja rahandus"
 #. module: base
 #: model:ir.module.category,name:base.module_category_accounting_andamp;_finance
 msgid "Accounting &amp; Finance"
-msgstr "Raamatupidamine ja rahandus"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_test
 msgid "Accounting Consistency Tests"
-msgstr "Raamatupidamise järjepidevuse testid"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_reports
 msgid "Accounting Reports"
-msgstr "Raamatupidamisaruanded"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_tax_adjustments
@@ -4972,7 +4971,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_accountant
 msgid "Accounting and Finance"
-msgstr "Raamatupidamine ja rahandus"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_view_act_window_id
@@ -5025,7 +5024,7 @@ msgstr "Toimingu sihtmärk"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_state
 msgid "Action To Do"
-msgstr "Tegevused, mida teha"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_client_type
@@ -5124,7 +5123,7 @@ msgstr "Tegevus"
 #. module: base
 #: model:ir.module.module,summary:base.module_website_sale_delivery
 msgid "Add Delivery Costs to Online Sales"
-msgstr "Lisage saatmiskulu online müükidele"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_header
@@ -5139,7 +5138,7 @@ msgstr "Lisa automaatvärskendus vaatele"
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_barcode
 msgid "Add barcode scanning facilities to Warehouse Management."
-msgstr "Lisa laohaldamisele ribakoodi lugemise võimalus."
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -5149,7 +5148,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.act_report_xml_view
 msgid "Add in the 'Print' menu"
-msgstr "Lisa 'prindi' menüüs"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_report_xml_header
@@ -5272,36 +5271,36 @@ msgstr "Haldus"
 #: model:ir.model.fields,help:base.field_res_country_state_name
 msgid ""
 "Administrative divisions of a country. E.g. Fed. State, Departement, Canton"
-msgstr "Riigi haldusüksused nt Fed. State, Departement, Canton"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_model.py:597 code:addons/base/ir/ir_model.py:658
 #: code:addons/base/ir/ir_model.py:1174
 #, python-format
 msgid "Administrator access is required to uninstall a module"
-msgstr "Mooduli deinstallimiseks on vajalik administraatori juurdepääs"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_event_track
 msgid "Advanced Events"
-msgstr "Täpsemad sündmused"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_model_fields_form
 #: model:ir.ui.view,arch_db:base.view_model_form
 msgid "Advanced Properties"
-msgstr "Täpsemad omadused"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment_adyen
 #: model:ir.module.module,shortdesc:base.module_payment_adyen
 msgid "Adyen Payment Acquirer"
-msgstr "Adyen'i makse saaja"
+msgstr ""
 
 #. module: base
 #: selection:ir.module.module,license:0
 msgid "Affero GPL-3"
-msgstr "Affero GPL-3"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.af
@@ -5343,7 +5342,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_reprint
 msgid "Allow cashier to reprint receipts"
-msgstr "Luba kassapidajal kviitungeid uuesti välja printida"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_tax_cash_basis
@@ -5734,12 +5733,6 @@ msgid "Automatic Installation"
 msgstr "Automaatne paigaldamine"
 
 #. module: base
-#: code:addons/base/module/module.py:693
-#, python-format
-msgid "Automatic install of downloaded Apps is currently disabled."
-msgstr ""
-
-#. module: base
 #: model:ir.model.fields,help:base.field_ir_translation_state
 msgid ""
 "Automatically set to let administators find new terms that might need to be "
@@ -5749,7 +5742,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.menu,name:base.menu_automation
 msgid "Automation"
-msgstr "Automatiseerimine"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.az
@@ -5935,7 +5928,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_batch_deposit
 msgid "Batch Deposit"
-msgstr "Mass deposiidid"
+msgstr ""
 
 #. module: base
 #: selection:res.currency,position:0
@@ -6057,7 +6050,7 @@ msgstr ""
 #. module: base
 #: selection:ir.property,type:0
 msgid "Boolean"
-msgstr "Boolean"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_theme_bootswatch
@@ -6400,7 +6393,7 @@ msgstr ""
 #: code:addons/base/ir/ir_model.py:484
 #, python-format
 msgid "Changing the storing system for field \"%s\" is not allowed."
-msgstr "Säilitamissüsteemi muutmine väljal \"%s\" ei ole lubatud."
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_model.py:509
@@ -6445,7 +6438,7 @@ msgstr ""
 #: model:ir.model.fields,help:base.field_res_partner_customer
 #: model:ir.model.fields,help:base.field_res_users_customer
 msgid "Check this box if this contact is a customer."
-msgstr "Märgi see valik, kui tegemist on kliendi kontaktandmetega."
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner_supplier
@@ -6495,7 +6488,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_child_ids
 msgid "Child Actions"
-msgstr "Alamtegevused"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category_child_ids
@@ -6527,7 +6520,7 @@ msgstr ""
 msgid ""
 "Child server actions that will be executed. Note that the last return "
 "returned action value will be used as global return value."
-msgstr "Käivitatav alamserveri tegevus. Pange tähele, et tagastatav viimase toimingu väärtust kasutatakse kui globaalset tagastatud väärtust."
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.cl
@@ -6705,7 +6698,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pad
 msgid "Collaborative Pads"
-msgstr "Koostöö ____"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.co
@@ -6733,7 +6726,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_partner_color
 #: model:ir.model.fields,field_description:base.field_res_users_color
 msgid "Color Index"
-msgstr "Värvi index"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields_column1
@@ -7449,7 +7442,7 @@ msgstr "Loomine"
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_attachment_search
 msgid "Creation Month"
-msgstr "Loomise kuu"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_use_create
@@ -7680,7 +7673,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_logging_search_view
 msgid "Database"
-msgstr "Andmebaas"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_anonymization
@@ -8227,7 +8220,7 @@ msgstr ""
 #. module: base
 #: selection:ir.actions.todo,state:0
 msgid "Done"
-msgstr "Lõpetatud"
+msgstr ""
 
 #. module: base
 #: model:res.partner.title,shortcut:base.res_partner_title_doctor
@@ -8331,7 +8324,7 @@ msgstr ""
 #: code:addons/base/ir/ir_ui_view.py:585
 #, python-format
 msgid "Element '%s' cannot be located in parent view"
-msgstr "Element '%s' ei saa asuda ülemvaates"
+msgstr ""
 
 #. module: base
 #: code:addons/base/res/res_company.py:105
@@ -8371,7 +8364,7 @@ msgstr "Tootaja"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_appraisal
 msgid "Employee Appraisals"
-msgstr "Töötaja hinnangud"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_contract
@@ -8381,7 +8374,7 @@ msgstr "Töötaja lepingud"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr
 msgid "Employee Directory"
-msgstr "Töötajate andmik"
+msgstr ""
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_partner_employee_form
@@ -8434,12 +8427,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_equipment
 msgid "Equipments"
-msgstr "Seadmed"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_equipment
 msgid "Equipments, Assets, Internal Hardware, Allocation Tracking"
-msgstr "Seadmed, varad, sisemine riistvara, jaotuse jälgimine"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.er
@@ -8468,7 +8461,7 @@ msgstr ""
 #: code:addons/models.py:1264
 #, python-format
 msgid "Error details:"
-msgstr "Vea detailsed andmed:"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:1281
@@ -8499,12 +8492,12 @@ msgstr "Etioopia"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_et
 msgid "Ethiopia - Accounting"
-msgstr "Etioopia - raamatupidamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_et_reports
 msgid "Ethiopia - Accounting Reports"
-msgstr "Etioopia - raamatupidamisaruanded"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_server_object_lines_type
@@ -8524,7 +8517,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_event_sale
 msgid "Events Sales"
-msgstr "Ürituste müük"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -8568,7 +8561,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_expense
 msgid "Expense Tracker"
-msgstr "Kulude jälgija"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_expense
@@ -8925,17 +8918,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_filters_name
 #: model:ir.ui.view,arch_db:base.ir_filters_view_search
 msgid "Filter Name"
-msgstr "Filtri nimi"
+msgstr ""
 
 #. module: base
 #: sql_constraint:ir.filters:0
 msgid "Filter names must be unique"
-msgstr "Filtreeritavad nimed peavad olema unikaalsed"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_attachment_search
 msgid "Filter on my documents"
-msgstr "Filtreeri mu dokumente"
+msgstr ""
 
 #. module: base
 #: model:ir.actions.act_window,name:base.actions_ir_filters_view
@@ -8950,17 +8943,17 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_filters_view_search
 msgid "Filters created by myself"
-msgstr "Minu poolt loodud filtrid"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_filters_view_search
 msgid "Filters shared with all users"
-msgstr "Kõigi kasutajatega jagatud filtrid"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_filters_view_search
 msgid "Filters visible only for one user"
-msgstr "Ainult ühele kasutajale nähtavad filtrid"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_server_copyvalue
@@ -8997,12 +8990,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_fleet
 msgid "Fleet Management"
-msgstr "Sõiduvahendite haldamine"
+msgstr ""
 
 #. module: base
 #: selection:ir.property,type:0
 msgid "Float"
-msgstr "Ujukomaarv"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_wkf_activity_flow_start
@@ -9045,7 +9038,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,help:base.field_res_company_rml_footer
 msgid "Footer text displayed at the bottom of all reports."
-msgstr "Jaluse tekst kuvatakse kõigi aruannete allosas."
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_report_xml_report_name
@@ -9110,12 +9103,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_forum
 msgid "Forum"
-msgstr "Foorum"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_forum_doc
 msgid "Forum, Documentation"
-msgstr "Foorum, dokumentatsioon"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_forum
@@ -9176,7 +9169,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_fr_hr_payroll
 msgid "French Payroll"
-msgstr "Prantsuse palgaarvestus"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.tf
@@ -9409,7 +9402,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_spreadsheet
 msgid "Google Spreadsheet"
-msgstr "Google'i arvutustabel"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_google_account
@@ -9496,7 +9489,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_country_group_form
 msgid "Group name"
-msgstr "Rühma nimi"
+msgstr ""
 
 #. module: base
 #: model:ir.actions.act_window,name:base.action_res_groups
@@ -9523,7 +9516,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_rule_form
 msgid "Groups (no group = global)"
-msgstr "Rühmad (ilma rühmata = globaalne)"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.gp
@@ -9573,12 +9566,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_gamification
 msgid "HR Gamification"
-msgstr "Personali tunnustamine"
+msgstr ""
 
 #. module: base
 #: selection:ir.actions.report.xml,report_type:0
 msgid "HTML"
-msgstr "HTML"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_report_xml_report_type
@@ -10049,7 +10042,7 @@ msgid ""
 "If set, this field will be stored in the sparse structure of the "
 "serialization field, instead of having its own database column. This cannot "
 "be changed after creation."
-msgstr "Kui määratud, siis see väli salvestatakse hõreda struktuuriga seerianumbri väljal, selle asemel, et omada oma andmebaasi veergu. Seda ei saa muuta pärast loomist."
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
@@ -10206,12 +10199,12 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_currency_search
 #: model:ir.ui.view,arch_db:base.view_view_search
 msgid "Inactive"
-msgstr "Mitteaktiivne"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_search
 msgid "Inactive Users"
-msgstr "Mitteaktiivsed kasutajad"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_wkf_activity_in_transitions
@@ -10253,7 +10246,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_in_hr_payroll
 msgid "Indian Payroll"
-msgstr "India palgaarvestus"
+msgstr ""
 
 #. module: base
 #: selection:res.partner,company_type:0
@@ -10280,12 +10273,12 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_view_search
 msgid "Inherit"
-msgstr "Pärima"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_groups_form
 msgid "Inherited"
-msgstr "Pärandatud"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_view_inherit_id
@@ -10295,12 +10288,12 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_view_form
 msgid "Inherited Views"
-msgstr "Pärandatud vaated"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_inherited_model_ids
 msgid "Inherited models"
-msgstr "Pärandatud mudelid"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_groups_implied_ids
@@ -10558,7 +10551,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_warehouse_management
 msgid "Inventory"
-msgstr "Ladu"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_generic_modules_inventory_control
@@ -10569,7 +10562,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_inventory_management
 #: model:ir.module.module,shortdesc:base.module_stock
 msgid "Inventory Management"
-msgstr "Laohaldus"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_account
@@ -10827,7 +10820,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_stock_landed_costs
 msgid "Landed Costs"
-msgstr "Maaletoomise kulud"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_language_export_lang
@@ -11212,12 +11205,12 @@ msgstr "Juhtlõngad & võimalused"
 #. module: base
 #: model:ir.module.module,summary:base.module_crm
 msgid "Leads, Opportunities, Activities"
-msgstr "Müügivihjed, müügivõimalused, tegevused"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays
 msgid "Leave Management"
-msgstr "Puhkuste haldamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_holidays_gantt
@@ -11288,7 +11281,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_logging_line
 msgid "Line"
-msgstr "Rida"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_link_tracker
@@ -11298,7 +11291,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_link_field_id
 msgid "Link using field"
-msgstr "Link ,kasutades välja"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model_fields_modules
@@ -11402,12 +11395,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_lunch
 msgid "Lunch"
-msgstr "Lõuna"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_lunch
 msgid "Lunch Order, Meal, Food"
-msgstr "Lõuna tellimus, toit"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.lu
@@ -11674,7 +11667,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_mass_mailing
 msgid "Mass Mailing"
-msgstr "E-kirja turundus"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mass_mailing
@@ -11943,7 +11936,7 @@ msgstr ""
 msgid ""
 "Model for record creation / update. Set this field only to specify a "
 "different model than the base model."
-msgstr "Kirjete loomise/uuendamise mudel. Määrakse see väli ainult erinevate kui baasmudelite täpsustamiseks."
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_window_res_model
@@ -12576,7 +12569,7 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_hr_user
 msgid "Officer"
-msgstr "Ametnik"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment_ogone
@@ -12634,7 +12627,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_event
 msgid "Online Events"
-msgstr "Online sündmued"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_hr_recruitment
@@ -12732,7 +12725,7 @@ msgstr ""
 msgid ""
 "Optional help text for the users with a description of the target view, such"
 " as its usage and purpose."
-msgstr "Valikuline abitekst kasutajatele koos sihtvaate kirjeldusega nagu selle kasutamine ja eesmärgid."
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_window_src_model
@@ -13052,7 +13045,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_payment
 msgid "Payment Acquirer"
-msgstr "Makse saaja"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_payment
@@ -13111,7 +13104,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_localization_payroll
 #: model:ir.module.module,shortdesc:base.module_hr_payroll
 msgid "Payroll"
-msgstr "Palgalehed"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_payroll_account
@@ -13121,7 +13114,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,summary:base.module_hr_appraisal
 msgid "Periodical Appraisal"
-msgstr "Perioodiline hindamine"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -13497,7 +13490,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_project_management
 #: model:ir.ui.menu,name:base.menu_main_pm
 msgid "Project"
-msgstr "Projektid"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_project_and_timesheet_management
@@ -13507,7 +13500,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_forecast
 msgid "Project Forecast"
-msgstr "Projekti prognoos"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project
@@ -13604,7 +13597,7 @@ msgstr "Ost"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_purchase
 msgid "Purchase Management"
-msgstr "Ostude haldamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_purchase
@@ -13800,7 +13793,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_hr_recruitment
 msgid "Recruitment Process"
-msgstr "Värbamisprotsess"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_subscription
@@ -13913,13 +13906,13 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_server_action_form
 msgid "Remove the contextual action related to this server action"
-msgstr "Eemalda selle serveri tegevusega seotud kontekstitegevus"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_model.py:486
 #, python-format
 msgid "Renaming sparse field \"%s\" is not allowed"
-msgstr "Hõreda välja \"%s\" ümbernimetamine pole lubatud"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_mrp_repair
@@ -13929,7 +13922,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_mrp_repair
 msgid "Repairs Management"
-msgstr "Parandustööde haldamine"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_cron_doall
@@ -13947,28 +13940,28 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.act_report_xml_search_view
 #: model:ir.ui.view,arch_db:base.act_report_xml_view
 msgid "Report"
-msgstr "Aruanne"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_company_form
 msgid "Report Configuration"
-msgstr "Aruande seadistamine"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_report_file
 msgid "Report File"
-msgstr "Aruande fail"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_company_rml_footer
 #: model:ir.model.fields,field_description:base.field_res_company_rml_footer_readonly
 msgid "Report Footer"
-msgstr "Aruande jalus"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.act_report_xml_search_view
 msgid "Report Model"
-msgstr "Aruande mall"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_report_type
@@ -14017,12 +14010,12 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_model_fields_required
 #: model:ir.ui.view,arch_db:base.view_model_fields_search
 msgid "Required"
-msgstr "Nõutud"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_partner_assign
 msgid "Resellers"
-msgstr "Edasimüüjad"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:1083
@@ -14035,19 +14028,19 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_property_res_id
 #: model:ir.module.module,shortdesc:base.module_resource
 msgid "Resource"
-msgstr "Ressurss"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment_res_field
 msgid "Resource Field"
-msgstr "Ressursi väli"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment_res_id
 #: model:ir.model.fields,field_description:base.field_wkf_instance_res_id
 #: model:ir.model.fields,field_description:base.field_wkf_triggers_res_id
 msgid "Resource ID"
-msgstr "Ressursi ID"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment_res_model
@@ -14057,14 +14050,14 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_attachment_res_name
 msgid "Resource Name"
-msgstr "Ressursi nimi"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_wkf_instance_res_type
 #: model:ir.model.fields,field_description:base.field_wkf_osv
 #: model:ir.ui.view,arch_db:base.view_workflow_instance_search
 msgid "Resource Object"
-msgstr "Ressursi objekt"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_project_forecast
@@ -14074,7 +14067,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_pos_restaurant
 msgid "Restaurant"
-msgstr "Restoran"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_restaurant
@@ -14084,7 +14077,7 @@ msgstr ""
 #. module: base
 #: selection:ir.model.fields,on_delete:0
 msgid "Restrict"
-msgstr "Piira"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_multi
@@ -14094,7 +14087,7 @@ msgstr ""
 #. module: base
 #: model:res.partner.category,name:base.res_partner_category_16
 msgid "Retailer"
-msgstr "Edasimüüja"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.re
@@ -14119,17 +14112,17 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.ro
 msgid "Romania"
-msgstr "Rumeenia"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ro
 msgid "Romania - Accounting"
-msgstr "Rumeenia - Raamatupidamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ro_reports
 msgid "Romania - Accounting Reports"
-msgstr "Rumeenia - Raamatupidamise aruanded"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -14139,7 +14132,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_currency_rounding
 msgid "Rounding Factor"
-msgstr "Ümardamise faktor"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_rule_form
@@ -14155,7 +14148,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_groups_rule_groups
 #: model:ir.ui.view,arch_db:base.view_groups_form
 msgid "Rules"
-msgstr "Reeglid"
+msgstr ""
 
 #. module: base
 #: constraint:ir.rule:0
@@ -14201,12 +14194,12 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_sepa
 msgid "SEPA Credit Transfer"
-msgstr "SEPA pangamakse"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server_smtp_port
 msgid "SMTP Port"
-msgstr "SMTP port"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_mail_server_smtp_port
@@ -14216,7 +14209,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_mail_server_smtp_host
 msgid "SMTP Server"
-msgstr "SMTP server"
+msgstr ""
 
 #. module: base
 #: selection:ir.translation,type:0
@@ -14283,7 +14276,7 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_sale
 #: model:ir.ui.view,arch_db:base.view_partner_form
 msgid "Sale"
-msgstr "Müük"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_voucher
@@ -14318,12 +14311,12 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_sales
 #: model:ir.ui.menu,name:base.menu_sales_config
 msgid "Sales"
-msgstr "Müük"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_partner_form
 msgid "Sales & Purchases"
-msgstr "Müügid ja ostud"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_sale_expense
@@ -14371,17 +14364,17 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_res_users_user_id
 #: model:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Salesperson"
-msgstr "Müügimees"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.ws
 msgid "Samoa"
-msgstr "Samoa"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.sm
 msgid "San Marino"
-msgstr "San Marino"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_bank_sanitized_acc_number
@@ -14391,7 +14384,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sa
 msgid "Saudi Arabia"
-msgstr "Saudi Araabia"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sa
@@ -14401,7 +14394,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_users_form_simple_modif
 msgid "Save"
-msgstr "Salvesta"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_attachment
@@ -14416,7 +14409,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_cron_view_search
 msgid "Scheduled Action"
-msgstr "Ajastatud toimingud"
+msgstr ""
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_cron_act
@@ -14426,27 +14419,27 @@ msgstr "Ajastatud toimingud"
 #: model:ir.ui.view,arch_db:base.ir_cron_view_search
 #: model:ir.ui.view,arch_db:base.ir_cron_view_tree
 msgid "Scheduled Actions"
-msgstr "ˇAjastatud toimingud"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_view_search selection:ir.ui.view,type:0
 msgid "Search"
-msgstr "Otsi"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.config_wizard_step_view_search
 msgid "Search Actions"
-msgstr "Otsingu toimingud"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Search Partner"
-msgstr "Otsi partnerit"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_search_view
 msgid "Search View"
-msgstr "Otsinguvaade"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_window_search_view_id
@@ -14456,7 +14449,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_module_filter
 msgid "Search modules"
-msgstr "Otsingu moodulid"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.sequence_view
@@ -14468,7 +14461,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.act_report_xml_view
 #: model:ir.ui.view,arch_db:base.view_window_action_form
 msgid "Security"
-msgstr "Turvalisus"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_mail_server_form
@@ -14483,19 +14476,19 @@ msgstr ""
 #. module: base
 #: model:res.groups,name:base.group_sale_salesman_all_leads
 msgid "See all Leads"
-msgstr "Vaata kõiki juhtlõngasid"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:306
 #, python-format
 msgid "See all possible values"
-msgstr "Vaata võimalikke väärtuseid"
+msgstr ""
 
 #. module: base
 #: code:addons/common.py:42
 #, python-format
 msgid "See http://openerp.com"
-msgstr "Vaata http://openerp.com"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_act_server_model_object_field
@@ -14525,17 +14518,17 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields_selectable
 msgid "Selectable"
-msgstr "Valitav"
+msgstr ""
 
 #. module: base
 #: selection:ir.property,type:0 selection:ir.translation,type:0
 msgid "Selection"
-msgstr "Valik"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields_selection
 msgid "Selection Options"
-msgstr "Valiku toimingud"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_website_event_sale
@@ -14596,7 +14589,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sn
 msgid "Senegal"
-msgstr "Senegal"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_lang_grouping
@@ -14647,7 +14640,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.rs
 msgid "Serbia"
-msgstr "Serbia"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -14662,25 +14655,25 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields_serialization_field_id
 msgid "Serialization Field"
-msgstr "Seerianumbri väli"
+msgstr ""
 
 #. module: base
 #: code:addons/models.py:426
 #, python-format
 msgid "Serialization field `%s` not found for sparse field `%s`!"
-msgstr "Seerianumbri välja `%s` ei leitud hõredale väljale `%s`!"
+msgstr ""
 
 #. module: base
 #: selection:ir.logging,type:0
 msgid "Server"
-msgstr "Server"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_wkf_activity_action_id
 #: model:ir.ui.view,arch_db:base.view_server_action_form
 #: model:ir.ui.view,arch_db:base.view_server_action_search
 msgid "Server Action"
-msgstr "Serveri toiming"
+msgstr ""
 
 #. module: base
 #: model:ir.model,name:base.model_ir_server_object_lines
@@ -14699,7 +14692,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_services
 #: model:res.partner.category,name:base.res_partner_category_11
 msgid "Services"
-msgstr "Teenused"
+msgstr ""
 
 #. module: base
 #: selection:ir.model.fields,on_delete:0
@@ -14709,7 +14702,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users_new_password
 msgid "Set Password"
-msgstr "Määra parool"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.config_wizard_step_view_form
@@ -14737,7 +14730,7 @@ msgstr ""
 #: model:ir.ui.menu,name:base.menu_sale_general_settings
 #: model:res.groups,name:base.group_system
 msgid "Settings"
-msgstr "Seaded"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.sc
@@ -14762,7 +14755,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_filters_view_search
 msgid "Shared"
-msgstr "Jagatud"
+msgstr ""
 
 #. module: base
 #: selection:res.partner,type:0
@@ -14782,7 +14775,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sl
 msgid "Sierra Leone"
-msgstr "Sierra Leone"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_wkf_transition_signal
@@ -14802,17 +14795,17 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_users_signature
 msgid "Signature"
-msgstr "Allkiri"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_auth_signup
 msgid "Signup"
-msgstr "Liitumine"
+msgstr ""
 
 #. module: base
 #: model:res.partner.category,name:base.res_partner_category_5
 msgid "Silver"
-msgstr "Hõbe"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_pos_discount
@@ -14822,7 +14815,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sg
 msgid "Singapore"
-msgstr "Singapur"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_sg
@@ -14842,12 +14835,12 @@ msgstr ""
 #. module: base
 #: model:res.partner.title,name:base.res_partner_title_sir
 msgid "Sir"
-msgstr "Hr"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_model_fields_size
 msgid "Size"
-msgstr "Suurus"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_model.py:291
@@ -14858,12 +14851,12 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.res_config_installer
 msgid "Skip"
-msgstr "Jäta vahele"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_slides
 msgid "Slides"
-msgstr "Presentatsioon"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -14873,22 +14866,22 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sk
 msgid "Slovakia"
-msgstr "Slovakkia"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.si
 msgid "Slovenia"
-msgstr "Sloveenia"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_si
 msgid "Slovenian - Accounting"
-msgstr "Sloveenia - Raamatupidamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_si_reports
 msgid "Slovenian - Accounting Reports"
-msgstr "Sloveenia - Raamatupidamise aruanded"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -15156,7 +15149,7 @@ msgstr "Standard"
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_base_module_upgrade_install
 msgid "Start configuration"
-msgstr "Alusta seadistamist"
+msgstr ""
 
 #. module: base
 #: code:addons/base/res/res_partner.py:52
@@ -15170,22 +15163,22 @@ msgstr "Alusta seadistamist"
 #: model:ir.ui.view,arch_db:base.view_res_bank_form
 #, python-format
 msgid "State"
-msgstr "Maakond"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country_state_code
 msgid "State Code"
-msgstr "Maakonna kood"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country_state_name
 msgid "State Name"
-msgstr "Maakonna nimi"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country_state_ids
 msgid "States"
-msgstr "Maakonnad"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_language_install_state
@@ -15203,13 +15196,13 @@ msgstr "Olek"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_sequence_number_increment
 msgid "Step"
-msgstr "Samm"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_sequence.py:20 code:addons/base/ir/ir_sequence.py:43
 #, python-format
 msgid "Step must not be zero."
-msgstr "Samm ei tohi olla null."
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_note_pad
@@ -15271,12 +15264,12 @@ msgstr "Tänav2"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_sub_model_object_field
 msgid "Sub-field"
-msgstr "Alamväli"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_sub_object
 msgid "Sub-model"
-msgstr "Alam-mall"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_wkf_activity_subflow_id
@@ -15354,18 +15347,18 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sr
 msgid "Suriname"
-msgstr "Suriname"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_survey
 #: model:ir.module.module,shortdesc:base.module_survey
 msgid "Survey"
-msgstr "Uuring"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_survey_crm
 msgid "Survey CRM"
-msgstr "CRM küsitlus"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.sj
@@ -15380,7 +15373,7 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.se
 msgid "Sweden"
-msgstr "Rootsi"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -15390,27 +15383,27 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.ch
 msgid "Switzerland"
-msgstr "Šveits"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ch
 msgid "Switzerland - Accounting"
-msgstr "Šveits - Raamatupidamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_ch_reports
 msgid "Switzerland - Accounting Reports"
-msgstr "Šveits - Raamatupidamise aruanded"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_currency_symbol
 msgid "Symbol"
-msgstr "Sümbol"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_currency_position
 msgid "Symbol Position"
-msgstr "Sümboli asukoht"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_project_timesheet_synchro
@@ -15432,18 +15425,18 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.sy
 msgid "Syria"
-msgstr "Süüria"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_base_module_configuration_form
 msgid "System Configuration Done"
-msgstr "Süsteem on seadistatud"
+msgstr ""
 
 #. module: base
 #: code:addons/base/module/wizard/base_module_configuration.py:20
 #, python-format
 msgid "System Configuration done"
-msgstr "Süsteem on seadistatud"
+msgstr ""
 
 #. module: base
 #: model:ir.actions.act_window,name:base.ir_config_list_action
@@ -15451,22 +15444,22 @@ msgstr "Süsteem on seadistatud"
 #: model:ir.ui.view,arch_db:base.view_ir_config_form
 #: model:ir.ui.view,arch_db:base.view_ir_config_list
 msgid "System Parameters"
-msgstr "Süsteemi parameetrid"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_ir_config_search
 msgid "System Properties"
-msgstr "Süsteemi omadused"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_base_module_upgrade
 msgid "System Update"
-msgstr "Süsteemi uuendus"
+msgstr ""
 
 #. module: base
 #: selection:base.language.export,format:0
 msgid "TGZ Archive"
-msgstr "TGZ arhiiv"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.wizard_lang_export
@@ -15491,7 +15484,7 @@ msgstr ""
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Tag"
-msgstr "Silt"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_partner_category_id_972
@@ -15504,12 +15497,12 @@ msgstr "Sildid"
 #: model:ir.ui.view,arch_db:base.view_partner_form
 #: model:ir.ui.view,arch_db:base.view_partner_simple_form
 msgid "Tags..."
-msgstr "Sildid..."
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.tw
 msgid "Taiwan"
-msgstr "Taiwan"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.tj
@@ -15554,41 +15547,41 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_hr
 msgid "Team Page"
-msgstr "Meeskonna lehekülg"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.menu,name:base.menu_custom
 msgid "Technical"
-msgstr "Tehniline"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_cron_view
 #: model:ir.ui.view,arch_db:base.module_form
 msgid "Technical Data"
-msgstr "Tehnilised andmed"
+msgstr ""
 
 #. module: base
 #: model:res.groups,name:base.group_no_one
 msgid "Technical Features"
-msgstr "Tehnilised omadused"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_module_name
 msgid "Technical Name"
-msgstr "Tehniline nimi"
+msgstr ""
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_hidden
 #: model:ir.module.category,name:base.module_category_technical_settings
 #: model:ir.ui.view,arch_db:base.user_groups_view
 msgid "Technical Settings"
-msgstr "Tehnilised seaded"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_translation.py:734
 #, python-format
 msgid "Technical Translation"
-msgstr "Tehnilised tõlked"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_partner_company_type
@@ -15606,7 +15599,7 @@ msgstr ""
 #. module: base
 #: model:ir.actions.report.xml,name:base.ir_module_reference_print
 msgid "Technical guide"
-msgstr "Tehniline juhend"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -15621,17 +15614,17 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_report_xml_report_name
 msgid "Template Name"
-msgstr "Malli nimi"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_test_new_api
 msgid "Test API"
-msgstr "Testi API"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.ir_mail_server_form
 msgid "Test Connection"
-msgstr "Testi ühendust"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_access_rights
@@ -15641,7 +15634,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.category,name:base.module_category_tests
 msgid "Tests"
-msgstr "Testid"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_converter
@@ -15652,7 +15645,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:base.field_ir_actions_todo_note
 #: selection:ir.property,type:0
 msgid "Text"
-msgstr "Tekst"
+msgstr ""
 
 #. module: base
 #: selection:base.language.install,lang:0
@@ -15662,17 +15655,17 @@ msgstr ""
 #. module: base
 #: model:res.country,name:base.th
 msgid "Thailand"
-msgstr "Tai"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_th
 msgid "Thailand - Accounting"
-msgstr "Tai - Raamatupidamine"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_th_reports
 msgid "Thailand - Accounting Reports"
-msgstr "Tai - Raamatupidamise aruanded"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_res_country_code
@@ -16244,13 +16237,6 @@ msgstr ""
 #: selection:ir.module.module,state:0
 #: selection:ir.module.module.dependency,state:0
 msgid "To be upgraded"
-msgstr ""
-
-#. module: base
-#: code:addons/base/module/module.py:694
-#, python-format
-msgid ""
-"To enable it, make sure this directory exists and is writable on the server:"
 msgstr ""
 
 #. module: base
@@ -16982,7 +16968,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_act_server_fields_lines
 msgid "Value Mapping"
-msgstr "Väärtuste kaardistamine"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.vu
@@ -17011,7 +16997,7 @@ msgstr "Tarnija"
 #: model:ir.ui.menu,name:base.menu_procurement_management_supplier_name
 #: model:ir.ui.view,arch_db:base.view_res_partner_filter
 msgid "Vendors"
-msgstr "Tarnijad"
+msgstr ""
 
 #. module: base
 #: model:res.country,name:base.ve
@@ -17156,7 +17142,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category_visible
 msgid "Visible"
-msgstr "Nähtav"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_account
@@ -17176,7 +17162,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_barcode
 msgid "Warehouse Management Barcode Scanning"
-msgstr "Laohaldus ribakoodi lugejaga"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_stock_picking_wave
@@ -17189,7 +17175,7 @@ msgstr ""
 #: code:addons/base/res/res_partner.py:368
 #, python-format
 msgid "Warning"
-msgstr "Hoiatus"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_warning
@@ -17207,7 +17193,7 @@ msgstr "Hoiatus!"
 #: code:addons/models.py:5855 code:addons/models.py:5905
 #, python-format
 msgid "Warnings"
-msgstr "Hoiatused"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_base_module_upgrade_install
@@ -17219,17 +17205,17 @@ msgstr ""
 #: model:ir.module.module,shortdesc:base.module_web
 #: model:ir.ui.view,arch_db:base.report_irmodulereference
 msgid "Web"
-msgstr "Veeb"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_calendar
 msgid "Web Calendar"
-msgstr "Veebikalender"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_editor
 msgid "Web Editor"
-msgstr "Veebiredaktor"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_web_gantt
@@ -17239,12 +17225,12 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_menu_web_icon
 msgid "Web Icon File"
-msgstr "Veebiikooni fail"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_ui_menu_web_icon_data
 msgid "Web Icon Image"
-msgstr "Veebiikooni pilt"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_translation_search
@@ -17270,12 +17256,12 @@ msgstr ""
 #: model:ir.module.category,name:base.module_category_website
 #, python-format
 msgid "Website"
-msgstr "Veebisait"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website
 msgid "Website Builder"
-msgstr "Veebisaidi ehitaja"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_claim
@@ -17514,7 +17500,7 @@ msgstr ""
 #: model:ir.ui.view,arch_db:base.view_workflow_search
 #: model:ir.ui.view,arch_db:base.view_workflow_tree
 msgid "Workflow"
-msgstr "Töövoog"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_workflow_activity_search
@@ -17622,7 +17608,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_yodlee
 msgid "Yodlee"
-msgstr "Yodlee"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,summary:base.module_account_yodlee
@@ -17951,7 +17937,7 @@ msgstr ""
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale
 msgid "eCommerce"
-msgstr "E-kaubandus"
+msgstr ""
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_delivery
@@ -17997,7 +17983,7 @@ msgstr ""
 #: selection:base.language.install,state:0
 #: selection:base.module.update,state:0
 msgid "init"
-msgstr "initsialiseeri"
+msgstr ""
 
 #. module: base
 #: model:ir.ui.view,arch_db:base.view_partner_form
@@ -18269,7 +18255,7 @@ msgstr ""
 #: code:addons/base/ir/ir_ui_view.py:447
 #, python-format
 msgid "n/a"
-msgstr "n/a"
+msgstr ""
 
 #. module: base
 #: code:addons/base/ir/ir_fields.py:339
@@ -18344,7 +18330,7 @@ msgstr ""
 #. module: base
 #: model:ir.model,name:base.model_res_config_settings
 msgid "res.config.settings"
-msgstr "res.config.settings"
+msgstr ""
 
 #. module: base
 #: model:ir.model,name:base.model_res_partner_title
@@ -18419,7 +18405,7 @@ msgstr ""
 #. module: base
 #: model:res.groups,comment:base.group_hr_user
 msgid "the user will be able to approve document created by employees."
-msgstr "kasutajal on võimalik kinnitada töötaja poolt koostatud dokumente."
+msgstr ""
 
 #. module: base
 #: model:res.groups,comment:base.group_user
@@ -18445,7 +18431,7 @@ msgstr ""
 msgid ""
 "the user will have an access to the human resources configuration as well as"
 " statistic reports."
-msgstr "kasutajal on ligipääs personali seadetele ja statistilistele aruannetele."
+msgstr ""
 
 #. module: base
 #: model:res.groups,comment:base.group_sale_manager

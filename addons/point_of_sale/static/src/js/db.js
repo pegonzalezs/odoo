@@ -255,12 +255,10 @@ var PosDB = core.Class.extend({
         for(var i = 0, len = partners.length; i < len; i++){
             partner = partners[i];
 
-            var local_partner_date = (this.partner_write_date || '').replace(/^(\d{4}-\d{2}-\d{2}) ((\d{2}:?){3})$/, '$1T$2Z');
-            var dist_partner_date = (partner.write_date || '').replace(/^(\d{4}-\d{2}-\d{2}) ((\d{2}:?){3})$/, '$1T$2Z');
-            if (    this.partner_write_date &&
+            if (    this.partner_write_date && 
                     this.partner_by_id[partner.id] &&
-                    new Date(local_partner_date).getTime() + 1000 >=
-                    new Date(dist_partner_date).getTime() ) {
+                    new Date(this.partner_write_date).getTime() + 1000 >=
+                    new Date(partner.write_date).getTime() ) {
                 // FIXME: The write_date is stored with milisec precision in the database
                 // but the dates we get back are only precise to the second. This means when
                 // you read partners modified strictly after time X, you get back partners that were
@@ -321,7 +319,7 @@ var PosDB = core.Class.extend({
     search_partner: function(query){
         try {
             query = query.replace(/[\[\]\(\)\+\*\?\.\-\!\&\^\$\|\~\_\{\}\:\,\\\/]/g,'.');
-            query = query.replace(/ /g,'.+');
+            query = query.replace(' ','.+');
             var re = RegExp("([0-9]+):.*?"+query,"gi");
         }catch(e){
             return [];
@@ -502,13 +500,6 @@ var PosDB = core.Class.extend({
         }
         return orders;
     },
-    set_cashier: function(cashier) {
-        // Always update if the user is the same as before
-        this.save('cashier', cashier);
-    },
-    get_cashier: function() {
-        return this.load('cashier');
-    }
 });
 
 return PosDB;
