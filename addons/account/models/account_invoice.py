@@ -872,12 +872,15 @@ class AccountInvoice(models.Model):
         return self.filtered(lambda inv: inv.state != 'cancel').action_cancel()
 
     @api.multi
-    def _notification_recipients(self, message, groups):
-        groups = super(AccountInvoice, self)._notification_recipients(message, groups)
+    def _notify_get_groups(self, message, groups):
+        """ Give access button to users and portal customer as portal is integrated
+        in account. Customer and portal group have probably no right to see
+        the document so they don't have the access button. """
+        groups = super(AccountInvoice, self)._notify_get_groups(message, groups)
 
         if self.state not in ('draft', 'cancel'):
             for group_name, group_method, group_data in groups:
-                if group_name == 'customer':
+                if group_name in ('customer', 'portal'):
                     continue
                 group_data['has_button_access'] = True
 
@@ -1524,7 +1527,7 @@ class AccountInvoiceLine(models.Model):
         help="Gives the sequence of this line when displaying the invoice.")
     invoice_id = fields.Many2one('account.invoice', string='Invoice Reference',
         ondelete='cascade', index=True)
-    uom_id = fields.Many2one('product.uom', string='Unit of Measure',
+    uom_id = fields.Many2one('uom.uom', string='Unit of Measure',
         ondelete='set null', index=True, oldname='uos_id')
     product_id = fields.Many2one('product.product', string='Product',
         ondelete='restrict', index=True)
