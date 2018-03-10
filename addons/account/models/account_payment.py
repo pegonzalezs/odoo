@@ -70,9 +70,10 @@ class account_abstract_payment(models.AbstractModel):
     def default_get(self, fields):
         rec = super(account_abstract_payment, self).default_get(fields)
         active_ids = self._context.get('active_ids')
+        active_model = self._context.get('active_model')
 
         # Check for selected invoices ids
-        if not active_ids:
+        if not active_ids or active_model != 'account.invoice':
             return rec
 
         invoices = self.env['account.invoice'].browse(active_ids)
@@ -587,9 +588,9 @@ class account_payment(models.Model):
             writeoff_line['amount_currency'] = amount_currency_wo
             writeoff_line['currency_id'] = currency_id
             writeoff_line = aml_obj.create(writeoff_line)
-            if counterpart_aml['debit'] or writeoff_line['credit']:
+            if counterpart_aml['debit'] or (writeoff_line['credit'] and not counterpart_aml['credit']):
                 counterpart_aml['debit'] += credit_wo - debit_wo
-            if counterpart_aml['credit'] or writeoff_line['debit']:
+            if counterpart_aml['credit'] or (writeoff_line['debit'] and not counterpart_aml['debit']):
                 counterpart_aml['credit'] += debit_wo - credit_wo
             counterpart_aml['amount_currency'] -= amount_currency_wo
 
