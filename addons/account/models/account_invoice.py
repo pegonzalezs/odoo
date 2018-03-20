@@ -228,7 +228,6 @@ class AccountInvoice(models.Model):
         ], string='Status', index=True, readonly=True, default='draft',
         track_visibility='onchange', copy=False,
         help=" * The 'Draft' status is used when a user is encoding a new and unconfirmed Invoice.\n"
-             " * The 'Pro-forma' status is used when the invoice does not have an invoice number.\n"
              " * The 'Open' status is used when user creates invoice, an invoice number is generated. It stays in the open status till the user pays the invoice.\n"
              " * The 'Paid' status is set automatically when the invoice is paid. Its related journal entries may or may not be reconciled.\n"
              " * The 'Cancelled' status is used when user cancel invoice.")
@@ -1426,7 +1425,14 @@ class AccountInvoiceTax(models.Model):
     currency_id = fields.Many2one('res.currency', related='invoice_id.currency_id', store=True, readonly=True)
     base = fields.Monetary(string='Base', compute='_compute_base_amount', store=True)
 
-
+    # DO NOT FORWARD-PORT!!! ONLY FOR v10
+    def create(self, vals):
+        inv_tax = super(AccountInvoiceTax, self).create(vals)
+        # Workaround to make sure the tax amount is rounded to the currency precision since the ORM
+        # won't round it automatically at creation.
+        if inv_tax.company_id.tax_calculation_rounding_method == 'round_globally':
+            inv_tax.amount = inv_tax.currency_id.round(inv_tax.amount)
+        return inv_tax
 
 
 class AccountPaymentTerm(models.Model):
