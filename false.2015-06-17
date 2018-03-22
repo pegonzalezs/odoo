@@ -1,0 +1,23 @@
+2015-06-17 15:37:07,817 6230 INFO ? openerp: OpenERP version 7.0-20130807-231103
+2015-06-17 15:37:07,817 6230 INFO ? openerp: addons paths: /home/openerp/custom_addons,/home/openerp/openerp-server/openerp/addons
+2015-06-17 15:37:07,817 6230 INFO ? openerp: database hostname: localhost
+2015-06-17 15:37:07,817 6230 INFO ? openerp: database port: 5432
+2015-06-17 15:37:07,817 6230 INFO ? openerp: database user: openerp
+2015-06-17 15:37:07,818 6230 WARNING ? openerp.modules.module: 
+Ambiguous import: the OpenERP module `resource` is shadowed by another
+module (available at /usr/lib/python2.6/lib-dynload/resource.so).
+To import it, use `import openerp.addons.<module>.`.
+2015-06-17 15:37:07,822 6231 INFO ? openerp.service.workers: Worker WorkerHTTP (6231) alive
+2015-06-17 15:37:07,824 6232 INFO ? openerp.service.workers: Worker WorkerHTTP (6232) alive
+2015-06-17 15:37:07,825 6233 INFO ? openerp.service.workers: Worker WorkerCron (6233) alive
+2015-06-17 15:37:07,829 6234 INFO ? openerp.service.workers: Worker WorkerCron (6234) alive
+2015-06-17 15:37:08,908 6233 INFO ? openerp.addons.google_docs.google_docs: GData lib version `%s GData-Python/2.0.2` detected
+2015-06-17 15:37:08,909 6234 INFO ? openerp.addons.google_docs.google_docs: GData lib version `%s GData-Python/2.0.2` detected
+2015-06-17 15:37:09,513 6233 INFO AMT openerp.modules.loading: loading 1 modules...
+2015-06-17 15:37:09,581 6233 INFO AMT openerp.modules.loading: loading 104 modules...
+2015-06-17 15:37:11,833 6232 INFO ? openerp.service.workers: Worker (6232) exiting. request_count: 0.
+2015-06-17 15:37:11,837 6231 INFO ? openerp.service.workers: Worker (6231) exiting. request_count: 0.
+2015-06-17 15:37:11,841 6230 INFO ? openerp.service.workers: Stopping gracefully
+2015-06-17 15:37:11,962 6230 INFO ? openerp: OpenERP server is running, waiting for connections...
+2015-06-17 15:37:11,962 6230 INFO ? openerp.service: Initiating shutdown
+2015-06-17 15:37:11,962 6230 INFO ? openerp.service: Hit CTRL-C again or send a second signal to force the shutdown.
