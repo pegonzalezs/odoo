@@ -139,14 +139,13 @@ class wkf_instance(osv.osv):
         'state': fields.char('Status', size=32),
     }
     def _auto_init(self, cr, context=None):
-        res = super(wkf_instance, self)._auto_init(cr, context)
+        super(wkf_instance, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'wkf_instance_res_type_res_id_state_index\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX wkf_instance_res_type_res_id_state_index ON wkf_instance (res_type, res_id, state)')
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'wkf_instance_res_id_wkf_id_index\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX wkf_instance_res_id_wkf_id_index ON wkf_instance (res_id, wkf_id)')
-        return res
 
 wkf_instance()
 
@@ -158,7 +157,7 @@ class wkf_workitem(osv.osv):
     _columns = {
         'act_id': fields.many2one('workflow.activity', 'Activity', required=True, ondelete="cascade", select=True),
         'wkf_id': fields.related('act_id','wkf_id', type='many2one', relation='workflow', string='Workflow'),
-        'subflow_id': fields.many2one('workflow.instance', 'Subflow', ondelete="set null", select=True),
+        'subflow_id': fields.many2one('workflow.instance', 'Subflow', ondelete="cascade", select=True),
         'inst_id': fields.many2one('workflow.instance', 'Instance', required=True, ondelete="cascade", select=True),
         'state': fields.char('Status', size=64, select=True),
     }
@@ -175,11 +174,10 @@ class wkf_triggers(osv.osv):
         'workitem_id': fields.many2one('workflow.workitem', 'Workitem', required=True, ondelete="cascade"),
     }
     def _auto_init(self, cr, context=None):
-        res = super(wkf_triggers, self)._auto_init(cr, context)
+        super(wkf_triggers, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'wkf_triggers_res_id_model_index\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX wkf_triggers_res_id_model_index ON wkf_triggers (res_id, model)')
-        return res
 wkf_triggers()
 
 

@@ -66,6 +66,19 @@ psycopg2.extensions.register_type(psycopg2.extensions.new_type((700, 701, 1700,)
 
 
 import tools
+
+from tools import parse_version as pv
+if pv.parse_version(psycopg2.__version__) < pv.parse_version('2.7'):
+    from psycopg2._psycopg import QuotedString
+    def adapt_string(adapted):
+        """Python implementation of psycopg/psycopg2#459 from v2.7"""
+        if '\x00' in adapted:
+            raise ValueError("A string literal cannot contain NUL (0x00) characters.")
+        return QuotedString(adapted)
+
+    psycopg2.extensions.register_adapter(str, adapt_string)
+    psycopg2.extensions.register_adapter(unicode, adapt_string)
+
 from tools.func import frame_codeinfo
 from datetime import datetime as mdt
 from datetime import timedelta
@@ -172,7 +185,7 @@ class Cursor(object):
         self.sql_log_count = 0
         self.__closed = True    # avoid the call of close() (by __del__) if an exception
                                 # is raised by any of the following initialisations
-        self.__pool = pool
+        self._pool = pool
         self.dbname = dbname
 
         # Whether to enable snapshot isolation level for this cursor.
@@ -255,7 +268,7 @@ class Cursor(object):
     def split_for_in_conditions(self, ids):
         """Split a list of identifiers into one or more smaller tuples
            safe for IN conditions, after uniquifying them."""
-        return tools.misc.split_every(self.IN_MAX, ids)
+        return tools.misc.split_every(self.IN_MAX, set(ids))
 
     def print_log(self):
         global sql_counter
@@ -318,7 +331,7 @@ class Cursor(object):
             chosen_template = tools.config['db_template']
             templates_list = tuple(set(['template0', 'template1', 'postgres', chosen_template]))
             keep_in_pool = self.dbname not in templates_list
-            self.__pool.give_back(self._cnx, keep_in_pool=keep_in_pool)
+            self._pool.give_back(self._cnx, keep_in_pool=keep_in_pool)
 
     @check
     def autocommit(self, on):
@@ -430,8 +443,6 @@ class ConnectionPool(object):
             for i, (cnx, used) in enumerate(self._connections):
                 if not used:
                     self._connections.pop(i)
-                    if not cnx.closed:
-                        cnx.close()
                     self._debug('Removing old connection at index %d: %r', i, cnx.dsn)
                     break
             else:
@@ -478,12 +489,12 @@ class Connection(object):
 
     def __init__(self, pool, dbname):
         self.dbname = dbname
-        self.__pool = pool
+        self._pool = pool
 
     def cursor(self, serialized=True):
         cursor_type = serialized and 'serialized ' or ''
         _logger.debug('create %scursor to %r', cursor_type, self.dbname)
-        return Cursor(self.__pool, self.dbname, serialized=serialized)
+        return Cursor(self._pool, self.dbname, serialized=serialized)
 
     # serialized_cursor is deprecated - cursors are serialized by default
     serialized_cursor = cursor

@@ -33,7 +33,7 @@ from openerp.osv.orm import Model
 from openerp.tools.safe_eval import safe_eval as eval
 from openerp.tools import config
 from openerp.tools.translate import _
-from openerp.osv.orm import except_orm, browse_record, MAGIC_COLUMNS
+from openerp.osv.orm import except_orm, browse_record
 
 _logger = logging.getLogger(__name__)
 
@@ -151,7 +151,7 @@ class ir_model(osv.osv):
             if result and result[0] == 'v':
                 cr.execute('DROP view %s' % (model_pool._table,))
             elif result and result[0] == 'r':
-                cr.execute('DROP TABLE %s CASCADE' % (model_pool._table,))
+                cr.execute('DROP TABLE %s' % (model_pool._table,))
         return True
 
     def unlink(self, cr, user, ids, context=None):
@@ -198,7 +198,6 @@ class ir_model(osv.osv):
                 select=vals.get('select_level', '0'),
                 update_custom_fields=True)
             self.pool.get(vals['model'])._auto_init(cr, ctx)
-            self.pool.get(vals['model'])._auto_end(cr, ctx) # actually create FKs!
             openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
         return res
 
@@ -302,8 +301,6 @@ class ir_model_fields(osv.osv):
 
     def _drop_column(self, cr, uid, ids, context=None):
         for field in self.browse(cr, uid, ids, context):
-            if field.name in MAGIC_COLUMNS:
-                continue
             model = self.pool.get(field.model)
             cr.execute('select relkind from pg_class where relname=%s', (model._table,))
             result = cr.fetchone()
@@ -312,14 +309,6 @@ class ir_model_fields(osv.osv):
             if column_name and (result and result[0] == 'r'):
                 cr.execute('ALTER table "%s" DROP column "%s" cascade' % (model._table, field.name))
             model._columns.pop(field.name, None)
-
-            # remove m2m relation table for custom fields
-            # we consider the m2m relation is only one way as it's not possible
-            # to specify the relation table in the interface for custom fields
-            # TODO master: maybe use ir.model.relations for custom fields
-            if field.state == 'manual' and field.ttype == 'many2many':
-                rel_name = self.pool[field.model]._all_columns[field.name].column._rel
-                cr.execute('DROP table "%s"' % (rel_name))
         return True
 
     def unlink(self, cr, user, ids, context=None):
@@ -359,12 +348,6 @@ class ir_model_fields(osv.osv):
                 raise except_orm(_('Error'), _("Model %s does not exist!") % vals['relation'])
 
             if self.pool.get(vals['model']):
-                if vals['model'].startswith('x_') and vals['name'] == 'x_name':
-                    self.pool[vals['model']]._rec_name = 'x_name'
-
-                if self.pool.fields_by_model is not None:
-                    cr.execute('SELECT * FROM ir_model_fields WHERE id=%s', (res,))
-                    self.pool.fields_by_model.setdefault(vals['model'], []).append(cr.dictfetchone())
                 self.pool.get(vals['model']).__init__(self.pool, cr)
                 #Added context to _auto_init for special treatment to custom field for select_level
                 ctx = dict(context,
@@ -373,7 +356,6 @@ class ir_model_fields(osv.osv):
                     select=vals.get('select_level', '0'),
                     update_custom_fields=True)
                 self.pool.get(vals['model'])._auto_init(cr, ctx)
-                self.pool.get(vals['model'])._auto_end(cr, ctx) # actually create FKs!
                 openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
 
         return res
@@ -399,7 +381,7 @@ class ir_model_fields(osv.osv):
 
         # static table of properties
         model_props = [ # (our-name, fields.prop, set_fn)
-            ('field_description', 'string', tools.ustr),
+            ('field_description', 'string', str),
             ('required', 'required', bool),
             ('readonly', 'readonly', bool),
             ('domain', '_domain', eval),
@@ -444,7 +426,7 @@ class ir_model_fields(osv.osv):
                     column_rename = (obj, (obj._table, item.name, vals['name']))
                     final_name = vals['name']
 
-                if 'model_id' in vals and vals['model_id'] != item.model_id.id:
+                if 'model_id' in vals and vals['model_id'] != item.model_id:
                     raise except_orm(_("Error!"), _("Changing the model of a field is forbidden!"))
 
                 if 'ttype' in vals and vals['ttype'] != item.ttype:
@@ -491,7 +473,6 @@ class ir_model_fields(osv.osv):
                 for col_name, col_prop, val in patch_struct[1]:
                     setattr(obj._columns[col_name], col_prop, val)
                 obj._auto_init(cr, ctx)
-                obj._auto_end(cr, ctx) # actually create FKs!
             openerp.modules.registry.RegistryManager.signal_registry_change(cr.dbname)
         return res
 
@@ -868,11 +849,10 @@ class ir_model_data(osv.osv):
         self.loads = self.pool.model_data_reference_ids
 
     def _auto_init(self, cr, context=None):
-        res = super(ir_model_data, self)._auto_init(cr, context)
+        super(ir_model_data, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'ir_model_data_module_name_index\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_model_data_module_name_index ON ir_model_data (module, name)')
-        return res
 
     @tools.ormcache()
     def _get_id(self, cr, uid, module, xml_id):
@@ -955,13 +935,13 @@ class ir_model_data(osv.osv):
 
         if action_id and res_id:
             model_obj.write(cr, uid, [res_id], values, context=context)
-            self.write(cr, SUPERUSER_ID, [action_id], {
+            self.write(cr, uid, [action_id], {
                 'date_update': time.strftime('%Y-%m-%d %H:%M:%S'),
                 },context=context)
         elif res_id:
             model_obj.write(cr, uid, [res_id], values, context=context)
             if xml_id:
-                self.create(cr, SUPERUSER_ID, {
+                self.create(cr, uid, {
                     'name': xml_id,
                     'model': model,
                     'module':module,
@@ -972,7 +952,7 @@ class ir_model_data(osv.osv):
                     for table in model_obj._inherits:
                         inherit_id = model_obj.browse(cr, uid,
                                 res_id,context=context)[model_obj._inherits[table]]
-                        self.create(cr, SUPERUSER_ID, {
+                        self.create(cr, uid, {
                             'name': xml_id + '_' + table.replace('.', '_'),
                             'model': table,
                             'module': module,
@@ -983,7 +963,7 @@ class ir_model_data(osv.osv):
             if mode=='init' or (mode=='update' and xml_id):
                 res_id = model_obj.create(cr, uid, values, context=context)
                 if xml_id:
-                    self.create(cr, SUPERUSER_ID, {
+                    self.create(cr, uid, {
                         'name': xml_id,
                         'model': model,
                         'module': module,
@@ -994,7 +974,7 @@ class ir_model_data(osv.osv):
                         for table in model_obj._inherits:
                             inherit_id = model_obj.browse(cr, uid,
                                     res_id,context=context)[model_obj._inherits[table]]
-                            self.create(cr, SUPERUSER_ID, {
+                            self.create(cr, uid, {
                                 'name': xml_id + '_' + table.replace('.', '_'),
                                 'model': table,
                                 'module': module,
@@ -1010,8 +990,29 @@ class ir_model_data(osv.osv):
         return res_id
 
     def ir_set(self, cr, uid, key, key2, name, models, value, replace=True, isobject=False, meta=None, xml_id=False):
-        ir_values_obj = pooler.get_pool(cr.dbname)['ir.values']
-        ir_values_obj.set(cr, uid, key, key2, name, models, value, replace, isobject, meta)
+        if isinstance(models[0], (list, tuple)):
+            model,res_id = models[0]
+        else:
+            res_id=None
+            model = models[0]
+
+        if res_id:
+            where = ' and res_id=%s' % (res_id,)
+        else:
+            where = ' and (res_id is null)'
+
+        if key2:
+            where += ' and key2=\'%s\'' % (key2,)
+        else:
+            where += ' and (key2 is null)'
+
+        cr.execute('select * from ir_values where model=%s and key=%s and name=%s'+where,(model, key, name))
+        res = cr.fetchone()
+        if not res:
+            ir_values_obj = pooler.get_pool(cr.dbname).get('ir.values')
+            ir_values_obj.set(cr, uid, key, key2, name, models, value, replace, isobject, meta)
+        elif xml_id:
+            cr.execute('UPDATE ir_values set value=%s WHERE model=%s and key=%s and name=%s'+where,(value, model, key, name))
         return True
 
     def _module_data_uninstall(self, cr, uid, modules_to_remove, context=None):
@@ -1079,20 +1080,13 @@ class ir_model_data(osv.osv):
 
         # Remove non-model records first, then model fields, and finish with models
         unlink_if_refcount((model, res_id) for model, res_id in to_unlink
-                                if model not in ('ir.model','ir.model.fields','ir.model.constraint'))
-        unlink_if_refcount((model, res_id) for model, res_id in to_unlink
-                                if model == 'ir.model.constraint')
-
-        ir_module_module = self.pool['ir.module.module']
-        ir_model_constraint = self.pool['ir.model.constraint']
-        modules_to_remove_ids = ir_module_module.search(cr, uid, [('name', 'in', modules_to_remove)], context=context)
-        constraint_ids = ir_model_constraint.search(cr, uid, [('module', 'in', modules_to_remove_ids)], context=context)
-        ir_model_constraint._module_data_uninstall(cr, uid, constraint_ids, context)
-
+                                if model not in ('ir.model','ir.model.fields'))
         unlink_if_refcount((model, res_id) for model, res_id in to_unlink
                                 if model == 'ir.model.fields')
 
         ir_model_relation = self.pool.get('ir.model.relation')
+        ir_module_module = self.pool.get('ir.module.module')
+        modules_to_remove_ids = ir_module_module.search(cr, uid, [('name', 'in', modules_to_remove)])
         relation_ids = ir_model_relation.search(cr, uid, [('module', 'in', modules_to_remove_ids)])
         ir_model_relation._module_data_uninstall(cr, uid, relation_ids, context)
 
@@ -1115,8 +1109,7 @@ class ir_model_data(osv.osv):
             return True
         to_unlink = []
         cr.execute("""SELECT id,name,model,res_id,module FROM ir_model_data
-                      WHERE module IN %s AND res_id IS NOT NULL AND noupdate=%s
-                      ORDER BY id DESC""",
+                      WHERE module IN %s AND res_id IS NOT NULL AND noupdate=%s""",
                       (tuple(modules), False))
         for (id, name, model, res_id, module) in cr.fetchall():
             if (module,name) not in self.loads:

@@ -1,0 +1,30 @@
+2015-06-17 15:37:16,195 6250 INFO ? openerp: OpenERP version 7.0-20130807-231103
+2015-06-17 15:37:16,195 6250 INFO ? openerp: addons paths: /home/openerp/custom_addons,/home/openerp/openerp-server/openerp/addons
+2015-06-17 15:37:16,195 6250 INFO ? openerp: database hostname: localhost
+2015-06-17 15:37:16,195 6250 INFO ? openerp: database port: 5432
+2015-06-17 15:37:16,195 6250 INFO ? openerp: database user: openerp
+2015-06-17 15:37:16,196 6250 WARNING ? openerp.modules.module: 
+Ambiguous import: the OpenERP module `resource` is shadowed by another
+module (available at /usr/lib/python2.6/lib-dynload/resource.so).
+To import it, use `import openerp.addons.<module>.`.
+2015-06-17 15:37:16,200 6251 INFO ? openerp.service.workers: Worker WorkerHTTP (6251) alive
+2015-06-17 15:37:16,202 6252 INFO ? openerp.service.workers: Worker WorkerHTTP (6252) alive
+2015-06-17 15:37:16,204 6253 INFO ? openerp.service.workers: Worker WorkerCron (6253) alive
+2015-06-17 15:37:16,205 6254 INFO ? openerp.service.workers: Worker WorkerCron (6254) alive
+2015-06-17 15:37:17,280 6254 INFO ? openerp.addons.google_docs.google_docs: GData lib version `%s GData-Python/2.0.2` detected
+2015-06-17 15:37:17,281 6253 INFO ? openerp.addons.google_docs.google_docs: GData lib version `%s GData-Python/2.0.2` detected
+2015-06-17 15:37:17,881 6253 INFO AMT openerp.modules.loading: loading 1 modules...
+2015-06-17 15:37:17,949 6253 INFO AMT openerp.modules.loading: loading 104 modules...
+2015-06-17 15:37:20,347 6253 CRITICAL AMT .home.openerp.custom_addons.bt_swissdec.transmitter.py: You need to install JAVA. $sudo apt-get install default-jre
+2015-06-17 15:37:20,546 6253 INFO AMT openerp.modules.loading: Modules loaded.
+2015-06-17 15:37:20,563 6253 INFO AMT openerp.addons.fetchmail.fetchmail: start checking for new emails on pop server info@plasma-hvof.com
+2015-06-17 15:37:20,592 6253 INFO AMT openerp.addons.fetchmail.fetchmail: fetched/processed 0 email(s) on pop server info@plasma-hvof.com
+2015-06-17 15:37:20,602 6253 INFO AMT openerp.modules.registry: Reloading the model registry after database signaling.
+2015-06-17 15:37:20,627 6253 INFO AMT openerp.modules.loading: loading 1 modules...
+2015-06-17 15:37:20,696 6253 INFO AMT openerp.modules.loading: loading 104 modules...
+2015-06-17 15:37:21,137 6253 INFO AMT openerp.modules.loading: Modules loaded.
+2015-06-17 15:37:21,152 6253 INFO ? openerp.sql_db: ConnectionPool(used=0/count=4/max=64): Close all connections to 'host=localhost user=openerp password=fYAKiwMyHxg2kCB dbname=AMT'
+2015-06-17 15:37:30,313 6250 INFO ? openerp.service.workers: Stopping gracefully
+2015-06-17 15:37:30,428 6250 INFO ? openerp: OpenERP server is running, waiting for connections...
+2015-06-17 15:37:30,429 6250 INFO ? openerp.service: Initiating shutdown
+2015-06-17 15:37:30,429 6250 INFO ? openerp.service: Hit CTRL-C again or send a second signal to force the shutdown.

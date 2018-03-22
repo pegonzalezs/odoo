@@ -18,11 +18,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+import pickle
 
 from openerp.osv import osv, fields
 from openerp.osv.orm import except_orm
-from openerp.tools.safe_eval import safe_eval as eval
-from openerp.tools import pickle
 
 EXCLUDED_FIELDS = set((
     'report_sxw_content', 'report_rml_content', 'report_sxw', 'report_rml',
@@ -122,13 +121,7 @@ class ir_values(osv.osv):
         record = self.browse(cursor, user, id, context=context)
         if record.key == 'default':
             # default values are pickled on the fly
-            if isinstance(value, (str, unicode)):
-                try:
-                    value = pickle.dumps(eval(value))
-                except Exception:
-                    value = pickle.dumps(value)
-            else:
-                value = pickle.dumps(value)
+            value = pickle.dumps(value)
         self.write(cursor, user, id, {name[:-9]: value}, context=ctx)
 
     def onchange_object_id(self, cr, uid, ids, object_id, context=None):
@@ -190,11 +183,10 @@ class ir_values(osv.osv):
     }
 
     def _auto_init(self, cr, context=None):
-        res = super(ir_values, self)._auto_init(cr, context)
+        super(ir_values, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'ir_values_key_model_key2_res_id_user_id_idx\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_values_key_model_key2_res_id_user_id_idx ON ir_values (key, model, key2, res_id, user_id)')
-        return res
 
     def set_default(self, cr, uid, model, field_name, value, for_all_users=True, company_id=False, condition=False):
         """Defines a default value for the given model and field_name. Any previous

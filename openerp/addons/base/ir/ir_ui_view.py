@@ -41,11 +41,10 @@ class view_custom(osv.osv):
     }
 
     def _auto_init(self, cr, context=None):
-        res = super(view_custom, self)._auto_init(cr, context)
+        super(view_custom, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'ir_ui_view_custom_user_id_ref_id\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_ui_view_custom_user_id_ref_id ON ir_ui_view_custom (user_id, ref_id)')
-        return res
 
 class view(osv.osv):
     _name = 'ir.ui.view'
@@ -126,15 +125,11 @@ class view(osv.osv):
         try:
             fvg = self.pool.get(view.model).fields_view_get(cr, uid, view_id=view.id, view_type=view.type, context=context)
             return fvg['arch']
-        except Exception:
+        except:
             _logger.exception("Can't render view %s for model: %s", view.xml_id, view.model)
             return False
 
     def _check_xml(self, cr, uid, ids, context=None):
-        if context is None:
-            context = {}
-        context['check_view_ids'] = ids
-
         for view in self.browse(cr, uid, ids, context):
             # Sanity check: the view should not break anything upon rendering!
             view_arch_utf8 = self._check_render_view(cr, uid, view, context=context)
@@ -162,11 +157,10 @@ class view(osv.osv):
     ]
 
     def _auto_init(self, cr, context=None):
-        res = super(view, self)._auto_init(cr, context)
+        super(view, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'ir_ui_view_model_type_inherit_id\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_ui_view_model_type_inherit_id ON ir_ui_view (model, inherit_id)')
-        return res
 
     def get_inheriting_views_arch(self, cr, uid, view_id, model, context=None):
         """Retrieves the architecture of views that inherit from the given view, from the sets of
@@ -181,15 +175,13 @@ class view(osv.osv):
            :rtype: list of tuples
            :return: [(view_arch,view_id), ...]
         """
-
         user_groups = frozenset(self.pool.get('res.users').browse(cr, 1, uid, context).groups_id)
         if self.pool._init:
             # Module init currently in progress, only consider views from modules whose code was already loaded 
-            check_view_ids = context and context.get('check_view_ids') or (0,)
             query = """SELECT v.id FROM ir_ui_view v LEFT JOIN ir_model_data md ON (md.model = 'ir.ui.view' AND md.res_id = v.id)
-                       WHERE v.inherit_id=%s AND v.model=%s AND (md.module in %s OR v.id in %s)
+                       WHERE v.inherit_id=%s AND v.model=%s AND (md.module IS NULL or md.module in %s)  
                        ORDER BY priority"""
-            query_params = (view_id, model, tuple(self.pool._init_modules), tuple(check_view_ids))
+            query_params = (view_id, model, tuple(self.pool._init_modules))
         else:
             # Modules fully loaded, consider all views
             query = """SELECT v.id FROM ir_ui_view v
@@ -234,15 +226,15 @@ class view(osv.osv):
                     if model_value._obj==node_obj:
                         _Node_Field=model_key
                         _Model_Field=model_value._fields_id
+                    flag=False
                     for node_key,node_value in _Node_Obj._columns.items():
                         if node_value._type=='one2many':
                              if node_value._obj==conn_obj:
-                                 # _Source_Field = "Incoming Arrows" (connected via des_node)
-                                 if node_value._fields_id == des_node:
+                                 if src_node in _Arrow_Obj._columns and flag:
                                     _Source_Field=node_key
-                                 # _Destination_Field = "Outgoing Arrows" (connected via src_node)
-                                 if node_value._fields_id == src_node:
+                                 if des_node in _Arrow_Obj._columns and not flag:
                                     _Destination_Field=node_key
+                                    flag = True
 
         datas = _Model_Obj.read(cr, uid, id, [],context)
         for a in _Node_Obj.read(cr,uid,datas[_Node_Field],[]):
@@ -293,11 +285,10 @@ class view_sc(osv.osv):
     }
 
     def _auto_init(self, cr, context=None):
-        res = super(view_sc, self)._auto_init(cr, context)
+        super(view_sc, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'ir_ui_view_sc_user_id_resource\'')
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_ui_view_sc_user_id_resource ON ir_ui_view_sc (user_id, resource)')
-        return res
 
     def get_sc(self, cr, uid, user_id, model='ir.ui.menu', context=None):
         ids = self.search(cr, uid, [('user_id','=',user_id),('resource','=',model)], context=context)

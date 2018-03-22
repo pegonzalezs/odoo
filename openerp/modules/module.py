@@ -341,7 +341,27 @@ def load_information_from_description_file(module):
 
             f = tools.file_open(terp_file)
             try:
-                info.update(eval(f.read()))
+                f_read_content = f.read()
+                if 'without_bt_swissdec' in tools.config.options and tools.config['without_bt_swissdec'] == True and 'depends_without_bt_swissdec' in f_read_content:
+                    f_read_content = f_read_content.replace('"depends"', '"depends_old"')
+                    f_read_content = f_read_content.replace('"depends_without_bt_swissdec"', '"depends"')
+                    
+                    def insert(original, new, pos):
+                        '''Inserts new inside original at pos.'''
+                        return original[:pos] + new + original[pos:]
+                    
+                    #find position of next ']' after "data"
+                    pos_data = f_read_content.index('"data"')
+                    pos = f_read_content.find(']', pos_data)
+                    #find position of next '[' and ']' after "data_without_bt_swissdec"
+                    pos_data1 = f_read_content.index('"data_without_bt_swissdec"')
+                    pos_start = f_read_content.find('[', pos_data1)
+                    pos_end = f_read_content.find(']', pos_data1)
+                    #get text to insert
+                    to_insert = f_read_content[pos_start+1:pos_end]
+                    f_read_content = insert(f_read_content, to_insert, pos)
+                    
+                info.update(eval(f_read_content))
             finally:
                 f.close()
 

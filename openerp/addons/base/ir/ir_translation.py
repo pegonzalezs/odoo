@@ -110,22 +110,18 @@ class ir_translation_import_cursor(object):
 
         # Records w/o res_id must _not_ be inserted into our db, because they are
         # referencing non-existent data.
-        cr.execute("DELETE FROM %s WHERE res_id IS NULL AND module IS NOT NULL" % self._table_name)
+        cr.execute("DELETE FROM %s WHERE res_id IS NULL AND module IS NOT NULL" % \
+            self._table_name)
 
-        find_expr = """
-                irt.lang = ti.lang
-            AND irt.type = ti.type
-            AND irt.name = ti.name
-            AND (ti.type IN ('field', 'help') OR irt.src = ti.src)
-            AND (ti.type != 'model' OR ti.res_id = irt.res_id)
-        """
+        find_expr = "irt.lang = ti.lang AND irt.type = ti.type " \
+                    " AND irt.name = ti.name AND irt.src = ti.src " \
+                    " AND (ti.type != 'model' OR ti.res_id = irt.res_id) "
 
         # Step 2: update existing (matching) translations
         if self._overwrite:
             cr.execute("""UPDATE ONLY %s AS irt
                 SET value = ti.value,
-                    src = ti.src,
-                    state = 'translated'
+                state = 'translated'
                 FROM %s AS ti
                 WHERE %s AND ti.value IS NOT NULL AND ti.value != ''
                 """ % (self._parent_table, self._table_name, find_expr))
@@ -165,20 +161,18 @@ class ir_translation(osv.osv):
         '''
         if context is None:
             context = {}
-        res = dict.fromkeys(ids, False)
+        res = {}
         for record in self.browse(cr, uid, ids, context=context):
             if record.type != 'model':
                 res[record.id] = record.src
             else:
                 model_name, field = record.name.split(',')
                 model = self.pool.get(model_name)
-                if model and model.exists(cr, uid, record.res_id, context=context):
-                    #We need to take the context without the language information, because we want to read the
-                    #value store in db and not on the one associate with current language.
-                    context_wo_lang = context.copy()
-                    context_wo_lang.pop('lang', None)
-                    result = model.read(cr, uid, record.res_id, [field], context=context_wo_lang)
-                    res[record.id] = result and result[field] or False
+                #We need to take the context without the language information, because we want to read the
+                #value store in db and not on the one associate with current language.
+                context_wo_lang = context.copy()
+                context_wo_lang.pop('lang', None)
+                res[record.id] = model.read(cr, uid, record.res_id, [field], context=context_wo_lang)[field]
         return res
 
     def _set_src(self, cr, uid, id, name, value, args, context=None):
@@ -188,7 +182,7 @@ class ir_translation(osv.osv):
         if context is None:
             context = {}
         record = self.browse(cr, uid, id, context=context)
-        if  record.type == 'model':
+        if value and record.type == 'model':
             model_name, field = record.name.split(',')
             model = self.pool.get(model_name)
             #We need to take the context without the language information, because we want to write on the
@@ -229,7 +223,7 @@ class ir_translation(osv.osv):
         'Language code of translation item must be among known languages' ), ]
 
     def _auto_init(self, cr, context=None):
-        res = super(ir_translation, self)._auto_init(cr, context)
+        super(ir_translation, self)._auto_init(cr, context)
 
         # FIXME: there is a size limit on btree indexed values so we can't index src column with normal btree.
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = %s', ('ir_translation_ltns',))
@@ -252,8 +246,6 @@ class ir_translation(osv.osv):
         if not cr.fetchone():
             cr.execute('CREATE INDEX ir_translation_ltn ON ir_translation (name, lang, type)')
             cr.commit()
-
-        return res
 
     def _check_selection_field_value(self, cr, uid, field, value, context=None):
         if field == 'lang':
@@ -453,13 +445,6 @@ class ir_translation(osv.osv):
                         tools.trans_load(cr, base_trans_file, lang, verbose=False, module_name=module_name, context=context)
                         context['overwrite'] = True # make sure the requested translation will override the base terms later
 
-                    # i18n_extra folder is for additional translations handle manually (eg: for l10n_be)
-                    base_trans_extra_file = openerp.modules.get_module_resource(module_name, 'i18n_extra', base_lang_code + '.po')
-                    if base_trans_extra_file:
-                        _logger.info('module %s: loading extra base translation file %s for language %s', module_name, base_lang_code, lang)
-                        tools.trans_load(cr, base_trans_extra_file, lang, verbose=False, module_name=module_name, context=context)
-                        context['overwrite'] = True # make sure the requested translation will override the base terms later
-
                 # Step 2: then load the main translation file, possibly overriding the terms coming from the base language
                 trans_file = openerp.modules.get_module_resource(module_name, 'i18n', lang_code + '.po')
                 if trans_file:
@@ -467,11 +452,6 @@ class ir_translation(osv.osv):
                     tools.trans_load(cr, trans_file, lang, verbose=False, module_name=module_name, context=context)
                 elif lang_code != 'en_US':
                     _logger.warning('module %s: no translation for language %s', module_name, lang_code)
-
-                trans_extra_file = openerp.modules.get_module_resource(module_name, 'i18n_extra', lang_code + '.po')
-                if trans_extra_file:
-                    _logger.info('module %s: loading extra translation file (%s) for language %s', module_name, lang_code, lang)
-                    tools.trans_load(cr, trans_extra_file, lang, verbose=False, module_name=module_name, context=context)
         return True
 
 

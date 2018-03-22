@@ -2,7 +2,7 @@
 ##############################################################################
 #
 #    OpenERP, Open Source Management Solution
-#    Copyright (C) 2004-2014 OpenERP S.A. <http://www.openerp.com>
+#    Copyright (C) 2004-2011 OpenERP S.A. <http://www.openerp.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -100,7 +100,7 @@ class report_xml(osv.osv):
             if r['report_rml'] or r['report_rml_content_data']:
                 report_sxw('report.'+r['report_name'], r['model'],
                         opj('addons',r['report_rml'] or '/'), header=r['header'])
-            elif r['report_xsl'] and r['report_xml']:
+            if r['report_xsl']:
                 report_rml('report.'+r['report_name'], r['model'],
                         opj('addons',r['report_xml']),
                         r['report_xsl'] and opj('addons',r['report_xsl']))
@@ -300,11 +300,10 @@ class act_window_view(osv.osv):
         'multi': False,
     }
     def _auto_init(self, cr, context=None):
-        res = super(act_window_view, self)._auto_init(cr, context)
+        super(act_window_view, self)._auto_init(cr, context)
         cr.execute('SELECT indexname FROM pg_indexes WHERE indexname = \'act_window_view_unique_mode_per_action\'')
         if not cr.fetchone():
             cr.execute('CREATE UNIQUE INDEX act_window_view_unique_mode_per_action ON ir_act_window_view (act_window_id, view_mode)')
-        return res
 act_window_view()
 
 class act_wizard(osv.osv):
@@ -412,7 +411,7 @@ class actions_server(osv.osv):
 
     def _select_objects(self, cr, uid, context=None):
         model_pool = self.pool.get('ir.model')
-        ids = model_pool.search(cr, uid, [], limit=None)
+        ids = model_pool.search(cr, uid, [('name','not ilike','.')])
         res = model_pool.read(cr, uid, ids, ['model', 'name'])
         return [(r['model'], r['name']) for r in res] +  [('','')]
 
