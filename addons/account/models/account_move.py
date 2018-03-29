@@ -1329,7 +1329,7 @@ class AccountPartialReconcile(models.Model):
         :param tax: An account.tax record
         :return: An account record
         '''
-        return line.account_id
+        return tax.cash_basis_base_account_id or line.account_id
 
     def create_tax_cash_basis_entry(self, percentage_before_rec):
         self.ensure_one()
@@ -1372,7 +1372,7 @@ class AccountPartialReconcile(models.Model):
                             'name': line.name,
                             'debit': rounded_amt if rounded_amt > 0 else 0.0,
                             'credit': abs(rounded_amt) if rounded_amt < 0 else 0.0,
-                            'account_id': line.tax_line_id.cash_basis_account.id,
+                            'account_id': line.tax_line_id.cash_basis_account_id.id,
                             'analytic_account_id': line.analytic_account_id.id,
                             'analytic_tag_ids': line.analytic_tag_ids.ids,
                             'tax_line_id': line.tax_line_id.id,
