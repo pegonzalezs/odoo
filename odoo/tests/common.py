@@ -192,7 +192,7 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
             return self._assertRaises(exception)
 
     @contextmanager
-    def assertQueryCount(self, default=0, **counters):
+    def assertQueryCount(self, default=0, margin=0, **counters):
         """ Context manager that counts queries. It may be invoked either with
             one value, or with a set of named arguments like ``login=value``::
 
@@ -207,17 +207,20 @@ class BaseCase(TreeCase, MetaCase('DummyCase', (object,), {})):
         if self.warm:
             login = self.env.user.login
             expected = counters.get(login, default)
-            tolerance = expected + round(expected * 0.1)   # allow a 10% tolerance
             count0 = self.cr.sql_log_count
             yield
             count = self.cr.sql_log_count - count0
-            if count > tolerance:
-                msg = "Too much queries for user %s: %d > %d queries"
-                self.fail(msg % (login, count, expected))
+            if count > (expected + margin):
+                msg = "Too much query count: user %s: got %d instead of %d (margin %s)"
+                self.fail(msg % (login, count, expected, margin))
+            elif count > expected and count <= (expected + margin):
+                logger = logging.getLogger(type(self).__module__)
+                msg = "Query count greater but still in margin : user %s: got %d instead of %d (margin %s)"
+                logger.warn(msg, login, count, expected, margin)
             elif count < expected:
                 logger = logging.getLogger(type(self).__module__)
-                msg = "Nice job, %s! Got %d queries instead of %d"
-                logger.info(msg, login, count, expected)
+                msg = "Better query count: user %s: got %d instead of %d (margin %s)"
+                logger.info(msg, login, count, expected, margin)
         else:
             yield
 
