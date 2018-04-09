@@ -226,19 +226,7 @@ class MailController(http.Controller):
             'channel_slots': request.env['mail.channel'].channel_fetch_slot(),
             'commands': request.env['mail.channel'].get_mention_commands(),
             'mention_partner_suggestions': request.env['res.partner'].get_static_mention_suggestions(),
-            'shortcodes': request.env['mail.shortcode'].sudo().search_read([], ['shortcode_type', 'source', 'unicode_source', 'substitution', 'description']),
+            'shortcodes': request.env['mail.shortcode'].sudo().search_read([], ['source', 'substitution', 'description']),
             'menu_id': request.env['ir.model.data'].xmlid_to_res_id('mail.mail_channel_menu_root_chat'),
         }
         return values
-
-    @http.route('/mail/activity/new', type='json', auth='user')
-    def mail_activity_new(self, note, activity_type_id=None, date_deadline=None):
-        values = {'note': note}
-        if date_deadline:
-            values['date_deadline'] = date_deadline
-        if not activity_type_id:
-            activity_type_id = request.env['mail.activity.type'].sudo().search([('category', '=', 'reminder')], limit=1).id
-        if activity_type_id:
-            values['activity_type_id'] = activity_type_id
-        activity = request.env['mail.activity'].create(values)
-        return activity.id

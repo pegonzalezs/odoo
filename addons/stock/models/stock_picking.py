@@ -184,6 +184,8 @@ class Picking(models.Model):
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="If this shipment was split, then this field links to the shipment which contains the already processed part.")
 
+    backorder_ids = fields.One2many('stock.picking', 'backorder_id', 'Back Orders')
+
     move_type = fields.Selection([
         ('direct', 'As soon as possible'), ('one', 'When all products are ready')], 'Shipping Policy',
         default='direct', required=True,
@@ -709,7 +711,7 @@ class Picking(models.Model):
                 product = line.product_id
                 if product and product.tracking != 'none':
                     if not line.lot_name and not line.lot_id:
-                        raise UserError(_('You need to supply a lot/serial number for %s.') % product.display_name)
+                        raise UserError(_('You need to supply a Lot/Serial number for product %s.') % product.display_name)
                     elif line.qty_done == 0:
                         raise UserError(_('You cannot validate a transfer if you have not processed any quantity for %s.') % product.display_name)
 
