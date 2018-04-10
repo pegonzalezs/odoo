@@ -25,6 +25,7 @@ ActionManager.include({
         update_filters: '_onUpdateFilters',
         search: '_onSearch',
         switch_view: '_onSwitchView',
+        navigation_move: '_onNavigationMove',
     }),
 
     //--------------------------------------------------------------------------
@@ -435,7 +436,7 @@ ActionManager.include({
             var View = view_registry.get(key || viewType);
             if (View) {
                 views.push({
-                    accessKey: View.prototype.accessKey,
+                    accessKey: View.prototype.accessKey || View.prototype.accesskey,
                     fieldsView: fieldsView,
                     icon: View.prototype.icon,
                     isMobileFriendly: View.prototype.mobile_friendly,
@@ -819,6 +820,21 @@ ActionManager.include({
         var data = ev.data;
         var addedFilters = action.searchView.updateFilters(data.newFilters, data.filtersToRemove);
         data.callback(addedFilters);
+    },
+    /**
+     * Called mainly from the control panel when the focus should be given to a controller
+     * 
+     * @param {OdooEvent} event
+     * @private
+     */
+    _onNavigationMove : function(event) {
+        switch(event.data.direction) {
+            case 'down' :
+                var currentController = this.getCurrentController().widget;
+                currentController.giveFocus();
+                event.stopPropagation();
+                break;
+        }
     },
     /**
      * Called when there is a change in the search view, so the current action's

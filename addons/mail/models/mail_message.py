@@ -28,7 +28,7 @@ class Message(models.Model):
     def _get_default_from(self):
         if self.env.user.email:
             return formataddr((self.env.user.name, self.env.user.email))
-        raise UserError(_("Unable to send email, please configure the sender's email address."))
+        raise UserError(_("Unable to post message, please configure the sender's email address."))
 
     @api.model
     def _get_default_author(self):
@@ -392,8 +392,9 @@ class Message(models.Model):
                     'message_type': u'comment',
                     'id': 59,
                     'subject': False
-                    'is_note': True # only if the subtype is internal
+                    'is_note': True # only if the message is a note (subtype == note)
                     'is_discussion': False # only if the message is a discussion (subtype == discussion)
+                    'is_notification': False # only if the message is a note but is a notification aka not linked to a document like assignation
                 }
         """
         message_values = self.read([
@@ -419,6 +420,7 @@ class Message(models.Model):
         for message in message_values:
             message['is_note'] = message['subtype_id'] and subtypes_dict[message['subtype_id'][0]]['id'] == note_id
             message['is_discussion'] = message['subtype_id'] and subtypes_dict[message['subtype_id'][0]]['id'] == com_id
+            message['is_notification'] = message['is_note'] and not message['model'] and not message['res_id']
             message['subtype_description'] = message['subtype_id'] and subtypes_dict[message['subtype_id'][0]]['description']
             if message['model'] and self.env[message['model']]._original_module:
                 message['module_icon'] = modules.module.get_module_icon(self.env[message['model']]._original_module)
@@ -717,8 +719,14 @@ class Message(models.Model):
     def _invalidate_documents(self):
         """ Invalidate the cache of the documents followed by ``self``. """
         for record in self:
-            if record.model and record.res_id:
-                self.env[record.model].invalidate_cache(ids=[record.res_id])
+            if record.model and record.res_id and 'message_ids' in self.env[record.model]:
+                self.env[record.model].invalidate_cache(fnames=[
+                    'message_ids',
+                    'message_unread',
+                    'message_unread_counter',
+                    'message_needaction',
+                    'message_needaction_counter',
+                ], ids=[record.res_id])
 
     @api.model
     def create(self, values):
@@ -764,7 +772,8 @@ class Message(models.Model):
         if tracking_values_cmd:
             message.sudo().write({'tracking_value_ids': tracking_values_cmd})
 
-        message._invalidate_documents()
+        if values.get('model') and values.get('res_id'):
+            message._invalidate_documents()
 
         return message
 
@@ -780,7 +789,8 @@ class Message(models.Model):
         if 'model' in vals or 'res_id' in vals:
             self._invalidate_documents()
         res = super(Message, self).write(vals)
-        self._invalidate_documents()
+        if 'notification_ids' in vals or 'model' in vals or 'res_id' in vals:
+            self._invalidate_documents()
         return res
 
     @api.multi
@@ -855,10 +865,5 @@ class Message(models.Model):
         notif_partners._notify_by_chat(self)
 
         channels_sudo._notify(self)
-
-        # Discard cache, because child / parent allow reading and therefore
-        # change access rights.
-        if self.parent_id:
-            self.parent_id.invalidate_cache()
 
         return True
