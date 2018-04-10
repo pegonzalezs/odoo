@@ -4,13 +4,13 @@
 # 
 # Translators:
 # Ramiz Deniz Öner <deniz@denizoner.com>, 2016
-# Martin Trigaux <mat@odoo.com>, 2016
+# Martin Trigaux, 2016
 # Murat Kaplan <muratk@projetgrup.com>, 2016
 # Ediz Duman <neps1192@gmail.com>, 2016
-# tanerhasret <tanerhasret@gmail.com>, 2016
 # Güven YILMAZ <guvenyilmaz@outlook.com.tr>, 2016
 # Alper Çiftçi <inactive+alprciftci@transifex.com>, 2016
 # gezgin biri <gezginbiri@hotmail.com>, 2016
+# tanerhasret <tanerhasret@gmail.com>, 2016
 # Saban Yildiz <sabany@projetgrup.com>, 2016
 # Ahmet Altinisik <aaltinisik@altinkaya.com.tr>, 2016
 # Ayhan KIZILTAN <akiziltan76@hotmail.com>, 2016
@@ -49,7 +49,7 @@ msgstr "# Ürünler"
 #: code:addons/product/models/product_pricelist.py:438
 #, python-format
 msgid "%s %% discount"
-msgstr "% indirim"
+msgstr "%s indirim"
 
 #. module: product
 #: code:addons/product/models/product_pricelist.py:440
@@ -187,6 +187,9 @@ msgid ""
 "                        will delete and recreate existing variants and lead\n"
 "                        to the loss of their possible customizations."
 msgstr ""
+"<strong>Dikkat !</strong>: Nitelik eklemek veya silmek\n"
+"                        mecvut varyantların silinmesine ve yeniden oluşturulmasına neden olur,\n"
+"                        muhtemel özelleştirmelerinizi kaybetmemek için dikkatli olun."
 
 #. module: product
 #: code:addons/product/models/product.py:167 sql_constraint:product.product:0
@@ -696,7 +699,7 @@ msgstr "Bilgisayar Kasası"
 #: model:product.product,name:product.product_product_3
 #: model:product.template,name:product.product_product_3_product_template
 msgid "Computer SC234"
-msgstr ""
+msgstr "Bilgisayar SC234"
 
 #. module: product
 #: code:addons/product/models/product_template.py:42

@@ -87,11 +87,11 @@ options.registry["width-x"] = options.Class.extend({
 });
 
 options.registry.table_item = options.Class.extend({
-    on_clone: function ($clone) {
+    on_clone: function ($clone, options) {
         this._super.apply(this, arguments);
 
         // If we cloned a td or th element...
-        if (this.$target.is("td, th")) {
+        if (options.isCurrent && this.$target.is("td, th")) {
             // ... and that the td or th element was alone on its row ...
             if (this.$target.siblings().length === 1) {
                 var $tr = $clone.parent();
@@ -326,7 +326,6 @@ snippets_editor.Class.include({
             switch_theme.last = theme_params;
 
             $body.removeClass(all_classes).addClass(theme_params.className);
-            switch_images(theme_params, $editable_area);
 
             var $old_layout = $editable_area.find(".o_layout");
             // This wrapper structure is the only way to have a responsive and
@@ -349,8 +348,9 @@ snippets_editor.Class.include({
                 $contents = $editable_area.contents();
             }
 
-            $editable_area.empty().append($new_layout);
             $new_wrapper_content.append($contents);
+            switch_images(theme_params, $new_wrapper_content);
+            $editable_area.empty().append($new_layout);
             $old_layout.remove();
 
             if (first_choice) {
