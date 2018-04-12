@@ -45,7 +45,6 @@ from openerp import modules, pooler, tools, addons
 from openerp.modules.db import create_categories
 from openerp.tools.parse_version import parse_version
 from openerp.tools.translate import _
-from openerp.tools import html_sanitize
 from openerp.osv import fields, osv, orm
 
 _logger = logging.getLogger(__name__)
@@ -155,10 +154,9 @@ class module(osv.osv):
     def _get_desc(self, cr, uid, ids, field_name=None, arg=None, context=None):
         res = dict.fromkeys(ids, '')
         for module in self.browse(cr, uid, ids, context=context):
-            overrides = dict(embed_stylesheet=False, doctitle_xform=False,
-                             output_encoding='unicode', xml_declaration=False)
+            overrides = dict(embed_stylesheet=False, doctitle_xform=False, output_encoding='unicode')
             output = publish_string(source=module.description, settings_overrides=overrides, writer=MyWriter())
-            res[module.id] = html_sanitize(output)
+            res[module.id] = output
         return res
 
     def _get_latest_version(self, cr, uid, ids, field_name=None, arg=None, context=None):
@@ -436,9 +434,13 @@ class module(osv.osv):
         including the deletion of all database structures created by the module:
         tables, columns, constraints, etc."""
         ir_model_data = self.pool.get('ir.model.data')
+        ir_model_constraint = self.pool.get('ir.model.constraint')
         modules_to_remove = [m.name for m in self.browse(cr, uid, ids, context)]
+        modules_to_remove_ids = [m.id for m in self.browse(cr, uid, ids, context)]
+        constraint_ids = ir_model_constraint.search(cr, uid, [('module', 'in', modules_to_remove_ids)])
+        ir_model_constraint._module_data_uninstall(cr, uid, constraint_ids, context)
         ir_model_data._module_data_uninstall(cr, uid, modules_to_remove, context)
-        self.write(cr, uid, ids, {'state': 'uninstalled', 'latest_version': False})
+        self.write(cr, uid, ids, {'state': 'uninstalled'})
         return True
 
     def downstream_dependencies(self, cr, uid, ids, known_dep_ids=None,
@@ -487,7 +489,6 @@ class module(osv.osv):
             'params': {'menu_id': menu_ids and menu_ids[0] or False}
         }
 
-    #TODO remove me in master, not called anymore
     def button_immediate_uninstall(self, cr, uid, ids, context=None):
         """
         Uninstall the selected module(s) immediately and fully,

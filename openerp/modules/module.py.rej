@@ -1,0 +1,33 @@
+--- openerp/modules/module_unpatched.py	2013-11-08 10:11:57.000000000 +0100
++++ openerp/modules/module.py	2014-01-29 14:55:09.292098548 +0100
+@@ -341,7 +341,29 @@
+ 
+             f = tools.file_open(terp_file)
+             try:
+-                info.update(eval(f.read()))
++                fileContent = f.read()
++                values = eval(fileContent)
++                if ('without_bt_swissdec' in tools.config.options and
++                    tools.config['without_bt_swissdec'] == True and
++                    'depends_without_bt_swissdec' in values):
++
++                    # set the depends
++                    values['depends'] = values.pop('depends_without_bt_swissdec', None)
++
++                    # set the data
++                    values['data'] = values.pop('data', []) + values.pop('data_without_bt_swissdec', [])
++                    values.pop('data_with_bt_swissdec', None) # just to clean the list
++
++                else:
++
++                    # just clean the list
++                    values.pop('depends_without_bt_swissdec', None)
++
++                    # set the data
++                    values['data'] = values.pop('data', []) + values.pop('data_with_bt_swissdec', [])
++                    values.pop('data_without_bt_swissdec', None) # just to clean the list
++
++                info.update(values)
+             finally:
+                 f.close()
+ 
