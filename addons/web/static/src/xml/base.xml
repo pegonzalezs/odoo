@@ -115,19 +115,23 @@
 </t>
 
 <t t-name="Notification">
-    <div t-attf-class="o_notification #{className}" t-translation="off">
+    <div t-attf-class="o_notification #{widget.className}" t-translation="off">
         <a t-if="widget.sticky" class="fa fa-times o_close" href="#"/>
         <div class="o_notification_title">
-            <span class="o_icon fa fa-3x fa-lightbulb-o"/>
+            <span t-attf-class="o_icon fa fa-3x #{widget.icon}"/>
             <t t-raw="widget.title"/>
         </div>
-        <div class="o_notification_content" t-if="widget.text"><t t-raw="widget.text"/></div>
+        <div class="o_notification_content" t-if="widget.message"><t t-raw="widget.message"/></div>
+        <div t-if="widget.buttons.length" class="o_buttons">
+            <button t-foreach="widget.buttons" t-as="button" t-attf-class="btn btn-sm #{button.primary ? 'btn-primary' : 'btn-default'}" type="button">
+                <t t-if="button.icon">
+                    <i t-if="button.icon.indexOf('fa-') === 0" t-attf-class="fa fa-fw o_button_icon #{button.icon}"/>
+                    <img t-else="" t-att-src="button.icon"/>
+                </t>
+                <span><t t-esc="button.text"/></span>
+            </button>
+        </div>
     </div>
-</t>
-<t t-name="Warning" t-extend="Notification">
-    <t t-jquery=".o_icon" t-operation="replace">
-        <span class="o_icon fa fa-3x fa-exclamation"/>
-    </t>
 </t>
 
 <div t-name="CrashManager.warning" class="o_dialog_warning">
@@ -318,7 +322,7 @@
 <t t-name="Sidebar">
     <t t-foreach="widget.sections" t-as="section">
         <div class="btn-group o_dropdown">
-            <button t-if="section.name != 'buttons'" class="o_dropdown_toggler_btn btn btn-sm btn-link btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+            <button t-if="section.name != 'buttons'" class="o_dropdown_toggler_btn btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
                 <t t-if="section.name == 'files'" t-raw="widget.items[section.name].length || ''"/>
                 <t t-esc="section.label"/> <span class="caret"/>
             </button>
@@ -1026,7 +1030,7 @@
     <ul class="dropdown-menu o_searchview_autocomplete" role="menu"></ul>
 </t>
 <div t-name="SearchView.FilterMenu" class="btn-group o_dropdown">
-    <button class="o_dropdown_toggler_btn btn btn-sm btn-link btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" tabindex="-1">
+    <button class="o_dropdown_toggler_btn btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" tabindex="-1">
         <span class="fa fa-filter"/> Filters <span class="caret"/>
     </button>
     <ul class="dropdown-menu o_filters_menu" role="menu">
@@ -1138,7 +1142,7 @@
     </select>
 </t>
 <div t-name="SearchView.GroupByMenu" class="btn-group hidden-xs o_dropdown">
-    <button class="o_dropdown_toggler_btn btn btn-sm btn-link btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" tabindex="-1">
+    <button class="o_dropdown_toggler_btn btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" tabindex="-1">
         <span class="fa fa-bars"/> Group By <span class="caret"/>
     </button>
     <ul class="dropdown-menu o_group_by_menu" role="menu">
@@ -1159,7 +1163,7 @@
     </li>
 </t>
 <div t-name="SearchView.FavoriteMenu" class="btn-group o_dropdown">
-    <button class="o_dropdown_toggler_btn btn btn-sm btn-link btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" tabindex="-1">
+    <button class="o_dropdown_toggler_btn btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false" tabindex="-1">
         <span class="fa fa-star"/> Favorites <span class="caret"/>
     </button>
     <ul class="dropdown-menu o_favorites_menu" role="menu">

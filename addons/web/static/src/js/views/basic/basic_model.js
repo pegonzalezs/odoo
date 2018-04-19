@@ -948,7 +948,7 @@ var BasicModel = AbstractModel.extend({
      * - call the /create or /write method according to the record status
      * - After that, it has to reload all data, in case something changed, server side.
      *
-     * @param {string} record_id local resource
+     * @param {string} recordID local resource
      * @param {Object} [options]
      * @param {boolean} [options.reload=true] if true, data will be reloaded
      * @param {boolean} [options.savePoint=false] if true, the record will only
@@ -3646,11 +3646,22 @@ var BasicModel = AbstractModel.extend({
                     if (isFieldInView) {
                         var field = r.fields[fieldName];
                         var fieldType = field.type;
+                        var rec;
                         if (fieldType === 'many2one') {
-                            var rec = self._makeDataPoint({
+                            rec = self._makeDataPoint({
                                 context: r.context,
                                 modelName: field.relation,
                                 data: {id: r._changes[fieldName]},
+                                parentID: r.id,
+                            });
+                            r._changes[fieldName] = rec.id;
+                            many2ones[fieldName] = true;
+                        } else if (fieldType === 'reference') {
+                            var reference = r._changes[fieldName].split(',');
+                            rec = self._makeDataPoint({
+                                context: r.context,
+                                modelName: reference[0],
+                                data: {id: parseInt(reference[1])},
                                 parentID: r.id,
                             });
                             r._changes[fieldName] = rec.id;
