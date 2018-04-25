@@ -30,6 +30,7 @@ var KanbanController = BasicController.extend({
         kanban_load_more: '_onLoadMore',
         kanban_load_records: '_onLoadColumnRecords',
         column_toggle_fold: '_onToggleColumn',
+        kanban_column_records_toggle_active: '_onToggleActiveRecords',
     }),
     /**
      * @override
@@ -51,7 +52,10 @@ var KanbanController = BasicController.extend({
      */
     renderButtons: function ($node) {
         if (this.hasButtons && this.is_action_enabled('create')) {
-            this.$buttons = $(qweb.render('KanbanView.buttons', {widget: this}));
+            this.$buttons = $(qweb.render('KanbanView.buttons', {
+                btnClass: 'btn-primary',
+                widget: this,
+            }));
             this.$buttons.on('click', 'button.o-kanban-button-new', this._onButtonNew.bind(this));
             this.$buttons.on('keydown',this._onButtonsKeyDown.bind(this));
             this._updateButtons();
@@ -442,6 +446,27 @@ var KanbanController = BasicController.extend({
         var changes = _.clone(ev.data);
         ev.data.force_save = true;
         this._applyChanges(ev.target.db_id, changes, ev);
+    },
+    /**
+     * Allow the user to archive/restore all the records of a column.
+     *
+     * @private
+     * @param {OdooEvent} event
+     */
+    _onToggleActiveRecords: function (event) {
+        var self = this;
+        var active = !event.data.archive;
+        var column = event.target;
+        var recordIds = _.pluck(column.records, 'db_id');
+        if (recordIds.length) {
+            this.model
+                .toggleActive(recordIds, active, column.db_id)
+                .then(function (dbID) {
+                    var data = self.model.get(dbID);
+                    self.renderer.updateColumn(dbID, data);
+                    self._updateEnv();
+                });
+        }
     },
 });
 
