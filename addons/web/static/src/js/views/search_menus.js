@@ -80,7 +80,8 @@ return Widget.extend({
         var self = this,
             filter_name = this.$inputs[0].value,
             default_filter = this.$inputs[1].checked,
-            shared_filter = this.$inputs[2].checked;
+            shared_filter = this.$inputs[2].checked,
+            shared_filter_company = this.$inputs[3].checked;
         if (!filter_name.length){
             this.do_warn(_t("Error"), _t("Filter name is required."));
             this.$inputs.first().focus();
@@ -117,6 +118,7 @@ return Widget.extend({
         var filter = {
             name: filter_name,
             user_id: shared_filter ? false : session.uid,
+            company_id: shared_filter_company ? false : session.company_id,
             model_id: this.target_model,
             context: results.context,
             domain: results.domain,
@@ -207,8 +209,10 @@ return Widget.extend({
         this.$divider.show();
         if (!(key in this.$filters)) {
             var $filter = $('<li>')
-                .addClass(filter.user_id ? 'o-searchview-custom-private'
-                                         : 'o-searchview-custom-public')
+                .addClass(filter.user_id && filter.company_id ? 'o-searchview-custom-private'
+                                         : filter.user_id ? 'o-searchview-custom-public-company'
+                                         : filter.company_id ? 'o-searchview-custom-public'
+                                         : 'o-searchview-custom-public-user-company')
                 .append($('<a>', {'href': '#'}).text(filter.name))
                 .append($('<span>', {
                     class: 'fa fa-trash-o o-remove-filter',
