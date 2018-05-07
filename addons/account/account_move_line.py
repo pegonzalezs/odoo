@@ -68,9 +68,13 @@ class account_move_line(osv.osv):
             query_params['date_from'] = context['date_from']
             query_params['date_to'] = context['date_to']
             if initial_bal:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date < %(date_from)s)"
+                # begin hack by abku1
+                #where_move_lines_by_date = " AND " + obj + ".move_id IN (SELECT id FROM account_move WHERE date < %(date_from)s)"
+                where_move_lines_by_date = " AND " +obj+".date < %(date_from)s"
             else:
-                where_move_lines_by_date = " AND " +obj+".move_id IN (SELECT id FROM account_move WHERE date >= %(date_from)s AND date <= %(date_to)s)"
+                #where_move_lines_by_date = " AND " + obj + ".move_id IN (SELECT id FROM account_move WHERE date >= %(date_from)s AND date <= %(date_to)
+                where_move_lines_by_date = " AND " +obj+".date >= %(date_from)s AND " +obj+ ".date <= %(date_to)s"
+                # end hack
 
         if state:
             if state.lower() not in ['all']:
