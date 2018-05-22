@@ -229,7 +229,7 @@ class Picking(models.Model):
         default=fields.Datetime.now, index=True, track_visibility='onchange',
         states={'done': [('readonly', True)], 'cancel': [('readonly', True)]},
         help="Creation Date, usually the time of the order")
-    date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Completion Date of Transfer")
+    date_done = fields.Datetime('Date of Transfer', copy=False, readonly=True, help="Date at which the transfer has been processed or cancelled.")
 
     location_id = fields.Many2one(
         'stock.location', "Source Location",
@@ -303,7 +303,7 @@ class Picking(models.Model):
     show_operations = fields.Boolean(compute='_compute_show_operations')
     show_lots_text = fields.Boolean(compute='_compute_show_lots_text')
     has_tracking = fields.Boolean(compute='_compute_has_tracking')
-    immediate_transfer = fields.Boolean()
+    immediate_transfer = fields.Boolean(default=False)
 
     _sql_constraints = [
         ('name_uniq', 'unique(name, company_id)', 'Reference must be unique per company!'),
