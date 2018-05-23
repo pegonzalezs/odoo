@@ -84,6 +84,16 @@ class AccountAccount(models.Model):
         ('code_company_uniq', 'unique (code,company_id)', 'The code of the account must be unique per company !')
     ]
 
+    @api.model
+    def _search_new_account_code(self, company, digits, prefix):
+        for num in range(1, 100):
+            new_code = str(prefix.ljust(digits - 1, '0')) + str(num)
+            rec = self.search([('code', '=', new_code), ('company_id', '=', company.id)], limit=1)
+            if not rec:
+                return new_code
+        else:
+            raise UserError(_('Cannot generate an unused account code.'))
+
     def _compute_opening_debit_credit(self):
         for record in self:
             opening_debit = opening_credit = 0.0
@@ -164,15 +174,15 @@ class AccountAccount(models.Model):
         return super(AccountAccount, contextual_self).default_get(default_fields)
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         domain = []
         if name:
             domain = ['|', ('code', '=ilike', name.split(' ')[0] + '%'), ('name', operator, name)]
             if operator in expression.NEGATIVE_TERM_OPERATORS:
                 domain = ['&', '!'] + domain[1:]
-        accounts = self.search(domain + args, limit=limit)
-        return accounts.name_get()
+        account_ids = self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(account_ids).name_get()
 
     @api.onchange('internal_type')
     def onchange_internal_type(self):
@@ -328,12 +338,14 @@ class AccountGroup(models.Model):
         return result
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         if not args:
             args = []
         criteria_operator = ['|'] if operator not in expression.NEGATIVE_TERM_OPERATORS else ['&', '!']
         domain = criteria_operator + [('code_prefix', '=ilike', name + '%'), ('name', operator, name)]
-        return self.search(domain + args, limit=limit).name_get()
+        group_ids = self._search(domain + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(group_ids).name_get()
+
 
 class AccountJournal(models.Model):
     _name = "account.journal"
@@ -620,19 +632,12 @@ class AccountJournal(models.Model):
             account_code_prefix = company.bank_account_code_prefix or ''
         else:
             account_code_prefix = company.cash_account_code_prefix or company.bank_account_code_prefix or ''
-        for num in range(1, 100):
-            new_code = str(account_code_prefix.ljust(digits - 1, '0')) + str(num)
-            rec = self.env['account.account'].search([('code', '=', new_code), ('company_id', '=', company.id)], limit=1)
-            if not rec:
-                break
-        else:
-            raise UserError(_('Cannot generate an unused account code.'))
 
         liquidity_type = self.env.ref('account.data_account_type_liquidity')
         return {
                 'name': name,
                 'currency_id': currency_id or False,
-                'code': new_code,
+                'code': self.env['account.account']._search_new_account_code(company, digits, account_code_prefix),
                 'user_type_id': liquidity_type and liquidity_type.id or False,
                 'company_id': company.id,
         }
@@ -703,13 +708,13 @@ class AccountJournal(models.Model):
         return res
 
     @api.model
-    def name_search(self, name='', args=None, operator='ilike', limit=100):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         args = args or []
         connector = '|'
         if operator in expression.NEGATIVE_TERM_OPERATORS:
             connector = '&'
-        recs = self.search([connector, ('code', operator, name), ('name', operator, name)] + args, limit=limit)
-        return recs.name_get()
+        journal_ids = self._search([connector, ('code', operator, name), ('name', operator, name)] + args, limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(journal_ids).name_get()
 
     @api.multi
     @api.depends('company_id')
@@ -840,7 +845,7 @@ class AccountTax(models.Model):
         return super(AccountTax, self).copy(default=default)
 
     @api.model
-    def name_search(self, name, args=None, operator='ilike', limit=80):
+    def _name_search(self, name, args=None, operator='ilike', limit=100, name_get_uid=None):
         """ Returns a list of tuples containing id, name, as internally it is called {def name_get}
             result format: {[(id, name), (id, name), ...]}
         """
@@ -849,11 +854,11 @@ class AccountTax(models.Model):
             domain = [('description', operator, name), ('name', operator, name)]
         else:
             domain = ['|', ('description', operator, name), ('name', operator, name)]
-        taxes = self.search(expression.AND([domain, args]), limit=limit)
-        return taxes.name_get()
+        tax_ids = self._search(expression.AND([domain, args]), limit=limit, access_rights_uid=name_get_uid)
+        return self.browse(tax_ids).name_get()
 
     @api.model
-    def search(self, args, offset=0, limit=None, order=None, count=False):
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         context = self._context or {}
 
         if context.get('type'):
@@ -867,7 +872,7 @@ class AccountTax(models.Model):
             if journal.type in ('sale', 'purchase'):
                 args += [('type_tax_use', '=', journal.type)]
 
-        return super(AccountTax, self).search(args, offset, limit, order, count=count)
+        return super(AccountTax, self)._search(args, offset, limit, order, count=count, access_rights_uid=access_rights_uid)
 
     @api.onchange('amount')
     def onchange_amount(self):
