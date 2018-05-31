@@ -72,7 +72,7 @@ class Users(models.Model):
         return write_res
 
     @api.model
-    def activity_user_count(self):
+    def systray_get_activities(self):
         query = """SELECT m.id, count(*), act.res_model as model,
                         CASE
                             WHEN %(today)s::date - act.date_deadline::date = 0 Then 'today'
@@ -98,6 +98,7 @@ class Users(models.Model):
                 user_activities[activity['model']] = {
                     'name': model_names[activity['id']],
                     'model': activity['model'],
+                    'type': 'activity',
                     'icon': modules.module.get_module_icon(self.env[activity['model']]._original_module),
                     'total_count': 0, 'today_count': 0, 'overdue_count': 0, 'planned_count': 0,
                 }
