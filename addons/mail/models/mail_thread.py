@@ -1294,7 +1294,7 @@ class MailThread(models.AbstractModel):
                 post_params['model'] = model
             new_msg = thread.message_post(**post_params)
 
-            if original_partner_ids:
+            if new_msg and original_partner_ids:
                 # postponed after message_post, because this is an external message and we don't want to create
                 # duplicate emails due to notifications
                 new_msg.write({'partner_ids': original_partner_ids})
@@ -1691,6 +1691,26 @@ class MailThread(models.AbstractModel):
                 obj._message_add_suggested_recipient(result, partner=obj.user_id.partner_id, reason=self._fields['user_id'].string)
         return result
 
+    def _search_on_user(self, email_address, extra_domain=[]):
+        Users = self.env['res.users'].sudo()
+        # exact, case-insensitive match
+        partners = Users.search([('email', '=ilike', email_address)], limit=1).mapped('partner_id')
+        if not partners:
+            # if no match with addr-spec, attempt substring match within name-addr pair
+            email_brackets = "<%s>" % email_address
+            partners = Users.search([('email', 'ilike', email_brackets)], limit=1).mapped('partner_id')
+        return partners.id
+
+    def _search_on_partner(self, email_address, extra_domain=[]):
+        Partner = self.env['res.partner'].sudo()
+        # exact, case-insensitive match
+        partners = Partner.search([('email', '=ilike', email_address)] + extra_domain, limit=1)
+        if not partners:
+            # if no match with addr-spec, attempt substring match within name-addr pair
+            email_brackets = "<%s>" % email_address
+            partners = Partner.search([('email', 'ilike', email_brackets)] + extra_domain, limit=1)
+        return partners.id
+
     @api.multi
     def _find_partner_from_emails(self, emails, res_model=None, res_id=None, check_followers=True, force_create=False, exclude_aliases=True):
         """ Utility method to find partners from email addresses. The rules are :
@@ -1718,8 +1738,6 @@ class MailThread(models.AbstractModel):
             if hasattr(record, 'message_partner_ids'):
                 followers = record.message_partner_ids
 
-        Partner = self.env['res.partner'].sudo()
-        Users = self.env['res.users'].sudo()
         partner_ids = []
 
         for contact in emails:
@@ -1733,28 +1751,17 @@ class MailThread(models.AbstractModel):
                 continue
 
             email_address = email_address[0]
+            # Escape special SQL characters in email_address to avoid invalid matches
+            email_address = tools.email_escape_char(email_address)
+
             # first try: check in document's followers
             partner_id = next((partner.id for partner in followers if partner.email == email_address), False)
-
             # second try: check in partners that are also users
-            # Escape special SQL characters in email_address to avoid invalid matches
-            email_address = (email_address.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_'))
-            email_brackets = "<%s>" % email_address
             if not partner_id:
-                # exact, case-insensitive match
-                partners = Users.search([('email', '=ilike', email_address)], limit=1).mapped('partner_id')
-                if not partners:
-                    # if no match with addr-spec, attempt substring match within name-addr pair
-                    partners = Users.search([('email', 'ilike', email_brackets)], limit=1).mapped('partner_id')
-                partner_id = partners.id
+                partner_id = self._search_on_user(email_address)
             # third try: check in partners
             if not partner_id:
-                # exact, case-insensitive match
-                partners = Partner.search([('email', '=ilike', email_address)], limit=1)
-                if not partners:
-                    # if no match with addr-spec, attempt substring match within name-addr pair
-                    partners = Partner.search([('email', 'ilike', email_brackets)], limit=1)
-                partner_id = partners.id
+                partner_id = self._search_on_partner(email_address)
             if not partner_id and force_create:
                 partner_id = self.env['res.partner'].name_create(contact)[0]
             partner_ids.append(partner_id)
@@ -1862,7 +1869,7 @@ class MailThread(models.AbstractModel):
         return m2m_attachment_ids
 
     @api.multi
-    @api.returns('self', lambda value: value.id)
+    @api.returns('mail.message', lambda value: value.id)
     def message_post(self, body='', subject=None,
                      message_type='notification', subtype=None,
                      parent_id=False, attachments=None,
@@ -1884,6 +1891,7 @@ class MailThread(models.AbstractModel):
                     to the related document. Should only be set by Chatter.
             :return int: ID of newly created mail.message
         """
+
         if attachments is None:
             attachments = {}
         if self.ids and not self.ensure_one():
@@ -1991,15 +1999,18 @@ class MailThread(models.AbstractModel):
         message and computed value are given, to try to lessen query count by
         using already-computed values instead of having to rebrowse things. """
         # Notify recipients of the newly-created message (Inbox / Email + channels)
-        message._notify(
-            layout=notif_layout,
-            force_send=self.env.context.get('mail_notify_force_send', True),
-            values=notif_values,
-        )
+        if values.get('moderation_status') != 'pending_moderation':
+            message._notify(
+                layout=notif_layout,
+                force_send=self.env.context.get('mail_notify_force_send', True),
+                values=notif_values,
+            )
 
-        # Post-process: subscribe author
-        if values['author_id'] and values['model'] and self.ids and values['message_type'] != 'notification' and not self._context.get('mail_create_nosubscribe'):
-            self._message_subscribe([values['author_id']])
+            # Post-process: subscribe author
+            if values['author_id'] and values['model'] and self.ids and values['message_type'] != 'notification' and not self._context.get('mail_create_nosubscribe'):
+                self._message_subscribe([values['author_id']])
+        else:
+            message._notify_pending_by_chat()
 
     @api.multi
     def message_post_with_view(self, views_or_xmlid, **kwargs):
