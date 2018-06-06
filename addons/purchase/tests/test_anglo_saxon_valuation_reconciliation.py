@@ -53,6 +53,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'name': 'vendor bill',
             'type': 'in_invoice',
             'date_invoice': '2017-12-31',
+            'date': '2017-12-31',
             'account_id': account_receivable.id,
         })
         rslt.purchase_order_change()
@@ -131,6 +132,7 @@ class TestValuationReconciliation(ValuationReconciliationTestCase):
             'description': 'test_invoice_shipment_refund',
             'filter_refund': 'cancel',
             'date': '2018-03-15',
+            'date_invoice': '2018-03-15',
         })
         refund_invoice_wiz.invoice_refund()
 
