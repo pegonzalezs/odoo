@@ -27,7 +27,7 @@ class AccountChartTemplate(models.Model):
             value = xlat_obj._get_ids(in_ids._name + ',' + in_field, 'model', lang, in_ids.ids)
             counter = 0
             for element in in_ids.with_context(lang=None):
-                if value[element.id]:
+                if value[element.id] and counter < len(out_ids):
                     #copy Translation from Source to Destination object
                     xlat_obj.create({
                         'name': out_ids._name + ',' + in_field,
