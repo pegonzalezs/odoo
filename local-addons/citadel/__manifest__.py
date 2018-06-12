@@ -11,5 +11,6 @@
     'website': 'http://www.odoo.com',
     'category': 'Events',
     'version': '11.0.1.0.0',
-    'depends': ['base']
+    'depends': ['base'],
+    'application': True
 }
