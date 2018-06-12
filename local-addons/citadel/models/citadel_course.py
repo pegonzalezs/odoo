@@ -4,7 +4,7 @@ class CitadelCourse(models.Model):
     _name = 'citadel.course'
     _description = 'Citadel Course'
     
-    name = fields.Char('Title', requried=True)
+    name = fields.Char('Title', required=True)
     state = fields.Selection([('draft', 'In preparation'),
                               ('ready', 'Ready')],
                              'State')
