@@ -6,6 +6,7 @@
     <act_window id="citadel_course_action"
                 name="Courses"
                 res_model="citadel.course" />
+
     <menuitem id="citadel_session"
               name="Citadel Session"
               action="citadel_session_action"
@@ -16,4 +17,36 @@
               action="citadel_course_action"
               parent=""
               sequence="0" />
+
+    <record id="citadel_session_view_form"
+            model="ir.ui.view">
+        <field name="name">Citadel Session</field>
+        <field name="model">citadel.session</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="course" />
+                    <field name="attendees"
+                           widget="many2many_tags" />
+                </group>
+                <group>
+                    <field name="time_event" />
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="citadel_session_view_list"
+            model="ir.ui.view">
+        <field name="name">Sessions at the Citadel</field>
+        <field name="model">citadel.session</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="course" />
+                <field name="time_event" />
+                <field name="attendees"
+                       widget="many2many_tags" />
+            </tree>
+        </field>
+    </record>
 </odoo>
