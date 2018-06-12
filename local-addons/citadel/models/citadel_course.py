@@ -8,6 +8,11 @@ class CitadelCourse(models.Model):
     state = fields.Selection([('draft', 'In preparation'),
                               ('ready', 'Ready')],
                              'State')
+    level = fields.Selection([('novice', 'Novice'),
+                              ('intermediate', 'Intermediate'),
+                              ('expert', 'Expert'),
+                              ('god', 'God')],
+                             'Level')
 
     maester = fields.Many2one('res.partner',
                               string='Maester',
