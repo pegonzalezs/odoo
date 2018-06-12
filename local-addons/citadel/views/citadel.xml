@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <act_window id="citadel_session_action"
+                name="Sessions at the Citadel"
+                res_model="citadel.session" />
+    <act_window id="citadel_course_action"
+                name="Courses"
+                res_model="citadel.course" />
+    <menuitem id="citadel_session"
+              name="Citadel Session"
+              action="citadel_session_action"
+              parent=""
+              sequence="0" />
+    <menuitem id="citadel_course"
+              name="Citadel Course"
+              action="citadel_course_action"
+              parent=""
+              sequence="0" />
+</odoo>

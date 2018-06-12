@@ -12,5 +12,6 @@
     'category': 'Events',
     'version': '11.0.1.0.0',
     'depends': ['base'],
-    'application': True
+    'application': True,
+    'data': ['views/citadel.xml']
 }
