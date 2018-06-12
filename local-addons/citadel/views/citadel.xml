@@ -24,6 +24,12 @@
         <field name="model">citadel.session</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button type="object"
+                            name="do_archive"
+                            string="Archive"
+                            class="btn-primary" />
+                </header>
                 <group>
                     <field name="course" />
                     <field name="attendees"
