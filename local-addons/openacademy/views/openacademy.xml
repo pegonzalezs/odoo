@@ -21,6 +21,30 @@
               name="Courses"
               parent="openacademy_menu"
               action="action_list_courses" />
+
+      <record model="ir.ui.view" id="course_form_view">
+        <field name="name">course.form</field>
+        <field name="model">openacademy.course</field>
+        <field name="arch" type="xml">
+          <form>
+            <sheet>
+              <group>
+                <separator string="General Info" />
+                <field name="name" />
+              </group>
+              <separator string="Detailed Info" />
+              <notebook>
+                <page string="Description">
+                  <field name="description" />
+                </page>
+                <page string="About">
+                  This is an example of notebooks.
+                </page>
+              </notebook>
+            </sheet>
+          </form>
+        </field>
+      </record>
     <!-- explicit list view definition -->
     <!--
     <record model="ir.ui.view" id="openacademy.list">
