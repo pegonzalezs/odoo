@@ -32,6 +32,7 @@
                 </header>
                 <group>
                     <field name="course" />
+                    <field name="state" />
                     <field name="attendees"
                            widget="many2many_tags" />
                 </group>
@@ -54,7 +55,6 @@
                     <field name="level" />
                 </group>
                 <group>
-                    <field name="state" />
                     <field name="sessions" 
                            widget="one2many_tags" />
                 </group>
@@ -69,6 +69,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="course" />
+                <field name="state" />
                 <field name="time_event" />
                 <field name="attendees"
                        widget="many2many_tags" />
@@ -85,7 +86,6 @@
                 <field name="name" />
                 <field name="maester" />
                 <field name="level" />
-                <field name="state" />
                 <field name="sessions" />
             </tree>
         </field>

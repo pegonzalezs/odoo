@@ -5,9 +5,6 @@ class CitadelCourse(models.Model):
     _description = 'Citadel Course'
     
     name = fields.Char('Title', required=True)
-    state = fields.Selection([('draft', 'In preparation'),
-                              ('ready', 'Ready')],
-                             'State')
     level = fields.Selection([('novice', 'Novice'),
                               ('intermediate', 'Intermediate'),
                               ('expert', 'Expert'),
