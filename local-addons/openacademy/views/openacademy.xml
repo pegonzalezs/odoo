@@ -1,5 +1,6 @@
 <odoo>
   <data>
+    <!-- COURSE -->
     <record model="ir.actions.act_window"
             id="action_list_courses">
       <field name="name">Courses</field>
@@ -54,6 +55,41 @@
           <field name="name" />
           <field name="description" />
         </search>
+      </field>
+    </record>
+
+    <!-- SESSION -->
+    <record model="ir.actions.act_window"
+            id="action_list_sessions">
+      <field name="name">Sessions</field>
+      <field name="res_model">openacademy.session</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="help"
+             type="html">
+        <p class="oe_view_nocontent_create">Create the first session</p>
+      </field>
+    </record>
+
+    <menuitem id="sessions_menu"
+              name="Sessions"
+              parent="openacademy_menu"
+              action="action_list_sessions" />
+
+    <record model="ir.ui.view" id="session_form_view">
+      <field name="name">session.form</field>
+      <field name="model">openacademy.session</field>
+      <field name="arch" type="xml">
+        <form>
+          <sheet>
+            <group>
+              <field name="name" />
+              <field name="start_date" />
+              <field name="duration" />
+              <field name="seats" />
+            </group>
+          </sheet>
+        </form>
       </field>
     </record>
 

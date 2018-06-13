@@ -8,6 +8,17 @@ class Course(models.Model):
     name = fields.Char('Title',
                        required=True)
     description = fields.Text()
+
+class Session(models.Model):
+    _name = 'openacademy.session'
+
+    name = fields.Char('Title',
+                       required=True)
+    start_date = fields.Date('Start Date')
+    duration = fields.Float("Duration",
+                            digits=(6, 2),
+                            help="Duration in days")
+    seats = fields.Integer('Number of Seats')
 #
 #     @api.depends('value')
 #     def _value_pc(self):
