@@ -2,13 +2,12 @@
 
 from odoo import models, fields, api
 
-# class openacademy(models.Model):
-#     _name = 'openacademy.openacademy'
+class Course(models.Model):
+    _name = 'openacademy.course'
 
-#     name = fields.Char()
-#     value = fields.Integer()
-#     value2 = fields.Float(compute="_value_pc", store=True)
-#     description = fields.Text()
+    name = fields.Char('Title',
+                       required=True)
+    description = fields.Text()
 #
 #     @api.depends('value')
 #     def _value_pc(self):
