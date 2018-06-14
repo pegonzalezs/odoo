@@ -12,9 +12,17 @@ class Course(models.Model):
                                      ondelete='set null',
                                      string='Responsible',
                                      index=True)
-    
     session_ids = fields.One2many('openacademy.session',
                                   'course_id')
+    
+    _sql_constraints = [
+        ('description_is_not_title',
+         'CHECK (description != name)',
+         "The description cannot be the same as the title"),
+        ('name_unique',
+         'UNIQUE (name)',
+         "The name must be unique")
+    ]
 
 #
 #     @api.depends('value')
