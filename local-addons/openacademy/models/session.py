@@ -7,7 +7,9 @@ class Session(models.Model):
 
     name = fields.Char('Title',
                        required=True)
-    start_date = fields.Date('Start Date')
+    active = fields.Boolean(default=True)
+    start_date = fields.Date('Start Date',
+                             default=fields.Date.today())
     duration = fields.Float("Duration",
                             digits=(6, 2),
                             help="Duration in days")
