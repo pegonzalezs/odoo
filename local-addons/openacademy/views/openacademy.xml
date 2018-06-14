@@ -1,153 +1,184 @@
 <odoo>
-  <data>
-    <!-- COURSE -->
-    <record model="ir.actions.act_window"
-            id="action_list_courses">
-      <field name="name">Courses</field>
-      <field name="res_model">openacademy.course</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">tree,form</field>
-      <field name="help"
-             type="html">
-        <p class="oe_view_nocontent_create">Create the first course</p>
-      </field>
-    </record>
+    <data>
+        <!-- COURSE -->
+        <record model="ir.actions.act_window" id="action_list_courses">
+            <field name="name">Courses</field>
+            <field name="res_model">openacademy.course</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create the first course</p>
+            </field>
+        </record>
 
-    <menuitem id="main_openacademy_menu"
-              name="Open Academy" />
-    <menuitem id="openacademy_menu"
-              name="Open Academy"
-              parent="main_openacademy_menu" />
-    <menuitem id="courses_menu"
-              name="Courses"
-              parent="openacademy_menu"
-              action="action_list_courses" />
+        <menuitem id="main_openacademy_menu" name="Open Academy" />
+        <menuitem id="openacademy_menu" name="Open Academy" parent="main_openacademy_menu" />
+        <menuitem id="courses_menu" name="Courses" parent="openacademy_menu" action="action_list_courses" />
 
-    <record model="ir.ui.view" id="course_form_view">
-      <field name="name">course.form</field>
-      <field name="model">openacademy.course</field>
-      <field name="arch" type="xml">
-        <form>
-          <sheet>
-            <group>
-              <separator string="General Info" />
-              <field name="name" />
-            </group>
-            <separator string="Detailed Info" />
-            <notebook>
-              <page string="Description">
-                <field name="description" />
-              </page>
-              <page string="About">
-                This is an example of notebooks.
-              </page>
-            </notebook>
-          </sheet>
-        </form>
-      </field>
-    </record>
+        <record model="ir.ui.view" id="course_tree_view">
+            <field name="name">course.tree</field>
+            <field name="model">openacademy.course</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="responsible_id" />
+                </tree>
+            </field>
+        </record>
 
-    <record model="ir.ui.view" id="course_search_view">
-      <field name="name">course.search</field>
-      <field name="model">openacademy.course</field>
-      <field name="arch" type="xml">
-        <search>
-          <field name="name" />
-          <field name="description" />
-        </search>
-      </field>
-    </record>
+        <record model="ir.ui.view" id="course_form_view">
+            <field name="name">course.form</field>
+            <field name="model">openacademy.course</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <field name="name" />
+                            <field name="responsible_id" />
+                        </group>
+                        <notebook>
+                            <page string="Description">
+                                <field name="description" />
+                            </page>
+                            <page string="Sessions">
+                                <field name="session_ids">
+                                    <tree>
+                                        <field name="name" />
+                                        <field name="instructor_id" />
+                                    </tree>
+                                </field>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
-    <!-- SESSION -->
-    <record model="ir.actions.act_window"
-            id="action_list_sessions">
-      <field name="name">Sessions</field>
-      <field name="res_model">openacademy.session</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">tree,form</field>
-      <field name="help"
-             type="html">
-        <p class="oe_view_nocontent_create">Create the first session</p>
-      </field>
-    </record>
+        <record model="ir.ui.view" id="course_search_view">
+            <field name="name">course.search</field>
+            <field name="model">openacademy.course</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="name" />
+                    <field name="responsible_id" />
+                    <field name="description" />
+                </search>
+            </field>
+        </record>
 
-    <menuitem id="sessions_menu"
-              name="Sessions"
-              parent="openacademy_menu"
-              action="action_list_sessions" />
+        <!-- SESSION -->
+        <record model="ir.actions.act_window" id="action_list_sessions">
+            <field name="name">Sessions</field>
+            <field name="res_model">openacademy.session</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Create the first session
+                </p>
+            </field>
+        </record>
 
-    <record model="ir.ui.view" id="session_form_view">
-      <field name="name">session.form</field>
-      <field name="model">openacademy.session</field>
-      <field name="arch" type="xml">
-        <form>
-          <sheet>
-            <group>
-              <field name="name" />
-              <field name="start_date" />
-              <field name="duration" />
-              <field name="seats" />
-            </group>
-          </sheet>
-        </form>
-      </field>
-    </record>
+        <menuitem id="sessions_menu" 
+                  name="Sessions"
+                  parent="openacademy_menu"
+                  action="action_list_sessions" />
+        
+        <record model="ir.ui.view" id="session_tree_view">
+            <field name="name">session.tree</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name" />
+                    <field name="course_id" />
+                </tree>
+            </field>
+        </record>
 
-    <!-- explicit list view definition -->
-    <!--
-    <record model="ir.ui.view" id="openacademy.list">
-      <field name="name">openacademy list</field>
-      <field name="model">openacademy.openacademy</field>
-      <field name="arch" type="xml">
-        <tree>
-          <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
-        </tree>
-      </field>
-    </record>
-    -->
+        <record model="ir.ui.view" id="session_form_view">
+            <field name="name">session.form</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group string="General">
+                            <field name="name" />
+                            <field name="course_id" />
+                            <field name="instructor_id" />
+                        </group>
+                        <group string="Schedule">
+                            <field name="start_date" />
+                            <field name="duration" />
+                            <field name="seats" />
+                            <field name="attendee_ids">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="country_id" />
+                                    <field name="city" />
+                                    <field name="phone" />
+                                    <field name="mobile" />
+                                    <field name="email_formatted" />
+                                </tree>
+                            </field>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
 
-    <!-- actions opening views on models -->
-    <!--
-    <record model="ir.actions.act_window" id="openacademy.action_window">
-      <field name="name">openacademy window</field>
-      <field name="res_model">openacademy.openacademy</field>
-      <field name="view_mode">tree,form</field>
-    </record>
-    -->
+        <!-- explicit list view definition -->
+        <!--
+        <record model="ir.ui.view" id="openacademy.list">
+            <field name="name">openacademy list</field>
+            <field name="model">openacademy.openacademy</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="value"/>
+                    <field name="value2"/>
+                </tree>
+            </field>
+        </record>
+        -->
 
-    <!-- server action to the one above -->
-    <!--
-    <record model="ir.actions.server" id="openacademy.action_server">
-      <field name="name">openacademy server</field>
-      <field name="model_id" ref="model_openacademy_openacademy"/>
-      <field name="state">code</field>
-      <field name="code">
-        action = {
-          "type": "ir.actions.act_window",
-          "view_mode": "tree,form",
-          "res_model": self._name,
-        }
-      </field>
-    </record>
-    -->
+        <!-- actions opening views on models -->
+        <!--
+        <record model="ir.actions.act_window" id="openacademy.action_window">
+            <field name="name">openacademy window</field>
+            <field name="res_model">openacademy.openacademy</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        -->
 
-    <!-- Top menu item -->
-    <!--
-    <menuitem name="openacademy" id="openacademy.menu_root"/>
-    -->
-    <!-- menu categories -->
-    <!--
-    <menuitem name="Menu 1" id="openacademy.menu_1" parent="openacademy.menu_root"/>
-    <menuitem name="Menu 2" id="openacademy.menu_2" parent="openacademy.menu_root"/>
-    -->
-    <!-- actions -->
-    <!--
-    <menuitem name="List" id="openacademy.menu_1_list" parent="openacademy.menu_1"
-              action="openacademy.action_window"/>
-    <menuitem name="Server to list" id="openacademy" parent="openacademy.menu_2"
-              action="openacademy.action_server"/>
-    -->
-  </data>
+        <!-- server action to the one above -->
+        <!--
+        <record model="ir.actions.server" id="openacademy.action_server">
+            <field name="name">openacademy server</field>
+            <field name="model_id" ref="model_openacademy_openacademy"/>
+            <field name="state">code</field>
+            <field name="code">
+                action = {
+                "type": "ir.actions.act_window",
+                "view_mode": "tree,form",
+                "res_model": self._name,
+                }
+            </field>
+        </record>
+        -->
+
+        <!-- Top menu item -->
+        <!--
+        <menuitem name="openacademy" id="openacademy.menu_root"/>
+        -->
+        <!-- menu categories -->
+        <!--
+        <menuitem name="Menu 1" id="openacademy.menu_1" parent="openacademy.menu_root"/>
+        <menuitem name="Menu 2" id="openacademy.menu_2" parent="openacademy.menu_root"/>
+        -->
+        <!-- actions -->
+        <!--
+        <menuitem name="List" id="openacademy.menu_1_list" parent="openacademy.menu_1" action="openacademy.action_window"/>
+        <menuitem name="Server to list" id="openacademy" parent="openacademy.menu_2" action="openacademy.action_server"/>
+        -->
+    </data>
 </odoo>
