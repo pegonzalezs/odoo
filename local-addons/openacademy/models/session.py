@@ -24,3 +24,14 @@ class Session(models.Model):
                                 string='Course')
     attendee_ids = fields.Many2many('res.partner',
                                     string='Attendees')
+    taken_seats = fields.Float('Taken seats',
+                               compute='_taken_seats')
+    
+    @api.depends('seats', 'attendee_ids')
+    def _taken_seats(self):
+        for record in self:
+            if not record.seats:
+                record.taken_seats = 0.
+            else:
+                pc = 100 * (len(record.attendee_ids) / record.seats)
+                record.taken_seats = pc
