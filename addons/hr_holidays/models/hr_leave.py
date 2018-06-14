@@ -146,6 +146,9 @@ class HolidaysRequest(models.Model):
         date_from = False
         date_to = False
 
+        if not self.employee_id:
+            return
+
         if self.request_date_from:
             if self.date_from:
                 date_from = fields.Datetime.to_string(datetime.combine(fields.Date.from_string(self.request_date_from), fields.Datetime.from_string(self.date_from).time()))
@@ -196,8 +199,9 @@ class HolidaysRequest(models.Model):
             date_from = fields.Datetime.from_string(date_from)
             date_to = fields.Datetime.from_string(date_to)
         else:
-            date_from = timezone(self.env.user.tz).localize(datetime.combine(first_day, hour_from)).astimezone(UTC)
-            date_to = timezone(self.env.user.tz).localize(datetime.combine(last_day, hour_to)).astimezone(UTC)
+            tz = self.env.user.tz or 'UTC'
+            date_from = timezone(tz).localize(datetime.combine(first_day, hour_from)).astimezone(UTC)
+            date_to = timezone(tz).localize(datetime.combine(last_day, hour_to)).astimezone(UTC)
 
         self.date_from = date_from
         self.date_to = date_to
