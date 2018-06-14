@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class Session(models.Model):
     _name = 'openacademy.session'
@@ -54,3 +55,9 @@ class Session(models.Model):
                     'message': "Increase seats or remove excess attendees"
                 }
             }
+    
+    @api.constrains('instructor_id', 'attendee_ids')
+    def _verify_instructor_not_in_attendees(self):
+        for record in self:
+            if record.instructor_id in record.attendee_ids:
+                raise ValidationError("An instructor cannot be a student at his own session.")
