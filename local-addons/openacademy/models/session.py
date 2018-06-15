@@ -11,6 +11,7 @@ class Session(models.Model):
     name = fields.Char('Title',
                        required=True)
     active = fields.Boolean(default=True)
+    color = fields.Integer()
     start_date = fields.Date('Start Date',
                              default=fields.Date.today())
     duration = fields.Float("Duration in days",
