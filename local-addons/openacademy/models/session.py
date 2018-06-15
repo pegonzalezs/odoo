@@ -13,12 +13,17 @@ class Session(models.Model):
     active = fields.Boolean(default=True)
     start_date = fields.Date('Start Date',
                              default=fields.Date.today())
-    duration = fields.Float("Duration",
+    duration = fields.Float("Duration in days",
                             digits=(6, 2),
                             help="Duration in days")
     end_date = fields.Date('End Date',
                            compute='_get_end_date',
-                           inverse='_set_end_date')
+                           inverse='_set_end_date',
+                           store=True)
+    duration_hours = fields.Float("Duration in hours",
+                                  digits=(12,2),
+                                  compute='_get_hours',
+                                  inverse='_set_hours')
     seats = fields.Integer('Number of Seats')
     instructor_id = fields.Many2one('res.partner',
                                     ondelete='set null',
@@ -38,17 +43,31 @@ class Session(models.Model):
     @api.depends('start_date', 'duration')
     def _get_end_date(self):
         for record in self:
-            if record.start_date and record.duration:
-                start = fields.Datetime.from_string(record.start_date)
-                duration = timedelta(days=record.duration)
-                record.end_date = start + duration
+            if not (record.start_date and record.duration):
+                record.end_date = record.start_date
+                continue
+            
+            start = fields.Datetime.from_string(record.start_date)
+            duration = timedelta(days=record.duration, seconds=-1)
+            record.end_date = start + duration
     
     def _set_end_date(self):
         for record in self:
-            if record.end_date and record.duration:
-                start = fields.Datetime.from_string(record.start_date)
-                end = fields.Datetime.from_string(record.end_date)
-                record.duration = (end - start).days + 1
+            if not (record.start_date and record.end_date):
+                continue
+
+            start = fields.Datetime.from_string(record.start_date)
+            end = fields.Datetime.from_string(record.end_date)
+            record.duration = (end - start).days + 1
+    
+    @api.depends('duration')
+    def _get_hours(self):
+        for record in self:
+            record.duration_hours = record.duration * 24
+    
+    def _set_hours(self):
+        for record in self:
+            record.duration = record.duration_hours / 24
 
     @api.depends('seats', 'attendee_ids')
     def _taken_seats(self):
