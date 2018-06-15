@@ -78,7 +78,7 @@
             <field name="name">Sessions</field>
             <field name="res_model">openacademy.session</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree,form,calendar,gantt</field>
+            <field name="view_mode">tree,form,calendar,gantt,graph</field>
             <field name="help" type="html">
                 <p class="oe_view_nocontent_create">
                     Create the first session
@@ -161,6 +161,17 @@
                 <gantt date_start="start_date"
                        date_stop="end_date"
                        default_group_by="instructor_id" />
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="session_graph_view">
+            <field name="name">session.graph</field>
+            <field name="model">openacademy.session</field>
+            <field name="arch" type="xml">
+                <graph>
+                    <field name="course_id" />
+                    <field name="number_of_attendees" type="measure" />
+                </graph>
             </field>
         </record>
 

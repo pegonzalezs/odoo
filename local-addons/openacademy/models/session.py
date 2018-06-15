@@ -14,14 +14,14 @@ class Session(models.Model):
     start_date = fields.Date('Start Date',
                              default=fields.Date.today())
     duration = fields.Float("Duration in days",
-                            digits=(6, 2),
+                            digits=0,
                             help="Duration in days")
     end_date = fields.Date('End Date',
                            compute='_get_end_date',
                            inverse='_set_end_date',
                            store=True)
     duration_hours = fields.Float("Duration in hours",
-                                  digits=(12,2),
+                                  digits=2,
                                   compute='_get_hours',
                                   inverse='_set_hours')
     seats = fields.Integer('Number of Seats')
@@ -37,9 +37,17 @@ class Session(models.Model):
                                 string='Course')
     attendee_ids = fields.Many2many('res.partner',
                                     string='Attendees')
+    number_of_attendees = fields.Integer('Number of Attendees',
+                                         compute='_number_of_attendees',
+                                         store=True)
     taken_seats = fields.Float('Taken seats',
                                compute='_taken_seats')
     
+    @api.depends('attendee_ids')
+    def _number_of_attendees(self):
+        for record in self:
+            record.number_of_attendees = len(record.attendee_ids)
+
     @api.depends('start_date', 'duration')
     def _get_end_date(self):
         for record in self:
