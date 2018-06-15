@@ -3,6 +3,8 @@
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
+from datetime import date, datetime, timedelta
+
 class Session(models.Model):
     _name = 'openacademy.session'
 
@@ -14,6 +16,9 @@ class Session(models.Model):
     duration = fields.Float("Duration",
                             digits=(6, 2),
                             help="Duration in days")
+    end_date = fields.Date('End Date',
+                           compute='_get_end_date',
+                           inverse='_set_end_date')
     seats = fields.Integer('Number of Seats')
     instructor_id = fields.Many2one('res.partner',
                                     ondelete='set null',
@@ -30,6 +35,21 @@ class Session(models.Model):
     taken_seats = fields.Float('Taken seats',
                                compute='_taken_seats')
     
+    @api.depends('start_date', 'duration')
+    def _get_end_date(self):
+        for record in self:
+            if record.start_date and record.duration:
+                start = fields.Datetime.from_string(record.start_date)
+                duration = timedelta(days=record.duration)
+                record.end_date = start + duration
+    
+    def _set_end_date(self):
+        for record in self:
+            if record.end_date and record.duration:
+                start = fields.Datetime.from_string(record.start_date)
+                end = fields.Datetime.from_string(record.end_date)
+                record.duration = (end - start).days + 1
+
     @api.depends('seats', 'attendee_ids')
     def _taken_seats(self):
         for record in self:
