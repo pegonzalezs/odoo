@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 
 from datetime import date, datetime, timedelta
@@ -92,15 +92,15 @@ class Session(models.Model):
         if self.seats < 0:
             return {
                 'warning': {
-                    'title': "Incorrect 'seats' value",
-                    'message': "The number of available seats may not be negative"
+                    'title': _("Incorrect 'seats' value"),
+                    'message': _("The number of available seats may not be negative")
                 }
             }
         if len(self.attendee_ids) > self.seats:
             return {
                 'warning': {
-                    'title': "Too many attendees",
-                    'message': "Increase seats or remove excess attendees"
+                    'title': _("Too many attendees"),
+                    'message': _("Increase seats or remove excess attendees")
                 }
             }
     
@@ -108,4 +108,4 @@ class Session(models.Model):
     def _verify_instructor_not_in_attendees(self):
         for record in self:
             if record.instructor_id in record.attendee_ids:
-                raise ValidationError("An instructor cannot be a student at his own session.")
+                raise ValidationError(_("An instructor cannot be a student at his own session."))
