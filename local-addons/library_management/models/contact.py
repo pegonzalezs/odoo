@@ -2,7 +2,7 @@
 
 from odoo import models, fields
 
-class ResPartner(models.Model):
+class Contact(models.Model):
     _inherit = 'res.partner'
 
     books_rented = fields.One2many('library.rental',

@@ -1,30 +1,57 @@
 <odoo>
     <data>
-        <!--  -->
-        <!--   <record id="object0" model="library_management.library_management"> -->
-        <!--     <field name="name">Object 0</field> -->
-        <!--     <field name="value">0</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object1" model="library_management.library_management"> -->
-        <!--     <field name="name">Object 1</field> -->
-        <!--     <field name="value">10</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object2" model="library_management.library_management"> -->
-        <!--     <field name="name">Object 2</field> -->
-        <!--     <field name="value">20</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object3" model="library_management.library_management"> -->
-        <!--     <field name="name">Object 3</field> -->
-        <!--     <field name="value">30</field> -->
-        <!--   </record> -->
-        <!--  -->
-        <!--   <record id="object4" model="library_management.library_management"> -->
-        <!--     <field name="name">Object 4</field> -->
-        <!--     <field name="value">40</field> -->
-        <!--   </record> -->
-        <!--  -->
+        <record id="book0" model="library.book">
+            <field name="name">Freedom</field>
+            <field name="year_of_edition">2010-08-31</field>
+            <field name="isbn">0-374-15846-0</field>
+        </record>
+        <record id="book1" model="library.book">
+            <field name="name">11/22/63</field>
+            <field name="year_of_edition">2011-11-08</field>
+            <field name="isbn">978-1-4516-2728-2</field>
+            <field name="state">borrowed</field>
+        </record>
+
+        <record id="contact0" model="res.partner">
+            <field name="name">Jonathan Franzen</field>
+            <field name="books_authored" eval="[(6, 0, [ref('book0')])]" />
+        </record>
+        <record id="contact1" model="res.partner">
+            <field name="name">Farrar, Straus and Giroux</field>
+            <field name="books_edited" eval="[(6, 0, [ref('book0')])]" />
+        </record>
+        <record id="contact2" model="res.partner">
+            <field name="name">Stephen King</field>
+            <field name="books_authored" eval="[(6, 0, [ref('book1')])]" />
+        </record>
+        <record id="contact3" model="res.partner">
+            <field name="name">Scribner</field>
+            <field name="books_edited" eval="[(6, 0, [ref('book1')])]" />
+        </record>
+        <record id="contact4" model="res.partner">
+            <field name="name">Winston Smith</field>
+            <field name="street">Dystopia Street 1984</field>
+            <field name="zip">902010</field>
+            <field name="city">Smile City</field>
+            <field name="email">winston.smith@example.com</field>
+        </record>
+
+        <record id="rental0" model="library.rental">
+            <field name="date_borrowed">2016-05-07</field>
+            <field name="date_returned">2017-05-07</field>
+            <field name="book" ref="book0" />
+            <field name="customer" ref="contact4" />
+        </record>
+        <record id="rental1" model="library.rental">
+            <field name="date_borrowed">2017-06-19</field>
+            <field name="date_returned">2017-06-21</field>
+            <field name="book" ref="book0" />
+            <field name="customer" ref="contact2" />
+        </record>
+        <record id="rental2" model="library.rental">
+            <field name="date_borrowed">2018-06-19</field>
+            <field name="book" ref="book1" />
+            <field name="customer" ref="contact4" />
+        </record>
     </data>
 </odoo>

@@ -13,7 +13,8 @@ class LibraryBook(models.Model):
                               ('borrowed', 'Borrowed'),
                               ('lost', 'Lost'),
                               ('unavailable', 'Unavailable')],
-                             'State')
+                             'State',
+                             default='available')
     
     authors = fields.Many2many('res.partner',
                               string='Authors',
@@ -21,10 +22,10 @@ class LibraryBook(models.Model):
     editor = fields.Many2one('res.partner',
                              string='Editor',
                              ondelete='restrict')
+    isbn = fields.Char("ISBN")
     rental_history = fields.One2many('library.rental',
                                      inverse_name='book',
-                                     string='Rental history',
-                                     readonly=True)
+                                     string='Rental history')
     
     @api.multi
     def do_rent(self, customer):
