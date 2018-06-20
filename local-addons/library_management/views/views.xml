@@ -2,9 +2,15 @@
     <act_window id="library_book_action"
                 name="Books"
                 res_model="library.book" />
-    <act_window id="library_customer_action"
-                name="Customers"
-                res_model="res.partner" />
+    <record id="library_customer_action" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_ids"
+                eval="[(5, 0, 0),
+                        (0, 0, {'view_mode': 'tree', 'view_id': ref('customer_tree_view')}),
+                        (0, 0, {'view_mode': 'form', 'view_id': ref('customer_form_view')})]"/>
+    </record>
 
     <menuitem id="main_library_menu" name="Library Management" />
         <menuitem id="library_menu" name="Library" parent="main_library_menu" />
@@ -30,26 +36,34 @@
         <field name="model">library.book</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="name" />
-                    <field name="year_of_edition" />
-                    <field name="isbn" />
-                </group>
-                <group>
-                    <field name="active" />
-                    <field name="state" />
-                </group>
-                <group>
-                    <field name="authors" widget="many2many_tags" />
-                    <field name="editor" />
-                    <field name="rental_history">
-                        <tree>
-                            <field name="customer" />
-                            <field name="date_borrowed" />
-                            <field name="date_returned" />
-                        </tree>
-                    </field>
-                </group>
+                <sheet>
+                    <h1>
+                        <field name="name" placeholder="Title" />
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="authors" widget="many2many_tags" />
+                            <field name="editor" />
+                            <field name="year_of_edition" />
+                            <field name="isbn" />
+                            <separator />
+                            <field name="active" />
+                            <field name="state" /> 
+                        </group>
+                        <group>
+                            <field name="cover" widget="image" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="rental_history">
+                            <tree>
+                                <field name="customer" />
+                                <field name="date_borrowed" />
+                                <field name="date_returned" />
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
             </form>
         </field>
     </record>
@@ -73,35 +87,44 @@
         <field name="model">res.partner</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="name" />
-                    <field name="street" />
-                    <field name="street2" />
-                    <field name="zip" />
-                    <field name="city" />
-                    <field name="state_id" />
-                    <field name="country_id" />
-                    <field name="email" />
-                    <field name="phone" />
-                    <field name="mobile" />
-                </group>
-                <group>
-                    <field name="books_authored">
-                        <tree>
-                            <field name="name" />
-                            <field name="editor" />
-                            <field name="year_of_edition" />
-                            <field name="state" />
-                        </tree>
-                    </field>
-                    <field name="books_rented">
-                        <tree>
-                            <field name="book" />
-                            <field name="date_borrowed" />
-                            <field name="date_returned" />
-                        </tree>
-                    </field>
-                </group>
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar" />
+                    <h1>
+                        <field name="name" placeholder="Name" />
+                    </h1>
+                    <group>
+                        <group>
+                            <field name="street" />
+                            <field name="street2" />
+                            <field name="zip" />
+                            <field name="city" />
+                            <field name="state_id" />
+                            <field name="country_id" />
+                        </group>
+                        <group>
+                            <field name="email" />
+                            <field name="phone" />
+                            <field name="mobile" />
+                        </group>
+                    </group>
+                    <group>
+                        <field name="books_authored">
+                            <tree>
+                                <field name="name" />
+                                <field name="editor" />
+                                <field name="year_of_edition" />
+                                <field name="state" />
+                            </tree>
+                        </field>
+                        <field name="books_rented">
+                            <tree>
+                                <field name="book" />
+                                <field name="date_borrowed" />
+                                <field name="date_returned" />
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
             </form>
         </field>
     </record>

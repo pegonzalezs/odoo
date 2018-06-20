@@ -23,6 +23,8 @@ class LibraryBook(models.Model):
                              string='Editor',
                              ondelete='restrict')
     isbn = fields.Char("ISBN")
+    cover = fields.Binary("Cover picture",
+                          attachment=True)
     rental_history = fields.One2many('library.rental',
                                      inverse_name='book',
                                      string='Rental history')

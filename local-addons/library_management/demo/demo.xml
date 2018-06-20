@@ -4,29 +4,35 @@
             <field name="name">Freedom</field>
             <field name="year_of_edition">2010-08-31</field>
             <field name="isbn">0-374-15846-0</field>
+            <field name="cover" type="base64" file="library_management/static/img/book0-image.jpg" />
         </record>
         <record id="book1" model="library.book">
             <field name="name">11/22/63</field>
             <field name="year_of_edition">2011-11-08</field>
             <field name="isbn">978-1-4516-2728-2</field>
             <field name="state">borrowed</field>
+            <field name="cover" type="base64" file="library_management/static/img/book1-image.jpg" />
         </record>
 
         <record id="contact0" model="res.partner">
             <field name="name">Jonathan Franzen</field>
             <field name="books_authored" eval="[(6, 0, [ref('book0')])]" />
+            <field name="image" type="base64" file="library_management/static/img/contact0-image.jpg" />
         </record>
         <record id="contact1" model="res.partner">
             <field name="name">Farrar, Straus and Giroux</field>
             <field name="books_edited" eval="[(6, 0, [ref('book0')])]" />
+            <field name="image" type="base64" file="library_management/static/img/contact1-image.jpg" />
         </record>
         <record id="contact2" model="res.partner">
             <field name="name">Stephen King</field>
             <field name="books_authored" eval="[(6, 0, [ref('book1')])]" />
+            <field name="image" type="base64" file="library_management/static/img/contact2-image.jpg" />
         </record>
         <record id="contact3" model="res.partner">
             <field name="name">Scribner</field>
             <field name="books_edited" eval="[(6, 0, [ref('book1')])]" />
+            <field name="image" type="base64" file="library_management/static/img/contact3-image.jpg" />
         </record>
         <record id="contact4" model="res.partner">
             <field name="name">Winston Smith</field>
@@ -34,6 +40,7 @@
             <field name="zip">902010</field>
             <field name="city">Smile City</field>
             <field name="email">winston.smith@example.com</field>
+            <field name="image" type="base64" file="library_management/static/img/contact4-image.png" />
         </record>
 
         <record id="rental0" model="library.rental">
