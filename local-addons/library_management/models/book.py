@@ -30,7 +30,7 @@ class LibraryBook(models.Model):
                                      string='Rental history')
     
     @api.multi
-    def do_rent(self, customer):
+    def do_rent(self, contact):
         for record in self:
             record.state = 'borrowed'
             rental = {

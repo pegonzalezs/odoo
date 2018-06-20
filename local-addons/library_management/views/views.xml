@@ -3,17 +3,17 @@
                 name="Books"
                 res_model="library.book" />
     <record model="ir.actions.act_window" 
-            id="library_customer_action">
-        <field name="name">Customers</field>
+            id="library_contact_action">
+        <field name="name">Contacts</field>
         <field name="res_model">res.partner</field>
-        <field name="view_id" ref="customer_tree_view" />
+        <field name="view_id" ref="base.view_partner_tree" />
         <field name="domain">['|', '|', ('is_author', '=', True), ('is_editor', '=', True), ('is_customer', '=', True)]</field>
     </record>
 
     <menuitem id="main_library_menu" name="Library Management" />
         <menuitem id="library_menu" name="Library" parent="main_library_menu" />
             <menuitem id="books_menu" name="Books" parent="library_menu" action="library_book_action" sequence="1" />
-            <menuitem id="customers_menu" name="Customers" parent="library_menu" action="library_customer_action" sequence="10" />
+            <menuitem id="contacts_menu" name="Contacts" parent="library_menu" action="library_contact_action" sequence="10" />
     
     <record model="ir.ui.view" id="book_tree_view">
         <field name="name">book.tree</field>
@@ -63,20 +63,6 @@
                     </group>
                 </sheet>
             </form>
-        </field>
-    </record>
-
-    <record model="ir.ui.view" id="customer_tree_view">
-        <field name="name">customer.tree</field>
-        <field name="model">res.partner</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name" />
-                <field name="contact_address" />
-                <field name="email" />
-                <field name="phone" />
-                <field name="mobile" />
-            </tree>
         </field>
     </record>
 

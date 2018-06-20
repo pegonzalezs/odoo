@@ -7,7 +7,7 @@
     'description': """
         Manage a library:
         * Books
-        * Customers
+        * Contacts
         * Rentals
     """,
 
