@@ -10,7 +10,9 @@
         <field name="domain">['|', '|', ('is_author', '=', True), ('is_editor', '=', True), ('is_customer', '=', True)]</field>
     </record>
 
-    <menuitem id="main_library_menu" name="Library Management" />
+    <menuitem id="main_library_menu"
+              name="Library" 
+              web_icon="library_management,static/description/icon.png" />
         <menuitem id="library_menu" name="Library" parent="main_library_menu" />
             <menuitem id="books_menu" name="Books" parent="library_menu" action="library_book_action" sequence="1" />
             <menuitem id="contacts_menu" name="Contacts" parent="library_menu" action="library_contact_action" sequence="10" />
