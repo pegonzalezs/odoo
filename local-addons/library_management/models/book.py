@@ -8,7 +8,7 @@ class LibraryBook(models.Model):
 
     name = fields.Char('Title')
     active = fields.Boolean(default=True)
-    year_of_edition = fields.Date('Year of Edition')
+    date_of_edition = fields.Date('Date of Edition')
     state = fields.Selection([('available', 'Available'),
                               ('borrowed', 'Borrowed'),
                               ('lost', 'Lost'),

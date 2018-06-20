@@ -19,7 +19,7 @@
                 <field name="name" />
                 <field name="authors" widget="many2many_tags"/>
                 <field name="editor" />
-                <field name="year_of_edition" />
+                <field name="date_of_edition" />
                 <field name="state" />
             </tree>
         </field>
@@ -38,7 +38,7 @@
                         <group>
                             <field name="authors" widget="many2many_tags" />
                             <field name="editor" />
-                            <field name="year_of_edition" />
+                            <field name="date_of_edition" />
                             <field name="isbn" />
                             <separator />
                             <field name="active" />
@@ -83,32 +83,46 @@
             <xpath  expr="//notebook" position="inside">
                 <page name="Library" string="Library">
                     <group>
-                        <field name="books_rented">
+                        <field name="is_author" invisible="1" />
+                        <field name="is_customer" invisible="1" />
+                        <field name="is_editor" invisible="1" />
+                        <field name="books_rented"
+                               attrs="{'invisible': [('is_customer', '=', False)]}">
                             <tree>
                                 <field name="book" />
                                 <field name="date_borrowed" />
                                 <field name="date_returned" />
                             </tree>
                         </field>
-                        <field name="books_authored">
+                        <field name="books_authored"
+                               attrs="{'invisible': [('is_author', '=', False)]}">
                             <tree>
                                 <field name="name" />
                                 <field name="editor" />
-                                <field name="year_of_edition" />
+                                <field name="date_of_edition" />
                                 <field name="state" />
                             </tree>
                         </field>
-                        <field name="books_edited">
+                        <field name="books_edited"
+                               attrs="{'invisible': [('is_editor', '=', False)]}">
                             <tree>
                                 <field name="name" />
                                 <field name="authors" widget="many2many_tags" />
-                                <field name="year_of_edition" />
+                                <field name="date_of_edition" />
                                 <field name="state" />
                             </tree>
                         </field>
                     </group>
                 </page>
             </xpath>
+
+            <field name="name" position="after">
+                <h2>
+                    <span attrs="{'invisible': [('is_author', '=', False)]}">Author </span>
+                    <span attrs="{'invisible': [('is_editor', '=', False)]}">Editor </span>
+                    <span attrs="{'invisible': [('is_customer', '=', False)]}">Customer </span>
+                </h2>
+            </field>
         </field>
     </record>
 </odoo>
