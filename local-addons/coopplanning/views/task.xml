@@ -1,6 +1,6 @@
 <odoo>
     <record model="ir.ui.view" id="task_view_tree">
-        <field name="name">Task Template List</field>
+        <field name="name">Task List</field>
         <field name="model">coopplanning.task</field>
         <field name="arch" type="xml">
             <tree>
@@ -14,7 +14,7 @@
     </record>
 
     <record model="ir.ui.view" id="task_view_form">
-        <field name="name">Task Template Form</field>
+        <field name="name">Task Form</field>
         <field name="model">coopplanning.task</field>
         <field name="arch" type="xml">
             <form>
@@ -26,8 +26,13 @@
                     </div>
                     <group>
                         <group>
-                            <field name="task_template_id"  />
-                            <field name="task_type_id" />
+                            <field name="task_template_id"
+                                   attrs="{'invisible': [('task_template_id', '=', False)],
+                                           'readonly': [('task_template_id', '!=', False)]}"  />
+                            <field name="task_type_id"
+                                   attrs="{'readonly': [('task_template_id', '!=', False)]}"
+                                   options="{'no_create': true}"
+                                   required="1" />
                             <field name="worker_id" />
                         </group>
                         <group>

@@ -25,6 +25,7 @@
     'data': [
         "views/task_template.xml",
         "views/task.xml",
+        "views/daynumber.xml",
         "data/coopplanning_data.xml",
         "data/task_template_demo.xml",
     ],

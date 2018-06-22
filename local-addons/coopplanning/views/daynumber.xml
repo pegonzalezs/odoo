@@ -1,0 +1,14 @@
+<odoo>
+    <!-- Actions -->
+    <record model="ir.actions.act_window" id="action_daynumber">
+        <field name="name">Day Number Action</field>
+        <field name="res_model">coopplanning.daynumber</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- menu categories -->
+    <menuitem name="Config" id="menu_config_top" parent="menu_root" sequence="3"/>
+    <!-- actions -->
+    <menuitem name="Day Number" id="menu_daynumber" parent="menu_config_top"
+              action="action_daynumber"/>
+</odoo>
