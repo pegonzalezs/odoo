@@ -1,0 +1,89 @@
+<odoo>
+    <data>
+        <record id="course0" model="citadel.course">
+            <field name="name">Fencing</field>
+            <field name="level">god</field>
+        </record>
+        <record id="course1" model="citadel.course">
+            <field name="name">Swimming</field>
+            <field name="level">expert</field>
+        </record>
+        <record id="course2" model="citadel.course">
+            <field name="name">Meditating</field>
+            <field name="level">intermediate</field>
+        </record>
+        <record id="course3" model="citadel.course">
+            <field name="name">Eggnogg+</field>
+            <field name="level">novice</field>
+        </record>
+
+        <record id="contact0" model="res.partner">
+            <field name="name">John Zorn</field>
+            <field name="position">maester</field>
+            <field name="courses_taught" eval="[(6, 0, [ref('course0')])]" />
+            <field name="image" type="base64" file="citadel/static/img/contact0-image.jpg" />
+        </record>
+        <record id="contact1" model="res.partner">
+            <field name="name">Mike Patton</field>
+            <field name="position">maester</field>
+            <field name="courses_taught" eval="[(6, 0, [ref('course1')])]" />
+            <field name="image" type="base64" file="citadel/static/img/contact1-image.png" />
+        </record>
+        <record id="contact2" model="res.partner">
+            <field name="name">Brad Mehldau</field>
+            <field name="position">maester</field>
+            <field name="courses_taught" eval="[(6, 0, [ref('course2'), ref('course3')])]" />
+            <field name="image" type="base64" file="citadel/static/img/contact2-image.jpg" />
+        </record>
+        <record id="contact3" model="res.partner">
+            <field name="name">Susanne Lewis</field>
+            <field name="position">trainee</field>
+            <field name="image" type="base64" file="citadel/static/img/contact3-image.jpg" />
+        </record>
+        <record id="contact4" model="res.partner">
+            <field name="name">Chris Thile</field>
+            <field name="position">trainee</field>
+            <field name="image" type="base64" file="citadel/static/img/contact4-image.jpg" />
+        </record>
+        <record id="contact5" model="res.partner">
+            <field name="name">Miles Davis</field>
+            <field name="position">unknown</field>
+            <field name="image" type="base64" file="citadel/static/img/contact5-image.png" />
+        </record>
+
+        <record id="session0" model="citadel.session">
+            <field name="state">draft</field>
+            <field name="time_event">2019-05-07</field>
+            <field name="max_attendees">3</field>
+            <field name="course" ref="course0" />
+        </record>
+        <record id="session1" model="citadel.session">
+            <field name="state">ready</field>
+            <field name="time_event">2018-08-15</field>
+            <field name="max_attendees">2</field>
+            <field name="course" ref="course1" />
+            <field name="attendees" eval="[(6, 0, [ref('contact4'), ref('contact5')])]" />
+        </record>
+        <record id="session2" model="citadel.session">
+            <field name="state">ready</field>
+            <field name="time_event">2018-07-15</field>
+            <field name="max_attendees">5</field>
+            <field name="course" ref="course1" />
+            <field name="attendees" eval="[(6, 0, [ref('contact3')])]" />
+        </record>
+        <record id="session3" model="citadel.session">
+            <field name="state">ready</field>
+            <field name="time_event">2018-09-15</field>
+            <field name="max_attendees">3</field>
+            <field name="course" ref="course2" />
+            <field name="attendees" eval="[(6, 0, [ref('contact4')])]" />
+        </record>
+        <record id="session4" model="citadel.session">
+            <field name="state">draft</field>
+            <field name="time_event">2018-10-15</field>
+            <field name="max_attendees">30</field>
+            <field name="course" ref="course3" />
+            <field name="attendees" eval="[(6, 0, [ref('contact3'), ref('contact4'), ref('contact5')])]" />
+        </record>
+    </data>
+</odoo>

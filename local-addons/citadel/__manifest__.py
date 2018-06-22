@@ -13,5 +13,8 @@
     'version': '11.0.1.0.0',
     'depends': ['base'],
     'application': True,
-    'data': ['views/citadel.xml']
+    'data': ['views/citadel.xml'],
+    'demo': [
+        'demo/demo.xml',
+    ],
 }
