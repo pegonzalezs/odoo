@@ -56,21 +56,24 @@ class Task(models.Model):
     def _get_workers_filled_pc(self):
         for r in self:
             if r.required_workforce and r.volunteer_ids and r.required_workforce > 0:
-                r.workers_filled_pc = float(len(r.volunteer_ids)) / r.required_workforce
+                r.workers_filled_pc = 100 * (float(len(r.volunteer_ids)) / r.required_workforce)
 
 class WorkDay(models.Model):
     _name = 'coop.day'
+    _rec_name = 'day_nr'
 
     day_nr = fields.Integer("Number", required=True)
-    task_ids = fields.Many2many('coop.task',
-                                string="Tasks")
-    volunteer_ids = fields.Many2many('coop.volunteer',
-                                     string="Volunteers")
+    task_ids = fields.One2many('coop.task',
+                               inverse_name='day_nr',
+                               string="Tasks")
     
     required_workforce = fields.Integer("Volunteers Required",
                                         compute='_required_workforce')
+
+    nr_volunteers = fields.Integer("Workers found",
+                                   compute='_get_nr_volunteers')
     
-    workers_filled_pc = fields.Float("Workers found",
+    workers_filled_pc = fields.Float("Workers found / required",
                                      compute='_get_workers_filled_pc')
     
     @api.depends('task_ids')
@@ -79,9 +82,15 @@ class WorkDay(models.Model):
             for task in r.task_ids:
                 r.required_workforce += task.required_workforce
     
-    @api.depends('required_workforce', 'volunteer_ids')
+    @api.depends('task_ids')
+    def _get_nr_volunteers(self):
+        for r in self:
+            for task in r.task_ids:
+                r.nr_volunteers += len(task.volunteer_ids)
+    
+    @api.depends('task_ids')
     def _get_workers_filled_pc(self):
         for r in self:
-            if r.required_workforce and r.volunteer_ids and r.required_workforce > 0:
-                r.workers_filled_pc = float(len(r.volunteer_ids)) / r.required_workforce
+            if len(r.task_ids) > 0:
+                r.workers_filled_pc = 100* (float(r.nr_volunteers)/r.required_workforce)
     

@@ -60,8 +60,10 @@
 					</h1>
 					<group>
 						<field name="required_workforce" />
+						<field name="nr_volunteers" />
+						<field name="workers_filled_pc"
+							   widget="progressbar" />
 						<field name="task_ids" />
-						<field name="volunteer_ids" />
 					</group>
 				</sheet>
             </form>
