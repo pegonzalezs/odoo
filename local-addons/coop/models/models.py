@@ -17,6 +17,7 @@ class Task(models.Model):
     _name = 'coop.task'
 
     name = fields.Char("Name", required=True)
+    active = fields.Boolean(default=True)
     state = fields.Selection([('todo', "To do"),
                               ('progress', "In progres"),
                               ('done', "Done")],

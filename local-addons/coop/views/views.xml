@@ -134,4 +134,25 @@
             </tree>
         </field>
     </record>
+
+	<record id="coop_task_view_search"
+            model="ir.ui.view">
+        <field name="name">Task Search</field>
+        <field name="model">coop.task</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="task_type" />
+                <field name="day_nr" />
+                <field name="volunteer_ids" />
+				<filter string="Archives"
+						name="archives"
+						domain="[('active', '=', False)]" />
+				<filter string="All"
+						name="all"
+						domain="['|', ('active', '=', False),
+								 	  ('active', '=', True)]" />
+            </search>
+        </field>
+    </record>
 </odoo>
