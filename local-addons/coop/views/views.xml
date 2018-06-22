@@ -94,11 +94,12 @@
         <field name="name">Tasks</field>
         <field name="model">coop.task</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree default_order="day_nr,start_time">
                 <field name="name" />
                 <field name="state" />
                 <field name="task_type" />
 				<field name="day_nr" />
+				<field name="start_time" />
                 <field name="duration" />
                 <field name="workers_filled_pc"
                        widget="progressbar" />
