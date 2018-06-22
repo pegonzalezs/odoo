@@ -31,8 +31,10 @@ class Task(models.Model):
     day_nr = fields.Many2one('coop.day',
                              "Day number")
     required_workforce = fields.Integer("Volunteers Required")
-    workers = fields.Many2many('coop.volunteer',
+    volunteer_ids = fields.Many2many('coop.volunteer',
                                string="Assigned workers")
+    workers_filled_pc = fields.Float("Workers found",
+                             compute='_get_workers_filled_pc')
     
     @api.depends('start_time', 'end_time')
     def _get_duration(self):
@@ -49,6 +51,12 @@ class Task(models.Model):
             if r.start_time and r.duration:
                 start = fields.Datetime.from_string(r.start_time)
                 r.end_time = start + timedelta(hours=r.duration)
+    
+    @api.depends('required_workforce', 'volunteer_ids')
+    def _get_workers_filled_pc(self):
+        for r in self:
+            if r.required_workforce and r.volunteer_ids and r.required_workforce > 0:
+                r.workers_filled_pc = float(len(r.volunteer_ids)) / r.required_workforce
 
 class WorkDay(models.Model):
     _name = 'coop.day'
@@ -62,9 +70,18 @@ class WorkDay(models.Model):
     required_workforce = fields.Integer("Volunteers Required",
                                         compute='_required_workforce')
     
+    workers_filled_pc = fields.Float("Workers found",
+                                     compute='_get_workers_filled_pc')
+    
     @api.depends('task_ids')
     def _required_workforce(self):
         for r in self:
             for task in r.task_ids:
                 r.required_workforce += task.required_workforce
+    
+    @api.depends('required_workforce', 'volunteer_ids')
+    def _get_workers_filled_pc(self):
+        for r in self:
+            if r.required_workforce and r.volunteer_ids and r.required_workforce > 0:
+                r.workers_filled_pc = float(len(r.volunteer_ids)) / r.required_workforce
     
