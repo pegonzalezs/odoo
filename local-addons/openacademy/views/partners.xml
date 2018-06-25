@@ -2,6 +2,31 @@
 <odoo>
     <data>
 
+        <record model="ir.ui.view" id="view_partner_form">
+            <field name="name">partner.instructor.form</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form" />
+            <field name="arch" type="xml">
+                <group name="purchase" position="after">
+                    <group string="OpenAcademy">
+                        <field name="instructor" />
+                        <field name="session_ids" widget="many2many_tags" />
+                    </group>
+                </group>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_partner_search">
+            <field name="name">partner.instructor.search</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_res_partner_filter" />
+            <field name="arch" type="xml">
+                <filter name="supplier" position="after">
+                    <filter name="instructor" string="Instructors" domain="[('instructor','=',1)]" />
+                </filter>
+            </field>
+        </record>
+
         <record model="ir.actions.act_window" id="contact_list_action">
             <field name="name">Contacts</field>
             <field name="res_model">res.partner</field>
