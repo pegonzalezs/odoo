@@ -30,22 +30,22 @@
             <field name="edition_date">1996-08-01</field>
             <field name="isbn">0-553-10354-7</field>
             <field name="publisher_id" ref="publisher_got"/>
-            <field name="authors_ids" eval="[(4, ref('author_martin'))]"/>
+            <field name="author_ids" eval="[(4, ref('author_martin'))]"/>
         </record>
 
-        <record id="copy01" model="library.book.copy">
+        <record id="copy01" model="library.copy">
             <field name="book_id" ref="book_got"/>
-            <field name="copy_id">GOT-01</field>
+            <field name="reference">GOT-01</field>
         </record>
 
-        <record id="copy02" model="library.book.copy">
+        <record id="copy02" model="library.copy">
             <field name="book_id" ref="book_got"/>
-            <field name="copy_id">GOT-02</field>
+            <field name="reference">GOT-02</field>
         </record>
 
-        <record id="copy03" model="library.book.copy">
+        <record id="copy03" model="library.copy">
             <field name="book_id" ref="book_got"/>
-            <field name="copy_id">GOT-03</field>
+            <field name="reference">GOT-03</field>
         </record>
 
     </data>
