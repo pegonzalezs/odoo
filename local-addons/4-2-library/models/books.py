@@ -10,4 +10,10 @@ class Books(models.Model):
     edition_date =  fields.Date(string='Edition date',)
     isbn = fields.Char(string='ISBN')
     publisher_id = fields.Many2one('library.publisher', string='Publisher')
+
+class BookCopy(models.Model):
+    _name = 'library.book.copy'
+    _inherits = {'library.book': 'book_id'}
+
+    copy_id = fields.Char("Reference")
     rental_ids = fields.One2many('library.rental', 'book_id', string='Rentals')
