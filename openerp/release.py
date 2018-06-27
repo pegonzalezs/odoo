@@ -53,3 +53,7 @@ license = 'AGPL-3'
 nt_service_name = "openerp-server-" + serie
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+version = "7.0-20140325-002839"
+# server bzr version: 5264 launchpad_translations_on_behalf_of_openerp-20140321065115-srp2g1l3twjabmcq on lp:~openerp/openobject-server/7.0
+# addons bzr version: 9925 dle@openerp.com-20140324103427-yckncrnynvs5si8i on lp:~openerp/openobject-addons/7.0
+# web bzr version: 4162 launchpad_translations_on_behalf_of_openerp-20140318062141-rdiqz2ptnz3qmxd0 on lp:~openerp/openerp-web/7.0

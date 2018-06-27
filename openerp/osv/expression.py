@@ -165,26 +165,6 @@ TERM_OPERATORS = ('=', '!=', '<=', '<', '>', '>=', '=?', '=like', '=ilike',
 # legal in the processed term.
 NEGATIVE_TERM_OPERATORS = ('!=', 'not like', 'not ilike', 'not in')
 
-# Negation of domain expressions
-DOMAIN_OPERATORS_NEGATION = {
-    AND_OPERATOR: OR_OPERATOR,
-    OR_OPERATOR: AND_OPERATOR,
-}
-TERM_OPERATORS_NEGATION = {
-    '<': '>=',
-    '>': '<=',
-    '<=': '>',
-    '>=': '<',
-    '=': '!=',
-    '!=': '=',
-    'in': 'not in',
-    'like': 'not like',
-    'ilike': 'not ilike',
-    'not in': 'in',
-    'not like': 'like',
-    'not ilike': 'ilike',
-}
-
 TRUE_LEAF = (1, '=', 1)
 FALSE_LEAF = (0, '=', 1)
 
@@ -281,36 +261,51 @@ def distribute_not(domain):
          ['|',('user_id','!=',4),('partner_id','not in',[1,2])]
 
     """
+    def negate(leaf):
+        """Negates and returns a single domain leaf term,
+        using the opposite operator if possible"""
+        left, operator, right = leaf
+        mapping = {
+            '<': '>=',
+            '>': '<=',
+            '<=': '>',
+            '>=': '<',
+            '=': '!=',
+            '!=': '=',
+        }
+        if operator in ('in', 'like', 'ilike'):
+            operator = 'not ' + operator
+            return [(left, operator, right)]
+        if operator in ('not in', 'not like', 'not ilike'):
+            operator = operator[4:]
+            return [(left, operator, right)]
+        if operator in mapping:
+            operator = mapping[operator]
+            return [(left, operator, right)]
+        return [NOT_OPERATOR, (left, operator, right)]
 
-    # This is an iterative version of a recursive function that split domain
-    # into subdomains, processes them and combine the results. The "stack" below
-    # represents the recursive calls to be done.
-    result = []
-    stack = [False]
-
-    for token in domain:
-        negate = stack.pop()
-        # negate tells whether the subdomain starting with token must be negated
-        if is_leaf(token):
-            if negate:
-                left, operator, right = token
-                if operator in TERM_OPERATORS_NEGATION:
-                    result.append((left, TERM_OPERATORS_NEGATION[operator], right))
-                else:
-                    result.append(NOT_OPERATOR)
-                    result.append(token)
-            else:
-                result.append(token)
-        elif token == NOT_OPERATOR:
-            stack.append(not negate)
-        elif token in DOMAIN_OPERATORS_NEGATION:
-            result.append(DOMAIN_OPERATORS_NEGATION[token] if negate else token)
-            stack.append(negate)
-            stack.append(negate)
-        else:
-            result.append(token)
-
-    return result
+    def distribute_negate(domain):
+        """Negate the domain ``subtree`` rooted at domain[0],
+        leaving the rest of the domain intact, and return
+        (negated_subtree, untouched_domain_rest)
+        """
+        if is_leaf(domain[0]):
+            return negate(domain[0]), domain[1:]
+        if domain[0] == AND_OPERATOR:
+            done1, todo1 = distribute_negate(domain[1:])
+            done2, todo2 = distribute_negate(todo1)
+            return [OR_OPERATOR] + done1 + done2, todo2
+        if domain[0] == OR_OPERATOR:
+            done1, todo1 = distribute_negate(domain[1:])
+            done2, todo2 = distribute_negate(todo1)
+            return [AND_OPERATOR] + done1 + done2, todo2
+    if not domain:
+        return []
+    if domain[0] != NOT_OPERATOR:
+        return [domain[0]] + distribute_not(domain[1:])
+    if domain[0] == NOT_OPERATOR:
+        done, todo = distribute_negate(domain[1:])
+        return done + distribute_not(todo)
 
 
 # --------------------------------------------------
@@ -406,7 +401,7 @@ def is_leaf(element, internal=False):
         and len(element) == 3 \
         and element[1] in INTERNAL_OPS \
         and ((isinstance(element[0], basestring) and element[0])
-             or tuple(element) in (TRUE_LEAF, FALSE_LEAF))
+             or element in (TRUE_LEAF, FALSE_LEAF))
 
 
 # --------------------------------------------------
@@ -435,10 +430,6 @@ def select_distinct_from_where_not_null(cr, select_field, from_table):
     cr.execute('SELECT distinct("%s") FROM "%s" where "%s" is not null' % (select_field, from_table, select_field))
     return [r[0] for r in cr.fetchall()]
 
-def get_unaccent_wrapper(cr):
-    if openerp.modules.registry.RegistryManager.get(cr.dbname).has_unaccent:
-        return lambda x: "unaccent(%s)" % (x,)
-    return lambda x: x
 
 # --------------------------------------------------
 # ExtendedLeaf class for managing leafs and contexts
@@ -495,7 +486,7 @@ class ExtendedLeaf(object):
     #       i.e.: many2one: 'state_id': current field name
     # --------------------------------------------------
 
-    def __init__(self, leaf, model, join_context=None, internal=False):
+    def __init__(self, leaf, model, join_context=None):
         """ Initialize the ExtendedLeaf
 
             :attr [string, tuple] leaf: operator or tuple-formatted domain
@@ -534,7 +525,7 @@ class ExtendedLeaf(object):
             self._models.append(item[0])
         self._models.append(model)
         # check validity
-        self.check_leaf(internal)
+        self.check_leaf()
 
     def __str__(self):
         return '<osv.ExtendedLeaf: %s on %s (ctx: %s)>' % (str(self.leaf), self.model._table, ','.join(self._get_context_debug()))
@@ -580,7 +571,7 @@ class ExtendedLeaf(object):
     # Leaf manipulation
     # --------------------------------------------------
 
-    def check_leaf(self, internal=False):
+    def check_leaf(self):
         """ Leaf validity rules:
             - a valid leaf is an operator or a leaf
             - a valid leaf has a field objects unless
@@ -589,7 +580,7 @@ class ExtendedLeaf(object):
                 - left is id, operator is 'child_of'
                 - left is in MAGIC_COLUMNS
         """
-        if not is_operator(self.leaf) and not is_leaf(self.leaf, internal):
+        if not is_operator(self.leaf) and not is_leaf(self.leaf, True):
             raise ValueError("Invalid leaf %s" % str(self.leaf))
 
     def is_operator(self):
@@ -608,14 +599,14 @@ class ExtendedLeaf(object):
         self.leaf = normalize_leaf(self.leaf)
         return True
 
-def create_substitution_leaf(leaf, new_elements, new_model=None, internal=False):
+def create_substitution_leaf(leaf, new_elements, new_model=None):
     """ From a leaf, create a new leaf (based on the new_elements tuple
         and new_model), that will have the same join context. Used to
         insert equivalent leafs in the processing stack. """
     if new_model is None:
         new_model = leaf.model
     new_join_context = [tuple(context) for context in leaf.join_context]
-    new_leaf = ExtendedLeaf(new_elements, new_model, join_context=new_join_context, internal=internal)
+    new_leaf = ExtendedLeaf(new_elements, new_model, join_context=new_join_context)
     return new_leaf
 
 class expression(object):
@@ -640,7 +631,7 @@ class expression(object):
             :attr list expression: the domain expression, that will be normalized
                 and prepared
         """
-        self._unaccent = get_unaccent_wrapper(cr)
+        self.has_unaccent = openerp.modules.registry.RegistryManager.get(cr.dbname).has_unaccent
         self.joins = []
         self.root_model = table
 
@@ -930,10 +921,6 @@ class expression(object):
                             call_null = False
                             o2m_op = 'not in' if operator in NEGATIVE_TERM_OPERATORS else 'in'
                             push(create_substitution_leaf(leaf, ('id', o2m_op, ids2), working_model))
-                        elif operator in ('like', 'ilike', 'in', '='):
-                            # no match found with positive search operator => no result (FALSE_LEAF)
-                            call_null = False
-                            push(create_substitution_leaf(leaf, FALSE_LEAF, working_model))
 
                 if call_null:
                     o2m_op = 'in' if operator in NEGATIVE_TERM_OPERATORS else 'not in'
@@ -956,7 +943,7 @@ class expression(object):
                     call_null_m2m = True
                     if right is not False:
                         if isinstance(right, basestring):
-                            res_ids = [x[0] for x in relational_model.name_search(cr, uid, right, [], operator, context=context, limit=None)]
+                            res_ids = [x[0] for x in relational_model.name_search(cr, uid, right, [], operator, context=context)]
                             if res_ids:
                                 operator = 'in'
                         else:
@@ -1044,34 +1031,34 @@ class expression(object):
                         sql_operator = sql_operator[4:] if sql_operator[:3] == 'not' else '='
                         inselect_operator = 'not inselect'
 
-                    unaccent = self._unaccent if sql_operator.endswith('like') else lambda x: x
-
-                    instr = unaccent('%s')
-
+                    subselect = '( SELECT res_id'          \
+                             '    FROM ir_translation'  \
+                             '   WHERE name = %s'       \
+                             '     AND lang = %s'       \
+                             '     AND type = %s'
+                    instr = ' %s'
+                    #Covering in,not in operators with operands (%s,%s) ,etc.
                     if sql_operator == 'in':
-                        # params will be flatten by to_sql() => expand the placeholders
-                        instr = '(%s)' % ', '.join(['%s'] * len(right))
+                        instr = ','.join(['%s'] * len(right))
+                        subselect += '     AND value ' + sql_operator + ' ' + " (" + instr + ")"   \
+                             ') UNION ('                \
+                             '  SELECT id'              \
+                             '    FROM "' + working_model._table + '"'       \
+                             '   WHERE "' + left + '" ' + sql_operator + ' ' + " (" + instr + "))"
+                    else:
+                        subselect += '     AND value ' + sql_operator + instr +   \
+                             ') UNION ('                \
+                             '  SELECT id'              \
+                             '    FROM "' + working_model._table + '"'       \
+                             '   WHERE "' + left + '" ' + sql_operator + instr + ")"
 
-                    subselect = """WITH temp_irt_current (id, name) as (
-                            SELECT ct.id, coalesce(it.value,ct.{quote_left})
-                            FROM {current_table} ct 
-                            LEFT JOIN ir_translation it ON (it.name = %s and 
-                                        it.lang = %s and 
-                                        it.type = %s and 
-                                        it.res_id = ct.id and 
-                                        it.value != '')
-                            ) 
-                            SELECT id FROM temp_irt_current WHERE {name} {operator} {right} order by name
-                            """.format(current_table=working_model._table, quote_left=_quote(left), name=unaccent('name'), 
-                                       operator=sql_operator, right=instr)
-
-                    params = (
-                        working_model._name + ',' + left,
-                        context.get('lang') or 'en_US',
-                        'model',
-                        right,
-                    )
-                    push(create_substitution_leaf(leaf, ('id', inselect_operator, (subselect, params)), working_model, internal=True))
+                    params = [working_model._name + ',' + left,
+                              context.get('lang', False) or 'en_US',
+                              'model',
+                              right,
+                              right,
+                             ]
+                    push(create_substitution_leaf(leaf, ('id', inselect_operator, (subselect, params)), working_model))
 
                 else:
                     push_result(leaf)
@@ -1153,7 +1140,7 @@ class expression(object):
             else:  # Must not happen
                 raise ValueError("Invalid domain term %r" % (leaf,))
 
-        elif (left in model._columns) and model._columns[left]._type == "boolean" and ((operator == '=' and right is False) or (operator == '!=' and right is True)):
+        elif right == False and (left in model._columns) and model._columns[left]._type == "boolean" and (operator == '='):
             query = '(%s."%s" IS NULL or %s."%s" = false )' % (table_alias, left, table_alias, left)
             params = []
 
@@ -1161,8 +1148,7 @@ class expression(object):
             query = '%s."%s" IS NULL ' % (table_alias, left)
             params = []
 
-        elif (left in model._columns) and model._columns[left]._type == "boolean" and ((operator == '!=' and right is False) or (operator == '==' and right is True)):
-
+        elif right == False and (left in model._columns) and model._columns[left]._type == "boolean" and (operator == '!='):
             query = '(%s."%s" IS NOT NULL and %s."%s" != false)' % (table_alias, left, table_alias, left)
             params = []
 
@@ -1187,15 +1173,15 @@ class expression(object):
         else:
             need_wildcard = operator in ('like', 'ilike', 'not like', 'not ilike')
             sql_operator = {'=like': 'like', '=ilike': 'ilike'}.get(operator, operator)
-            cast = '::text' if  sql_operator.endswith('like') else ''
 
             if left in model._columns:
                 format = need_wildcard and '%s' or model._columns[left]._symbol_set[0]
-                unaccent = self._unaccent if sql_operator.endswith('like') else lambda x: x
-                column = '%s.%s' % (table_alias, _quote(left))
-                query = '(%s%s %s %s)' % (unaccent(column), cast, sql_operator, unaccent(format))
+                if self.has_unaccent and sql_operator in ('ilike', 'not ilike'):
+                    query = '(unaccent(%s."%s") %s unaccent(%s))' % (table_alias, left, sql_operator, format)
+                else:
+                    query = '(%s."%s" %s %s)' % (table_alias, left, sql_operator, format)
             elif left in MAGIC_COLUMNS:
-                    query = "(%s.\"%s\"%s %s %%s)" % (table_alias, left, cast, sql_operator)
+                    query = "(%s.\"%s\" %s %%s)" % (table_alias, left, sql_operator)
                     params = right
             else:  # Must not happen
                 raise ValueError("Invalid field %r in domain term %r" % (left, leaf))
