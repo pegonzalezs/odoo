@@ -138,8 +138,8 @@ class PurchaseOrder(models.Model):
         ('invoiced', 'No Bill to Receive'),
         ], string='Billing Status', compute='_get_invoiced', store=True, readonly=True, copy=False, default='no')
 
-    picking_count = fields.Integer(compute='_compute_picking', string='Picking count', default=0, store=True)
-    picking_ids = fields.Many2many('stock.picking', compute='_compute_picking', string='Receptions', copy=False, store=True)
+    picking_count = fields.Integer(compute='_compute_picking', string='Picking count', default=0, store=True, compute_sudo=True)
+    picking_ids = fields.Many2many('stock.picking', compute='_compute_picking', string='Receptions', copy=False, store=True, compute_sudo=True)
 
     # There is no inverse function on purpose since the date may be different on each line
     date_planned = fields.Datetime(string='Scheduled Date', compute='_compute_date_planned', store=True, index=True)
@@ -402,6 +402,8 @@ class PurchaseOrder(models.Model):
 
             for pick in order.picking_ids.filtered(lambda r: r.state != 'cancel'):
                 pick.action_cancel()
+
+            order.order_line.write({'move_dest_ids':[(5,0,0)]})
 
         self.write({'state': 'cancel'})
 
@@ -948,7 +950,8 @@ class ProcurementRule(models.Model):
             cache[domain] = po
         if not po:
             vals = self._prepare_purchase_order(product_id, product_qty, product_uom, origin, values, partner)
-            po = self.env['purchase.order'].sudo().create(vals)
+            company_id = values.get('company_id') and values['company_id'].id or self.env.user.company_id.id
+            po = self.env['purchase.order'].with_context(force_company=company_id).sudo().create(vals)
             cache[domain] = po
         elif not po.origin or origin not in po.origin.split(', '):
             if po.origin:

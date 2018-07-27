@@ -113,6 +113,10 @@ Running the server
 
     runs tests after installing modules
 
+.. option:: --test-tags 'tag_1,tag_2,...,-tag_n'
+
+    select the tests to run by using tags.
+
 .. option:: --dev <feature,feature,...,feature>
 
     * ``all``: all the features below are activated
@@ -383,13 +387,6 @@ customize the amount of logging output
 
         In case of conflict between :option:`--log-level` and
         :option:`--log-handler`, the latter is used
-
-translations
-------------
-
-.. option:: --i18n-import
-
-.. option:: --i18n-export
 
 emails
 ------

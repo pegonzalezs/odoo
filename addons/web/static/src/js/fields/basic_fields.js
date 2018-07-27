@@ -1835,7 +1835,7 @@ var StatInfo = AbstractField.extend({
      */
     _render: function () {
         var options = {
-            value: this.value || 0,
+            value: this._formatValue(this.value || 0),
         };
         if (! this.attrs.nolabel) {
             if (this.nodeOptions.label_field && this.recordData[this.nodeOptions.label_field]) {
@@ -2508,6 +2508,21 @@ var AceEditor = DebouncedField.extend({
     //--------------------------------------------------------------------------
 
     /**
+     * Format value
+     *
+     * Note: We have to overwrite this method to always return a string.
+     * AceEditor works with string and not boolean value.
+     *
+     * @override
+     * @private
+     * @param {boolean|string} value
+     * @returns {string}
+     */
+    _formatValue: function (value) {
+        return this._super.apply(this, arguments) || '';
+    },
+
+    /**
      * @override
      * @private
      */
@@ -2529,6 +2544,7 @@ var AceEditor = DebouncedField.extend({
             this.aceSession.setValue(newValue);
         }
     },
+
     /**
      * Starts the ace library on the given DOM element. This initializes the
      * ace editor option according to the edit/readonly mode and binds ace
