@@ -13,7 +13,7 @@ class StockPackageLevel(models.Model):
     picking_id = fields.Many2one('stock.picking', 'Picking')
     move_ids = fields.One2many('stock.move', 'package_level_id')
     move_line_ids = fields.One2many('stock.move.line', 'package_level_id')
-    location_id = fields.Many2one('stock.location', 'From')
+    location_id = fields.Many2one('stock.location', 'From', compute='_compute_location_id')
     location_dest_id = fields.Many2one('stock.location', 'To')
     is_done = fields.Boolean('Done', compute='_compute_is_done', inverse='_set_is_done')
     state = fields.Selection([
@@ -27,6 +27,8 @@ class StockPackageLevel(models.Model):
     is_fresh_package = fields.Boolean(compute='_compute_fresh_pack')
 
     picking_source_location = fields.Many2one('stock.location', related='picking_id.location_id')
+    show_lots_m2o = fields.Boolean(compute='_compute_show_lot')
+    show_lots_text = fields.Boolean(compute='_compute_show_lot')
 
     @api.depends('move_line_ids', 'move_line_ids.qty_done')
     def _compute_is_done(self):
@@ -47,10 +49,10 @@ class StockPackageLevel(models.Model):
                         if corresponding_ml:
                             corresponding_ml[0].qty_done = corresponding_ml[0].qty_done + quant.quantity
                         else:
-                            corresponding_move = package_level.move_ids.filtered(lambda m: m.product_id == quant.product_id)
+                            corresponding_move = package_level.move_ids.filtered(lambda m: m.product_id == quant.product_id)[:1]
                             self.env['stock.move.line'].create({
-                                'location_id': package_level.picking_id.location_id.id,
-                                'location_dest_id': package_level.picking_id.location_dest_id.id,
+                                'location_id': package_level.location_id.id,
+                                'location_dest_id': package_level.location_dest_id.id,
                                 'picking_id': package_level.picking_id.id,
                                 'product_id': quant.product_id.id,
                                 'qty_done': quant.quantity,
@@ -62,9 +64,10 @@ class StockPackageLevel(models.Model):
                                 'move_id': corresponding_move.id,
                             })
             else:
-                package_level.move_line_ids.write({'qty_done': 0})
+                package_level.move_line_ids.filtered(lambda ml: ml.product_qty == 0).unlink()
+                package_level.move_line_ids.filtered(lambda ml: ml.product_qty != 0).write({'qty_done': 0})
 
-    @api.depends('move_line_ids')
+    @api.depends('move_line_ids', 'move_line_ids.package_id', 'move_line_ids.result_package_id')
     def _compute_fresh_pack(self):
         for package_level in self:
             if not package_level.move_line_ids or all(ml.package_id and ml.package_id == ml.result_package_id for ml in package_level.move_line_ids):
@@ -91,11 +94,22 @@ class StockPackageLevel(models.Model):
             elif package_level.move_line_ids.filtered(lambda ml: ml.state == 'cancel') or package_level.move_ids.filtered(lambda m: m.state == 'cancel'):
                 package_level.state = 'cancel'
 
-
-    @api.onchange('package_id')
-    def _onchange_package_id(self):
-        if not self.is_fresh_package:
-            self.location_id = self.package_id.location_id
+    def _compute_show_lot(self):
+        for package_level in self:
+            if any(ml.product_id.tracking != 'none' for ml in package_level.move_line_ids):
+                if package_level.picking_id.picking_type_id.use_existing_lots or package_level.state == 'done':
+                    package_level.show_lots_m2o = True
+                    package_level.show_lots_text = False
+                else:
+                    if self.picking_id.picking_type_id.use_create_lots and package_level.state != 'done':
+                        package_level.show_lots_m2o = False
+                        package_level.show_lots_text = True
+                    else:
+                        package_level.show_lots_m2o = False
+                        package_level.show_lots_text = False
+            else:
+                package_level.show_lots_m2o = False
+                package_level.show_lots_text = False
 
     def _generate_moves(self):
         for package_level in self:
@@ -117,9 +131,6 @@ class StockPackageLevel(models.Model):
         if vals.get('location_dest_id'):
             result.mapped('move_line_ids').write({'location_dest_id': vals['location_dest_id']})
             result.mapped('move_ids').write({'location_dest_id': vals['location_dest_id']})
-        if not result.is_fresh_package and vals.get('location_id'):
-            result.mapped('move_line_ids').write({'location_id': vals['location_id']})
-            result.mapped('move_ids').write({'location_id': vals['location_id']})
         if result.picking_id.state != 'draft' and result.location_id and result.location_dest_id and not result.move_ids and not result.move_line_ids:
             result._generate_moves()
         return result
@@ -129,13 +140,6 @@ class StockPackageLevel(models.Model):
         if vals.get('location_dest_id'):
             self.mapped('move_line_ids').write({'location_dest_id': vals['location_dest_id']})
             self.mapped('move_ids').write({'location_dest_id': vals['location_dest_id']})
-        if vals.get('location_id'):
-            fresh_packages = self.env['stock.package_level']
-            for package_level in self:
-                if package_level.is_fresh_package:
-                    fresh_packages |= package_level
-            fresh_packages.mapped('move_line_ids').write({'location_id': vals['location_id']})
-            fresh_packages.mapped('move_ids').write({'location_id': vals['location_id']})
         return result
 
     def unlink(self):
@@ -164,3 +168,15 @@ class StockPackageLevel(models.Model):
                 or any(grouped_ops.get(key, 0) - grouped_quants.get(key, 0) != 0 for key in grouped_ops):
             all_in = False
         return all_in
+
+    @api.depends('state', 'move_ids', 'move_line_ids')
+    def _compute_location_id(self):
+        for pl in self:
+            if pl.state == 'new' or pl.is_fresh_package:
+                pl.location = False
+            elif pl.state == 'confirmed' and pl.move_ids:
+                pl.location_id = pl.move_ids[0].location_id
+            elif pl.state in ('assigned', 'done') and pl.move_line_ids:
+                pl.location_id = pl.move_line_ids[0].location_id
+            else:
+                pl.location_id = pl.picking_id.location_id

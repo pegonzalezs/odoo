@@ -40,12 +40,17 @@ class HolidaysRequest(models.Model):
     _order = "date_from desc"
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    def _default_domain_holiday_status(self):
+        if self.user_has_groups('hr_holidays.group_hr_holidays_manager'):
+            return [('valid', '=', True)]
+        return [('valid', '=', True), ('employee_applicability', 'in', ['leave', 'both'])]
+
     @api.model
     def default_get(self, fields_list):
         defaults = super(HolidaysRequest, self).default_get(fields_list)
 
         LeaveType = self.env['hr.leave.type'].with_context(employee_id=defaults.get('employee_id'), default_date_from=defaults.get('date_from', fields.Datetime.now()))
-        lt = LeaveType.search([('valid', '=', True), ('employee_applicability', 'in', ['leave', 'both'])])
+        lt = LeaveType.search(self._default_domain_holiday_status())
 
         defaults['holiday_status_id'] = lt[0].id if len(lt) > 0 else defaults.get('holiday_status_id')
         return defaults
@@ -77,18 +82,18 @@ class HolidaysRequest(models.Model):
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
     holiday_status_id = fields.Many2one("hr.leave.type", string="Leave Type", required=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
-        domain="[('valid', '=', True), ('employee_applicability', 'in', ['leave', 'both'])]")
+        domain=lambda self: self._default_domain_holiday_status())
     employee_id = fields.Many2one('hr.employee', string='Employee', index=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=_default_employee, track_visibility='onchange')
     manager_id = fields.Many2one('hr.employee', string='Manager', readonly=True)
     notes = fields.Text('Reasons', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     number_of_days_temp = fields.Float(
-        'Allocation', copy=False, readonly=True,
+        'Duration (Days)', copy=False, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
         help='Number of days of the leave request according to your working schedule.')
     number_of_days = fields.Float('Number of Days', compute='_compute_number_of_days', store=True, track_visibility='onchange')
     number_of_hours = fields.Float(
-        'Hours Allocation', copy=False, readonly=True, compute='_compute_number_of_hours',
+        'Duration (Hours)', copy=False, readonly=True, compute='_compute_number_of_hours',
         help='Number of hours of the leave request according to your working schedule.')
     meeting_id = fields.Many2one('calendar.event', string='Meeting')
 

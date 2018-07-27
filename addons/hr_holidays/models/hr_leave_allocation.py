@@ -40,12 +40,17 @@ class HolidaysAllocation(models.Model):
     _description = "Leaves Allocation"
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    def _default_domain_holiday_status_id(self):
+        if self.user_has_groups('hr_holidays.group_hr_holidays_manager'):
+            return [('valid', '=', True), ('limit', '=', False)]
+        return [('valid', '=', True), ('employee_applicability', 'in', ['allocation', 'both']), ('limit', '=', False)]
+
     def _default_employee(self):
         return self.env.context.get('default_employee_id') or self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
 
     def _default_holiday_status_id(self):
         LeaveType = self.env['hr.leave.type'].with_context(employee_id=self._default_employee().id)
-        lt = LeaveType.search([('valid', '=', True), ('employee_applicability', 'in', ['leave', 'both']), ('limit', '=', False)])
+        lt = LeaveType.search(self._default_domain_holiday_status_id())
         return lt[:1]
 
     name = fields.Char('Description')
@@ -67,16 +72,16 @@ class HolidaysAllocation(models.Model):
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, track_visibility='onchange')
     holiday_status_id = fields.Many2one("hr.leave.type", string="Leave Type", required=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
-        domain="[('valid', '=', True), ('employee_applicability', 'in', ['allocation', 'both']), ('limit', '=', False)]", default=_default_holiday_status_id)
+        domain=lambda self: self._default_domain_holiday_status_id(), default=_default_holiday_status_id)
     employee_id = fields.Many2one('hr.employee', string='Employee', index=True, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=_default_employee, track_visibility='onchange')
     notes = fields.Text('Reasons', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
     number_of_days_temp = fields.Float(
-        'Allocation', copy=False, readonly=True,
+        'Duration (days)', copy=False, readonly=True,
         states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]},
         help='Number of days of the leave request according to your working schedule.')
     number_of_days = fields.Float('Number of Days', compute='_compute_number_of_days', store=True, track_visibility='onchange')
-    number_of_hours = fields.Float('Number of Hours', help="Number of hours of the leave allocation according to your working schedule.")
+    number_of_hours = fields.Float('Duration (hours)', help="Number of hours of the leave allocation according to your working schedule.")
     parent_id = fields.Many2one('hr.leave.allocation', string='Parent')
     linked_request_ids = fields.One2many('hr.leave.allocation', 'parent_id', string='Linked Requests')
     department_id = fields.Many2one('hr.department', string='Department', readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
@@ -98,8 +103,8 @@ class HolidaysAllocation(models.Model):
     can_approve = fields.Boolean('Can Approve', compute='_compute_can_approve')
     type_request_unit = fields.Selection(related='holiday_status_id.request_unit')
     accrual = fields.Boolean("Accrual", related='holiday_status_id.accrual', store=True, readonly=True)
-    number_per_interval = fields.Float("Number of unit per interval", readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
-    interval_number = fields.Integer("Number of unit between two intervals", readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]})
+    number_per_interval = fields.Float("Number of unit per interval", readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=1)
+    interval_number = fields.Integer("Number of unit between two intervals", readonly=True, states={'draft': [('readonly', False)], 'confirm': [('readonly', False)]}, default=1)
     unit_per_interval = fields.Selection([
         ('hours', 'Hour(s)'),
         ('days', 'Day(s)')
@@ -115,6 +120,8 @@ class HolidaysAllocation(models.Model):
         ('type_value', "CHECK( (holiday_type='employee' AND employee_id IS NOT NULL) or (holiday_type='category' AND category_id IS NOT NULL) or (holiday_type='department' AND department_id IS NOT NULL) )",
          "The employee, department or employee category of this request is missing. Please make sure that your user login is linked to an employee."),
         ('date_check', "CHECK ( number_of_days_temp >= 0 )", "The number of days must be greater than 0."),
+        ('number_per_interval_check', "CHECK(number_per_interval > 0)", "The number per interval should be greater than 0"),
+        ('interval_number_check', "CHECK(interval_number > 0)", "The interval number should be greater than 0"),
     ]
 
     @api.model
@@ -251,9 +258,9 @@ class HolidaysAllocation(models.Model):
             else:
                 self.unit_per_interval = 'days'
         else:
-            self.interval_number = 0
+            self.interval_number = 1
             self.interval_unit = 'weeks'
-            self.number_per_interval = 0
+            self.number_per_interval = 1
             self.unit_per_interval = 'hours'
 
     ####################################################

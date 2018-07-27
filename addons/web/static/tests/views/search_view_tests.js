@@ -10,17 +10,17 @@ QUnit.module('Search View', {
             partner: {
                 fields: {
                     date_field: {string: "Date", type: "date", store: true, sortable: true},
-                    Birthday: {string: "Birthday", type: "date", store: true, sortable: true},
-                    foo: {string: "Foo", type: "char"},
+                    birthday: {string: "Birthday", type: "date", store: true, sortable: true},
+                    foo: {string: "Foo", type: "char", store: true, sortable: true},
                     bar: {string: "Bar", type: "many2one", relation: 'partner'},
                     float_field: {string: "Float", type: "float"},
                 },
                 records: [
-                    {id: 1, display_name: "First record", foo: "yop", bar: 2, date_field: "2017-01-25", Birthday: "1983-07-15", float_field: 1},
-                    {id: 2, display_name: "Second record", foo: "blip", bar: 1, date_field: "2017-01-24", Birthday: "1982-06-04",float_field: 2},
-                    {id: 3, display_name: "Third record", foo: "gnap", bar: 1, date_field: "2017-01-13", Birthday: "1985-09-13",float_field: 1.618},
-                    {id: 4, display_name: "Fourth record", foo: "plop", bar: 2, date_field: "2017-02-25", Birthday: "1983-05-05",float_field: -1},
-                    {id: 5, display_name: "Fifth record", foo: "zoup", bar: 2, date_field: "2016-01-25", Birthday: "1800-01-01",float_field: 13},
+                    {id: 1, display_name: "First record", foo: "yop", bar: 2, date_field: "2017-01-25", birthday: "1983-07-15", float_field: 1},
+                    {id: 2, display_name: "Second record", foo: "blip", bar: 1, date_field: "2017-01-24", birthday: "1982-06-04",float_field: 2},
+                    {id: 3, display_name: "Third record", foo: "gnap", bar: 1, date_field: "2017-01-13", birthday: "1985-09-13",float_field: 1.618},
+                    {id: 4, display_name: "Fourth record", foo: "plop", bar: 2, date_field: "2017-02-25", birthday: "1983-05-05",float_field: -1},
+                    {id: 5, display_name: "Fifth record", foo: "zoup", bar: 2, date_field: "2016-01-25", birthday: "1800-01-01",float_field: 13},
                 ],
             },
             pony: {
@@ -69,7 +69,21 @@ QUnit.module('Search View', {
             type: 'ir.actions.act_window',
             views: [[2, 'list']],
             search_view_id: [4, 'search'],
-        }
+        }, {
+            id: 6,
+            name: 'Partners Action 6',
+            res_model: 'partner',
+            type: 'ir.actions.act_window',
+            views: [[2, 'list']],
+            search_view_id: [5, 'search'],
+        }, {
+            id: 7,
+            name: 'Partners Action 7',
+            res_model: 'partner',
+            type: 'ir.actions.act_window',
+            views: [[2, 'list']],
+            search_view_id: [6, 'search'],
+        },
         ];
 
         this.archs = {
@@ -104,6 +118,34 @@ QUnit.module('Search View', {
             'partner,4,search': '<search>'+
                     '<field name="date_field" string="Date"/>' +
                     '<filter string="Date" name="coolName" context="{\'group_by\': \'date_field:day\'}"/>' +
+                '</search>',
+            'partner,5,search': '<search>'+
+                    '<filter string="1" name="coolName1" date="date_field"/>' +
+                    '<separator/>' +
+                    '<filter string="2" name="coolName2" date="birthday"/>' +
+                    '<separator/>' +
+                    '<filter string="3" name="coolName3" domain="[]"/>' +
+                    '<separator/>' +
+                    '<filter string="4" name="coolName4" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="5" name="coolName5" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="6" name="coolName6" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="7" name="coolName7" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="8" name="coolName8" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="9" name="coolName9" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="10" name="coolName10" domain="[]"/>' +
+                                    '<separator/>' +
+                    '<filter string="11" name="coolName11" domain="[]"/>' +
+                '</search>',
+            'partner,6,search': '<search>'+
+                    '<filter string="Date" name="coolName" context="{\'group_by\': \'date_field:day\'}"/>' +
+                    '<separator/>' +
+                    '<filter string="Bar" name="superName" context="{\'group_by\': \'bar\'}"/>' +
                 '</search>',
         };
     },
@@ -256,6 +298,37 @@ QUnit.module('Search View', {
         assert.strictEqual($('.o_content tr.o_group_header').length, 4);
         actionManager.destroy();
     });
+    
+    QUnit.test('a separator in groupbys does not cause problems', function (assert) {
+        assert.expect(6);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+
+        actionManager.doAction(7);
+        // open menu 'Group By'
+        $('span.fa-bars').click();
+        // open options menu
+        $('.o_group_by_menu .o_menu_item a:first').click();
+        // activate groupby with 'day' option
+        $('.o_group_by_menu .o_menu_item .o_item_option[data-option_id="day"]').click();
+        // activate the second groupby
+        $('.o_group_by_menu .o_menu_item > a').eq(1).click();
+        assert.strictEqual($('.o_group_by_menu .o_menu_item').length, 2);
+        assert.ok($('.o_group_by_menu .o_menu_item').hasClass('selected'));
+        // deactivate second groupby
+        $('.o_group_by_menu .o_menu_item > a').eq(1).click();
+        assert.ok($('.o_group_by_menu .o_menu_item').eq(0).hasClass('selected'));
+        assert.ok(!$('.o_group_by_menu .o_menu_item').eq(1).hasClass('selected'));
+        // remove facet
+        $('.o_facet_remove').click();
+        assert.ok(!$('.o_group_by_menu .o_menu_item').eq(0).hasClass('selected'));
+        assert.ok(!$('.o_group_by_menu .o_menu_item').eq(1).hasClass('selected'));
+        actionManager.destroy();
+    });
 
     QUnit.module('Filters Menu');
 
@@ -293,6 +366,24 @@ QUnit.module('Search View', {
         $('li.o_menu_item').click();
         assert.strictEqual($('.o_searchview .o_searchview_facet .o_facet_values span').length, 0,
             'no facet should be in the search view');
+        actionManager.destroy();
+    });
+
+    QUnit.test('arch order of groups of filters preserved', function (assert) {
+        assert.expect(12);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+
+        actionManager.doAction(6);
+        $('span.fa-filter').click();
+        assert.strictEqual($('.o_filters_menu .o_menu_item').length, 11);
+        for (var i = 0;  i < 11; i++) {
+            assert.strictEqual($('.o_filters_menu .o_menu_item').eq(i).text().trim(), (i+1).toString());
+        }
         actionManager.destroy();
     });
 });

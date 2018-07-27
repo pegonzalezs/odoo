@@ -203,9 +203,8 @@ class SaleTimesheetController(http.Controller):
 
         # remaining computation of SO row, as Sold - Done (timesheet total)
         for sale_order_id, done_sold_vals in rows_sale_order_done_sold.items():
-            item = done_sold_vals.get(sale_order_id)
-            if item:
-                rows_sale_order[sale_order_id] = item['sold'] - item['done']
+            if sale_order_id in rows_sale_order:
+                rows_sale_order[sale_order_id][-1] = done_sold_vals['sold'] - done_sold_vals['done']
 
         # group rows SO, SOL and their related employee rows.
         timesheet_forecast_table_rows = []
@@ -414,7 +413,9 @@ class SaleTimesheetController(http.Controller):
         elif res_model == 'sale.order':
             action = clean_action(request.env.ref('sale.action_orders').read()[0])
             action['domain'] = domain
+            action['context'] = {'create': False, 'edit': False, 'delete': False}  # No CRUD operation when coming from overview
         elif res_model == 'account.invoice':
             action = clean_action(request.env.ref('account.action_invoice_tree1').read()[0])
             action['domain'] = domain
+            action['context'] = {'create': False, 'edit': False, 'delete': False}  # No CRUD operation when coming from overview
         return action

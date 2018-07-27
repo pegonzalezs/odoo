@@ -57,7 +57,7 @@ class MailResendMessage(models.TransientModel):
             to_send = wizard.partner_ids.filtered(lambda p: p.resend).mapped("partner_id")
             notif_to_cancel = wizard.notification_ids.filtered(lambda notif: notif.res_partner_id in to_cancel and notif.email_status in ('exception', 'bounce'))
             notif_to_cancel.sudo().write({'email_status': 'canceled'})
-            to_send.sudo()._notify(self.mail_message_id, self.mail_message_id.layout, force_send=True, send_after_commit=False, values=literal_eval(self.mail_message_id.layout_values))
+            to_send.sudo()._notify(self.mail_message_id, force_send=True, send_after_commit=False)
             self.mail_message_id._notify_failure_update()
         return {'type': 'ir.actions.act_window_close'}
 
@@ -70,15 +70,48 @@ class MailResendMessage(models.TransientModel):
         return {'type': 'ir.actions.act_window_close'}
 
 
-
 class PartnerResend(models.TransientModel):
     _name = 'mail.resend.partner'
     _description = 'Partner with additionnal information for mail resend'
 
     partner_id = fields.Many2one('res.partner', string='Partner', required=True, ondelete='cascade')
-    name = fields.Char(related="partner_id.name")
-    email = fields.Char(related="partner_id.email")
+    name = fields.Char(related="partner_id.name", related_sudo=False)
+    email = fields.Char(related="partner_id.email", related_sudo=False)
     resend = fields.Boolean(string="Send Again", default=True)
     resend_wizard_id = fields.Many2one('mail.resend.message', string="Resend wizard")
     message = fields.Char(string="Help message")
 
+
+class MailCancelResend(models.TransientModel):
+    _name = 'mail.resend.cancel'
+    _description = 'Dismiss notification for resend by model'
+
+    model = fields.Char(string='Model')
+    help_message = fields.Char(string='Help message', compute='_compute_help_message')
+
+    @api.multi
+    @api.depends('model')
+    def _compute_help_message(self):
+        for wizard in self:
+            wizard.help_message = _("Are you sure you want to discard %s mail delivery failures. You won't be able to re-send these mails later!") % (wizard._context.get('unread_counter'))
+
+    @api.multi
+    def cancel_resend_action(self):
+        author_id = self.env.user.partner_id.id
+        for wizard in self:
+            self._cr.execute("""
+                                SELECT notif.id, mes.id
+                                FROM mail_message_res_partner_needaction_rel notif
+                                JOIN mail_message mes
+                                    ON notif.mail_message_id = mes.id
+                                WHERE notif.email_status IN ('bounce', 'exception')
+                                    AND mes.model = %s
+                                    AND mes.author_id = %s
+                            """, (wizard.model, author_id))
+            res = self._cr.fetchall()
+            notif_ids = [row[0] for row in res]
+            messages_ids = list(set([row[1] for row in res]))
+            if notif_ids:
+                self.env["mail.notification"].browse(notif_ids).sudo().write({'email_status': 'canceled'})
+                self.env["mail.message"].browse(messages_ids)._notify_failure_update()
+        return {'type': 'ir.actions.act_window_close'}

@@ -329,7 +329,9 @@ class Partner(models.Model):
     @api.multi
     def copy(self, default=None):
         self.ensure_one()
-        default = dict(default or {}, name=_('%s (copy)') % self.name)
+        chosen_name = default.get('name') if default else ''
+        new_name = chosen_name or _('%s (copy)') % self.name
+        default = dict(default or {}, name=new_name)
         return super(Partner, self).copy(default)
 
     @api.onchange('parent_id')
@@ -514,7 +516,8 @@ class Partner(models.Model):
                 if partner.user_ids:
                     companies = set(user.company_id for user in partner.user_ids)
                     if len(companies) > 1 or company not in companies:
-                        raise UserError(_("You can not change the company as the partner/user has multiple user linked with different companies."))
+                        raise UserError(
+                            ("The selected company is not compatible with the companies of the related user(s)"))
         tools.image_resize_images(vals, sizes={'image': (1024, None)})
 
         result = True

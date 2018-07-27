@@ -262,7 +262,7 @@ class PurchaseOrder(models.Model):
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
             'default_composition_mode': 'comment',
-            'custom_layout': "purchase.mail_template_data_notification_email_purchase_order",
+            'custom_layout': "mail.mail_notification_borders",
             'force_email': True,
             'mark_rfq_as_sent': True,
         })
@@ -324,6 +324,8 @@ class PurchaseOrder(models.Model):
             for inv in order.invoice_ids:
                 if inv and inv.state not in ('cancel', 'draft'):
                     raise UserError(_("Unable to cancel this purchase order. You must first cancel the related vendor bills."))
+            order.order_line.write({'move_dest_ids':[(5,0,0)]})
+
         self.write({'state': 'cancel'})
 
     @api.multi
