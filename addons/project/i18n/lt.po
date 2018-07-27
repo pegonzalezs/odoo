@@ -275,6 +275,11 @@ msgid ""
 "                        documents to your project.\n"
 "                    </p>"
 msgstr ""
+"<p class=\"oe_view_nocontent_create\">\n"
+"                       Dokumentai yra prisegti prie jūsų projekto užduočių ar problemų.</p><p>\n"
+"                        Siųskite žinutes arba veskite vidinius užrašus su prisegtukais, kad\n"
+"                        susietumėte dokumentus su savo projektu.\n"
+"                    </p>"
 
 #. module: project
 #: code:addons/project/models/project.py:150
@@ -1456,7 +1461,7 @@ msgstr "Sukurti"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Create a Gantt chart with your projects tasks and deadlines"
-msgstr ""
+msgstr "Sukurti Gantt grafiką su savo projektais, užduotimis ir terminais"
 
 #. module: project
 #: model:ir.actions.act_window,name:project.open_create_project
@@ -1474,6 +1479,8 @@ msgid ""
 "Create a task by sending an email to a project alias with one of your "
 "colleagues in copy"
 msgstr ""
+"Sukurti užduotį siunčiant el. laišką projekto pseudonimui su kopija vienam "
+"iš jūsų kolegų"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -1600,7 +1607,7 @@ msgstr "Klientų aptarnavimo kortelės"
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
 msgid "Customization"
-msgstr ""
+msgstr "Pritaikymas"
 
 #. module: project
 #: model:ir.ui.menu,name:project.menu_projects
@@ -1883,6 +1890,8 @@ msgid ""
 "Explanation text to help users using the star and priority mechanism on "
 "stages or issues that are in this stage."
 msgstr ""
+"Paaiškinamasis tekstas, kuris padeda vartotojams naudoti žvaigždučių ir "
+"prioritetų mechanizmą stadijose ar problemose, kurios yra šioje stadijoje."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.view_task_project_user_search
@@ -2080,7 +2089,7 @@ msgstr ""
 #: code:addons/project/models/project.py:567
 #, python-format
 msgid "I take it"
-msgstr ""
+msgstr "Renkuosi tai"
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_config_settings_id
@@ -2240,6 +2249,8 @@ msgid ""
 "Internal notes are messages that will appear in the Chatter but will not be "
 "notified in Odoo's Inbox."
 msgstr ""
+"Vidiniai pranešimai yra žinutės, kurios pasirodys susirašinėjime, bet ne "
+"Odoo laiškų dėžutėje."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -2303,6 +2314,8 @@ msgid ""
 "It's essential to be clear about why you want to use Odoo Project and what your goals are.\n"
 "                        Indeed, there are many ways to manage a project, to find the best one for you, you need to know exactly what you want to achieve. And later on, we will hopefully transform your objectives into real improvements for your company."
 msgstr ""
+"Svarbiausia - aiškiai išsiaiškinti, kodėl jūs norite naudoti Odoo Projektą ir kokie yra jūsų tikslai.\n"
+"                        Aišku, yra daugybė būdų valdyti projektą, tačiau norėdami rasti geriausią sau, turite žinoti, ką tiksliai norite pasiekti. Vėliau mes jūsų tikslus paversime tikrais jūsų kompanijos patobulinimais."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -2456,6 +2469,8 @@ msgid ""
 "Managing a group of people, a team or a department (example: R&amp;D team, "
 "HR Department, etc.)"
 msgstr ""
+"Valdoma žmonių grupė, komanda arba skyrius (pavyzdžiui, tyrimų komanda, "
+"žmogiškųjų išteklių skyrius ir pan.)"
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
@@ -2722,6 +2737,8 @@ msgid ""
 "Override the default value displayed for the done state for kanban "
 "selection, when the task or issue is in that stage."
 msgstr ""
+"Viršyti numatytąją reikšmę, rodomą Kanban pasirinkimo atliktai stadijai, kai"
+" užduotis ar problema yra toje stadijoje."
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_task_legend_normal
@@ -2730,6 +2747,8 @@ msgid ""
 "Override the default value displayed for the normal state for kanban "
 "selection, when the task or issue is in that stage."
 msgstr ""
+"Viršyti numatytąją reikšmę, rodomą Kanban pasirinkimo normaliai stadijai, "
+"kai užduotis ar problema yra šioje stadijoje."
 
 #. module: project
 #: model:ir.model.fields,field_description:project.field_project_project_alias_user_id
@@ -3454,6 +3473,9 @@ msgid ""
 " email that does not reply to an existing record will cause the creation of "
 "a new record of this model (e.g. a Project Task)"
 msgstr ""
+"Modelis (Odoo dokumento rūšis), su kuriuo susijęs šis pseudonimas. Visi "
+"gaunami laiškai, kurie neatsako į egzistuojantį įrašą, sukurs naują šio "
+"modelio įrašą (pvz. projekto užduotį)"
 
 #. module: project
 #: model:ir.model.fields,help:project.field_project_project_alias_name
@@ -3915,6 +3937,8 @@ msgid ""
 "You can reply directly to a message from you email software; the message and"
 " its attachments will be added to the Chatter."
 msgstr ""
+"Galite į žinutę atsakyti tiesiogiai iš savo el. pašto programos; žinutė ir "
+"jos prisegtukai bus pridėti prie susirašinėjimo."
 
 #. module: project
 #: model:ir.ui.view,arch_db:project.project_planner
