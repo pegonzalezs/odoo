@@ -840,36 +840,84 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         messages = []
         ModelData = self.env['ir.model.data']
         ModelData.clear_caches()
-        extracted = self._extract_records(fields, data, log=messages.append)
-        converted = self._convert_records(extracted, log=messages.append)
-        for id, xid, record, info in converted:
+
+        # list of (xid, vals, info) for records to be created in batch
+        batch = []
+        batch_xml_ids = set()
+
+        def flush(xml_id=None):
+            if not batch:
+                return
+            if xml_id and xml_id not in batch_xml_ids:
+                return
+
+            data_list = [
+                dict(xml_id=xid, values=vals, info=info, noupdate=noupdate)
+                for xid, vals, info in batch
+            ]
+            batch.clear()
+            batch_xml_ids.clear()
+
             try:
                 cr.execute('SAVEPOINT model_load_save')
             except psycopg2.InternalError as e:
                 # broken transaction, exit and hope the source error was
                 # already logged
                 if not any(message['type'] == 'error' for message in messages):
-                    messages.append(dict(info, type='error',message=u"Unknown database error: '%s'" % e))
-                break
+                    info = data_list[0]['info']
+                    messages.append(dict(info, type='error', message=u"Unknown database error: '%s'" % e))
+                return
+
+            # try to create in batch
             try:
-                ids.append(ModelData._update(self._name, current_module, record, mode=mode,
-                                             xml_id=xid, noupdate=noupdate, res_id=id))
+                recs = self._load_records(data_list, mode == 'update')
+                ids.extend(recs.ids)
                 cr.execute('RELEASE SAVEPOINT model_load_save')
-            except psycopg2.Warning as e:
-                messages.append(dict(info, type='warning', message=str(e)))
+                return
+            except Exception:
                 cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
-            except psycopg2.Error as e:
-                messages.append(dict(info, type='error', **PGERROR_TO_OE[e.pgcode](self, fg, info, e)))
-                # Failed to write, log to messages, rollback savepoint (to
-                # avoid broken transaction) and keep going
-                cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
-            except Exception as e:
-                message = (_(u'Unknown error during import:') + u' %s: %s' % (type(e), e))
-                moreinfo = _('Resolve other errors first')
-                messages.append(dict(info, type='error', message=message, moreinfo=moreinfo))
-                # Failed for some reason, perhaps due to invalid data supplied,
-                # rollback savepoint and keep going
-                cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
+
+            # try again, this time record by record
+            for rec_data in data_list:
+                try:
+                    cr.execute('SAVEPOINT model_load_save')
+                    rec = self._load_records([rec_data], mode == 'update')
+                    ids.append(rec.id)
+                    cr.execute('RELEASE SAVEPOINT model_load_save')
+                except psycopg2.Warning as e:
+                    info = rec_data['info']
+                    messages.append(dict(info, type='warning', message=str(e)))
+                    cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
+                except psycopg2.Error as e:
+                    info = rec_data['info']
+                    messages.append(dict(info, type='error', **PGERROR_TO_OE[e.pgcode](self, fg, info, e)))
+                    # Failed to write, log to messages, rollback savepoint (to
+                    # avoid broken transaction) and keep going
+                    cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
+                except Exception as e:
+                    info = rec_data['info']
+                    message = (_(u'Unknown error during import:') + u' %s: %s' % (type(e), e))
+                    moreinfo = _('Resolve other errors first')
+                    messages.append(dict(info, type='error', message=message, moreinfo=moreinfo))
+                    # Failed for some reason, perhaps due to invalid data supplied,
+                    # rollback savepoint and keep going
+                    cr.execute('ROLLBACK TO SAVEPOINT model_load_save')
+
+        # make 'flush' available to the methods below, in the case where XMLID
+        # resolution fails, for instance
+        flush_self = self.with_context(import_flush=flush)
+        extracted = flush_self._extract_records(fields, data, log=messages.append)
+        converted = flush_self._convert_records(extracted, log=messages.append)
+
+        for id, xid, record, info in converted:
+            if xid:
+                xid = xid if '.' in xid else "%s.%s" % (current_module, xid)
+                batch_xml_ids.update(ModelData._generate_xmlids(xid, self))
+            elif id:
+                record['id'] = id
+            batch.append((xid, record, info))
+
+        flush()
         if any(message['type'] == 'error' for message in messages):
             cr.execute('ROLLBACK TO SAVEPOINT model_load')
             ids = False
@@ -1583,7 +1631,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         access_rights_uid = name_get_uid or self._uid
         ids = self._search(args, limit=limit, access_rights_uid=access_rights_uid)
         recs = self.browse(ids)
-        return recs.sudo(access_rights_uid).name_get()
+        return lazy_name_get(recs.sudo(access_rights_uid))
 
     @api.model
     def _add_missing_default_values(self, values):
@@ -1654,7 +1702,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 order = tools.reverse_order(order)
             groups = getattr(self, field.group_expand)(groups, domain, order)
             groups = groups.sudo()
-            values = groups.name_get()
+            values = lazy_name_get(groups)
             value2key = lambda value: value and value[0]
 
         else:
@@ -2061,7 +2109,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         for field in many2onefields:
             ids_set = {d[field] for d in data if d[field]}
             m2o_records = self.env[self._fields[field].comodel_name].browse(ids_set)
-            data_dict = dict(m2o_records.name_get())
+            data_dict = dict(lazy_name_get(m2o_records.sudo()))
             for d in data:
                 d[field] = (d[field], data_dict[d[field]]) if d[field] else False
 
@@ -3136,8 +3184,13 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
             if inverse_vals:
                 self.modified(set(inverse_vals) - set(store_vals))
 
-                # in case several fields use the same inverse method, call it once
-                for _inv, fields in groupby(inverse_fields, attrgetter('inverse')):
+                # group fields by inverse method (to call it once), and order
+                # groups by dependence (in case they depend on each other)
+                field_groups = sorted(
+                    (fields for _inv, fields in groupby(inverse_fields, attrgetter('inverse'))),
+                    key=lambda fields: min(pycompat.imap(self.pool.field_sequence, fields)),
+                )
+                for fields in field_groups:
                     # If a field is not stored, its inverse method will probably
                     # write on its dependencies, which will invalidate the field
                     # on all records. We therefore inverse the field one record
@@ -3153,7 +3206,6 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                         fields[0].determine_inverse(records)
 
                 self.modified(set(inverse_vals) - set(store_vals))
-
 
                 # check Python constraints for inversed fields
                 self._validate_fields(set(inverse_vals) - set(store_vals))
@@ -3268,59 +3320,75 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         return True
 
-    @api.model
+    @api.model_create_multi
     @api.returns('self', lambda value: value.id)
-    def create(self, vals):
-        """ create(vals) -> record
+    def create(self, vals_list):
+        """ create(vals_list) -> records
 
-        Creates a new record for the model.
+        Creates new records for the model.
 
-        The new record is initialized using the values from ``vals`` and
-        if necessary those from :meth:`~.default_get`.
+        The new records are initialized using the values from the list of dicts
+        ``vals_list``, and if necessary those from :meth:`~.default_get`.
 
-        :param dict vals:
-            values for the model's fields, as a dictionary::
+        :param list vals_list:
+            values for the model's fields, as a list of dictionaries::
 
-                {'field_name': field_value, ...}
+                [{'field_name': field_value, ...}, ...]
+
+            For backward compatibility, ``vals_list`` may be a dictionary.
+            It is treated as a singleton list ``[vals]``, and a single record
+            is returned.
 
             see :meth:`~.write` for details
-        :return: new record created
+
+        :return: the created records
         :raise AccessError: * if user has no create rights on the requested object
                             * if user tries to bypass access rules for create on the requested object
         :raise ValidateError: if user tries to enter invalid value for a field that is not in selection
         :raise UserError: if a loop would be created in a hierarchy of objects a result of the operation (such as setting an object as its own parent)
         """
-        self.check_access_rights('create')
+        if not vals_list:
+            return self.browse()
 
-        # add missing defaults
-        vals = self._add_missing_default_values(vals)
+        self = self.browse()
+        self.check_access_rights('create')
 
         bad_names = {'id', 'parent_path'}
         if self._log_access:
             bad_names.update(LOG_ACCESS_COLUMNS)
+        unknown_names = set()
 
-        # distribute fields into sets for various purposes
-        store_vals = {}
-        inverse_vals = {}
-        inherited_vals = defaultdict(dict)      # {modelname: {fieldname: value}}
-        unknown_names = []
-        inverse_fields = []
-        protected_fields = []
-        for key, val in vals.items():
-            if key in bad_names:
-                continue
-            field = self._fields.get(key)
-            if not field:
-                unknown_names.append(key)
-                continue
-            if field.store:
-                store_vals[key] = val
-            if field.inherited:
-                inherited_vals[field.related_field.model_name][key] = val
-            elif field.inverse:
-                inverse_vals[key] = val
-                inverse_fields.append(field)
-                protected_fields.extend(self._field_computed.get(field, [field]))
+        # classify fields for each record
+        data_list = []
+        inversed_fields = set()
+
+        for vals in vals_list:
+            # add missing defaults
+            vals = self._add_missing_default_values(vals)
+
+            # distribute fields into sets for various purposes
+            data = {}
+            data['stored'] = stored = {}
+            data['inversed'] = inversed = {}
+            data['inherited'] = inherited = defaultdict(dict)
+            data['protected'] = protected = set()
+            for key, val in vals.items():
+                if key in bad_names:
+                    continue
+                field = self._fields.get(key)
+                if not field:
+                    unknown_names.add(key)
+                    continue
+                if field.store:
+                    stored[key] = val
+                if field.inherited:
+                    inherited[field.related_field.model_name][key] = val
+                elif field.inverse:
+                    inversed[key] = val
+                    inversed_fields.add(field)
+                    protected.update(self._field_computed.get(field, [field]))
+
+            data_list.append(data)
 
         if unknown_names:
             _logger.warning("%s.create() with unknown fields: %s",
@@ -3328,123 +3396,174 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
 
         # create or update parent records
         for model_name, parent_name in self._inherits.items():
-            parent_record = self.env[model_name].browse(store_vals.get(parent_name))
-            parent_vals = inherited_vals[model_name]
-            if not parent_record:
-                store_vals[parent_name] = parent_record.create(parent_vals).id
-            elif parent_vals:
-                parent_record.write(parent_vals)
+            parent_data_list = []
+            for data in data_list:
+                if not data['stored'].get(parent_name):
+                    parent_data_list.append(data)
+                elif data['inherited'][model_name]:
+                    parent = self.env[model_name].browse(data['stored'][parent_name])
+                    parent.write(data['inherited'][model_name])
 
-        # create record with stored fields
-        record = self._create(store_vals)
+            if parent_data_list:
+                parents = self.env[model_name].create([
+                    data['inherited'][model_name]
+                    for data in parent_data_list
+                ])
+                for parent, data in pycompat.izip(parents, parent_data_list):
+                    data['stored'][parent_name] = parent.id
 
-        with self.env.protecting(protected_fields, record):
-            # put the values of inverse fields in cache, and inverse them
-            record._cache.update(record._convert_to_cache(inverse_vals))
+        # create records with stored fields
+        records = self._create(data_list)
 
-            # in case several fields use the same inverse method, call it once
-            for _inv, fields in groupby(inverse_fields, attrgetter('inverse')):
-                fields[0].determine_inverse(record)
+        # determine which fields to protect on which records
+        protected = [(data['protected'], data['record']) for data in data_list]
+        with self.env.protecting(protected):
+            # group fields by inverse method (to call it once), and order groups
+            # by dependence (in case they depend on each other)
+            field_groups = sorted(
+                (fields for _inv, fields in groupby(inversed_fields, attrgetter('inverse'))),
+                key=lambda fields: min(pycompat.imap(self.pool.field_sequence, fields)),
+            )
+            for fields in field_groups:
+                # determine which records to inverse for those fields
+                inv_names = {field.name for field in fields}
+                rec_vals = [
+                    (data['record'], {
+                        name: data['inversed'][name]
+                        for name in inv_names
+                        if name in data['inversed']
+                    })
+                    for data in data_list
+                    if not inv_names.isdisjoint(data['inversed'])
+                ]
 
-            # trick: no need to mark non-stored fields as modified, thanks to
-            # the transitive closure made over non-stored dependencies
+                # If a field is not stored, its inverse method will probably
+                # write on its dependencies, which will invalidate the field on
+                # all records. We therefore inverse the field record by record.
+                if all(field.store for field in fields):
+                    batches = [rec_vals]
+                else:
+                    batches = [[rec_data] for rec_data in rec_vals]
 
-            # check Python constraints for inversed fields
-            record._validate_fields(set(inverse_vals) - set(store_vals))
+                for batch in batches:
+                    for record, vals in batch:
+                        record._cache.update(record._convert_to_cache(vals))
+                    batch_recs = self.concat(*(record for record, vals in batch))
+                    fields[0].determine_inverse(batch_recs)
 
-            # recompute fields
-            if self.env.recompute and self._context.get('recompute', True):
-                self.recompute()
+                # trick: no need to mark non-stored fields as modified, thanks
+                # to the transitive closure made over non-stored dependencies
 
-        return record
+        # check Python constraints for non-stored inversed fields
+        for data in data_list:
+            data['record']._validate_fields(set(data['inversed']) - set(data['stored']))
+
+        # recompute fields
+        if self.env.recompute and self._context.get('recompute', True):
+            self.recompute()
+
+        return records
 
     @api.model
-    def _create(self, vals):
-        self = self.browse()
+    def _create(self, data_list):
+        """ Create records from the stored field values in ``data_list``. """
+        assert data_list
         cr = self.env.cr
+        quote = '"{}"'.format
 
-        # set boolean fields to False by default (to make search more powerful)
+        # set boolean fields to False by default (avoid NULL in database)
         for name, field in self._fields.items():
             if field.type == 'boolean' and field.store:
-                vals.setdefault(name, False)
+                for data in data_list:
+                    data['stored'].setdefault(name, False)
 
-        # determine SQL values
-        columns = []                    # list of (column_name, format, value)
-        other_fields = []               # list of non-column fields
-        protected_fields = []           # list of fields to not recompute on self
-        translated_names = []           # list of translated field names
+        # insert rows
+        ids = []                        # ids of created records
+        other_fields = set()            # non-column fields
+        translated_fields = set()       # translated fields
 
-        columns.append(('id', "nextval(%s)", self._sequence))
-
-        for name, val in vals.items():
-            field = self._fields[name]
-            assert field.store
-
-            if field.column_type:
-                column_val = field.convert_to_column(val, self, vals)
-                columns.append((name, field.column_format, column_val))
-                if field.translate is True:
-                    translated_names.append(name)
-            else:
-                other_fields.append(field)
-
-            if field.inverse:
-                protected_fields.append(field)
-
+        # column names, formats and values (for common fields)
+        columns0 = [('id', "nextval(%s)", self._sequence)]
         if self._log_access:
-            columns.append(('create_uid', '%s', self._uid))
-            columns.append(('write_uid', '%s', self._uid))
-            columns.append(('create_date', '%s', AsIs("(now() at time zone 'UTC')")))
-            columns.append(('write_date', '%s', AsIs("(now() at time zone 'UTC')")))
+            columns0.append(('create_uid', "%s", self._uid))
+            columns0.append(('create_date', "%s", AsIs("(now() at time zone 'UTC')")))
+            columns0.append(('write_uid', "%s", self._uid))
+            columns0.append(('write_date', "%s", AsIs("(now() at time zone 'UTC')")))
 
-        # insert a row for this record
-        query = """INSERT INTO "%s" (%s) VALUES(%s) RETURNING id""" % (
-                self._table,
-                ', '.join('"%s"' % column[0] for column in columns),
-                ', '.join(column[1] for column in columns),
+        for data in data_list:
+            # determine column values
+            columns = list(columns0)
+            for name, val in sorted(data['stored'].items()):
+                field = self._fields[name]
+                assert field.store
+
+                if field.column_type:
+                    col_val = field.convert_to_column(val, self, data['stored'])
+                    columns.append((name, field.column_format, col_val))
+                    if field.translate is True:
+                        translated_fields.add(field)
+                else:
+                    other_fields.add(field)
+
+            # insert a row with the given columns
+            query = "INSERT INTO {} ({}) VALUES ({}) RETURNING id".format(
+                quote(self._table),
+                ", ".join(quote(name) for name, fmt, val in columns),
+                ", ".join(fmt for name, fmt, val in columns),
             )
-        cr.execute(query, [column[2] for column in columns])
+            params = [val for name, fmt, val in columns]
+            cr.execute(query, params)
+            ids.append(cr.fetchone()[0])
 
-        # from now on, self is the new record
-        self = self.browse(cr.fetchone()[0])
+        # the new records
+        records = self.browse(ids)
+        for data, record in pycompat.izip(data_list, records):
+            data['record'] = record
 
         # update parent_path
-        self._parent_store_create()
+        records._parent_store_create()
 
-        with self.env.protecting(protected_fields, self):
+        protected = [(data['protected'], data['record']) for data in data_list]
+        with self.env.protecting(protected):
             # mark fields to recompute; do this before setting other fields,
             # because the latter can require the value of computed fields, e.g.,
             # a one2many checking constraints on records
-            self.modified(self._fields)
+            records.modified(self._fields)
 
-            # set the value of non-column fields
             if other_fields:
-                # discard default values from context
-                other = self.with_context({
+                # discard default values from context for other fields
+                others = records.with_context({
                     key: val
                     for key, val in self._context.items()
                     if not key.startswith('default_')
                 })
-
                 for field in sorted(other_fields, key=attrgetter('_sequence')):
-                    field.write(other, vals[field.name], create=True)
+                    field.create([
+                        (other, data['stored'][field.name])
+                        for other, data in pycompat.izip(others, data_list)
+                        if field.name in data['stored']
+                    ])
 
                 # mark fields to recompute
-                self.modified(field.name for field in other_fields)
+                records.modified([field.name for field in other_fields])
 
-            # check Python constraints
-            self._validate_fields(vals)
+            # check Python constraints for stored fields
+            records._validate_fields(name for data in data_list for name in data['stored'])
 
-        self.check_access_rule('create')
+        records.check_access_rule('create')
 
         # add translations
         if self.env.lang and self.env.lang != 'en_US':
-            for name in translated_names:
-                tname = "%s,%s" % (self._name, name)
-                val = vals[name]
-                self.env['ir.translation']._set_ids(tname, 'model', self.env.lang, self.ids, val, val)
+            Translations = self.env['ir.translation']
+            for field in translated_fields:
+                tname = "%s,%s" % (field.model_name, field.name)
+                for data in data_list:
+                    if field.name in data['stored']:
+                        record = data['record']
+                        val = data['stored'][field.name]
+                        Translations._set_ids(tname, 'model', self.env.lang, record.ids, val, val)
 
-        return self
+        return records
 
     def _parent_store_create(self):
         """ Set the parent_path field on ``self`` after its creation. """
@@ -3511,6 +3630,93 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         cr.execute(query.format(self._table), [prefix, tuple(self.ids)])
         modified_ids = {row[0] for row in cr.fetchall()}
         self.browse(modified_ids).modified(['parent_path'])
+
+    def _load_records(self, data_list, update=False):
+        """ Create or update records of this model, and assign XMLIDs.
+
+            :param data_list: list of dicts with keys `xml_id` (XMLID to
+                assign), `noupdate` (flag on XMLID), `values` (field values)
+            :param update: should be ``True`` when upgrading a module
+
+            :return: the records corresponding to ``data_list``
+        """
+        original_self = self.browse()
+        # records created during installation should not display messages
+        self = self.with_context(install_mode=True)
+        imd = self.env['ir.model.data'].sudo()
+
+        # The algorithm below partitions 'data_list' into three sets: the ones
+        # to create, the ones to update, and the others. For each set, we assign
+        # data['record'] for each data. All those records are then retrieved for
+        # the result.
+
+        # determine existing xml_ids
+        xml_ids = [data['xml_id'] for data in data_list if data.get('xml_id')]
+        existing = {
+            ("%s.%s" % row[1:3]): row
+            for row in imd._lookup_xmlids(xml_ids, self)
+        }
+
+        # determine which records to create and update
+        to_create = []                  # list of data
+        to_update = []                  # list of data
+
+        for data in data_list:
+            xml_id = data.get('xml_id')
+            if not xml_id:
+                vals = data['values']
+                if vals.get('id'):
+                    data['record'] = self.browse(vals['id'])
+                    to_update.append(data)
+                elif not update:
+                    to_create.append(data)
+                continue
+            row = existing.get(xml_id)
+            if not row:
+                to_create.append(data)
+                continue
+            d_id, d_module, d_name, d_model, d_res_id, d_noupdate, r_id = row
+            record = self.browse(d_res_id)
+            if update and d_noupdate:
+                data['record'] = record
+            elif r_id:
+                data['record'] = record
+                to_update.append(data)
+            else:
+                imd.browse(d_id).unlink()
+                to_create.append(data)
+
+        # update existing records
+        for data in to_update:
+            data['record'].write(data['values'])
+
+        # determine existing parents for new records
+        for parent_model, parent_field in self._inherits.items():
+            suffix = '_' + parent_model.replace('.', '_')
+            xml_ids_vals = {
+                (data['xml_id'] + suffix): data['values']
+                for data in to_create
+                if data.get('xml_id')
+            }
+            for row in imd._lookup_xmlids(xml_ids_vals, self.env[parent_model]):
+                d_id, d_module, d_name, d_model, d_res_id, d_noupdate, r_id = row
+                if r_id:
+                    xml_id = '%s.%s' % (d_module, d_name)
+                    xml_ids_vals[xml_id][parent_field] = r_id
+                else:
+                    imd.browse(d_id).unlink()
+
+        # create records
+        records = self.create([data['values'] for data in to_create])
+        for data, record in pycompat.izip(to_create, records):
+            data['record'] = record
+
+        # create or update XMLIDs
+        if to_create or to_update:
+            imd_data_list = [data for data in data_list if data.get('xml_id')]
+            imd._update_xmlids(imd_data_list, update)
+
+        return original_self.concat(*(data['record'] for data in data_list))
 
     # TODO: ameliorer avec NULL
     @api.model
@@ -3881,6 +4087,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                 if old.env.lang and callable(field.translate):
                     # the new value *without lang* must be the old value without lang
                     new_wo_lang[name] = old_wo_lang[name]
+                vals_list = []
                 for vals in Translation.search_read(domain):
                     del vals['id']
                     del vals['source']      # remove source to avoid triggering _set_src
@@ -3892,7 +4099,8 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
                             vals['source'] = old_wo_lang[name]
                         # the value should be the new value (given by copy())
                         vals['value'] = new_val
-                    Translation.create(vals)
+                    vals_list.append(vals)
+                Translation.create(vals_list)
 
     @api.multi
     @api.returns('self', lambda value: value.id)
@@ -3910,7 +4118,7 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         vals = self.copy_data(default)[0]
         # To avoid to create a translation in the lang of the user, copy_translation will do it
         new = self.with_context(lang=None).create(vals)
-        self.copy_translations(new)
+        self.with_context(from_copy_translation=True).copy_translations(new)
         return new
 
     @api.multi
@@ -5251,6 +5459,13 @@ def _normalize_ids(arg, atoms=set(IdType)):
         return arg,
 
     return tuple(arg)
+
+
+def lazy_name_get(self):
+    """ Evaluate self.name_get() lazily. """
+    names = tools.lazy(lambda: dict(self.name_get()))
+    return [(rid, tools.lazy(operator.getitem, names, rid)) for rid in self.ids]
+
 
 # keep those imports here to avoid dependency cycle errors
 from .osv import expression

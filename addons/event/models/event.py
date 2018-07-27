@@ -444,9 +444,14 @@ class EventRegistration(models.Model):
     @api.multi
     def message_get_suggested_recipients(self):
         recipients = super(EventRegistration, self).message_get_suggested_recipients()
+        public_users = self.env['res.users'].sudo()
+        public_groups = self.env.ref("base.group_public", raise_if_not_found=False)
+        if public_groups:
+            public_users = public_groups.sudo().with_context(active_test=False).mapped("users")
         try:
             for attendee in self:
-                if attendee.partner_id:
+                is_public = attendee.sudo().with_context(active_test=False).partner_id.user_ids in public_users if public_users else False
+                if attendee.partner_id and not is_public:
                     attendee._message_add_suggested_recipient(recipients, partner=attendee.partner_id, reason=_('Customer'))
                 elif attendee.email:
                     attendee._message_add_suggested_recipient(recipients, email=attendee.email, reason=_('Customer Email'))
@@ -454,7 +459,7 @@ class EventRegistration(models.Model):
             pass
         return recipients
 
-    def _message_post_after_hook(self, message, values, notif_layout, notif_values):
+    def _message_post_after_hook(self, message, *args, **kwargs):
         if self.email and not self.partner_id:
             # we consider that posting a message with a specified recipient (not a follower, a specific one)
             # on a document without customer means that it was created through the chatter using
@@ -466,7 +471,7 @@ class EventRegistration(models.Model):
                     ('email', '=', new_partner.email),
                     ('state', 'not in', ['cancel']),
                 ]).write({'partner_id': new_partner.id})
-        return super(EventRegistration, self)._message_post_after_hook(message, values, notif_layout, notif_values)
+        return super(EventRegistration, self)._message_post_after_hook(message, *args, **kwargs)
 
     @api.multi
     def action_send_badge_email(self):

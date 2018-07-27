@@ -6,6 +6,7 @@ import pytz
 
 from odoo import api, exceptions, fields, models, _
 from odoo.osv import expression
+from odoo.tools import pycompat
 
 
 class MailActivityType(models.Model):
@@ -34,6 +35,10 @@ class MailActivityType(models.Model):
         'Planned in', default=0,
         help='Number of days before executing the action. It allows to plan the action deadline.')
     icon = fields.Char('Icon', help="Font awesome icon e.g. fa-tasks")
+    decoration_type = fields.Selection([
+        ('warning', 'Alert'),
+        ('danger', 'Error')], string="Decoration Type",
+        help="Change the background color of the related activities of this type.")
     res_model_id = fields.Many2one(
         'ir.model', 'Model', index=True,
         domain=['&', ('is_mail_thread', '=', True), ('transient', '=', False)],
@@ -41,9 +46,11 @@ class MailActivityType(models.Model):
              ' and not available when managing activities for other models.')
     next_type_ids = fields.Many2many(
         'mail.activity.type', 'mail_activity_rel', 'activity_id', 'recommended_id',
+        domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]",
         string='Recommended Next Activities')
     previous_type_ids = fields.Many2many(
         'mail.activity.type', 'mail_activity_rel', 'recommended_id', 'activity_id',
+        domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]",
         string='Preceding Activities')
     category = fields.Selection([
         ('default', 'Other')], default='default',
@@ -85,6 +92,7 @@ class MailActivity(models.Model):
         'mail.activity.type', 'Activity',
         domain="['|', ('res_model_id', '=', False), ('res_model_id', '=', res_model_id)]", ondelete='restrict')
     activity_category = fields.Selection(related='activity_type_id.category')
+    activity_decoration = fields.Selection(related='activity_type_id.decoration_type')
     icon = fields.Char('Icon', related='activity_type_id.icon')
     summary = fields.Char('Summary')
     note = fields.Html('Note')
@@ -98,6 +106,10 @@ class MailActivity(models.Model):
         'res.users', 'Assigned to',
         default=lambda self: self.env.user,
         index=True, required=True)
+    create_user_id = fields.Many2one(
+        'res.users', 'Creator',
+        default=lambda self: self.env.user,
+        index=True)
     state = fields.Selection([
         ('overdue', 'Overdue'),
         ('today', 'Today'),
@@ -127,9 +139,10 @@ class MailActivity(models.Model):
 
         for record in self.filtered(lambda activity: activity.date_deadline):
             today = today_default
-            if record.user_id.tz:
+            tz = record.user_id.sudo().tz
+            if tz:
                 today_utc = pytz.UTC.localize(datetime.utcnow())
-                today_tz = today_utc.astimezone(pytz.timezone(record.user_id.tz))
+                today_tz = today_utc.astimezone(pytz.timezone(tz))
                 today = date(year=today_tz.year, month=today_tz.month, day=today_tz.day)
 
             date_deadline = fields.Date.from_string(record.date_deadline)

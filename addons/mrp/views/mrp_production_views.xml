@@ -127,7 +127,7 @@
                                     <field name="state" invisible="1" force_save="1"/>
                                     <field name="product_uom_qty" string="To Consume"/>
                                     <field name="reserved_availability" attrs="{'invisible': [('is_done', '=', True)], 'column_invisible': [('parent.state', '=', 'done')]}" string="Reserved"/>
-                                    <field name="quantity_done" string="Consumed"/>
+                                    <field name="quantity_done" string="Consumed" readonly="1"/>
                                 </tree>
                             </field>
                         </page>
@@ -147,7 +147,7 @@
                                 Use the Produce button or process the work orders to create some finished products. 
                             </p>
                         </page>
-                        <page string="Miscellaneous">
+                        <page string="Miscellaneous" groups="stock.group_stock_multi_locations, base.group_no_one">
                             <group>
                                 <group groups="stock.group_stock_multi_locations">
                                     <field name="picking_type_id" domain="[('code', '=', 'mrp_operation')]" attrs="{'readonly': [('has_moves', '=', True)]}"/>
@@ -252,7 +252,7 @@
                         help="Manufacturing Orders which are in confirmed state."/>
                     <separator/>
                     <filter string="Confirmed" name="confirmed" domain="[('state','=','confirmed')]"/>
-                    <filter string="Planned" name="planned" domain="[('state','=','planned')]"/>
+                    <filter string="Planned" name="planned" domain="[('state','=','planned')]" groups="mrp.group_mrp_routings"/>
                     <filter string="In Progress" name="inprogress" domain="[('state','=','progress')]"
                         help="Manufacturing Orders which are currently in production."/>
                     <filter string="Done" name="done" domain="[('state', '=', 'done')]"/>
@@ -280,9 +280,9 @@
                         ]"/>
                     <group expand="0" string="Group By...">
                         <filter string="Product" name="product" domain="[]" context="{'group_by':'product_id'}"/>
-                        <filter string="Routing" name="routing" domain="[]" context="{'group_by':'routing_id'}"/>
+                        <filter string="Routing" name="routing" domain="[]" context="{'group_by':'routing_id'}" groups="mrp.group_mrp_routings"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
-                        <filter string="Scheduled Month" name="scheduled_month" domain="[]" context="{'group_by':'date_planned_start'}" help="Scheduled Date by Month"/>
+                        <filter string="Scheduled Date" name="scheduled_month" domain="[]" context="{'group_by':'date_planned_start'}"/>
                     </group>
                </search>
             </field>

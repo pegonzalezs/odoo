@@ -200,9 +200,11 @@ class Repair(models.Model):
     def action_validate(self):
         self.ensure_one()
         precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        available_qty = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id, self.lot_id, strict=True)
-        if float_compare(available_qty, self.product_qty, precision_digits=precision) >= 0:
-            return self.action_repair_confirm()
+        available_qty_owner = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id, self.lot_id, owner_id=self.partner_id, strict=True)
+        available_qty_noown = self.env['stock.quant']._get_available_quantity(self.product_id, self.location_id, self.lot_id, strict=True)
+        for available_qty in [available_qty_owner, available_qty_noown]:
+            if float_compare(available_qty, self.product_qty, precision_digits=precision) >= 0:
+                return self.action_repair_confirm()
         else:
             return {
                 'name': _('Insufficient Quantity'),
@@ -254,7 +256,8 @@ class Repair(models.Model):
             'default_res_id': self.id,
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
-            'default_composition_mode': 'comment'
+            'default_composition_mode': 'comment',
+            'custom_layout': 'mail.mail_notification_light',
         }
         return {
             'type': 'ir.actions.act_window',
@@ -428,8 +431,15 @@ class Repair(models.Model):
         if self.filtered(lambda repair: not repair.repaired):
             raise UserError(_("Repair must be repaired in order to make the product moves."))
         res = {}
+        precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         Move = self.env['stock.move']
         for repair in self:
+            # Try to create move with the appropriate owner
+            owner_id = False
+            available_qty_owner = self.env['stock.quant']._get_available_quantity(repair.product_id, repair.location_id, repair.lot_id, owner_id=repair.partner_id, strict=True)
+            if float_compare(available_qty_owner, repair.product_qty, precision_digits=precision) >= 0:
+                owner_id = repair.partner_id.id
+
             moves = self.env['stock.move']
             for operation in repair.operations:
                 move = Move.create({
@@ -447,6 +457,7 @@ class Repair(models.Model):
                                            'qty_done': operation.product_uom_qty,
                                            'package_id': False,
                                            'result_package_id': False,
+                                           'owner_id': owner_id,
                                            'location_id': operation.location_id.id, #TODO: owner stuff
                                            'location_dest_id': operation.location_dest_id.id,})],
                     'repair_id': repair.id,
@@ -469,6 +480,7 @@ class Repair(models.Model):
                                            'qty_done': repair.product_qty,
                                            'package_id': False,
                                            'result_package_id': False,
+                                           'owner_id': owner_id,
                                            'location_id': repair.location_id.id, #TODO: owner stuff
                                            'location_dest_id': repair.location_id.id,})],
                 'repair_id': repair.id,
@@ -487,7 +499,7 @@ class RepairLine(models.Model):
     _name = 'repair.line'
     _description = 'Repair Line'
 
-    name = fields.Char('Description', required=True)
+    name = fields.Text('Description', required=True)
     repair_id = fields.Many2one(
         'repair.order', 'Repair Order Reference',
         index=True, ondelete='cascade')
@@ -574,6 +586,8 @@ class RepairLine(models.Model):
                 self.name = self.product_id.with_context(lang=partner.lang).display_name
             else:
                 self.name = self.product_id.display_name
+            if self.product_id.description_sale:
+                self.name += '\n' + self.product_id.description_sale
             self.product_uom = self.product_id.uom_id.id
         if self.type != 'remove':
             if partner and self.product_id:
@@ -604,7 +618,7 @@ class RepairFee(models.Model):
     repair_id = fields.Many2one(
         'repair.order', 'Repair Order Reference',
         index=True, ondelete='cascade', required=True)
-    name = fields.Char('Description', index=True, required=True)
+    name = fields.Text('Description', index=True, required=True)
     product_id = fields.Many2one('product.product', 'Product')
     product_uom_qty = fields.Float('Quantity', digits=dp.get_precision('Product Unit of Measure'), required=True, default=1.0)
     price_unit = fields.Float('Unit Price', required=True)
@@ -635,6 +649,8 @@ class RepairFee(models.Model):
         if self.product_id:
             self.name = self.product_id.display_name
             self.product_uom = self.product_id.uom_id.id
+            if self.product_id.description_sale:
+                self.name += '\n' + self.product_id.description_sale
 
         warning = False
         if not pricelist:

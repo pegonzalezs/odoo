@@ -202,7 +202,6 @@ class TestPickShip(TestStockCommon):
             'code': 'SWH'
         })
         warehouse_1.write({
-            'default_resupply_wh_id': warehouse_2.id,
             'resupply_wh_ids': [(6, 0, [warehouse_2.id])]
         })
         resupply_route = self.env['stock.location.route'].search([('supplier_wh_id', '=', warehouse_2.id), ('supplied_wh_id', '=', warehouse_1.id)])
@@ -1055,7 +1054,7 @@ class TestSinglePicking(TestStockCommon):
         })
         inventory.action_start()
         inventory.line_ids.product_qty = 2
-        inventory.action_done()
+        inventory.action_validate()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
         self.assertEqual(move1.state, 'assigned')
@@ -1113,7 +1112,7 @@ class TestSinglePicking(TestStockCommon):
         inventory.action_start()
         inventory.line_ids.prod_lot_id = lot1
         inventory.line_ids.product_qty = 2
-        inventory.action_done()
+        inventory.action_validate()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
         self.assertEqual(move1.state, 'assigned')
@@ -1179,7 +1178,7 @@ class TestSinglePicking(TestStockCommon):
             'product_id': self.productA.id,
             'product_qty': 1,
         })
-        inventory.action_done()
+        inventory.action_validate()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
         self.assertEqual(move1.state, 'assigned')
@@ -1246,7 +1245,7 @@ class TestSinglePicking(TestStockCommon):
             'product_id': self.productA.id,
             'product_qty': 1,
         })
-        inventory.action_done()
+        inventory.action_validate()
         delivery_order.action_assign()
         self.assertEqual(delivery_order.state, 'assigned')
         self.assertEqual(move1.state, 'assigned')
@@ -1820,25 +1819,25 @@ class TestRoutes(TestStockCommon):
             'categ_id': self.env.ref('product.product_category_all').id,
         })
         self.uom_unit = self.env.ref('uom.product_uom_unit')
-    
+
     def _enable_pick_ship(self):
         self.wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.user.id)], limit=1)
 
         # create and get back the pick ship route
         self.wh.write({'delivery_steps': 'pick_ship'})
-        self.pick_ship_route = self.wh.route_ids.filtered(lambda r: 'Pick + Ship' in r.name)
         
+        self.pick_ship_route = self.wh.route_ids.filtered(lambda r: '(pick + ship)' in r.name)
     def test_pick_ship_1(self):
         """ Enable the pick ship route, force a procurement group on the
         pick. When a second move is added, make sure the `partner_id` and
         `origin` fields are erased.
         """
         self._enable_pick_ship()
-        
-        # create a procurement group and set in on the pick procurement rule
+
+        # create a procurement group and set in on the pick stock rule
         procurement_group0 = self.env['procurement.group'].create({})
-        pick_rule = self.pick_ship_route.pull_ids.filtered(lambda rule: 'Stock -> Output' in rule.name)
-        push_rule = self.pick_ship_route.pull_ids - pick_rule
+        pick_rule = self.pick_ship_route.rule_ids.filtered(lambda rule: 'Stock → Output' in rule.name)
+        push_rule = self.pick_ship_route.rule_ids - pick_rule
         pick_rule.write({
             'group_propagation_option': 'fixed',
             'group_id': procurement_group0.id,
@@ -1888,9 +1887,9 @@ class TestRoutes(TestStockCommon):
         move2._action_confirm()
         self.assertEqual(picking_pick.partner_id.id, False)
         self.assertEqual(picking_pick.origin, False)
-    
+
     def test_replenish_pick_ship_1(self):
-        """ Creates 2 warehouses and make a replenish using one warehouse 
+        """ Creates 2 warehouses and make a replenish using one warehouse
         to ressuply the other one, Then check if the quantity and the product are matching
         """
         self.product_uom_qty = 42
@@ -1901,7 +1900,6 @@ class TestRoutes(TestStockCommon):
             'code': 'SWH'
         })
         warehouse_1.write({
-            'default_resupply_wh_id': warehouse_2.id,
             'resupply_wh_ids': [(6, 0, [warehouse_2.id])]
         })
         resupply_route = self.env['stock.location.route'].search([('supplier_wh_id', '=', warehouse_2.id), ('supplied_wh_id', '=', warehouse_1.id)])
@@ -1916,21 +1914,21 @@ class TestRoutes(TestStockCommon):
             'quantity': self.product_uom_qty,
             'warehouse_id': self.wh.id,
         })
-        
+
         replenish_wizard.launch_replenishment()
         last_picking_id = self.env['stock.picking'].search([('origin', '=', 'Manual Replenishment')])[-1]
         self.assertTrue(last_picking_id, 'Picking not found')
         move_line = last_picking_id.move_lines.search([('product_id','=', self.product1.id)])
         self.assertTrue(move_line,'The product is not in the picking')
         self.assertEqual(move_line[0].product_uom_qty, self.product_uom_qty, 'Quantities does not match')
-        self.assertEqual(move_line[1].product_uom_qty, self.product_uom_qty, 'Quantities does not match')       
+        self.assertEqual(move_line[1].product_uom_qty, self.product_uom_qty, 'Quantities does not match')
 
     def test_push_rule_on_move_1(self):
         """ Create a route with a push rule, force it on a move, check that it is applied.
-        """       
+        """
         self._enable_pick_ship()
         stock_location = self.env.ref('stock.stock_location_stock')
-        
+
         push_location = self.env['stock.location'].create({
             'location_id': stock_location.location_id.id,
             'name': 'push location',
@@ -1939,10 +1937,12 @@ class TestRoutes(TestStockCommon):
         # TODO: maybe add a new type on the "applicable on" fields?
         route = self.env['stock.location.route'].create({
             'name': 'new route',
-            'push_ids': [(0, False, {
+            'rule_ids': [(0, False, {
                 'name': 'create a move to push location',
-                'location_from_id': stock_location.id,
-                'location_dest_id': push_location.id,
+                'location_src_id': stock_location.id,
+                'location_id': push_location.id,
+                'company_id': self.env.user.company_id.id,
+                'action': 'push',
                 'auto': 'manual',
                 'picking_type_id': self.env.ref('stock.picking_type_in').id,
             })],

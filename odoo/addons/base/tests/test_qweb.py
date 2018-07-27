@@ -5,8 +5,10 @@ import collections
 import json
 import os.path
 import re
+import sys
 
-from lxml import etree
+from lxml import etree, html
+from lxml.builder import E
 
 from odoo.modules import get_module_resource
 from odoo.tests.common import TransactionCase
@@ -465,6 +467,26 @@ class TestQWebNS(TransactionCase):
             expected_result
         )
 
+    def test_render_dynamic_xml_with_code_error(self):
+        """ Test that, when rendering a template containing a namespaced node
+            that evaluates code with errors, the proper exception is raised
+        """
+        view1 = self.env['ir.ui.view'].create({
+            'name': "dummy",
+            'type': 'qweb',
+            'arch': u"""
+                <t t-name="base.dummy">
+                    <Invoice xmlns:od="http://odoo.com/od">
+                        <od:name t-att-test="'a' + 1"/>
+                    </Invoice>
+                </t>
+            """
+        })
+        error_msg = "Can't convert 'int' object to str implicitly"
+        if sys.version_info >= (3, 6):
+            error_msg = "must be str, not int"
+        with self.assertRaisesRegexp(QWebException, error_msg):
+            view1.render()
 
 from copy import deepcopy
 class FileSystemLoader(object):
@@ -533,6 +555,81 @@ class TestQWeb(TransactionCase):
                 (result or u'').strip().encode('utf-8'),
                 template
             )
+
+class TestPageSplit(TransactionCase):
+    # need to explicitly assertTreesEqual because I guess it's registered for
+    # equality between _Element *or* HtmlElement but we're comparing a parsed
+    # HtmlElement and a convenience _Element
+    def test_split_before(self):
+        t = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''<t t-name='test'>
+            <div>
+                <table>
+                    <tr></tr>
+                    <tr data-pagebreak="before"></tr>
+                    <tr></tr>
+                </table>
+            </div>
+            </t>
+            '''
+        })
+        rendered = html.fromstring(self.env['ir.qweb'].render(t.id))
+        ref = E.div(
+            E.table(E.tr()),
+            E.div({'style': 'page-break-after: always'}),
+            E.table(E.tr({'data-pagebreak': 'before'}), E.tr())
+        )
+        print(etree.tostring(rendered))
+        print(etree.tostring(ref))
+        self.assertTreesEqual(rendered, ref)
+
+    def test_split_after(self):
+        t = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''<t t-name='test'>
+            <div>
+                <table>
+                    <tr></tr>
+                    <tr data-pagebreak="after"></tr>
+                    <tr></tr>
+                </table>
+            </div>
+            </t>
+            '''
+        })
+        rendered = html.fromstring(self.env['ir.qweb'].render(t.id))
+        self.assertTreesEqual(
+            rendered,
+            E.div(
+                E.table(E.tr(), E.tr({'data-pagebreak': 'after'})),
+                E.div({'style': 'page-break-after: always'}),
+                E.table(E.tr())
+            )
+        )
+
+    def test_dontsplit(self):
+        t = self.env['ir.ui.view'].create({
+            'name': 'test',
+            'type': 'qweb',
+            'arch_db': '''<t t-name='test'>
+            <div>
+                <table>
+                    <tr></tr>
+                    <tr></tr>
+                    <tr></tr>
+                </table>
+            </div>
+            </t>
+            '''
+        })
+        rendered = html.fromstring(self.env['ir.qweb'].render(t.id))
+        self.assertTreesEqual(
+            rendered,
+            E.div(E.table(E.tr(), E.tr(), E.tr()))
+        )
 
 def load_tests(loader, suite, _):
     # can't override TestQWeb.__dir__ because dir() called on *class* not

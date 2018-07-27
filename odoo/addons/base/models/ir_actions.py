@@ -43,9 +43,9 @@ class IrActions(models.Model):
         for record in self:
             record.xml_id = res.get(record.id)
 
-    @api.model
-    def create(self, vals):
-        res = super(IrActions, self).create(vals)
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super(IrActions, self).create(vals_list)
         # self.get_bindings() depends on action records
         self.clear_caches()
         return res
@@ -220,10 +220,10 @@ class IrActionsActWindow(models.Model):
         record = self.env.ref("%s.%s" % (module, xml_id))
         return record.read()[0]
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         self.clear_caches()
-        return super(IrActionsActWindow, self).create(vals)
+        return super(IrActionsActWindow, self).create(vals_list)
 
     @api.multi
     def unlink(self):
@@ -372,7 +372,7 @@ class IrActionsServer(models.Model):
     code = fields.Text(string='Python Code', groups='base.group_system',
                        default=DEFAULT_PYTHON_CODE,
                        help="Write Python code that the action will execute. Some variables are "
-                            "available for use; help about pyhon expression is given in the help tab.")
+                            "available for use; help about python expression is given in the help tab.")
     # Multi
     child_ids = fields.Many2many('ir.actions.server', 'rel_server_actions', 'server_id', 'action_id',
                                  string='Child Actions', help='Child server actions that will be executed. Note that the last return returned action value will be used as global return value.')
@@ -614,12 +614,13 @@ class IrActionsTodo(models.Model):
     state = fields.Selection([('open', 'To Do'), ('done', 'Done')], string='Status', default='open', required=True)
     name = fields.Char()
 
-    @api.model
-    def create(self, vals):
-        todo = super(IrActionsTodo, self).create(vals)
-        if todo.state == "open":
-            self.ensure_one_open_todo()
-        return todo
+    @api.model_create_multi
+    def create(self, vals_list):
+        todos = super(IrActionsTodo, self).create(vals_list)
+        for todo in todos:
+            if todo.state == "open":
+                self.ensure_one_open_todo()
+        return todos
 
     @api.multi
     def write(self, vals):
@@ -661,17 +662,18 @@ class IrActionsTodo(models.Model):
         return super(IrActionsTodo, self)._name_search(name, args=args, operator=operator, limit=limit, name_get_uid=name_get_uid)
 
     @api.multi
-    def action_launch(self, context=None):
+    def action_launch(self):
         """ Launch Action of Wizard"""
         self.ensure_one()
 
         self.write({'state': 'done'})
 
         # Load action
-        action = self.env[self.action_id.type].browse(self.action_id.id)
+        action_type = self.action_id.type
+        action = self.env[action_type].browse(self.action_id.id)
 
         result = action.read()[0]
-        if action._name != 'ir.actions.act_window':
+        if action_type != 'ir.actions.act_window':
             return result
         result.setdefault('context', '{}')
 

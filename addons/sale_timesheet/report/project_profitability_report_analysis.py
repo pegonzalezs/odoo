@@ -50,7 +50,6 @@ class ProfitabilityAnalysis(models.Model):
                     S.date_order AS order_confirmation_date,
                     SOL.product_id AS product_id,
                     SOL.qty_delivered_method AS sale_qty_delivered_method,
-                    IP.value_float as standar_price,
                     CASE
                        WHEN SOL.qty_delivered_method = 'analytic' THEN (SOL.price_reduce / COALESCE(CR.rate, 1.0)) * SOL.qty_to_invoice
                        ELSE 0.0
@@ -61,7 +60,7 @@ class ProfitabilityAnalysis(models.Model):
                             CASE
                                 WHEN T.expense_policy = 'sales_price'
                                 THEN (SOL.price_reduce / COALESCE(CR.rate, 1.0)) * SOL.qty_invoiced
-                                ELSE IP.value_float * SOL.qty_invoiced
+                                ELSE -COST_SUMMARY.expense_cost
                             END
                        ELSE 0.0
                     END AS expense_amount_untaxed_invoiced,
@@ -146,7 +145,6 @@ class ProfitabilityAnalysis(models.Model):
                     LEFT JOIN sale_order S ON SOL.order_id = S.id
                     LEFT JOIN product_product PP on (SOL.product_id=PP.id)
                     LEFT JOIN product_template T on (PP.product_tmpl_id=T.id)
-                    LEFT JOIN ir_property IP ON (IP.name='standard_price' AND IP.res_id=CONCAT('product.product,',PP.id) AND IP.company_id=S.company_id)
                     LEFT JOIN currency_rate CR ON (CR.currency_id = SOL.currency_id
                         AND CR.currency_id != C.currency_id
                         AND CR.company_id = SOL.company_id

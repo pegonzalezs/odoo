@@ -148,7 +148,7 @@
         </record>
 
         <record id="crm_team_act_tree" model="ir.actions.act_window">
-            <field name="name">Cases by Sales Channel</field>
+            <field name="name">Cases by Sales Team</field>
             <field name="res_model">crm.team</field>
             <field name="view_type">tree</field>
             <field name="view_id" ref="sales_team.crm_team_view_tree"/>
@@ -188,7 +188,7 @@
 
                     <xpath expr="//div[hasclass('o_primary')]" position="after">
                         <div t-if="record.use_leads.raw_value and record.alias_name.value and record.alias_domain.value">
-                            <small t-translation="off"><i class="fa fa-envelope-o"></i>&amp;nbsp; <field name="alias_id"/></small>
+                            <small t-translation="off"><i class="fa fa-envelope-o" aria-label="Leads" title="Leads" role="img"></i>&amp;nbsp; <field name="alias_id"/></small>
                         </div>
                     </xpath>
 
@@ -258,6 +258,7 @@
 
         <record id="sales_team.mail_activity_type_action_config_sales" model="ir.actions.act_window">
             <field name="domain">['|', ('res_model_id', '=', False), ('res_model_id.model', 'in', ['crm.lead', 'res.partner'])]</field>
+            <field name="context">{'default_res_model': 'crm.lead'}</field>
         </record>
 
 </odoo>

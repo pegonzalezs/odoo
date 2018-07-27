@@ -40,10 +40,6 @@ class TestSaleMrpFlow(common.TransactionCase):
         self.uom_kg = self.env['uom.uom'].search([('category_id', '=', self.categ_kgm.id), ('uom_type', '=', 'reference')], limit=1)
         self.uom_kg.write({
             'name': 'Test-KG',
-            'category_id': self.categ_kgm.id,
-            'factor_inv': 1,
-            'factor': 1,
-            'uom_type': 'reference',
             'rounding': 0.000001})
         self.uom_gm = self.UoM.create({
             'name': 'Test-G',
@@ -54,9 +50,6 @@ class TestSaleMrpFlow(common.TransactionCase):
         self.uom_unit = self.env['uom.uom'].search([('category_id', '=', self.categ_unit.id), ('uom_type', '=', 'reference')], limit=1)
         self.uom_unit.write({
             'name': 'Test-Unit',
-            'category_id': self.categ_unit.id,
-            'factor': 1,
-            'uom_type': 'reference',
             'rounding': 1.0})
         self.uom_dozen = self.UoM.create({
             'name': 'Test-DozenA',
@@ -253,7 +246,7 @@ class TestSaleMrpFlow(common.TransactionCase):
             'product_uom_id': self.uom_kg.id,
             'product_qty': 20,
             'location_id': self.stock_location.id})
-        inventory.action_done()
+        inventory.action_validate()
 
         # --------------------------------------------------
         # Assign product c to manufacturing order of product D.
@@ -307,7 +300,7 @@ class TestSaleMrpFlow(common.TransactionCase):
             'product_uom_id': self.uom_kg.id,
             'product_qty': 27.5025,
             'location_id': self.stock_location.id})
-        inventory.action_done()
+        inventory.action_validate()
 
         # Assign product to manufacturing order of product A.
         # ---------------------------------------------------
@@ -337,7 +330,8 @@ class TestSaleMrpFlow(common.TransactionCase):
     def test_01_sale_mrp_delivery_kit(self):
         """ Test delivered quantity on SO based on delivered quantity in pickings."""
         # intial so
-        product = self.env.ref('mrp.product_product_build_kit')
+        product = self.env.ref('mrp.product_product_table_kit')
+        product.type = 'consu'
         product.invoice_policy = 'delivery'
         # Remove the MTO route as purchase is not installed and since the procurement removal the exception is directly raised
         product.write({'route_ids': [(6, 0, [self.warehouse.manufacture_pull_id.route_id.id])]})
@@ -357,7 +351,7 @@ class TestSaleMrpFlow(common.TransactionCase):
 
         # confirm our standard so, check the picking
         so.action_confirm()
-        self.assertTrue(so.picking_ids, 'Sale MRP: no picking created for "invoice on delivery" stockable products')
+        self.assertTrue(so.picking_ids, 'Sale MRP: no picking created for "invoice on delivery" storable products')
 
         # invoice in on delivery, nothing should be invoiced
         with self.assertRaises(UserError):
@@ -376,7 +370,11 @@ class TestSaleMrpFlow(common.TransactionCase):
         # deliver remaining products, check the so's invoice_status and delivered quantities
         self.assertEqual(len(so.picking_ids), 2, 'Sale MRP: number of pickings should be 2')
         pick_2 = so.picking_ids[0]
-        pick_2.move_lines.write({'quantity_done': 4})
+        for move in pick_2.move_lines:
+            if move.product_id.id == self.env.ref('mrp.product_product_computer_desk_bolt').id:
+                move.write({'quantity_done': 19})
+            else:
+                move.write({'quantity_done': 4})
         pick_2.button_validate()
 
         del_qty = sum(sol.qty_delivered for sol in so.order_line)

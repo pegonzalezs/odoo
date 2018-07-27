@@ -843,6 +843,22 @@ var FieldX2Many = AbstractField.extend({
         });
     },
     /**
+     * Computes the default renderer to use depending on the view type.
+     * We create this as a method so we can override it if we want to use
+     * another renderer instead (eg. section_and_note_one2many).
+     *
+     * @private
+     * @returns {Object} The renderer to use
+     */
+    _getRenderer: function () {
+        if (this.view.arch.tag === 'tree') {
+            return ListRenderer;
+        }
+        if (this.view.arch.tag === 'kanban') {
+            return KanbanRenderer;
+        }
+    },
+    /**
      * Instanciates or updates the adequate renderer.
      *
      * @override
@@ -861,19 +877,22 @@ var FieldX2Many = AbstractField.extend({
         }
         var arch = this.view.arch;
         var viewType;
+        var rendererParams = {
+            arch: arch,
+        };
+
         if (arch.tag === 'tree') {
             viewType = 'list';
             this.currentColInvisibleFields = this._evalColumnInvisibleFields();
-            this.renderer = new ListRenderer(this, this.value, {
-                arch: arch,
+            _.extend(rendererParams, {
                 editable: this.mode === 'edit' && arch.attrs.editable,
                 addCreateLine: !this.isReadonly && this.activeActions.create,
                 addTrashIcon: !this.isReadonly && this.activeActions.delete,
                 isMany2Many: this.isMany2Many,
-                viewType: viewType,
                 columnInvisibleFields: this.currentColInvisibleFields,
             });
         }
+
         if (arch.tag === 'kanban') {
             viewType = 'kanban';
             var record_options = {
@@ -881,12 +900,17 @@ var FieldX2Many = AbstractField.extend({
                 deletable: false,
                 read_only_mode: this.isReadonly,
             };
-            this.renderer = new KanbanRenderer(this, this.value, {
-                arch: arch,
+            _.extend(rendererParams, {
                 record_options: record_options,
-                viewType: viewType,
             });
         }
+
+        _.extend(rendererParams, {
+            viewType: viewType,
+        });
+        var Renderer = this._getRenderer();
+        this.renderer = new Renderer(this, this.value, rendererParams);
+
         this.$el.addClass('o_field_x2many o_field_x2many_' + viewType);
         return this.renderer ? this.renderer.appendTo(this.$el) : this._super();
     },
@@ -1266,11 +1290,18 @@ var FieldOne2Many = FieldX2Many.extend({
     /**
      * @private
      * @param {Object} params
+     * @param {Object} [params.context] We allow additional context, this is
+     *   used for example to define default values when adding new lines to
+     *   a one2many with control/create tags.
      */
     _openFormDialog: function (params) {
+        var context = this.record.getContext(_.extend({},
+            this.recordParams,
+            { additionalContext: params.context }
+        ));
         this.trigger_up('open_one2many_record', _.extend(params, {
             domain: this.record.getDomain(this.recordParams),
-            context: this.record.getContext(this.recordParams),
+            context: context,
             field: this.field,
             fields_view: this.attrs.views && this.attrs.views.form,
             parentID: this.value.id,
@@ -1293,12 +1324,15 @@ var FieldOne2Many = FieldX2Many.extend({
      */
     _onAddRecord: function (ev) {
         var self = this;
+        var data = ev.data || {};
+
         // we don't want interference with the components upstream.
         ev.stopPropagation();
+
         if (this.editable) {
             if (!this.activeActions.create) {
-                if (ev.data.onFail) {
-                    ev.data.onFail();
+                if (data.onFail) {
+                    data.onFail();
                 }
             } else if (!this.creatingRecord) {
                 this.creatingRecord = true;
@@ -1306,12 +1340,14 @@ var FieldOne2Many = FieldX2Many.extend({
                 this._setValue({
                     operation: 'CREATE',
                     position: this.editable,
+                    context: data.context,
                 }).always(function () {
                     self.creatingRecord = false;
                 });
             }
         } else {
             this._openFormDialog({
+                context: data.context,
                 on_saved: function (record) {
                     self._setValue({ operation: 'ADD', id: record.id });
                 },
@@ -1593,6 +1629,7 @@ var FieldMany2ManyBinaryMultiFiles = AbstractField.extend({
 
         this.$('form.o_form_binary_form').submit();
         this.$('.oe_fileupload').hide();
+        ev.target.value = "";
     },
     /**
      * @private
@@ -1867,7 +1904,7 @@ var FormFieldMany2ManyTags = FieldMany2ManyTags.extend({
         var $target = $(ev.currentTarget);
         var color = $target.data('color');
         var id = $target.data('id');
-        var tag = this.$("span.badge[data-id='" + id + "']");
+        var tag = this.$("button.badge[data-id='" + id + "']");
         var currentColor = tag.data('color');
         var changes = {};
 

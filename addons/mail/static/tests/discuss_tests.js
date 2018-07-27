@@ -1,21 +1,18 @@
 odoo.define('mail.discuss_test', function (require) {
 "use strict";
 
-var Discuss = require('mail.chat_discuss');
-var ChatManager = require('mail.ChatManager');
+var Discuss = require('mail.Discuss');
 var mailTestUtils = require('mail.testUtils');
 
-var Bus = require('web.Bus');
 var concurrency = require('web.concurrency');
 var SearchView = require('web.SearchView');
 var testUtils = require('web.test_utils');
 
-var createBusService = mailTestUtils.createBusService;
 var createDiscuss = mailTestUtils.createDiscuss;
 
 QUnit.module('mail', {}, function () {
 
-QUnit.module('Discuss client action', {
+QUnit.module('Discuss', {
     beforeEach: function () {
         // patch _.debounce and _.throttle to be fast and synchronous
         this.underscoreDebounce = _.debounce;
@@ -62,7 +59,7 @@ QUnit.module('Discuss client action', {
                 },
             },
         };
-        this.services = [ChatManager, createBusService()];
+        this.services = mailTestUtils.getMailServices();
     },
     afterEach: function () {
         // unpatch _.debounce and _.throttle
@@ -84,22 +81,62 @@ QUnit.test('basic rendering', function (assert) {
     })
     .then(function (discuss) {
         // test basic rendering
-        var $sidebar = discuss.$('.o_mail_chat_sidebar');
+        var $sidebar = discuss.$('.o_mail_discuss_sidebar');
         assert.strictEqual($sidebar.length, 1,
             "should have rendered a sidebar");
 
-        assert.strictEqual(discuss.$('.o_mail_chat_content').length, 1,
+        assert.strictEqual(discuss.$('.o_mail_discuss_content').length, 1,
             "should have rendered the content");
         assert.strictEqual(discuss.$('.o_mail_no_content').length, 1,
             "should display no content message");
 
-        var $inbox = $sidebar.find('.o_mail_chat_channel_item[data-channel-id=channel_inbox]');
+        var $inbox = $sidebar.find('.o_mail_discuss_item[data-thread-id=mailbox_inbox]');
         assert.strictEqual($inbox.length, 1,
-            "should have the channel item 'channel_inbox' in the sidebar");
+            "should have the channel item 'mailbox_inbox' in the sidebar");
 
-        var $starred = $sidebar.find('.o_mail_chat_channel_item[data-channel-id=channel_starred]');
+        var $starred = $sidebar.find('.o_mail_discuss_item[data-thread-id=mailbox_starred]');
         assert.strictEqual($starred.length, 1,
-            "should have the channel item 'channel_starred' in the sidebar");
+            "should have the channel item 'mailbox_starred' in the sidebar");
+        discuss.destroy();
+        done();
+    });
+});
+
+QUnit.test('unescape channel name in the sidebar', function (assert) {
+    // When the user creates a channel, the channel's name is escaped, this in
+    // order to prevent XSS attacks. However, the user should see visually the
+    // unescaped name of the channel. For instance, when the user creates a
+    // channel named  "R&D", he should see "R&D" and not "R&amp;D".
+    assert.expect(2);
+    var done = assert.async();
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: [{
+                id: 1,
+                channel_type: "channel",
+                name: "R&amp;D",
+            }],
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+    })
+    .then(function (discuss) {
+        var $sidebar = discuss.$('.o_mail_discuss_sidebar');
+
+        var $channel = $sidebar.find('.o_mail_discuss_item[data-thread-id=1]');
+        assert.strictEqual($channel.length, 1,
+            "should have the channel item for channel 1 in the sidebar");
+        assert.strictEqual($channel.find('.o_thread_name').text().replace(/\s/g, ''),
+            "#R&D",
+            "should have unescaped channel name in the sidebar");
+
         discuss.destroy();
         done();
     });
@@ -109,8 +146,7 @@ QUnit.test('@ mention in channel', function (assert) {
     assert.expect(34);
     var done = assert.async();
 
-    var bus = new Bus();
-    var BusService = createBusService(bus);
+    var bus = this.services[1].prototype.bus;
     var fetchListenersDef = $.Deferred();
     var receiveMessageDef = $.Deferred();
 
@@ -129,7 +165,7 @@ QUnit.test('@ mention in channel', function (assert) {
         context: {},
         params: {},
         data: this.data,
-        services: [ChatManager, BusService],
+        services: this.services,
         mockRPC: function (route, args) {
             if (args.method === 'channel_fetch_listeners') {
                 fetchListenersDef.resolve();
@@ -154,8 +190,8 @@ QUnit.test('@ mention in channel', function (assert) {
         },
     })
     .then(function (discuss) {
-        var $general = discuss.$('.o_mail_chat_sidebar')
-                        .find('.o_mail_chat_channel_item[data-channel-id=1]');
+        var $general = discuss.$('.o_mail_discuss_sidebar')
+                        .find('.o_mail_discuss_item[data-thread-id=1]');
         assert.strictEqual($general.length, 1,
             "should have the channel item with id 1");
         assert.strictEqual($general.attr('title'), 'general',
@@ -301,8 +337,8 @@ QUnit.test('no crash focusout emoji button', function (assert) {
         services: this.services,
     })
     .then(function (discuss) {
-        var $general = discuss.$('.o_mail_chat_sidebar')
-            .find('.o_mail_chat_channel_item[data-channel-id=1]');
+        var $general = discuss.$('.o_mail_discuss_sidebar')
+            .find('.o_mail_discuss_item[data-thread-id=1]');
         assert.strictEqual($general.length, 1,
             "should have the channel item with id 1");
         assert.strictEqual($general.attr('title'), 'general',
@@ -327,9 +363,9 @@ QUnit.test('older messages are loaded on scroll', function (assert) {
 
     var fetchCount = 0;
     var loadMoreDef = $.Deferred();
-    var msgData = [];
+    var messageData = [];
     for (var i = 0; i < 35; i++) {
-        msgData.push({
+        messageData.push({
             author_id: ['1', 'Me'],
             body: '<p>test ' + i + '</p>',
             channel_ids: [1],
@@ -347,13 +383,13 @@ QUnit.test('older messages are loaded on scroll', function (assert) {
             }],
         },
     };
-    this.data['mail.message'].records = msgData;
+    this.data['mail.message'].records = messageData;
 
     createDiscuss({
         context: {},
         data: this.data,
         params: {},
-        services: [ChatManager, createBusService()],
+        services: this.services,
         mockRPC: function (route, args) {
             if (args.method === 'message_fetch') {
                 fetchCount++;
@@ -367,7 +403,7 @@ QUnit.test('older messages are loaded on scroll', function (assert) {
             return this._super.apply(this, arguments);
         },
     }).then(function (discuss) {
-        var $general = discuss.$('.o_mail_chat_channel_item[data-channel-id=1]');
+        var $general = discuss.$('.o_mail_discuss_item[data-thread-id=1]');
         assert.strictEqual($general.length, 1,
             "should have a channel item with id 1");
 
@@ -396,11 +432,10 @@ QUnit.test('"Unstar all" button should reset the starred counter', function (ass
     assert.expect(2);
     var done = assert.async();
 
-    var bus = new Bus();
-    var BusService = createBusService(bus);
-    var msgData = [];
+    var bus = this.services[1].prototype.bus;
+    var messageData = [];
     _.each(_.range(1, 41), function (num) {
-        msgData.push({
+        messageData.push({
                 id: num,
                 body: "<p>test" + num + "</p>",
                 author_id: ["1", "Me"],
@@ -419,16 +454,16 @@ QUnit.test('"Unstar all" button should reset the starred counter', function (ass
                     name: "general",
                 }],
             },
-            starred_counter: msgData.length,
+            starred_counter: messageData.length,
     };
-    this.data['mail.message'].records = msgData;
+    this.data['mail.message'].records = messageData;
 
     createDiscuss({
         id: 1,
         context: {},
         params: {},
         data: this.data,
-        services: [ChatManager, BusService],
+        services: this.services,
         mockRPC: function (route, args) {
             if (args.method === 'unstar_all') {
                 var data = {
@@ -445,8 +480,8 @@ QUnit.test('"Unstar all" button should reset the starred counter', function (ass
         session: {partner_id: 1},
     })
     .then(function (discuss) {
-        var $starred = discuss.$('.o_mail_chat_sidebar').find('.o_mail_chat_title_starred');
-        var $starredCounter = $('.o_mail_chat_title_starred > .o_mail_sidebar_needaction');
+        var $starred = discuss.$('.o_mail_discuss_sidebar').find('.o_mail_mailbox_title_starred');
+        var $starredCounter = $('.o_mail_mailbox_title_starred > .o_mail_sidebar_needaction');
 
         // Go to Starred channel
         $starred.click();
@@ -454,8 +489,8 @@ QUnit.test('"Unstar all" button should reset the starred counter', function (ass
         assert.strictEqual($starredCounter.text().trim(), "40", "40 messages should be starred");
 
         // Unstar all and wait 'update_starred'
-        $('.o_control_panel .o_mail_chat_button_unstar_all').click();
-        $starredCounter = $('.o_mail_chat_title_starred > .o_mail_sidebar_needaction');
+        $('.o_control_panel .o_mail_discuss_button_unstar_all').click();
+        $starredCounter = $('.o_mail_mailbox_title_starred > .o_mail_sidebar_needaction');
         assert.strictEqual($starredCounter.text().trim(), "0",
             "All messages should be unstarred");
 
@@ -545,5 +580,111 @@ QUnit.test('do not crash when destroyed between start en end of _renderSearchVie
     testUtils.unpatch(SearchView);
 });
 
+QUnit.test('confirm dialog when administrator leave (not chat) channel', function (assert) {
+    assert.expect(2);
+    var done = assert.async();
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: [{
+                id: 1,
+                channel_type: "channel",
+                name: "MyChannel",
+                create_uid: 3,
+            }],
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+        session: {
+            uid: 3,
+        },
+    })
+    .then(function (discuss) {
+        // Unsubscribe on MyChannel as administrator
+        discuss.$('.o_mail_partner_unpin').click();
+
+        assert.strictEqual($('.modal-dialog').length, 1,
+            "should display a dialog");
+        assert.strictEqual($('.modal-body').text(),
+            "You are the administrator of this channel. Are you sure you want to unsubscribe?",
+            "Warn user that he will be unsubscribed from channel as admin.");
+        discuss.destroy();
+        done();
+    });
+
 });
+
+QUnit.test('convert emoji sources to unicodes on message_post', function (assert) {
+    assert.expect(2);
+    var done = assert.async();
+
+    var bus = this.services[1].prototype.bus;
+    var receiveMessageDef = $.Deferred();
+
+    this.data.initMessaging = {
+        channel_slots: {
+            channel_channel: [{
+                id: 1,
+                channel_type: "channel",
+                name: "general",
+            }],
+        },
+    };
+
+    createDiscuss({
+        id: 1,
+        context: {},
+        params: {},
+        data: this.data,
+        services: this.services,
+        mockRPC: function (route, args) {
+            if (args.method === 'message_post') {
+                assert.strictEqual(args.kwargs.body, "😊 😂",
+                    "message_post data should have all emojis in their unicode representation");
+
+                var data = {
+                    author_id: ["42", "Me"],
+                    body: args.kwargs.body,
+                    channel_ids: [1],
+                };
+                var notification = [[false, 'mail.channel'], data];
+                bus.trigger('notification', [notification]);
+                receiveMessageDef.resolve();
+                return $.when(42);
+            }
+            return this._super.apply(this, arguments);
+        },
+    })
+    .then(function (discuss) {
+        var $general = discuss.$('.o_mail_discuss_sidebar')
+                        .find('.o_mail_discuss_item[data-thread-id=1]');
+
+        // click on general
+        $general.click();
+        var $input = discuss.$('textarea.o_composer_text_field').first();
+
+        $input.focus();
+        $input.val(":) x'D");
+        $input.trigger($.Event('keydown', {which: $.ui.keyCode.ENTER}));
+
+        receiveMessageDef
+            .then(concurrency.delay.bind(concurrency, 0))
+            .then(function () {
+
+                assert.strictEqual(discuss.$('.o_thread_message_content').text().replace(/\s/g, ""),
+                    "😊😂",
+                    "New posted message should contain all emojis in their unicode representation");
+                discuss.destroy();
+                done();
+        });
+        });
+    });
+});
+
 });

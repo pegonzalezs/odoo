@@ -15,6 +15,7 @@
     }
 }
 .o_boxed_footer {
+    margin-top: 200px;
     white-space: nowrap;
     border-top: 3px solid $gray;
     ul {
@@ -69,5 +70,9 @@
             background-color: $gray;
             color: #fff;
         }
+    }
+
+    .table > tbody > tr.o_is_line_section td {
+        border-color: black;
     }
 }

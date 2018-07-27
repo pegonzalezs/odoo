@@ -183,6 +183,7 @@ var BasicModel = AbstractModel.extend({
             fields: list.fields,
             fieldsInfo: list.fieldsInfo,
             parentID: list.id,
+            position: position,
             viewType: list.viewType,
         };
         return this._makeDefaultRecord(list.model, params).then(function (id) {
@@ -303,6 +304,104 @@ var BasicModel = AbstractModel.extend({
         return this._applyOnChange(record._rawChanges, record, viewType).then(function () {
             return record.id;
         });
+    },
+    /**
+     * Compute the default value that the handle field should take.
+     * We need to compute this in order for new lines to be added at the correct position.
+     *
+     * @private
+     * @param {Object} listID
+     * @param {string} position
+     * @return {Object} empty object if no overrie has to be done, or:
+     *  field: the name of the field to override,
+     *  value: the value to use for that field
+     */
+    _computeOverrideDefaultFields: function (listID, position) {
+        var list = this.localData[listID];
+        var handleField;
+
+        // Here listID is actually just parentID, it's not yet confirmed
+        // to be a list.
+        // If we are not in the case that interests us,
+        // listID will be undefined and this check will work.
+        if (!list) {
+            return {};
+        }
+
+        position = position || 'bottom';
+
+        // Let's find if there is a field with handle.
+        if (!list.fieldsInfo) {
+            return {};
+        }
+        for (var field in list.fieldsInfo.list) {
+            if (list.fieldsInfo.list[field].widget === 'handle') {
+                handleField = field;
+                break;
+                // If there are 2 handle fields on the same list,
+                // we take the first one we find.
+                // And that will be alphabetically on the field name...
+            }
+        }
+
+        if (!handleField) {
+            return {};
+        }
+
+        // We don't want to override the default value
+        // if the list is not ordered by the handle field.
+        var isOrderedByHandle = list.orderedBy
+            && list.orderedBy.length
+            && list.orderedBy[0].asc === true
+            && list.orderedBy[0].name === handleField;
+
+        if (!isOrderedByHandle) {
+            return {};
+        }
+
+        // We compute the list (get) to apply the pending changes before doing our work,
+        // otherwise new lines might not be taken into account.
+        // We use raw: true because we only need to load the first level of relation.
+        var computedList = this.get(list.id, {raw: true});
+
+        // We don't need to worry about the position of a new line if the list is empty.
+        if (!computedList || !computedList.data || !computedList.data.length) {
+            return {};
+        }
+
+        // If there are less elements in the list than the limit of
+        // the page then take the index of the last existing line.
+
+        // If the button is at the top, we want the new element on
+        // the first line of the page.
+
+        // If the button is at the bottom, we want the new element
+        // after the last line of the page
+        // (= theorically it will be the first element of the next page).
+
+        // We ignore list.offset because computedList.data
+        // will only have the current page elements.
+
+        var index = Math.min(
+            computedList.data.length - 1,
+            position !== 'top' ? list.limit - 1 : 0
+        );
+
+        // This positioning will almost be correct. There might just be
+        // an issue if several other lines have the same handleFieldValue.
+
+        // TODO ideally: if there is an element with the same handleFieldValue,
+        // that one and all the following elements must be incremented
+        // by 1 (at least until there is a gap in the numbering).
+
+        // We don't do it now because it's not an important case.
+        var handleFieldValue = computedList.data[index].data[handleField];
+        handleFieldValue = position !== 'top' ? handleFieldValue : handleFieldValue - 1;
+
+        return {
+            field: handleField,
+            value: handleFieldValue,
+        };
     },
     /**
      * Delete a list of records, then, if the records have a parent, reload it.
@@ -584,13 +683,18 @@ var BasicModel = AbstractModel.extend({
     /**
      * Returns true if a record can be abandoned.
      *
-     * A record can be abandonned if it is a new record, except if
-     * this datapoint has been specifically tagged as "do not abandon".
+     * Case for not abandoning the record:
      *
-     * Example:
+     * 1. flagged as 'no abandon' (i.e. during a `default_get`, including any
+     *    `onchange` from a `default_get`)
+     * 2. registered in a list on addition
      *
-     *  - Discard record from "Add an item" => "New" record => abandon
-     *  - Discard record from `default_get`/`onchange` => do not abandon
+     *    2.1. registered as non-new addition
+     *    2.2. registered as new additon on update
+     *
+     * 3. record is not new
+     *
+     * Otherwise, the record can be abandoned.
      *
      * This is useful when discarding changes on this record, as it means that
      * we must keep the record even if some fields are invalids (e.g. required
@@ -600,7 +704,29 @@ var BasicModel = AbstractModel.extend({
      * @returns {boolean}
      */
     canBeAbandoned: function (id) {
-        return !this.localData[id]._noAbandon && this.isNew(id);
+        // 1. no drop if flagged
+        if (this.localData[id]._noAbandon) {
+            return false;
+        }
+        // 2. no drop in a list on "ADD in some cases
+        var record = this.localData[id];
+        var parent = this.localData[record.parentID];
+        if (parent) {
+            var entry = _.findWhere(parent._savePoint, {operation: 'ADD', id: id});
+            if (entry) {
+                // 2.1. no drop on non-new addition in list
+                if (!entry.isNew) {
+                    return false;
+                }
+                // 2.2. no drop on new addition on "UPDATE"
+                var lastEntry = _.last(parent._savePoint);
+                if (lastEntry.operation === 'UPDATE' && lastEntry.id === id) {
+                    return false;
+                }
+            }
+        }
+        // 3. drop new records
+        return this.isNew(id);
     },
     /**
      * Returns true if a record is dirty. A record is considered dirty if it has
@@ -800,7 +926,8 @@ var BasicModel = AbstractModel.extend({
         return this.mutex.exec(this._applyChange.bind(this, record_id, changes, options));
     },
     /**
-     * Reload all data for a given resource
+     * Reload all data for a given resource. At any time there is at most one
+     * reload operation active.
      *
      * @param {string} id local id for a resource
      * @param {Object} [options]
@@ -809,64 +936,7 @@ var BasicModel = AbstractModel.extend({
      * @returns {Deferred<string>} resolves to the id of the resource
      */
     reload: function (id, options) {
-        options = options || {};
-        var element = this.localData[id];
-
-        if (element.type === 'record') {
-            if (!options.currentId && (('currentId' in options) || this.isNew(id))) {
-                var params = {
-                    context: element.context,
-                    fieldsInfo: element.fieldsInfo,
-                    fields: element.fields,
-                    viewType: element.viewType,
-                };
-                return this._makeDefaultRecord(element.model, params);
-            }
-            if (!options.keepChanges) {
-                this.discardChanges(id, {rollback: false});
-            }
-        } else if (element._changes) {
-            delete element.tempLimitIncrement;
-            _.each(element._changes, function (change) {
-                delete change.isNew;
-            });
-        }
-
-        if (options.context !== undefined) {
-            element.context = options.context;
-        }
-        if (options.domain !== undefined) {
-            element.domain = options.domain;
-        }
-        if (options.groupBy !== undefined) {
-            element.groupedBy = options.groupBy;
-        }
-        if (options.limit !== undefined) {
-            element.limit = options.limit;
-        }
-        if (options.offset !== undefined) {
-            this._setOffset(element.id, options.offset);
-        }
-        if (options.loadMoreOffset !== undefined) {
-            element.loadMoreOffset = options.loadMoreOffset;
-        } else {
-            // reset if not specified
-            element.loadMoreOffset = 0;
-        }
-        if (options.currentId !== undefined) {
-            element.res_id = options.currentId;
-        }
-        if (options.ids !== undefined) {
-            element.res_ids = options.ids;
-            element.count = element.res_ids.length;
-        }
-        if (element.type === 'record') {
-            element.offset = _.indexOf(element.res_ids, element.res_id);
-        }
-        var loadOptions = _.pick(options, 'fieldNames', 'viewType');
-        return this._load(element, loadOptions).then(function (result) {
-            return result.id;
-        });
+        return this.mutex.exec(this._reload.bind(this, id, options));
     },
     /**
      * In some case, we may need to remove an element from a list, without going
@@ -1247,19 +1317,24 @@ var BasicModel = AbstractModel.extend({
      * @param {Object} [options]
      * @param {string} [options.position=top] if the new record should be added
      *   on top or on bottom of the list
+     * @param {Object} [options.context] additional context to be merged before
+     *   calling the default_get (eg. to set default values)
      * @returns {Deferred<string>} resolves to the new record id
      */
     _addX2ManyDefaultRecord: function (list, options) {
         var self = this;
+        var position = options && options.position || 'top';
+        var additionalContext = options && options.context;
+        var context = this._getContext(list, {additionalContext: additionalContext});
         var params = {
-            context: this._getContext(list),
+            context: context,
             fields: list.fields,
             fieldsInfo: list.fieldsInfo,
             parentID: list.id,
+            position: position,
             viewType: list.viewType,
         };
         return this._makeDefaultRecord(list.model, params).then(function (id) {
-            var position = options && options.position || 'top';
             list._changes.push({operation: 'ADD', id: id, position: position, isNew: true});
             var record = self.localData[id];
             list._cache[record.res_id] = id;
@@ -1730,9 +1805,12 @@ var BasicModel = AbstractModel.extend({
                 }
                 break;
             case 'CREATE':
-                var options = {position: command.position};
+                var options = {
+                    context: command.context,
+                    position: command.position,
+                };
                 def = this._addX2ManyDefaultRecord(list, options).then(function (id) {
-                    if (command.position === 'bottom' && list.orderedResIDs.length >= list.limit) {
+                    if (command.position === 'bottom' && list.orderedResIDs && list.orderedResIDs.length >= list.limit) {
                         list.tempLimitIncrement = (list.tempLimitIncrement || 0) + 1;
                         list.limit += 1;
                     }
@@ -1984,9 +2062,20 @@ var BasicModel = AbstractModel.extend({
             dataPoint.data.display_name = result[0][1];
         });
     },
+    /**
+     * Fetch name_get for a field of type Many2one or Reference
+     *
+     * @private
+     * @params {Object} list: must be a datapoint of type list
+     *   (for example: a datapoint representing a x2many)
+     * @params {string} fieldName: the name of a field of type Many2one or Reference
+     * @returns {Deferred}
+     */
     _fetchNameGets: function (list, fieldName) {
         var self = this;
-        var model;
+        // We first get the model this way because if list.data is empty
+        // the _.each below will not make it.
+        var model = list.fields[fieldName].relation;
         var records = [];
         var ids = [];
         list = this._applyX2ManyOperations(list);
@@ -1999,8 +2088,11 @@ var BasicModel = AbstractModel.extend({
             var many2oneRecord = self.localData[many2oneId];
             records.push(many2oneRecord);
             ids.push(many2oneRecord.res_id);
+            // We need to calculate the model this way too because
+            // field .relation is not set for a reference field.
             model = many2oneRecord.model;
         });
+
         if (!ids.length) {
             return $.when();
         }
@@ -2559,7 +2651,7 @@ var BasicModel = AbstractModel.extend({
                     count: ids.length,
                     context: record.context,
                     fieldsInfo: fieldsInfo,
-                    fields: view ? view.viewFields : fieldInfo.relatedFields,
+                    fields: view ? view.fields : fieldInfo.relatedFields,
                     limit: fieldInfo.limit,
                     modelName: field.relation,
                     res_ids: ids,
@@ -2571,6 +2663,11 @@ var BasicModel = AbstractModel.extend({
                     relationField: field.relation_field,
                     viewType: view ? view.type : fieldInfo.viewType,
                 });
+                // set existing changes to the list
+                if (record._changes && record._changes[fieldName]) {
+                    list._changes = self.localData[record._changes[fieldName]]._changes;
+                    record._changes[fieldName] = list.id;
+                }
                 record.data[fieldName] = list.id;
                 if (!fieldInfo.__no_fetch) {
                     var def = self._readUngroupedList(list).then(function () {
@@ -2904,13 +3001,10 @@ var BasicModel = AbstractModel.extend({
                                 continue;
                             }
                             changes = this._generateChanges(relRecord, options);
-                            if (changes.id) {
+                            if (!this.isNew(relRecord.id)) {
                                 // the subrecord already exists in db
+                                commands[fieldName].push(x2ManyCommands.link_to(relRecord.res_id));
                                 delete changes.id;
-                                if (this.isNew(record.id)) {
-                                    // if the main record is new, link the subrecord to it
-                                    commands[fieldName].push(x2ManyCommands.link_to(relRecord.res_id));
-                                }
                                 if (!_.isEmpty(changes)) {
                                     commands[fieldName].push(x2ManyCommands.update(relRecord.res_id, changes));
                                 }
@@ -3422,7 +3516,7 @@ var BasicModel = AbstractModel.extend({
     _makeDefaultRecord: function (modelName, params) {
         var self = this;
 
-        var determineExtraFields = function() {
+        var determineExtraFields = function () {
             // Fields that are present in the originating view, that need to be initialized
             // Hence preventing their value to crash when getting back to the originating view
             var parentRecord = self.localData[params.parentID];
@@ -3432,12 +3526,12 @@ var BasicModel = AbstractModel.extend({
                 return [];
 
             var fieldsFromOrigin = _.filter(Object.keys(originView[parentRecord.viewType]),
-                function(fieldname) {
+                function (fieldname) {
                     return params.fields[fieldname] !== undefined;
                 });
 
             return fieldsFromOrigin;
-        }
+        };
 
         var fieldNames = Object.keys(params.fieldsInfo[params.viewType]);
         var fields_key = _.without(fieldNames, '__last_update');
@@ -3451,6 +3545,7 @@ var BasicModel = AbstractModel.extend({
                 context: params.context,
             })
             .then(function (result) {
+
                 var record = self._makeDataPoint({
                     modelName: modelName,
                     fields: params.fields,
@@ -3460,6 +3555,20 @@ var BasicModel = AbstractModel.extend({
                     res_ids: params.res_ids,
                     viewType: params.viewType,
                 });
+
+                // We want to overwrite the default value of the handle field (if any),
+                // in order for new lines to be added at the correct position.
+                // -> This is a rare case where the defaul_get from the server
+                //    will be ignored by the view for a certain field (usually "sequence").
+
+                var overrideDefaultFields = self._computeOverrideDefaultFields(
+                    params.parentID,
+                    params.position
+                );
+
+                if (overrideDefaultFields) {
+                    result[overrideDefaultFields.field] = overrideDefaultFields.value;
+                }
 
                 return self.applyDefaultValues(record.id, result, {fieldNames: _.union(fieldNames, extraFields)})
                     .then(function () {
@@ -4013,6 +4122,76 @@ var BasicModel = AbstractModel.extend({
                 }
                 return list;
             });
+        });
+    },
+    /**
+     * Reload all data for a given resource
+     *
+     * @private
+     * @param {string} id local id for a resource
+     * @param {Object} [options]
+     * @param {boolean} [options.keepChanges=false] if true, doesn't discard the
+     *   changes on the record before reloading it
+     * @returns {Deferred<string>} resolves to the id of the resource
+     */
+    _reload: function (id, options) {
+        options = options || {};
+        var element = this.localData[id];
+
+        if (element.type === 'record') {
+            if (!options.currentId && (('currentId' in options) || this.isNew(id))) {
+                var params = {
+                    context: element.context,
+                    fieldsInfo: element.fieldsInfo,
+                    fields: element.fields,
+                    viewType: element.viewType,
+                };
+                return this._makeDefaultRecord(element.model, params);
+            }
+            if (!options.keepChanges) {
+                this.discardChanges(id, {rollback: false});
+            }
+        } else if (element._changes) {
+            delete element.tempLimitIncrement;
+            _.each(element._changes, function (change) {
+                delete change.isNew;
+            });
+        }
+
+        if (options.context !== undefined) {
+            element.context = options.context;
+        }
+        if (options.domain !== undefined) {
+            element.domain = options.domain;
+        }
+        if (options.groupBy !== undefined) {
+            element.groupedBy = options.groupBy;
+        }
+        if (options.limit !== undefined) {
+            element.limit = options.limit;
+        }
+        if (options.offset !== undefined) {
+            this._setOffset(element.id, options.offset);
+        }
+        if (options.loadMoreOffset !== undefined) {
+            element.loadMoreOffset = options.loadMoreOffset;
+        } else {
+            // reset if not specified
+            element.loadMoreOffset = 0;
+        }
+        if (options.currentId !== undefined) {
+            element.res_id = options.currentId;
+        }
+        if (options.ids !== undefined) {
+            element.res_ids = options.ids;
+            element.count = element.res_ids.length;
+        }
+        if (element.type === 'record') {
+            element.offset = _.indexOf(element.res_ids, element.res_id);
+        }
+        var loadOptions = _.pick(options, 'fieldNames', 'viewType');
+        return this._load(element, loadOptions).then(function (result) {
+            return result.id;
         });
     },
     /**

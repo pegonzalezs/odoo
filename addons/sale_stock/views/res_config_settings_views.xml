@@ -29,7 +29,7 @@
                         </div>
                         <div class="content-group" attrs="{'invisible': [('group_display_incoterm','=',False)]}">
                             <div class="mt16">
-                                <button name="%(stock.action_incoterms_tree)d" icon="fa-arrow-right" type="action" string="Incoterms" class="btn-link"/>
+                                <button name="%(account.action_incoterms_tree)d" icon="fa-arrow-right" type="action" string="Incoterms" class="btn-link"/>
                             </div>
                         </div>
                     </div>
@@ -94,7 +94,7 @@
                     </div>
                     <div class="o_setting_right_pane">
                         <label for="use_security_lead"/>
-                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." groups="base.group_multi_company"/>
+                        <span class="fa fa-lg fa-building-o" title="Values set here are company-specific." role="img" aria-label="Values set here are company-specific." groups="base.group_multi_company"/>
                         <div class="text-muted">
                             Schedule deliveries earlier to avoid delays
                         </div>

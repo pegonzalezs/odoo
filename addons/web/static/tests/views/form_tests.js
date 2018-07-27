@@ -9,7 +9,7 @@ var fieldRegistry = require('web.field_registry');
 var FormView = require('web.FormView');
 var mixins = require('web.mixins');
 var NotificationService = require('web.NotificationService');
-var pyeval = require('web.pyeval');
+var pyUtils = require('web.py_utils');
 var testUtils = require('web.test_utils');
 var widgetRegistry = require('web.widget_registry');
 var Widget = require('web.Widget');
@@ -1335,6 +1335,51 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('disable buttons until reload data from server', function (assert) {
+        assert.expect(2);
+        var def;
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form string="Partners">' +
+                    '<group><field name="foo"/></group>' +
+                '</form>',
+            mockRPC: function (route, args) {
+                if (args.method === 'write') {
+                    args.args[1].foo = "apple";
+                } else if (args.method === 'read') {
+                    // Block the 'read' call
+                    var result = this._super.apply(this, arguments);
+                    return $.when(def).then(_.constant(result));
+                }
+                return this._super(route, args);
+            },
+            res_id: 2,
+        });
+
+        var def = $.Deferred();
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('input').val("tralala").trigger('input');
+        form.$buttons.find('.o_form_button_save').click();
+
+        // Save button should be disabled
+        assert.strictEqual(
+            form.$buttons.find('.o_form_button_save').attr('disabled'),
+            'disabled', 'buttons should be disabled')
+
+        // Release the 'read' call
+        def.resolve();
+
+        // Edit button should be enabled after the reload
+        assert.strictEqual(
+            form.$buttons.find('.o_form_button_edit').attr('disabled'),
+            undefined, 'buttons should be enabled')
+
+        form.destroy();
+    });
+
     QUnit.test('properly apply onchange in simple case', function (assert) {
         assert.expect(2);
 
@@ -2131,13 +2176,13 @@ QUnit.module('Views', {
             "should display the name of the many2many on the original form");
         form.$('td:contains(gold)').click();
 
-        assert.strictEqual($('.modal-dialog').length, 1,
+        assert.strictEqual($('.modal').length, 1,
             'The partner_type modal should have opened');
-        assert.strictEqual($('.modal-dialog').find('td:contains(first record)').length, 1,
+        assert.strictEqual($('.modal').find('td:contains(first record)').length, 1,
             "should display the name of the many2many on the modal form");
 
-        $('.modal-dialog').find('td:contains(first record)').click();
-        assert.strictEqual($('.modal-dialog').length, 2,
+        $('.modal').find('td:contains(first record)').click();
+        assert.strictEqual($('.modal').length, 2,
             'There should be 2 modals (partner on top of partner_type) opened');
 
         form.destroy();
@@ -2201,13 +2246,13 @@ QUnit.module('Views', {
         // click on discard and cancel the confirm request
         form.$buttons.find('.o_form_button_cancel').click();
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal .modal-footer .btn-default').click(); // click on cancel
+        $('.modal-footer .btn-default').click(); // click on cancel
         assert.strictEqual(form.$('input').val(), 'new value', 'input should still contain new value');
 
         // click on discard and confirm
         form.$buttons.find('.o_form_button_cancel').click();
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal .modal-footer .btn-primary').click(); // click on confirm
+        $('.modal-footer .btn-primary').click(); // click on confirm
         assert.strictEqual(form.$('.o_field_widget').text(), 'yop', 'field in readonly should display yop');
 
         assert.strictEqual(nbWrite, 0, 'no write RPC should have been done');
@@ -2287,7 +2332,7 @@ QUnit.module('Views', {
 
         // click on discard and confirm
         form.$buttons.find('.o_form_button_cancel').click();
-        $('.modal .modal-footer .btn-primary').click(); // click on confirm
+        $('.modal-footer .btn-primary').click(); // click on confirm
 
         assert.notOk(form.$el.prop('outerHTML').match('xphone'),
             "the string xphone should not be present after discarding");
@@ -2354,14 +2399,14 @@ QUnit.module('Views', {
         assert.strictEqual($('.modal').length, 1,
             'there should be a confirm modal');
         assert.strictEqual(form.$('input').val(), 'DEF', 'input should be DEF');
-        $('.modal .modal-footer .btn-primary').click(); // click on confirm
+        $('.modal-footer .btn-primary').click(); // click on confirm
         assert.strictEqual(form.$('input').val(), 'ABC', 'input should now be ABC');
 
         // redirty and discard the field foo (to make sure initial changes haven't been lost)
         form.$('input').val('GHI').trigger('input');
         form.$buttons.find('.o_form_button_cancel').click();
         assert.strictEqual(form.$('input').val(), 'GHI', 'input should be GHI');
-        $('.modal .modal-footer .btn-primary').click(); // click on confirm
+        $('.modal-footer .btn-primary').click(); // click on confirm
         assert.strictEqual(form.$('input').val(), 'ABC', 'input should now be ABC');
 
         form.destroy();
@@ -2437,14 +2482,14 @@ QUnit.module('Views', {
         // click on the pager to switch to the next record and cancel the confirm request
         form.pager.$('.o_pager_next').click(); // click on next
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal .modal-footer .btn-default').click(); // click on cancel
+        $('.modal-footer .btn-default').click(); // click on cancel
         assert.strictEqual(form.$('input').val(), 'new value', 'input should still contain new value');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "1", 'pager value should still be 1');
 
         // click on the pager to switch to the next record and confirm
         form.pager.$('.o_pager_next').click(); // click on next
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
-        $('.modal .modal-footer .btn-primary').click(); // click on confirm
+        $('.modal-footer .btn-primary').click(); // click on confirm
         assert.strictEqual(form.$('input').val(), 'blip', 'input should contain blip');
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "2", 'pager value should be 2');
 
@@ -2507,7 +2552,7 @@ QUnit.module('Views', {
 
         form.$buttons.find('.o_form_button_cancel').click();
         assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
-        $('.modal .modal-footer .btn-primary').click(); // click on confirm
+        $('.modal-footer .btn-primary').click(); // click on confirm
         form.pager.$('.o_pager_next').click(); // click on next
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "2", 'pager value should be 2');
         form.destroy();
@@ -2745,7 +2790,7 @@ QUnit.module('Views', {
         assert.ok($('.modal').length, 'a confirm modal should be displayed');
 
         // confirm the delete
-        $('.modal .modal-footer button.btn-primary').click();
+        $('.modal-footer button.btn-primary').click();
 
         assert.strictEqual(form.pager.$('.o_pager_value').text(), "1", 'pager value should be 1');
         assert.strictEqual(form.pager.$('.o_pager_limit').text(), "2", 'pager limit should be 2');
@@ -2785,7 +2830,7 @@ QUnit.module('Views', {
             assert.step('history_back');
         });
         assert.strictEqual($('.modal').length, 1, 'a confirm modal should be displayed');
-        $('.modal .modal-footer button.btn-primary').click();
+        $('.modal-footer button.btn-primary').click();
         assert.strictEqual($('.modal').length, 0, 'no confirm modal should be displayed');
 
         assert.verifySteps(['read', 'unlink', 'history_back']);
@@ -3212,6 +3257,42 @@ QUnit.module('Views', {
         form.destroy();
     });
 
+    QUnit.test('delete a line in a one2many while editing another line triggers a warning', function (assert) {
+        assert.expect(3);
+
+        this.data.partner.records[0].p = [1, 2];
+
+        var form = createView({
+            View: FormView,
+            model: 'partner',
+            data: this.data,
+            arch: '<form>' +
+                    '<field name="p">' +
+                        '<tree editable="bottom">' +
+                            '<field name="display_name" required="True"/>' +
+                        '</tree>' +
+                    '</field>' +
+                '</form>',
+            res_id: 1,
+        });
+
+        form.$buttons.find('.o_form_button_edit').click();
+        form.$('.o_data_cell').first().click(); // edit first row
+        form.$('input').val('').trigger('input');
+        form.$('.fa-trash-o').eq(1).click(); // delete second row
+
+        assert.strictEqual($('.modal').find('.modal-title').first().text(), "Warning",
+            "Clicking out of a dirty line while editing should trigger a warning modal.");
+
+        $('.modal').find('.btn-primary').click(); // discard changes
+
+        assert.strictEqual(form.$('.o_data_cell').first().text(), "first record",
+            "Value should have been reset to what it was before editing began.");
+        assert.strictEqual(form.$('.o_data_row').length, 1,
+            "The other line should have been deleted.");
+        form.destroy();
+    });
+
     QUnit.test('properly apply onchange on many2many fields', function (assert) {
         assert.expect(14);
 
@@ -3582,7 +3663,7 @@ QUnit.module('Views', {
 
         // discard changes
         form.$buttons.find('.o_form_button_cancel').click();
-        $('.modal .modal-footer .btn-primary').click();
+        $('.modal-footer .btn-primary').click();
         assert.strictEqual(form.$('span[name="foo"]').text(), "blip",
             "field foo should still be displayed to initial value");
 
@@ -3901,7 +3982,7 @@ QUnit.module('Views', {
         $('.modal input:nth(1)').val(77).trigger('input');
         assert.strictEqual($('.modal input:first').val(), '[blip] 77',
             "onchange should have been correctly applied");
-        $('.modal .modal-footer .btn-primary').click(); // save the dialog
+        $('.modal-footer .btn-primary').click(); // save the dialog
         assert.strictEqual(form.$('.o_data_row td:first').text(), '[blip] 77',
             "onchange should have been correctly applied");
 
@@ -3911,7 +3992,7 @@ QUnit.module('Views', {
             "the custom field label is applied in the modal title");
         assert.strictEqual($('.modal input:first').val(), '[blip] 14',
             "onchange should have been correctly applied after default get");
-        $('.modal .modal-footer .btn-primary').click(); // save the dialog
+        $('.modal-footer .btn-primary').click(); // save the dialog
         assert.strictEqual(form.$('.o_data_row:nth(1) td:first').text(), '[blip] 14',
             "onchange should have been correctly applied after default get");
 
@@ -5213,9 +5294,9 @@ QUnit.module('Views', {
         assert.strictEqual($('.modal').length, 1,
             "FormViewDialog should be opened");
         $('.modal input[name="foo"]').val('xop').trigger("input");
-        $('.modal .modal-footer button:eq(1)').click(); // Save & new
+        $('.modal-footer button:eq(1)').click(); // Save & new
         $('.modal input[name="foo"]').val('zop').trigger("input");
-        $('.modal .modal-footer button:first').click(); // Save & close
+        $('.modal-footer button:first').click(); // Save & close
 
         // client-side sort
         assert.ok(form.$('.o_field_one2many tbody tr:eq(0) td:contains(zop)').length,
@@ -5238,7 +5319,7 @@ QUnit.module('Views', {
         form.$buttons.find('.o_form_button_edit').click();
         form.$('.o_field_one2many tbody tr:eq(1) td:contains(yop)').click();
         $('.modal input[name="foo"]').val('zzz').trigger("input");
-        $('.modal .modal-footer button:first').click(); // Save
+        $('.modal-footer button:first').click(); // Save
         assert.ok(form.$('.o_field_one2many tbody tr:eq(0) td:contains(zzz)').length,
             "record zzz should be first");
         assert.ok(form.$('.o_field_one2many tbody tr:eq(1) td:contains(zop)').length,
@@ -5780,7 +5861,7 @@ QUnit.module('Views', {
         form.$('.o_statusbar_buttons button').click();
         assert.ok(form.$('.o_statusbar_buttons button').prop('disabled'),
             'button should be disabled');
-        $('.modal .modal-footer button.btn-default').click();
+        $('.modal-footer button.btn-default').click();
         assert.ok(!form.$('.o_statusbar_buttons button').prop('disabled'),
             'button should no longer be disabled');
 
@@ -5789,7 +5870,7 @@ QUnit.module('Views', {
         // click on button, and click on ok in confirm dialog
         form.$('.o_statusbar_buttons button').click();
         assert.verifySteps(['default_get']);
-        $('.modal .modal-footer button.btn-primary').click();
+        $('.modal-footer button.btn-primary').click();
 
         assert.verifySteps(['default_get', 'create', 'read', 'execute_action']);
 
@@ -6041,9 +6122,9 @@ QUnit.module('Views', {
         $('.modal .o_field_many2one input').click();
         $dropdown.find('li:first()').click();
 
-        $('.modal .modal-footer button:eq(1)').click(); // Save & new
+        $('.modal-footer button:eq(1)').click(); // Save & new
         $('.modal .o_field_many2one input').click();
-        $('.modal .modal-footer button:first').click(); // Save & close
+        $('.modal-footer button:first').click(); // Save & close
         form.destroy();
     });
 
@@ -6140,13 +6221,13 @@ QUnit.module('Views', {
         $('.modal .o_field_widget[name=display_name]').val('readonly').trigger('input');
         assert.strictEqual($('.modal span.o_field_widget[name=foo]').length, 1,
             'foo should be readonly');
-        $('.modal .modal-footer .btn-primary').click(); // close the modal
+        $('.modal-footer .btn-primary').click(); // close the modal
         checkOnchange = false;
 
         form.$('.o_data_row').click(); // re-open previous record
         assert.strictEqual($('.modal .o_field_widget[name=foo]').text(), 'foo value',
             "the edited value should have been kept");
-        $('.modal .modal-footer .btn-primary').click(); // close the modal
+        $('.modal-footer .btn-primary').click(); // close the modal
 
         form.$buttons.find('.o_form_button_save').click(); // save the record
 
@@ -6220,7 +6301,7 @@ QUnit.module('Views', {
 
         form.sidebar.$('a:contains(Delete)').click(); // delete duplicated record
         assert.strictEqual($('.modal').length, 1, "should have opened a confirm dialog");
-        $('.modal .modal-footer .btn-primary').click(); // confirm
+        $('.modal-footer .btn-primary').click(); // confirm
 
         assert.strictEqual(form.$('.o_field_widget').text(), 'first record',
             "should have come back to previous record");
@@ -6304,7 +6385,7 @@ QUnit.module('Views', {
         $('.modal .o_external_button').click(); // in the modal, open the many2one record in another modal
 
         $('.modal:nth(1) .o_field_widget[name=display_name]').val('new name').trigger('input');
-        $('.modal:nth(1) .modal-footer .btn-primary').first().click(); // save changes
+        $('.modal:nth(1) footer .btn-primary').first().click(); // save changes
 
         assert.strictEqual($('.modal .o_field_widget[name=trululu] input').val(), 'new name',
             "record should have been reloaded");
@@ -6432,7 +6513,7 @@ QUnit.module('Views', {
                 '</form>',
             intercepts: {
                 execute_action: function (event) {
-                    var effectDescription = pyeval.py_eval(event.data.action_data.effect);
+                    var effectDescription = pyUtils.py_eval(event.data.action_data.effect);
                     assert.deepEqual(effectDescription, {message: 'Congrats!'}, "should have correct effect description");
                 }
             }
@@ -6849,7 +6930,7 @@ QUnit.module('Views', {
         core.bus.on('clear_cache', form, assert.step.bind(assert, 'clear_cache'));
 
         form.sidebar.$('a:contains(Delete)').click();
-        $('.modal .modal-footer .btn-primary').click(); // confirm
+        $('.modal-footer .btn-primary').click(); // confirm
 
         assert.verifySteps(['unlink', 'clear_cache']);
 

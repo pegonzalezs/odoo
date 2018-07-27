@@ -16,7 +16,7 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     purchase_line_id = fields.Many2one('purchase.order.line',
-        'Purchase Order Line', ondelete='set null', index=True, readonly=True, copy=False)
+        'Purchase Order Line', ondelete='set null', index=True, readonly=True)
     created_purchase_line_id = fields.Many2one('purchase.order.line',
         'Created Purchase Order Line', ondelete='set null', readonly=True, copy=False)
 
@@ -107,9 +107,9 @@ class StockMove(models.Model):
 class StockWarehouse(models.Model):
     _inherit = 'stock.warehouse'
 
-    buy_to_resupply = fields.Boolean('Purchase to resupply this warehouse', default=True,
+    buy_to_resupply = fields.Boolean('Buy to Resupply', default=True,
                                      help="When products are bought, they can be delivered to this warehouse")
-    buy_pull_id = fields.Many2one('procurement.rule', 'Buy rule')
+    buy_pull_id = fields.Many2one('stock.rule', 'Buy rule')
 
     @api.multi
     def _get_buy_pull_rule(self):
@@ -135,9 +135,7 @@ class StockWarehouse(models.Model):
     def create_routes(self):
         res = super(StockWarehouse, self).create_routes() # super applies ensure_one()
         if self.buy_to_resupply:
-            buy_pull_vals = self._get_buy_pull_rule()
-            buy_pull = self.env['procurement.rule'].create(buy_pull_vals)
-            res['buy_pull_id'] = buy_pull.id
+            res['buy_pull_id'] = self._create_buy_rule()
         return res
 
     @api.multi
@@ -146,9 +144,7 @@ class StockWarehouse(models.Model):
             if vals.get("buy_to_resupply"):
                 for warehouse in self:
                     if not warehouse.buy_pull_id:
-                        buy_pull_vals = self._get_buy_pull_rule()
-                        buy_pull = self.env['procurement.rule'].create(buy_pull_vals)
-                        vals['buy_pull_id'] = buy_pull.id
+                        vals['buy_pull_id'] = self._create_buy_rule()
             else:
                 for warehouse in self:
                     if warehouse.buy_pull_id:
@@ -165,7 +161,7 @@ class StockWarehouse(models.Model):
     def _update_name_and_code(self, name=False, code=False):
         res = super(StockWarehouse, self)._update_name_and_code(name, code)
         warehouse = self[0]
-        #change the buy procurement rule name
+        #change the buy stock rule name
         if warehouse.buy_pull_id and name:
             warehouse.buy_pull_id.write({'name': warehouse.buy_pull_id.name.replace(warehouse.name, name, 1)})
         return res
@@ -177,6 +173,11 @@ class StockWarehouse(models.Model):
             if warehouse.in_type_id.default_location_dest_id != warehouse.buy_pull_id.location_id:
                 warehouse.buy_pull_id.write({'location_id': warehouse.in_type_id.default_location_dest_id.id})
         return res
+
+    def _create_buy_rule(self):
+        buy_pull_vals = self._get_buy_pull_rule()
+        buy_pull = self.env['stock.rule'].create(buy_pull_vals)
+        return buy_pull.id
 
 class ReturnPicking(models.TransientModel):
     _inherit = "stock.return.picking"
@@ -211,3 +212,19 @@ class Orderpoint(models.Model):
         result['domain'] = "[('id','in',%s)]" % (purchase_ids.ids)
 
         return result
+
+
+class ProductionLot(models.Model):
+    _inherit = 'stock.production.lot'
+
+    purchase_order_ids = fields.Many2many('purchase.order', string="Purchase Orders", compute='_compute_purchase_order_ids', readonly=True, store=False)
+
+    @api.depends('name')
+    def _compute_purchase_order_ids(self):
+        for lot in self:
+            stock_moves = self.env['stock.move.line'].search([
+                ('lot_id', '=', lot.id),
+                ('state', '=', 'done')
+            ]).mapped('move_id').filtered(
+                lambda move: move.picking_id.location_id.usage == 'supplier' and move.state == 'done')
+            lot.purchase_order_ids = stock_moves.mapped('purchase_line_id.order_id')

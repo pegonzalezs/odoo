@@ -98,6 +98,9 @@ QUnit.module('ActionManager', {
             name: 'A Client Action',
             tag: 'ClientAction',
             type: 'ir.actions.client',
+        }, {
+            id: 10,
+            type: 'ir.actions.act_window_close',
         }];
 
         this.archs = {
@@ -2416,6 +2419,51 @@ QUnit.module('ActionManager', {
         actionManager.destroy();
     });
 
+    QUnit.test('requests for execute_action of type object: disable buttons', function (assert) {
+        assert.expect(2);
+
+        var self = this;
+        var def;
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/call_button') {
+                    return $.when(false);
+                } else if (args.method === 'read') {
+                    // Block the 'read' call
+                    var result = this._super.apply(this, arguments);
+                    return $.when(def).then(_.constant(result));
+                }
+                return this._super.apply(this, arguments);
+            },
+        });
+        actionManager.doAction(3);
+
+        // open a record in form view
+        actionManager.$('.o_list_view .o_data_row:first').click();
+
+        // click on 'Call method' button (should call an Object method)
+        def = $.Deferred();
+        actionManager.$('.o_form_view button:contains(Call method)').click();
+
+        // Buttons should be disabled
+        assert.strictEqual(
+            actionManager.$('.o_form_view button:contains(Call method)').attr('disabled'),
+            'disabled', 'buttons should be disabled')
+
+        // Release the 'read' call
+        def.resolve();
+
+        // Buttons should be enabled after the reload
+        assert.strictEqual(
+            actionManager.$('.o_form_view button:contains(Call method)').attr('disabled'),
+            undefined, 'buttons should be disabled')
+
+        actionManager.destroy();
+    });
+
     QUnit.test('can open different records from a multi record view', function (assert) {
         assert.expect(11);
 
@@ -2829,7 +2877,7 @@ QUnit.module('ActionManager', {
             intercepts: {
                 create_filter: function (event) {
                     var filter = event.data.filter;
-                    assert.deepEqual(filter.domain, [['bar', '=', 1]],
+                    assert.deepEqual(filter.domain, "[('bar', '=', 1)]",
                         "should save the correct domain");
                     assert.deepEqual(filter.context, {shouldBeInFilterContext: true},
                         "should save the correct context");
@@ -3002,7 +3050,7 @@ QUnit.module('ActionManager', {
         assert.strictEqual($('.o_technical_modal .o_form_view').length, 1,
             "should have rendered a form view in a modal");
         assert.ok($('.o_technical_modal .modal-body').hasClass('o_act_window'),
-            "modal-body element should have classname 'o_act_window'");
+            "dialog main element should have classname 'o_act_window'");
         assert.ok($('.o_technical_modal .o_form_view').hasClass('o_form_editable'),
             "form view should be in edit mode");
 
@@ -3011,6 +3059,31 @@ QUnit.module('ActionManager', {
             'load_views',
             'default_get',
         ]);
+
+        actionManager.destroy();
+    });
+
+    QUnit.test('chained action on_close', function (assert) {
+        assert.expect(3);
+
+        function on_close() {
+            assert.step('Close Action');
+        };
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+        actionManager.doAction(5, {on_close: on_close});
+
+        // a target=new action shouldn't activate the on_close
+        actionManager.doAction(5);
+        assert.verifySteps([]);
+
+        // An act_window_close should trigger the on_close
+        actionManager.doAction(10);
+        assert.verifySteps(['Close Action']);
 
         actionManager.destroy();
     });
@@ -3221,6 +3294,30 @@ QUnit.module('ActionManager', {
         });
     });
 
+    QUnit.test('close action with provided infos', function (assert) {
+        assert.expect(1);
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+        });
+
+        var options = {
+            on_close: function (infos) {
+                assert.strictEqual(infos, 'just for testing',
+                    "should have the correct close infos");
+            }
+        };
+
+        actionManager.doAction({
+            type: 'ir.actions.act_window_close',
+            infos: 'just for testing',
+        }, options);
+
+        actionManager.destroy();
+    });
+
     QUnit.test('properly drop client actions after new action is initiated', function (assert) {
         assert.expect(1);
 
@@ -3356,6 +3453,62 @@ QUnit.module('ActionManager', {
 
         assert.strictEqual(actionManager.$('.o_form_view').length, 1,
             "there should be a form view in dom");
+
+        actionManager.destroy();
+    });
+
+    QUnit.module('Search View Action');
+
+    QUnit.test('search view should keep focus during do_search', function (assert) {
+        assert.expect(5);
+
+        /* One should be able to type something in the search view, press on enter to
+         * make the facet and trigger the search, then do this process
+         * over and over again seamlessly.
+         * Verifying the input's value is a lot trickier than verifying the search_read
+         * because of how native events are handled in tests
+         */
+
+        var searchDeferred = $.Deferred();
+
+        var actionManager = createActionManager({
+            actions: this.actions,
+            archs: this.archs,
+            data: this.data,
+            mockRPC: function (route, args) {
+                if (route === '/web/dataset/search_read') {
+                    assert.step('search_read ' + args.domain);
+                    if ( _.isEqual(args.domain, [['foo', 'ilike', 'm']])) {
+                        return searchDeferred.then(this._super.bind(this, route, args));
+                    }
+                }
+                return this._super.apply(this, arguments);
+            }
+        });
+
+        actionManager.doAction(3);
+
+        var $searchInput = $('.o_searchview input');
+        $searchInput.trigger($.Event('keypress', {key: 'm', which: 109, keyCode: 109}));
+        $searchInput.trigger($.Event('keydown', {key: 'Enter', which: 13, keyCode: 13}));
+
+        assert.verifySteps(["search_read ",
+                            "search_read foo,ilike,m"]);
+
+        // Triggering the do_search above will kill the current searchview Input
+        $searchInput = $('.o_searchview input');
+        $searchInput.trigger($.Event('keypress', {key: 'o', which: 111, keyCode: 111}));
+
+        // We have something in the input of the search view. Making the search_read
+        // return at this point will trigger the redraw of the view.
+        // However we want to hold on to what we just typed
+        searchDeferred.resolve();
+
+        $searchInput.trigger($.Event('keydown', {key: 'Enter', which: 13, keyCode: 13}));
+
+        assert.verifySteps(["search_read ",
+                            "search_read foo,ilike,m",
+                            "search_read |,foo,ilike,m,foo,ilike,o"]);
 
         actionManager.destroy();
     });

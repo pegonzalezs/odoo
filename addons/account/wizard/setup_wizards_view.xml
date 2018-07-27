@@ -49,11 +49,9 @@
                         </div>
                     </div>
                     <footer>
-                        <field name="account_setup_fy_data_done" invisible="True"/>
-                        <button string="Mark as done" type="object" name="mark_as_done" class="oe_highlight" attrs="{'invisible': [('account_setup_fy_data_done','=',True)]}"/>
-                        <button string="Save" type="action" name="account.setup_wizard_close" attrs="{'invisible': [('account_setup_fy_data_done','=',True)]}"/>
-                        <button string="Save" type="action" name="account.setup_wizard_close" class="oe_highlight" attrs="{'invisible': [('account_setup_fy_data_done','=',False)]}"/>
-                        <button string="Unmark as done" type="object" name="unmark_as_done" attrs="{'invisible': [('account_setup_fy_data_done','=',False)]}"/>
+                        <button name="action_save_onboarding_fiscal_year" string="OK"
+                               class="oe_highlight" type="object" />
+                        <button special="cancel" string="Cancel" />
                     </footer>
                 </form>
             </field>
@@ -75,7 +73,6 @@
                            </group>
                         </group>
                         <div attrs="{'invisible': [('create_or_link_option', '=', 'link')]}" class="oe_title">
-                            <label for="new_journal_name" class="oe_edit_only"/>
                             <h1><field name="new_journal_name" placeholder="e.g Checking account" class="oe_inline"/></h1>
                         </div>
                         <group>
@@ -103,7 +100,7 @@
             <field name="name">account.setup.opening.move.line.tree</field>
             <field name="model">account.account</field>
             <field name="arch" type="xml">
-                <tree editable="top" create="1" delete="1">
+                <tree editable="top" create="1" delete="1" decoration-muted="opening_debit == 0 and opening_credit == 0">
                     <field name="code"/>
                     <field name="name"/>
                     <field name="user_type_id"/>

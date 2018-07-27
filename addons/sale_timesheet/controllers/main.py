@@ -9,6 +9,8 @@ from odoo import http, fields, _
 from odoo.http import request
 from odoo.tools import float_round
 
+from odoo.addons.web.controllers.main import clean_action
+
 DEFAULT_MONTH_RANGE = 3
 
 
@@ -201,9 +203,8 @@ class SaleTimesheetController(http.Controller):
 
         # remaining computation of SO row, as Sold - Done (timesheet total)
         for sale_order_id, done_sold_vals in rows_sale_order_done_sold.items():
-            item = done_sold_vals.get(sale_order_id)
-            if item:
-                rows_sale_order[sale_order_id] = item['sold'] - item['done']
+            if sale_order_id in rows_sale_order:
+                rows_sale_order[sale_order_id][-1] = done_sold_vals['sold'] - done_sold_vals['done']
 
         # group rows SO, SOL and their related employee rows.
         timesheet_forecast_table_rows = []
@@ -394,7 +395,7 @@ class SaleTimesheetController(http.Controller):
                 'type': 'ir.actions.act_window',
                 'res_model': res_model,
                 'view_mode': 'tree,form',
-                'view_type': 'tree',
+                'view_type': 'form',
                 'views': [[ts_view_tree_id, 'list'], [ts_view_form_id, 'form']],
                 'domain': domain,
             }
@@ -410,9 +411,11 @@ class SaleTimesheetController(http.Controller):
             if len(tasks.mapped('project_id')) == 1:
                 action['context']['default_project_id'] = tasks.mapped('project_id')[0].id
         elif res_model == 'sale.order':
-            action = request.env.ref('sale.action_orders').read()[0]
+            action = clean_action(request.env.ref('sale.action_orders').read()[0])
             action['domain'] = domain
+            action['context'] = {'create': False, 'edit': False, 'delete': False}  # No CRUD operation when coming from overview
         elif res_model == 'account.invoice':
-            action = request.env.ref('account.action_invoice_tree1').read()[0]
+            action = clean_action(request.env.ref('account.action_invoice_tree1').read()[0])
             action['domain'] = domain
+            action['context'] = {'create': False, 'edit': False, 'delete': False}  # No CRUD operation when coming from overview
         return action

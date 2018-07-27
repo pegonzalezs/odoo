@@ -48,6 +48,9 @@ class AccountInvoice(models.Model):
     def _get_default_access_token(self):
         return str(uuid.uuid4())
 
+    def _get_default_incoterm(self):
+        return self.env.user.company_id.incoterm_id
+
     @api.one
     @api.depends('invoice_line_ids.price_subtotal', 'tax_line_ids.amount', 'tax_line_ids.amount_rounding',
                  'currency_id', 'company_id', 'date_invoice', 'type')
@@ -70,7 +73,7 @@ class AccountInvoice(models.Model):
     @api.onchange('amount_total')
     def _onchange_amount_total(self):
         for inv in self:
-            if inv.amount_total < 0:
+            if float_compare(inv.amount_total, 0.0, precision_rounding=inv.currency_id.rounding) == -1:
                 raise Warning(_('You cannot validate an invoice with a negative total amount. You should create a credit note instead.'))
 
     @api.model
@@ -94,10 +97,6 @@ class AccountInvoice(models.Model):
     def _default_currency(self):
         journal = self._default_journal()
         return journal.currency_id or journal.company_id.currency_id or self.env.user.company_id.currency_id
-
-    @api.model
-    def _get_reference_type(self):
-        return [('none', _('Free Reference'))]
 
     @api.one
     @api.depends(
@@ -253,11 +252,8 @@ class AccountInvoice(models.Model):
     move_name = fields.Char(string='Journal Entry Name', readonly=False,
         default=False, copy=False,
         help="Technical field holding the number given to the invoice, automatically set when the invoice is validated then stored to set the same number again if the invoice is cancelled, set to draft and re-validated.")
-    reference = fields.Char(string='Vendor Reference', copy=False,
+    reference = fields.Char(string='Payment Ref.', copy=False,
         help="The partner reference of this invoice.", readonly=True, states={'draft': [('readonly', False)]})
-    reference_type = fields.Selection('_get_reference_type', string='Payment Reference',
-        required=True, readonly=True, states={'draft': [('readonly', False)]},
-        default='none')
     comment = fields.Text('Additional Information', readonly=True, states={'draft': [('readonly', False)]})
 
     state = fields.Selection([
@@ -369,6 +365,9 @@ class AccountInvoice(models.Model):
     #fields use to set the sequence, on the first invoice of the journal
     sequence_number_next = fields.Char(string='Next Number', compute="_get_sequence_number_next", inverse="_set_sequence_next")
     sequence_number_next_prefix = fields.Char(string='Next Number Prefix', compute="_get_sequence_prefix")
+    incoterm_id = fields.Many2one('account.incoterms', string='Incoterm',
+        default=_get_default_incoterm,
+        help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
 
     #fields related to vendor bills automated creation by email
     source_email = fields.Char(string='Source Email', track_visibility='onchange')
@@ -387,6 +386,18 @@ class AccountInvoice(models.Model):
                 vendor_display_name = _('From: ') + invoice.source_email
             invoice.vendor_display_name = vendor_display_name
             invoice.invoice_icon = invoice.source_email and '@' or ''
+
+    @api.multi
+    def _get_computed_reference(self):
+        self.ensure_one()
+        if self.company_id.invoice_reference_type == 'invoice_number':
+            identification_number = int(re.match('.*?([0-9]+)$', self.number).group(1))
+            prefix = self.number
+        else:
+            #self.company_id.invoice_reference_type == 'partner'
+            identification_number = self.partner_id.id
+            prefix = 'CUST'
+        return '%s/%s' % (prefix, str(identification_number % 97).rjust(2, '0'))
 
     # Load all Vendor Bill lines
     @api.onchange('vendor_bill_id')
@@ -427,7 +438,7 @@ class AccountInvoice(models.Model):
         """ computes the prefix of the number that will be assigned to the first invoice/bill/refund of a journal, in order to
         let the user manually change it.
         """
-        if not self.env.user._is_admin():
+        if not self.env.user._is_system():
             for invoice in self:
                 invoice.sequence_number_next_prefix = False
                 invoice.sequence_number_next = ''
@@ -593,7 +604,7 @@ class AccountInvoice(models.Model):
         """
         self.ensure_one()
         template = self.env.ref('account.email_template_edi_invoice', False)
-        compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
+        compose_form = self.env.ref('account.multi_compose_message_wizard_form', False)
         ctx = dict(
             default_model='account.invoice',
             default_res_id=self.id,
@@ -601,7 +612,7 @@ class AccountInvoice(models.Model):
             default_template_id=template and template.id or False,
             default_composition_mode='comment',
             mark_invoice_as_sent=True,
-            custom_layout="mail.mail_notification_borders",
+            custom_layout="mail.mail_notification_paynow",
             force_email=True
         )
         return {
@@ -609,7 +620,7 @@ class AccountInvoice(models.Model):
             'type': 'ir.actions.act_window',
             'view_type': 'form',
             'view_mode': 'form',
-            'res_model': 'mail.compose.message',
+            'res_model': 'multi.compose.message',
             'views': [(compose_form.id, 'form')],
             'view_id': compose_form.id,
             'target': 'new',
@@ -621,6 +632,7 @@ class AccountInvoice(models.Model):
     def message_post(self, **kwargs):
         if self.env.context.get('mark_invoice_as_sent'):
             self.filtered(lambda inv: not inv.sent).write({'sent': True})
+            self.env.user.company_id.account_onboarding_sample_invoice_sent = True
         return super(AccountInvoice, self.with_context(mail_post_autofollow=True)).message_post(**kwargs)
 
     @api.model
@@ -891,7 +903,7 @@ class AccountInvoice(models.Model):
             raise UserError(_("The field Vendor is required, please complete it to validate the Vendor Bill."))
         if to_open_invoices.filtered(lambda inv: inv.state != 'draft'):
             raise UserError(_("Invoice must be in draft state in order to validate it."))
-        if to_open_invoices.filtered(lambda inv: inv.amount_total < 0):
+        if to_open_invoices.filtered(lambda inv: float_compare(inv.amount_total, 0.0, precision_rounding=inv.currency_id.rounding) == -1):
             raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
         if to_open_invoices.filtered(lambda inv: not inv.account_id):
             raise UserError(_('No account was found to create the invoice, be sure you have installed a chart of account.'))
@@ -1007,6 +1019,8 @@ class AccountInvoice(models.Model):
     def get_taxes_values(self):
         tax_grouped = {}
         for line in self.invoice_line_ids:
+            if not line.account_id:
+                continue
             price_unit = line.price_unit * (1 - (line.discount or 0.0) / 100.0)
             taxes = line.invoice_line_tax_ids.compute_all(price_unit, self.currency_id, line.quantity, line.product_id, self.partner_id)['taxes']
             for tax in taxes:
@@ -1089,6 +1103,8 @@ class AccountInvoice(models.Model):
     def invoice_line_move_line_get(self):
         res = []
         for line in self.invoice_line_ids:
+            if not line.account_id:
+                continue
             if line.quantity==0:
                 continue
             tax_ids = []
@@ -1193,8 +1209,8 @@ class AccountInvoice(models.Model):
         for inv in self:
             if not inv.journal_id.sequence_id:
                 raise UserError(_('Please define sequence on the journal related to this invoice.'))
-            if not inv.invoice_line_ids:
-                raise UserError(_('Please create some invoice lines.'))
+            if not inv.invoice_line_ids.filtered(lambda line: line.account_id):
+                raise UserError(_('Please add at least one invoice line.'))
             if inv.move_id:
                 continue
 
@@ -1299,7 +1315,12 @@ class AccountInvoice(models.Model):
     def invoice_validate(self):
         for invoice in self.filtered(lambda invoice: invoice.partner_id not in invoice.message_partner_ids):
             invoice.message_subscribe([invoice.partner_id.id])
+
+            # Auto-compute reference, if not already existing and if configured on company
+            if not invoice.reference and invoice.company_id.invoice_reference_type != 'none' and invoice.type == 'out_invoice':
+                invoice.reference = invoice._get_computed_reference()
         self._check_duplicate_supplier_reference()
+
         return self.write({'state': 'open'})
 
     @api.model
@@ -1575,8 +1596,7 @@ class AccountInvoiceLine(models.Model):
     product_id = fields.Many2one('product.product', string='Product',
         ondelete='restrict', index=True)
     product_image = fields.Binary('Product Image', related="product_id.image", store=False)
-    account_id = fields.Many2one('account.account', string='Account',
-        required=True, domain=[('deprecated', '=', False)],
+    account_id = fields.Many2one('account.account', string='Account', domain=[('deprecated', '=', False)],
         default=_default_account,
         help="The income or expense account related to the selected product.")
     price_unit = fields.Float(string='Unit Price', required=True, digits=dp.get_precision('Product Price'))
@@ -1605,6 +1625,10 @@ class AccountInvoiceLine(models.Model):
     company_currency_id = fields.Many2one('res.currency', related='invoice_id.company_currency_id', readonly=True, related_sudo=False)
     is_rounding_line = fields.Boolean(string='Rounding Line', help='Is a rounding line in case of cash rounding.')
 
+    display_type = fields.Selection([
+        ('line_section', "Section"),
+        ('line_note', "Note")], default=False, help="Technical field for UX purpose.")
+
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         res = super(AccountInvoiceLine, self).fields_view_get(
@@ -1629,6 +1653,13 @@ class AccountInvoiceLine(models.Model):
             return accounts['income']
         return accounts['expense']
 
+    def _set_currency(self):
+        company = self.invoice_id.company_id
+        currency = self.invoice_id.currency_id
+        if company and currency:
+            if company.currency_id != currency:
+                self.price_unit = self.price_unit * currency.with_context(dict(self._context or {}, date=self.invoice_id.date_invoice)).rate
+
     def _set_taxes(self):
         """ Used in on_change to set taxes and price."""
         if self.invoice_id.type in ('out_invoice', 'out_refund'):
@@ -1647,8 +1678,10 @@ class AccountInvoiceLine(models.Model):
             prec = self.env['decimal.precision'].precision_get('Product Price')
             if not self.price_unit or float_compare(self.price_unit, self.product_id.standard_price, precision_digits=prec) == 0:
                 self.price_unit = fix_price(self.product_id.standard_price, taxes, fp_taxes)
+                self._set_currency()
         else:
             self.price_unit = fix_price(self.product_id.lst_price, taxes, fp_taxes)
+            self._set_currency()
 
     @api.onchange('product_id')
     def _onchange_product_id(self):
@@ -1697,8 +1730,6 @@ class AccountInvoiceLine(models.Model):
             domain['uom_id'] = [('category_id', '=', product.uom_id.category_id.id)]
 
             if company and currency:
-                if company.currency_id != currency:
-                    self.price_unit = self.price_unit * currency.with_context(dict(self._context or {}, date=self.invoice_id.date_invoice)).rate
 
                 if self.uom_id and self.uom_id.id != product.uom_id.id:
                     self.price_unit = product.uom_id._compute_price(self.price_unit, self.uom_id)
@@ -1770,6 +1801,29 @@ class AccountInvoiceLine(models.Model):
             'invoice_line_tax_ids': self.invoice_line_tax_ids.ids
         }
         return data
+
+    @api.model
+    def create(self, vals):
+        if vals.get('display_type', self.default_get(['display_type'])['display_type']):
+            vals.update(price_unit=0, account_id=False, quantity=0)
+
+        return super(AccountInvoiceLine, self).create(vals)
+
+    @api.multi
+    def write(self, values):
+        if 'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
+            raise UserError("You cannot change the type of an invoice line. Instead you should delete the current line and create a new line of the proper type.")
+        return super(AccountInvoiceLine, self).write(values)
+
+    _sql_constraints = [
+        ('accountable_required_fields',
+            "CHECK(display_type IS NOT NULL OR account_id IS NOT NULL)",
+            "Missing required account on accountable invoice line."),
+
+        ('non_accountable_fields_null',
+            "CHECK(display_type IS NULL OR (price_unit = 0 AND account_id IS NULL and quantity = 0))",
+            "Forbidden unit price, account and quantity on non-accountable invoice line"),
+    ]
 
 
 class AccountInvoiceTax(models.Model):

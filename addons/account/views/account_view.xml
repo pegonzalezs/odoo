@@ -168,13 +168,6 @@
         <menuitem action="action_account_form" id="menu_action_account_form" parent="account_account_menu" groups="account.group_account_user" sequence="0"/>
 
         <act_window
-            id="account.action_all_partner_invoices"
-            name="All Invoices"
-            res_model="account.invoice"
-            domain="[('partner_id', 'child_of', active_id)]"
-            src_model="res.partner"/>
-
-        <act_window
             id="act_account_acount_move_line_open_unreconciled"
             name="Unreconciled Entries"
             res_model="account.move.line"
@@ -205,8 +198,7 @@
             id="action_move_line_select_by_partner"
             name="Journal Items"
             context="{'search_default_partner_id': [active_id]}"
-            res_model="account.move.line"
-            src_model="res.partner"/>
+            res_model="account.move.line"/>
 
         <!-- Account Journal -->
         <record id="view_account_journal_tree" model="ir.ui.view">
@@ -345,7 +337,7 @@
                                         <field name="loss_account_id"/>
                                     </group>
                                     <group name="group_alias" string="Email your Vendor Bills" attrs="{'invisible': [('type', '!=',  'purchase')]}">
-                                        <label string="Email Alias" attrs="{'invisible': [('alias_domain', '=', False)]}"/>
+                                        <label string="Email Alias" attrs="{'invisible': [('alias_domain', '=', False)]}" for="alias_id"/>
                                         <div name="alias_def" attrs="{'invisible': [('alias_domain', '=', False)]}">
                                             <field name="alias_id" class="oe_read_only oe_inline"/>
                                             <div class="oe_edit_only oe_inline" name="edit_alias" style="display: inline;" >
@@ -353,7 +345,7 @@
                                             </div>
                                         </div>
                                         <div class="content-group" attrs="{'invisible': [('alias_domain', '!=', False)]}">
-                                            <a type='action' name='%(action_open_settings)d' class="btn btn-sm btn-link"><i class="fa fa-fw o_button_icon fa-arrow-right"/> Configure Email Servers</a>
+                                            <a type='action' name='%(action_open_settings)d' class="btn btn-sm btn-link" role="button"><i class="fa fa-fw o_button_icon fa-arrow-right"/> Configure Email Servers</a>
                                     </div>
                                     </group>
                                 </group>
@@ -860,7 +852,7 @@
                                 <label for="amount"/>
                                 <div>
                                     <field name="amount" class="oe_inline"/>
-                                    <label string="%" class="oe_inline" attrs="{'invisible':[('amount_type','!=','percentage')]}" />
+                                    <span class="o_form_label oe_inline" attrs="{'invisible':[('amount_type','!=','percentage')]}">%</span>
                                 </div>
                                 <field name="journal_id" domain="[('company_id', '=', company_id)]" widget="selection"/>
                             </group>
@@ -882,7 +874,7 @@
                                 <label for="second_amount" string="Amount"/>
                                 <div>
                                     <field name="second_amount" class="oe_inline"/>
-                                    <label string="%" class="oe_inline" attrs="{'invisible':[('amount_type','!=','percentage')]}" />
+                                    <span class="o_form_label oe_inline" attrs="{'invisible':[('amount_type','!=','percentage')]}">%</span>
                                 </div>
                                 <field name="second_journal_id" string="Journal" domain="[('company_id', '=', company_id)]" widget="selection"/>
                             </group>
@@ -1105,7 +1097,7 @@
                                     <label for="amount" attrs="{'invisible':[('amount_type','not in', ('fixed', 'percent', 'division'))]}"/>
                                     <div attrs="{'invisible':[('amount_type','not in', ('fixed', 'percent', 'division'))]}">
                                         <field name="amount" class="oe_inline" />
-                                        <label string="%" class="oe_inline" attrs="{'invisible':[('amount_type','=','fixed')]}" />
+                                        <span class="o_form_label oe_inline" attrs="{'invisible':[('amount_type','=','fixed')]}">%</span>
                                     </div>
                                 </group>
                                 <group attrs="{'invisible':[('amount_type','=', 'group')]}" groups="account.group_account_user">
@@ -1257,13 +1249,13 @@
                                         <span t-esc="record.move_id.value"/>
                                     </strong>
                                     <strong class="col-xs-6 text-right">
-                                        <i class="fa fa-clock-o"/><field name="date_maturity"/>
+                                        <i class="fa fa-clock-o" aria-label="Date" role="img" title="Date"/><field name="date_maturity"/>
                                     </strong>
                                     <div class="col-xs-10">
                                         <span t-esc="record.name.value"/>
                                     </div>
                                     <div class="col-xs-2 text-right">
-                                        <img t-att-src="kanban_image('res.partner', 'image_small', record.partner_id.raw_value)" t-att-title="record.partner_id.value" width="24" height="24" class="oe_kanban_avatar"/>
+                                        <img t-att-src="kanban_image('res.partner', 'image_small', record.partner_id.raw_value)" t-att-title="record.partner_id.value" t-att-alt="record.partner_id.value" width="24" height="24" class="oe_kanban_avatar"/>
                                     </div>
                                 </div>
                             </div>
@@ -1321,7 +1313,7 @@
             <field name="arch" type="xml">
                 <field name="full_reconcile_id" position="after">
                     <field name="tax_line_id"/>
-                    <field name="tax_base_amount"/>
+                    <field name="tax_base_amount" sum="Total Base Amount"/>
                 </field>
                 <field name="date_maturity" position="replace"/>
             </field>
@@ -1381,7 +1373,7 @@
                         <filter string="Partner" name="partner" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Journal" name="journal" domain="[]" context="{'group_by':'journal_id'}"/>
                         <filter string="Account" name="account" context="{'group_by':'account_id'}"/>
-                        <filter string="Date" name="date_filter" domain="[]" context="{'group_by':'date'}"/>
+                        <filter string="Date" name="groupby_date" domain="[]" context="{'group_by':'date'}"/>
                     </group>
                 </search>
             </field>
@@ -1468,7 +1460,7 @@
                                         <strong><span><field name="journal_id"/></span></strong>
                                     </div>
                                     <div class="col-xs-6 text-right">
-                                        <strong><i class="fa fa-clock-o"/> <t t-esc="record.date.value"/></strong>
+                                        <strong><i class="fa fa-clock-o" aria-label="Date" role="img" title="Date"/> <t t-esc="record.date.value"/></strong>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -1500,7 +1492,7 @@
             <field name="arch" type="xml">
                 <form string="Account Entry">
                     <header>
-                        <button name="post" states="draft" string="Post" type="object" class="oe_highlight" groups="account.group_account_invoice"/>
+                        <button name="action_post" states="draft" string="Post" type="object" class="oe_highlight" groups="account.group_account_invoice"/>
                         <button name="%(action_view_account_move_reversal)d" states="posted" string="Reverse Entry" type="action" groups="account.group_account_invoice"/>
                         <field name="state" widget="statusbar"/>
                     </header>
@@ -1601,7 +1593,7 @@
                         <filter string="Partner" name="partner" domain="[]" context="{'group_by':'partner_id'}"/>
                         <filter string="Journal" name="journal" domain="[]" context="{'group_by':'journal_id'}"/>
                         <filter string="Status" name="status" domain="[]" context="{'group_by':'state'}"/>
-                        <filter string="Date" name="date" domain="[]" context="{'group_by':'date'}" help="Journal Entries by Month"/>
+                        <filter string="Date" name="date" domain="[]" context="{'group_by':'date'}" help="Journal Entries by Date"/>
                     </group>
                 </search>
             </field>
@@ -1695,7 +1687,7 @@
                             <div attrs="{'invisible':[('value','=', 'balance')]}" class="o_row">
                                 <label for="value_amount" attrs="{'invisible':[('value','=', 'balance')]}"/>
                                 <field name="value_amount" class="oe_inline"/>
-                                <label string="%" class="oe_inline" attrs="{'invisible':[('value','!=','percent')]}"/>
+                                <span class="o_form_label oe_inline" attrs="{'invisible':[('value','!=','percent')]}">%</span>
                             </div>
                         </group>
                     </group>
@@ -1713,7 +1705,7 @@
                     <div colspan="2" attrs="{'invisible': [('option','!=', 'day_after_invoice_date')]}">
                         <label for="day_of_the_month" string="On the"/>
                         <field name="day_of_the_month" class="oe_inline"/>
-                        <label string="of the month"/>
+                        <span class="o_form_label">of the month</span>
                     </div>
                 </form>
             </field>
@@ -1942,7 +1934,7 @@
                                     <label for="amount" attrs="{'invisible':[('amount_type','=', 'group')]}"/>
                                     <div attrs="{'invisible':[('amount_type','=', 'group')]}">
                                         <field name="amount" class="oe_inline" />
-                                        <label string="%" class="oe_inline" attrs="{'invisible':[('amount_type','=','fixed')]}" />
+                                        <span class="o_form_label oe_inline" attrs="{'invisible':[('amount_type','=','fixed')]}">%</span>
                                     </div>
                                 </group>
                                 <group attrs="{'invisible':[('amount_type','=', 'group')]}">

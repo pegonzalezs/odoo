@@ -357,11 +357,11 @@ return core.Class.extend(mixins.EventDispatcherMixin, ServicesMixin, {
     STEPS: {
         MENU_MORE: {
             edition: "community",
-            trigger: "body > nav",
+            trigger: "body > header > nav",
             position: "bottom",
             auto: true,
             run: function (actions) {
-                actions.auto("#menu_more_container > a");
+                actions.auto("#more_menu_button");
             },
         },
 

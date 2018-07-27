@@ -6,7 +6,7 @@ import time
 from dateutil.relativedelta import relativedelta
 
 from odoo import fields, models, api, _
-from odoo.exceptions import ValidationError, UserError
+from odoo.exceptions import ValidationError, UserError, RedirectWarning
 from odoo.tools.misc import DEFAULT_SERVER_DATE_FORMAT
 from odoo.tools.float_utils import float_round, float_is_zero
 from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, date_utils
@@ -14,6 +14,9 @@ from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, date_utils
 
 class ResCompany(models.Model):
     _inherit = "res.company"
+
+    def _get_invoice_reference_types(self):
+        return [('invoice_number', _('Based on Invoice Number')), ('partner', _('Based on Partner')), ('none', _('Free Communication'))]
 
     #TODO check all the options/fields are in the views (settings + company form view)
     fiscalyear_last_day = fields.Integer(default=31, required=True)
@@ -54,6 +57,11 @@ If you have any queries regarding your account, Please contact us.
 Thank you in advance for your cooperation.
 Best Regards,'''))
     tax_exigibility = fields.Boolean(string='Use Cash Basis')
+    
+    incoterm_id = fields.Many2one('account.incoterms', string='Default incoterm',
+        help='International Commercial Terms are a series of predefined commercial terms used in international transactions.')
+    invoice_reference_type = fields.Selection(string='Default Communication Type', selection='_get_invoice_reference_types',
+                                              default='none', help='You can set here the default communication that will appear on customer invoices, once validated, to help the customer to refer to that particular invoice when making the payment.')
 
     #Fields of the setup step for opening move
     account_opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', help="The journal entry containing the initial balance of all this company's accounts.")
@@ -66,6 +74,27 @@ Best Regards,'''))
     account_setup_fy_data_done = fields.Boolean('Financial Year Setup Marked As Done', help="Technical field holding the status of the financial year setup step.")
     account_setup_coa_done = fields.Boolean(string='Chart of Account Checked', help="Technical field holding the status of the chart of account setup step.")
     account_setup_bar_closed = fields.Boolean(string='Setup Bar Closed', help="Technical field set to True when setup bar has been closed by the user.")
+
+    # account invoice onboarding
+    account_invoice_onboarding_closed = fields.Boolean(
+        string="Account invoice onboarding panel closed",
+        help="Refers to the account invoice onboarding panel closed state.")
+    account_invoice_onboarding_folded = fields.Boolean(
+        string="Account invoice onboarding panel folded",
+        help="Refers to the account invoice onboarding panel folded state.")
+
+    account_onboarding_invoice_layout_done = fields.Boolean("Onboarding invoice layout step done",
+        compute="_compute_account_onboarding_invoice_layout_done")
+    account_onboarding_sample_invoice_sent = fields.Boolean(
+        "Onboarding sample invoice step completed", default=False)
+
+    # account dashboard onboarding
+    account_dashboard_onboarding_closed = fields.Boolean(
+        string="Account dashboard onboarding panel closed",
+        help="Refers to the account dashboard onboarding panel closed state.")
+    account_dashboard_onboarding_folded = fields.Boolean(
+        string="Account dashboard onboarding panel folded",
+        help="Refers to the account dashboard onboarding panel folded state.")
 
     @api.multi
     def _check_lock_dates(self, vals):
@@ -295,43 +324,10 @@ Best Regards,'''))
             'name': _('Chart of Accounts'),
             'res_model': 'account.account',
             'view_mode': 'tree',
+            'limit': 99999999,
             'search_view_id': self.env.ref('account.view_account_search').id,
             'views': [[view_id, 'list']],
             'domain': domain,
-        }
-
-    @api.model
-    def setting_opening_move_action(self):
-        """ Called by the 'Initial Balances' button of the setup bar."""
-        company = self.env.user.company_id
-
-        # If the opening move has already been posted, we open its form view
-        if company.opening_move_posted():
-            form_view_id = self.env.ref('account.setup_posted_move_form').id
-            return {
-                'type': 'ir.actions.act_window',
-                'name': _('Initial Balances'),
-                'view_mode': 'form',
-                'res_model': 'account.move',
-                'target': 'new',
-                'res_id': company.account_opening_move_id.id,
-                'views': [[form_view_id, 'form']],
-            }
-
-        # Otherwise, we open a custom wizard to post it.
-        company.create_op_move_if_non_existant()
-        new_wizard = self.env['account.opening'].create({'company_id': company.id})
-        view_id = self.env.ref('account.setup_opening_move_wizard_form').id
-
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Initial Balances'),
-            'view_mode': 'form',
-            'res_model': 'account.opening',
-            'target': 'new',
-            'res_id': new_wizard.id,
-            'views': [[view_id, 'form']],
-            'context': {'check_move_validity': False},
         }
 
     @api.model
@@ -431,3 +427,111 @@ Best Regards,'''))
                         'debit': credit_diff,
                         'credit': debit_diff,
                     })
+
+    @api.depends('logo', 'account_invoice_onboarding_closed')
+    def _compute_account_onboarding_invoice_layout_done(self):
+        """ The invoice onboarding step is marked as done if logo is filled
+            and different from the default one. """
+        for record in self:
+            record.account_onboarding_invoice_layout_done = \
+                record.account_invoice_onboarding_closed or (
+                    bool(record.logo) and record.logo != record._get_logo())
+
+    @api.model
+    def action_toggle_fold_account_invoice_onboarding(self):
+        """ Toggle the onboarding panel `folded` state. """
+        self.env.user.company_id.account_invoice_onboarding_folded =\
+            not self.env.user.company_id.account_invoice_onboarding_folded
+
+    @api.model
+    def action_close_account_invoice_onboarding(self):
+        """ Mark the onboarding panel as closed. """
+        self.env.user.company_id.account_invoice_onboarding_closed = True
+
+    @api.model
+    def action_toggle_fold_account_dashboard_onboarding(self):
+        """ Toggle the dashboard onboarding panel `folded` state. """
+        self.env.user.company_id.account_dashboard_onboarding_folded =\
+            not self.env.user.company_id.account_dashboard_onboarding_folded
+
+    @api.model
+    def action_close_account_dashboard_onboarding(self):
+        """ Mark the dashboard onboarding panel as closed. """
+        self.env.user.company_id.account_dashboard_onboarding_closed = True
+
+    @api.model
+    def action_open_account_onboarding_invoice_layout(self):
+        """ Onboarding step for the invoice layout. """
+        action = self.env.ref('account.action_open_account_onboarding_invoice_layout').read()[0]
+        action['res_id'] = self.env.user.company_id.id
+        return action
+
+    @api.model
+    def _get_sample_invoice(self):
+        """ Get a sample invoice or create one if it does not exist. """
+        # use current user as partner
+        partner = self.env.user.partner_id
+
+        company_id = self.env.user.company_id.id
+        # try to find an existing sample invoice
+        sample_invoice = self.env['account.invoice'].search(
+            [('company_id', '=', company_id),
+             ('partner_id', '=', partner.id)], limit=1)
+
+        if len(sample_invoice) == 0:
+            # If there are no existing accounts or no journal, fail
+            account = self.env['account.account'].search([('company_id', '=', company_id)], limit=1)
+            if len(account) == 0:
+                action = self.env.ref('account.action_account_config')
+                msg = _(
+                    "We cannot find a chart of accounts for this company, you should configure it. \n"
+                    "Please go to Account Configuration and select or install a fiscal localization.")
+                raise RedirectWarning(msg, action.id, _("Go to the configuration panel"))
+
+            journal = self.env['account.journal'].search([('company_id', '=', company_id)], limit=1)
+            if len(journal) == 0:
+                action = self.env.ref('account.action_account_journal_form')
+                msg = _("We cannot find any journal for this company. You should create one."
+                        "\nPlease go to Configuration > Journals.")
+                raise RedirectWarning(msg, action.id, _("Go to the journal configuration"))
+
+            sample_invoice = self.env['account.invoice'].create({
+                'name': _("Sample invoice"),
+                'journal_id': journal.id,
+                'partner_id': partner.id,
+            })
+            # sample invoice lines
+            self.env['account.invoice.line'].create({
+                'name': _("Sample invoice line name"),
+                'invoice_id': sample_invoice.id,
+                'account_id': account.id,
+                'price_unit': 199.99,
+                'quantity': 2,
+            })
+            self.env['account.invoice.line'].create({
+                'name': _("Sample invoice line name 2"),
+                'invoice_id': sample_invoice.id,
+                'account_id': account.id,
+                'price_unit': 25,
+                'quantity': 1,
+            })
+        return sample_invoice
+
+    @api.model
+    def action_open_account_onboarding_sample_invoice(self):
+        """ Onboarding step for sending a sample invoice. Open a window to compose an email,
+            with the edi_invoice_template message loaded by default. """
+        sample_invoice = self._get_sample_invoice()
+        template = self.env.ref('account.email_template_edi_invoice', False)
+        action = self.env.ref('account.action_open_account_onboarding_sample_invoice').read()[0]
+        action['context'] = {
+            'default_res_id': sample_invoice.id,
+            'default_use_template': bool(template),
+            'default_template_id': template and template.id or False,
+            'default_model': 'account.invoice',
+            'default_composition_mode': 'comment',
+            'mark_invoice_as_sent': True,
+            'custom_layout': 'mail.mail_notification_borders',
+            'force_email': True,
+        }
+        return action

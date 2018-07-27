@@ -17,6 +17,7 @@ var _t = core._t;
  *   always exists during the lifecycle of the dialog.
  **/
 var Dialog = Widget.extend({
+    tagName: 'main',
     xmlDependencies: ['/web/static/src/xml/dialog.xml'],
     custom_events: _.extend({}, Widget.prototype.custom_events, {
         focus_control_button: '_onFocusControlButton',
@@ -102,6 +103,9 @@ var Dialog = Widget.extend({
      */
     renderElement: function () {
         this._super();
+        // Note: ideally, the $el which is created/set here should use the
+        // 'main' tag, we cannot enforce this as it would require to re-create
+        // the whole element.
         if (this.$content) {
             this.setElement(this.$content);
         }
@@ -169,6 +173,8 @@ var Dialog = Widget.extend({
         var self = this;
         this.appendTo($('<div/>')).then(function () {
             self.$modal.find(".modal-body").replaceWith(self.$el);
+            self.$modal.attr('open', true);
+            self.$modal.removeAttr("aria-hidden");
             self.$modal.modal('show');
             self._opened.resolve();
         });
@@ -183,12 +189,22 @@ var Dialog = Widget.extend({
         this.destroy();
     },
 
-    destroy: function (arg) {
+    /**
+     * Close and destroy the dialog.
+     *
+     * @param {Object} [options]
+     * @param {Object} [options.infos] if provided and `silent` is unset, the
+     *   `on_close` handler will pass this information related to closing this
+     *   information.
+     * @param {boolean} [options.silent=false] if set, do not call the
+     *   `on_close` handler.
+     */
+    destroy: function (options) {
         // Need to trigger before real destroy but if 'closed' handler destroys
         // the widget again, we want to avoid infinite recursion
         if (!this.__closed) {
             this.__closed = true;
-            this.trigger("closed", arg);
+            this.trigger('closed', options);
         }
 
         if (this.isDestroyed()) {
@@ -287,7 +303,8 @@ Dialog.alert = function (owner, message, options) {
     return new Dialog(owner, _.extend({
         size: 'medium',
         buttons: buttons,
-        $content: $('<div>', {
+        $content: $('<main/>', {
+            role: 'alert',
             text: message,
         }),
         title: _t("Alert"),
@@ -312,7 +329,8 @@ Dialog.confirm = function (owner, message, options) {
     return new Dialog(owner, _.extend({
         size: 'medium',
         buttons: buttons,
-        $content: $('<div>', {
+        $content: $('<main/>', {
+            role: 'alert',
             text: message,
         }),
         title: _t("Confirmation"),
@@ -345,7 +363,7 @@ Dialog.safeConfirm = function (owner, message, options) {
             text: message,
         });
     }
-    $content = $('<div/>').append($content, $securityCheck);
+    $content = $('<main/>', {role: 'alert'}).append($content, $securityCheck);
 
     var buttons = [
         {

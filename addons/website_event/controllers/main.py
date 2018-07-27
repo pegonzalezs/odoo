@@ -58,7 +58,7 @@ class WebsiteEventController(http.Controller):
                 ("date_end", ">=", sd(today.replace(day=1) + relativedelta(months=1))),
                 ("date_begin", "<", (today.replace(day=1) + relativedelta(months=2)).strftime('%Y-%m-%d 00:00:00'))],
                 0],
-            ['old', _('Old Events'), [
+            ['old', _('Past Events'), [
                 ("date_end", "<", today.strftime('%Y-%m-%d 00:00:00'))],
                 0],
         ]
@@ -177,7 +177,7 @@ class WebsiteEventController(http.Controller):
             'event': event,
             'main_object': event,
             'range': range,
-            'registrable': event._is_event_registrable()
+            'registrable': event.sudo()._is_event_registrable()
         }
         return request.render("website_event.event_description_full", values)
 
@@ -264,7 +264,7 @@ class WebsiteEventController(http.Controller):
 
         urls = event._get_event_resource_urls(Attendees.ids)
         return request.render("website_event.registration_complete", {
-            'attendees': Attendees,
+            'attendees': Attendees.sudo(),
             'event': event,
             'google_url': urls.get('google_url'),
             'iCal_url': urls.get('iCal_url')

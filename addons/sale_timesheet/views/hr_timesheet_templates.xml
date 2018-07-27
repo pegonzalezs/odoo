@@ -26,7 +26,7 @@
                             <div class="o_timesheet_plan_stat_buttons oe_button_box">
                                 <t t-foreach="stat_buttons" t-as="stat_button">
                                     <button class="btn btn-sm oe_stat_button" t-att-data-domain="stat_button['domain']" t-att-data-res-model="stat_button['res_model']">
-                                        <div t-attf-class="fa fa-fw o_button_icon #{stat_button['icon']}"></div>
+                                        <div t-attf-class="fa fa-fw o_button_icon #{stat_button['icon']}" role="img" aria-label="Statistics" title="Statistics"></div>
                                         <div name="task_count" class="o_field_widget o_stat_info o_readonly_modifier" t-att-title="stat_button['name']">
                                             <span class="o_stat_value" t-if="stat_button.get('count')">
                                                 <t t-esc="stat_button['count']"/>
@@ -277,15 +277,15 @@
                                                         <t t-if="row_value_index != 0">
                                                             <t t-if="row_value_index &lt; len(row)-2">
                                                                 <t t-if="row_is_milestone">
-                                                                    <i><t t-esc="row_value" t-options="{'widget': 'float_time'}"/></i>
+                                                                    <i t-att-class="'text-muted' if not row_value else ''"><t t-esc="row_value" t-options="{'widget': 'float_time'}"/></i>
                                                                 </t>
                                                                 <t t-else="">
-                                                                    <t t-esc="row_value" t-options="{'widget': 'float_time'}"/>
+                                                                    <span t-att-class="'text-muted' if not row_value else ''"><t t-esc="row_value" t-options="{'widget': 'float_time'}"/></span>
                                                                 </t>
                                                             </t>
                                                             <t t-else="">
-                                                                <t t-if="not row_is_milestone">
-                                                                    <t t-esc="row_value" t-options="{'widget': 'float_time'}"/>
+                                                                <t t-if="not row_is_milestone and not row[0].get('type') == 'hr_employee'">
+                                                                    <span t-att-class="'text-muted' if not row_value else ''"><t t-esc="row_value" t-options="{'widget': 'float_time'}"/></span>
                                                                 </t>
                                                             </t>
                                                         </t>

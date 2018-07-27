@@ -27,6 +27,12 @@
                     <div class="navbar navbar-default navbar-static-top">
                         <div class="container">
                             <div class="navbar-header">
+                                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-top-collapse">
+                                    <span class="sr-only">Toggle navigation</span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                    <span class="icon-bar"></span>
+                                </button>
                                 <a href="/" class="navbar-brand logo">
                                     <span t-field="res_company.logo" t-options="{'widget': 'image'}" t-att-alt="'Logo of %s' % res_company.name" t-att-title="res_company.name"/>
                                 </a>
@@ -57,7 +63,10 @@
                     <t t-raw="0"/>
                 </main>
                 <footer >
-                    <div id="footer">
+                    <div class="container mt16 mb16" id="footer">
+                        <div class="pull-right" t-ignore="true" t-if="not editable">
+                            Powered by <a target="_blank" href="http://www.odoo.com">Odoo</a>
+                        </div>
                     </div>
                 </footer>
             </div>
@@ -69,11 +78,12 @@
             <div class="container mt16 mb16 o_portal">
                 <div class="oe_structure">
                     <div t-if="not no_breadcrumbs" class="row">
-                        <div class="col-sm-12">
-                            <ol class="breadcrumb o_portal_submenu">
-                                <li><a href="/my/home"><i class="fa fa-home"/></a></li>
+                        <div t-attf-class="col-sm-12">
+                            <ol t-if="page_name != 'home'" class="breadcrumb o_portal_submenu">
+                                <li><a href="/my/home" aria-label="Home" title="Home"><i class="fa fa-home"/></a></li>
                                 <li t-if="page_name == 'my_details'">Your Details</li>
                             </ol>
+                            <t t-call='portal.record_pager'/>
                         </div>
                     </div>
                 </div>
@@ -90,7 +100,7 @@
                                     <t t-call="portal.portal_contact"/>
                                 </div>
                                 <div class="o_portal_my_details">
-                                    <h3 class="page-header">Your Details <a href="/my/account" class="btn btn-default btn-xs">Change</a></h3>
+                                    <h3 class="page-header">Your Details <a role="button" href="/my/account" class="btn btn-default btn-xs">Change</a></h3>
                                     <div t-field="user_id.partner_id" t-options='{"widget": "contact", "fields": ["email", "phone", "address", "name"]}'/>
                                 </div>
                                 <div class="o_my_archives" t-if="archive_groups">
@@ -272,7 +282,7 @@
                     <div class="col-md-8">
                         <div class="row">
                             <div class="col-md-12">
-                              <div t-if="error_message" class="alert alert-danger">
+                              <div t-if="error_message" class="alert alert-danger" role="alert">
                                   <t t-foreach="error_message" t-as="err"><t t-esc="err"/><br /></t>
                               </div>
                             </div>
@@ -352,8 +362,8 @@
     <template id="record_pager" name="Portal Record Pager">
         <t t-if='prev_record or next_record'>
           <div class="ml8 record_pager btn-group btn-group-xs pull-right" role="group">
-            <a t-att-class="'btn btn-default %s' % ('disabled' if not prev_record else '')" t-att-href="prev_record or '#'" ><i class="fa fa-arrow-left" aria-hidden="true"></i></a>
-            <a t-att-class="'btn btn-default %s' % ('disabled' if not next_record else '')" t-att-href="next_record or '#'" ><i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+            <a role="button" t-att-class="'btn btn-default %s' % ('disabled' if not prev_record else '')" t-att-href="prev_record or '#'" ><i class="fa fa-arrow-left" role="img" aria-label="Previous" title="Previous"></i></a>
+            <a role="button" t-att-class="'btn btn-default %s' % ('disabled' if not next_record else '')" t-att-href="next_record or '#'" ><i class="fa fa-arrow-right" role="img" aria-label="Next" title="Previous"></i></a>
           </div>
         </t>
     </template>
@@ -411,5 +421,14 @@
             t-att-data-call-url="callUrl"
             t-att-data-sign-label="signLabel"
             t-att-data-access-token="accessToken"/>
+    </template>
+
+    <template id="portal_sidebar" name="Sidebar">
+        <t t-call="portal.portal_layout">
+            <body data-spy="scroll" data-target=".navspy" data-offset="50">
+                <div class="container o_portal_sidebar"></div>
+                <div class="oe_structure mb32"/>
+            </body>
+        </t>
     </template>
 </odoo>

@@ -35,7 +35,7 @@
                     <filter name="group_category" string="Category" context="{'group_by':'category_id'}"/>
                     <filter name="group_type" string="Type" context="{'group_by':'holiday_status_id'}"/>
                     <separator/>
-                    <filter name="group_date_from" string="Start Month" context="{'group_by':'date_from'}"/>
+                    <filter name="group_date_from" string="Start Date" context="{'group_by':'date_from'}"/>
                 </group>
             </search>
         </field>
@@ -73,7 +73,7 @@
                         <div t-attf-class="oe_kanban_global_click">
                             <div>
                                 <span>
-                                    <img t-att-src="kanban_image('hr.employee', 'image_small', record.employee_id.raw_value)" t-att-title="record.employee_id.value" width="40" height="40" class="oe_kanban_avatar pull-left mr4"/>
+                                    <img t-att-src="kanban_image('hr.employee', 'image_small', record.employee_id.raw_value)" t-att-title="record.employee_id.value" t-att-alt="record.employee_id.value" width="40" height="40" class="oe_kanban_avatar pull-left mr4"/>
                                 </span>
                                 <span>
                                     <div>

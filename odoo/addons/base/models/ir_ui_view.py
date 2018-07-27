@@ -338,8 +338,11 @@ actual arch.
                     # A <data> element is a wrapper for multiple root nodes
                     view_docs = view_docs[0]
                 for view_arch in view_docs:
-                    if not valid_view(view_arch):
-                        raise ValidationError(_('Invalid view definition'))
+                    check = valid_view(view_arch)
+                    if not check:
+                        raise ValidationError(_('Invalid view %s definition in %s') % (view.name, view.arch_fs))
+                    if check == "Warning":
+                        _logger.warning(_('Invalid view %s definition in %s \n%s'), view.name, view.arch_fs, view.arch)
         return True
 
     @api.constrains('type', 'groups_id')
@@ -374,27 +377,28 @@ actual arch.
             values.setdefault('mode', 'extension' if values['inherit_id'] else 'primary')
         return values
 
-    @api.model
-    def create(self, values):
-        if not values.get('type'):
-            if values.get('inherit_id'):
-                values['type'] = self.browse(values['inherit_id']).type
-            else:
+    @api.model_create_multi
+    def create(self, vals_list):
+        for values in vals_list:
+            if not values.get('type'):
+                if values.get('inherit_id'):
+                    values['type'] = self.browse(values['inherit_id']).type
+                else:
 
-                try:
-                    if not values.get('arch') and not values.get('arch_base'):
-                        raise ValidationError(_('Missing view architecture.'))
-                    values['type'] = etree.fromstring(values.get('arch') or values.get('arch_base')).tag
-                except LxmlError:
-                    # don't raise here, the constraint that runs `self._check_xml` will
-                    # do the job properly.
-                    pass
-
-        if not values.get('name'):
-            values['name'] = "%s %s" % (values.get('model'), values['type'])
+                    try:
+                        if not values.get('arch') and not values.get('arch_base'):
+                            raise ValidationError(_('Missing view architecture.'))
+                        values['type'] = etree.fromstring(values.get('arch') or values.get('arch_base')).tag
+                    except LxmlError:
+                        # don't raise here, the constraint that runs `self._check_xml` will
+                        # do the job properly.
+                        pass
+            if not values.get('name'):
+                values['name'] = "%s %s" % (values.get('model'), values['type'])
+            values.update(self._compute_defaults(values))
 
         self.clear_caches()
-        return super(View, self).create(self._compute_defaults(values))
+        return super(View, self).create(vals_list)
 
     @api.multi
     def write(self, vals):
@@ -411,6 +415,12 @@ actual arch.
 
         self.clear_caches()
         return super(View, self).write(self._compute_defaults(vals))
+
+    def unlink(self):
+        # if in uninstall mode and has children views, emulate an ondelete cascade
+        if self.env.context.get('_force_unlink', False) and self.mapped('inherit_children_ids'):
+            self.mapped('inherit_children_ids').unlink()
+        super(View, self).unlink()
 
     @api.multi
     def toggle(self):

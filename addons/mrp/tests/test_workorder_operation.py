@@ -21,6 +21,8 @@ class TestWorkOrderProcess(common.TransactionCase):
         product_table_leg = self.env.ref('mrp.product_product_computer_desk_leg')
         product_bolt = self.env.ref('mrp.product_product_computer_desk_bolt')
         product_screw = self.env.ref('mrp.product_product_computer_desk_screw')
+        self.env['stock.move'].search([('product_id', 'in', [product_bolt.id, product_screw.id])])._do_unreserve()
+        (product_bolt + product_screw).write({'type': 'product'})
 
         production_table = self.env['mrp.production'].create({
             'product_id': dining_table.id,
@@ -70,7 +72,7 @@ class TestWorkOrderProcess(common.TransactionCase):
                 'location_id': self.source_location_id
             })]
         })
-        inventory.action_done()
+        inventory.action_validate()
 
         # Create work order
         production_table.button_plan()
@@ -119,6 +121,8 @@ class TestWorkOrderProcess(common.TransactionCase):
         product_table_sheet = self.env.ref('mrp.product_product_computer_desk_head')
         product_table_leg = self.env.ref('mrp.product_product_computer_desk_leg')
         product_bolt = self.env.ref('mrp.product_product_computer_desk_bolt')
+        self.env['stock.move'].search([('product_id', '=', product_bolt.id)])._do_unreserve()
+        product_bolt.type = 'product'
 
         bom = self.env['mrp.bom'].browse(self.ref("mrp.mrp_bom_desk"))
         bom.routing_id = self.ref('mrp.mrp_routing_1')
@@ -170,7 +174,7 @@ class TestWorkOrderProcess(common.TransactionCase):
                 'location_id': self.source_location_id
             })]
         })
-        inventory.action_done()
+        inventory.action_validate()
 
         # Create work order
         production_table.button_plan()
@@ -222,7 +226,7 @@ class TestWorkOrderProcess(common.TransactionCase):
         self.assertEqual(move_table_bolt.quantity_done, 4)
 
         # Change the quantity of the production order to 1
-        wiz = self.env['change.production.qty'].create({'mo_id': production_table.id , 
+        wiz = self.env['change.production.qty'].create({'mo_id': production_table.id ,
                                                         'product_qty': 1.0})
         wiz.change_prod_qty()
         # ---------------------------------------------------------------
@@ -313,7 +317,7 @@ class TestWorkOrderProcess(common.TransactionCase):
             })]
         })
         # inventory.action_start()
-        inventory.action_done()
+        inventory.action_validate()
 
         # Check consumed move status
         mo_custom_laptop.action_assign()
@@ -377,12 +381,12 @@ class TestWorkOrderProcess(common.TransactionCase):
 #         finsh_moves_state = any(move.state != 'done' for move in mo_custom_laptop.move_finished_ids)
 #         self.assertFalse(raw_moves_state, "Wrong state in consumed moves of production order.")
 #         self.assertFalse(finsh_moves_state, "Wrong state in consumed moves of production order.")
-# 
+#
 #         # Finished move quants of production order
-# 
+#
 #         finshed_quant_lot_001 = mo_custom_laptop.move_finished_ids.filtered(lambda x: x.product_id.id == custom_laptop.id and x.product_uom_qty==6).mapped('quant_ids')
 #         finshed_quant_lot_002 = mo_custom_laptop.move_finished_ids.filtered(lambda x: x.product_id.id == custom_laptop.id and x.product_uom_qty==4).mapped('quant_ids')
-# 
+#
 #         # Check total quantity consumed of charger, keybord
 #         # --------------------------------------------------
 #         charger_quants = mo_custom_laptop.move_raw_ids.filtered(lambda x: x.product_id.id == product_charger.id and x.state == 'done').mapped('quant_ids')
@@ -487,7 +491,7 @@ class TestWorkOrderProcess(common.TransactionCase):
             })]
         })
         # inventory.action_start()
-        inventory.action_done()
+        inventory.action_validate()
 
         # Start Production ...
         # --------------------

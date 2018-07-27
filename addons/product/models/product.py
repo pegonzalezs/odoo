@@ -220,6 +220,7 @@ class ProductProduct(models.Model):
         for supplier_info in self.seller_ids:
             if supplier_info.name.id == self._context.get('partner_id'):
                 self.code = supplier_info.product_code or self.default_code
+                break
         else:
             self.code = self.default_code
 
@@ -229,6 +230,7 @@ class ProductProduct(models.Model):
             if supplier_info.name.id == self._context.get('partner_id'):
                 product_name = supplier_info.product_name or self.default_code
                 self.partner_ref = '%s%s' % (self.code and '[%s] ' % self.code or '', product_name)
+                break
         else:
             self.partner_ref = self.name_get()[0][1]
 
@@ -296,13 +298,14 @@ class ProductProduct(models.Model):
         if self.uom_id and self.uom_po_id and self.uom_id.category_id != self.uom_po_id.category_id:
             self.uom_po_id = self.uom_id
 
-    @api.model
-    def create(self, vals):
-        product = super(ProductProduct, self.with_context(create_product_product=True)).create(vals)
-        # When a unique variant is created from tmpl then the standard price is set by _set_standard_price
-        if not (self.env.context.get('create_from_tmpl') and len(product.product_tmpl_id.product_variant_ids) == 1):
-            product._set_standard_price(vals.get('standard_price') or 0.0)
-        return product
+    @api.model_create_multi
+    def create(self, vals_list):
+        products = super(ProductProduct, self.with_context(create_product_product=True)).create(vals_list)
+        for product, vals in pycompat.izip(products, vals_list):
+            # When a unique variant is created from tmpl then the standard price is set by _set_standard_price
+            if not (self.env.context.get('create_from_tmpl') and len(product.product_tmpl_id.product_variant_ids) == 1):
+                product._set_standard_price(vals.get('standard_price') or 0.0)
+        return products
 
     @api.multi
     def write(self, values):
@@ -628,3 +631,10 @@ class SupplierInfo(models.Model):
     delay = fields.Integer(
         'Delivery Lead Time', default=1, required=True,
         help="Lead time in days between the confirmation of the purchase order and the receipt of the products in your warehouse. Used by the scheduler for automatic computation of the purchase order planning.")
+
+    @api.model
+    def get_import_templates(self):
+        return [{
+            'label': _('Import Template for Vendor Pricelists'),
+            'template': '/product/static/xls/product_supplierinfo.xls'
+        }]

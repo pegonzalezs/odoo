@@ -8,10 +8,10 @@ class StockWarehouse(models.Model):
     _inherit = 'stock.warehouse'
 
     manufacture_to_resupply = fields.Boolean(
-        'Manufacture in this Warehouse', default=True,
+        'Manufacture to Resupply', default=True,
         help="When products are manufactured, they can be manufactured in this warehouse.")
     manufacture_pull_id = fields.Many2one(
-        'procurement.rule', 'Manufacture Rule')
+        'stock.rule', 'Manufacture Rule')
     manu_type_id = fields.Many2one(
         'stock.picking.type', 'Manufacturing Operation Type',
         domain=[('code', '=', 'mrp_operation')])
@@ -25,7 +25,7 @@ class StockWarehouse(models.Model):
     def get_routes_dict(self):
         result = super(StockWarehouse, self).get_routes_dict()
         for warehouse in self:
-            result[warehouse.id]['manufacture'] = [self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id)]
+            result[warehouse.id]['manufacture'] = [self.Routing(warehouse.lot_stock_id, warehouse.lot_stock_id, warehouse.int_type_id, 'manufacture')]
         return result
 
     def _get_manufacture_route_id(self):
@@ -39,7 +39,7 @@ class StockWarehouse(models.Model):
     def _get_manufacture_pull_rules_values(self, route_values):
         if not self.manu_type_id:
             self._create_manufacturing_picking_type()
-        dummy, pull_rules_list = self._get_push_pull_rules_values(route_values, pull_values={
+        pull_rules_list = self._get_rule_values(route_values, values={
             'name': self._format_routename(_(' Manufacture')),
             'location_src_id': False,  # TDE FIXME
             'action': 'manufacture',
@@ -81,7 +81,7 @@ class StockWarehouse(models.Model):
                 manufacture_pull = warehouse.manufacture_pull_id
                 manufacture_pull.write(warehouse._get_manufacture_pull_rules_values(routings)[0])
             else:
-                manufacture_pull = self.env['procurement.rule'].create(warehouse._get_manufacture_pull_rules_values(routings)[0])
+                manufacture_pull = self.env['stock.rule'].create(warehouse._get_manufacture_pull_rules_values(routings)[0])
         return manufacture_pull
 
     @api.multi
@@ -120,7 +120,7 @@ class StockWarehouse(models.Model):
     @api.multi
     def _update_name_and_code(self, name=False, code=False):
         res = super(StockWarehouse, self)._update_name_and_code(name, code)
-        # change the manufacture procurement rule name
+        # change the manufacture stock rule name
         for warehouse in self:
             if warehouse.manufacture_pull_id and name:
                 warehouse.manufacture_pull_id.write({'name': warehouse.manufacture_pull_id.name.replace(warehouse.name, name, 1)})

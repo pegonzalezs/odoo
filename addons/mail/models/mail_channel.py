@@ -153,7 +153,7 @@ class Channel(models.Model):
     @api.constrains('moderator_ids', 'channel_partner_ids', 'channel_last_seen_partner_ids')
     def _check_moderator_is_member(self):
         for channel in self:
-            if not (channel.mapped('moderator_ids.partner_id') <= channel.channel_partner_ids):
+            if not (channel.mapped('moderator_ids.partner_id') <= channel.sudo().channel_partner_ids):
                 raise ValidationError("Moderators should be members of the channel they moderate.")
 
     @api.constrains('moderation', 'email_send')
@@ -549,6 +549,7 @@ class Channel(models.Model):
                 'moderation': channel.moderation,
                 'is_moderator': self.env.uid in channel.moderator_ids.ids,
                 'group_based_subscription': bool(channel.group_ids),
+                'create_uid': channel.create_uid.id,
             }
             if extra_info:
                 info['info'] = extra_info
@@ -890,10 +891,10 @@ class Channel(models.Model):
             channel_partners = self.env['mail.channel.partner'].search([('partner_id', '!=', partner.id), ('channel_id', '=', self.id)])
             msg = _("You are in a private conversation with <b>@%s</b>.") % (channel_partners[0].partner_id.name if channel_partners else _('Anonymous'))
         msg += _("""<br><br>
-            You can mention someone by typing <b>@username</b>, this will grab its attention.<br>
-            You can mention a channel by typing <b>#channel</b>.<br>
-            You can execute a command by typing <b>/command</b>.<br>
-            You can insert canned responses in your message by typing <b>:shortcut</b>.<br>""")
+            Type <b>@username</b> to mention someone, and grab his attention.<br>
+            Type <b>#channel</b>.to mention a channel.<br>
+            Type <b>/command</b> to execute a command.<br>
+            Type <b>:shortcut</b> to insert canned responses in your message.<br>""")
 
         self._send_transient_message(partner, msg)
 

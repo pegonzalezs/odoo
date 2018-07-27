@@ -1178,4 +1178,46 @@ QUnit.module('Views', {
             "should have 6 rows");
         pivot.destroy();
     });
+
+    QUnit.test('pivot measures should be alphabetically sorted', function (assert) {
+        assert.expect(2);
+
+        var data = this.data;
+        data.partner.fields.bouh = {string: "bouh", type: "integer"};
+
+        var pivot = createView({
+            View: PivotView,
+            model: "partner",
+            data: data,
+            arch: '<pivot>' +
+                        '<field name="foo" type="measure"/>' +
+                        '<field name="bouh" type="measure"/>' +
+                  '</pivot>',
+        })
+
+        assert.strictEqual(pivot.$buttons.find('.o_pivot_measures_list li:first').data('field'), 'bouh',
+            "Bouh should be the first measure");
+        assert.strictEqual(pivot.$buttons.find('.o_pivot_measures_list li:last').data('field'), '__count',
+            "Count should be the last measure");
+
+        pivot.destroy();
+    });
+
+    QUnit.test('pivot view should use default order for auto sorting', function (assert) {
+        assert.expect(1);
+
+        var pivot = createView({
+            View: PivotView,
+            model: "partner",
+            data: this.data,
+            arch: '<pivot default_order="foo asc">' +
+                        '<field name="foo" type="measure"/>' +
+                  '</pivot>',
+        });
+
+        assert.ok(pivot.$('thead tr:last th:last').hasClass('o_pivot_measure_row_sorted_asc'),
+                        "Last thead should be sorted in ascending order");
+
+        pivot.destroy();
+    });
 });});

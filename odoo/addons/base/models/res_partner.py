@@ -17,6 +17,7 @@ from odoo import api, fields, models, tools, SUPERUSER_ID, _
 from odoo.modules import get_module_resource
 from odoo.osv.expression import get_unaccent_wrapper
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import pycompat
 
 # Global variables used for the warning fields declared on the res.partner
 # in the following modules : sale, purchase, account, stock 
@@ -329,7 +330,9 @@ class Partner(models.Model):
     @api.multi
     def copy(self, default=None):
         self.ensure_one()
-        default = dict(default or {}, name=_('%s (copy)') % self.name)
+        chosen_name = default.get('name') if default else ''
+        new_name = chosen_name or _('%s (copy)') % self.name
+        default = dict(default or {}, name=new_name)
         return super(Partner, self).copy(default)
 
     @api.onchange('parent_id')
@@ -372,7 +375,10 @@ class Partner(models.Model):
     @api.depends('name', 'email')
     def _compute_email_formatted(self):
         for partner in self:
-            partner.email_formatted = formataddr((partner.name or u"False", partner.email or u"False"))
+            if partner.email:
+                partner.email_formatted = formataddr((partner.name or u"False", partner.email or u"False"))
+            else:
+                partner.email_formatted = ''
 
     @api.depends('is_company')
     def _compute_company_type(self):
@@ -514,7 +520,8 @@ class Partner(models.Model):
                 if partner.user_ids:
                     companies = set(user.company_id for user in partner.user_ids)
                     if len(companies) > 1 or company not in companies:
-                        raise UserError(_("You can not change the company as the partner/user has multiple user linked with different companies."))
+                        raise UserError(
+                            ("The selected company is not compatible with the companies of the related user(s)"))
         tools.image_resize_images(vals, sizes={'image': (1024, None)})
 
         result = True
@@ -529,21 +536,23 @@ class Partner(models.Model):
             partner._fields_sync(vals)
         return result
 
-    @api.model
-    def create(self, vals):
-        if vals.get('website'):
-            vals['website'] = self._clean_website(vals['website'])
-        if vals.get('parent_id'):
-            vals['company_name'] = False
-        # compute default image in create, because computing gravatar in the onchange
-        # cannot be easily performed if default images are in the way
-        if not vals.get('image'):
-            vals['image'] = self._get_default_image(vals.get('type'), vals.get('is_company'), vals.get('parent_id'))
-        tools.image_resize_images(vals, sizes={'image': (1024, None)})
-        partner = super(Partner, self).create(vals)
-        partner._fields_sync(vals)
-        partner._handle_first_contact_creation()
-        return partner
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('website'):
+                vals['website'] = self._clean_website(vals['website'])
+            if vals.get('parent_id'):
+                vals['company_name'] = False
+            # compute default image in create, because computing gravatar in the onchange
+            # cannot be easily performed if default images are in the way
+            if not vals.get('image'):
+                vals['image'] = self._get_default_image(vals.get('type'), vals.get('is_company'), vals.get('parent_id'))
+            tools.image_resize_images(vals, sizes={'image': (1024, None)})
+        partners = super(Partner, self).create(vals_list)
+        for partner, vals in pycompat.izip(partners, vals_list):
+            partner._fields_sync(vals)
+            partner._handle_first_contact_creation()
+        return partners
 
     @api.multi
     def create_company(self):
@@ -825,6 +834,13 @@ class Partner(models.Model):
             'country_id.address_format', 'country_id.code', 'country_id.name',
             'company_name', 'state_id.code', 'state_id.name',
         ]
+
+    @api.model
+    def get_import_templates(self):
+        return [{
+            'label': _('Import Template for Customers'),
+            'template': '/base/static/xls/res_partner.xls'
+        }]
 
 
 class ResPartnerIndustry(models.Model):

@@ -57,7 +57,7 @@ class TestMrpOrder(TestMrpCommon):
                 'location_id': self.warehouse_1.lot_stock_id.id
             })]
         })
-        inventory.action_done()
+        inventory.action_validate()
 
         test_date_planned = datetime.now() - timedelta(days=1)
         test_quantity = 2.0
@@ -241,7 +241,7 @@ class TestMrpOrder(TestMrpCommon):
             })]
         })
         inventory.action_start()
-        inventory.action_done()
+        inventory.action_validate()
 
         # re-assign consume material
         man_order.action_assign()
@@ -399,7 +399,7 @@ class TestMrpOrder(TestMrpCommon):
                 'location_id': source_location_id
             })]
         })
-        inventory.action_done()
+        inventory.action_validate()
 
         # create a mo for this bom
         mo_custom_laptop = self.env['mrp.production'].create({
@@ -590,16 +590,16 @@ class TestMrpOrder(TestMrpCommon):
         self.assertEqual(mo.state, 'done', "Production order should be in done state.")
 
     def test_product_produce_uom(self):
-        hdd_on_demand = self.env.ref('mrp.product_product_19')
-        bom = self.env.ref('mrp.mrp_bom_3')
+        plastic_laminate = self.env.ref('mrp.product_product_plastic_laminate')
+        bom = self.env.ref('mrp.mrp_bom_plastic_laminate')
         dozen = self.env.ref('uom.product_uom_dozen')
         unit = self.env.ref('uom.product_uom_unit')
 
-        hdd_on_demand.tracking = 'serial'
+        plastic_laminate.tracking = 'serial'
 
         mo = self.env['mrp.production'].create({
-            'name': 'A dozen pls',
-            'product_id': hdd_on_demand.id,
+            'name': 'Dozen Plastic Laminate',
+            'product_id': plastic_laminate.id,
             'product_uom_id': dozen.id,
             'product_qty': 1,
             'bom_id': bom.id,
@@ -607,7 +607,7 @@ class TestMrpOrder(TestMrpCommon):
 
         final_product_lot = self.env['stock.production.lot'].create({
             'name': 'lot1',
-            'product_id': hdd_on_demand.id,
+            'product_id': plastic_laminate.id,
         })
 
         mo.action_assign()

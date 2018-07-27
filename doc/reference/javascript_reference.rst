@@ -1435,10 +1435,26 @@ order.
 
     - Supported field types: *date*, *datetime*
 
+    Options:
+
+    - datepicker: extra settings for the datepicker_ widget.
+
+    .. code-block:: xml
+
+        <field name="datefield" options='{"datepicker": {"daysOfWeekDisabled": [0, 6]}}'/>
+
 - datetime (FieldDateTime)
     This is the default field type for fields of type *datetime*.
 
     - Supported field types: *date*, *datetime*
+
+    Options:
+
+    - datepicker: extra settings for the datepicker_ widget.
+
+    .. code-block:: xml
+
+        <field name="datefield" options='{"datepicker": {"daysOfWeekDisabled": [0, 6]}}'/>
 
 - monetary (FieldMonetary)
     This is the default field type for fields of type 'monetary'. It is used to
@@ -1462,8 +1478,10 @@ order.
 
 
 - handle (HandleWidget)
-    This field's job is to be displayed as a *handle* in a list view, and allow
+    This field's job is to be displayed as a *handle* in a list view, and allows
     reordering the various records by drag and dropping lines.
+
+    .. warning:: Having more than one field with a handle widget on the same list is not supported.
 
     - Supported field types: *integer*
 
@@ -1937,5 +1955,7 @@ Relational fields
 
 .. _event delegation:
     http://api.jquery.com/delegate/
+
+.. _datepicker: https://github.com/Eonasdan/bootstrap-datetimepicker
 
 .. _deferred: http://api.jquery.com/category/deferred-object/
