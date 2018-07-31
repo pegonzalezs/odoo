@@ -13,7 +13,7 @@ class SaleReport(models.Model):
     _order = 'date desc'
 
     name = fields.Char('Order Reference', readonly=True)
-    date = fields.Datetime('Date Order', readonly=True)
+    date = fields.Datetime('Order Date', readonly=True)
     confirmation_date = fields.Datetime('Confirmation Date', readonly=True)
     product_id = fields.Many2one('product.product', 'Product', readonly=True)
     product_uom = fields.Many2one('uom.uom', 'Unit of Measure', readonly=True)
@@ -46,7 +46,7 @@ class SaleReport(models.Model):
     weight = fields.Float('Gross Weight', readonly=True)
     volume = fields.Float('Volume', readonly=True)
 
-    def _query(self, with_clause='', fields={}, groupby=''):
+    def _query(self, with_clause='', fields={}, groupby='', from_clause=''):
         with_ = """currency_rate as (%s) %s""" % (self.env['res.currency']._select_companies_rates(), with_clause)
 
         select_ = """
@@ -97,7 +97,8 @@ class SaleReport(models.Model):
                         cr.company_id = s.company_id and
                         cr.date_start <= coalesce(s.date_order, now()) and
                         (cr.date_end is null or cr.date_end > coalesce(s.date_order, now())))
-        """
+                %s
+        """ % from_clause
 
         groupby_ = """
             l.product_id,

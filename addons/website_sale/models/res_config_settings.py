@@ -32,7 +32,7 @@ class ResConfigSettings(models.TransientModel):
     module_website_sale_comparison = fields.Boolean("Product Comparison Tool")
     module_website_sale_stock = fields.Boolean("Inventory", help='Installs the "Website Delivery Information" application')
 
-    module_account_invoicing = fields.Boolean("Invoicing")
+    module_account = fields.Boolean("Invoicing")
 
     automatic_invoice = fields.Boolean("Automatic Invoice",
                                        help="The invoice is generated automatically and available in the customer portal "
@@ -40,8 +40,6 @@ class ResConfigSettings(models.TransientModel):
                                        "The invoice is marked as paid and the payment is registered in the payment journal "
                                        "defined in the configuration of the payment acquirer.\n"
                                        "This mode is advised if you issue the final invoice at the order and not after the delivery.")
-
-    module_l10n_eu_service = fields.Boolean(string="EU Digital Goods VAT")
 
     cart_recovery_mail_template = fields.Many2one('mail.template', string='Cart Recovery Email',
         default=_default_recovery_mail_template, config_parameter='website_sale.cart_recovery_mail_template_id', domain="[('model', '=', 'sale.order')]")
@@ -67,7 +65,7 @@ class ResConfigSettings(models.TransientModel):
 
     def set_values(self):
         super(ResConfigSettings, self).set_values()
-        value = self.module_account_invoicing and self.default_invoice_policy == 'order' and self.automatic_invoice
+        value = self.module_account and self.default_invoice_policy == 'order' and self.automatic_invoice
         self.env['ir.config_parameter'].sudo().set_param('website_sale.automatic_invoice', value)
 
     @api.onchange('sale_delivery_settings')
