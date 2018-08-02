@@ -1150,22 +1150,19 @@ var MediaDialog = Dialog.extend({
         }
 
         this.opened(function () {
-            if (!self.media) {
-                return;
-            }
-            if (self.$media.is('img')) {
-                self.$('[href="#editor-media-image"]').tab('show');
+            var tabToShow = 'icon';
+            if (!self.media || self.$media.is('img')) {
+                tabToShow = 'image';
             } else if (self.$media.is('a.o_image')) {
-                self.$('[href="#editor-media-document"]').tab('show');
+                tabToShow = 'document';
             } else if (self.$media.attr('class').match(/(^|\s)media_iframe_video($|\s)/)) {
-                self.$('[href="#editor-media-video"]').tab('show');
+                tabToShow = 'video';
             } else if (self.$media.parent().attr('class').match(/(^|\s)media_iframe_video($|\s)/)) {
                 self.$media = self.$media.parent();
                 self.media = self.$media[0];
-                self.$('[href="#editor-media-video"]').tab('show');
-            } else if (self.$media.attr('class').match(/(^|\s)fa($|\s)/)) {
-                self.$('[href="#editor-media-icon"]').tab('show');
-            }
+                tabToShow = 'video';
+            } 
+            self.$('[href="#editor-media-' + tabToShow + '"]').tab('show');
         });
 
         this._onSearchInput = _.debounce(this._onSearchInput, 250);
@@ -1741,14 +1738,11 @@ var CropImageDialog = Dialog.extend({
      * @param {MouseEvent} ev
      */
     _onCropOptionClick: function (ev) {
-        ev.preventDefault();
         var $option = $(ev.currentTarget);
         var opt = $option.data('event');
         var value = $option.data('value');
         switch (opt) {
             case 'ratio':
-                $option.siblings().removeClass('active');
-                $option.addClass('active');
                 this.$cropperImage.cropper('reset');
                 this.imageData.aspectRatio = $option.data('label');
                 this.$cropperImage.cropper('setAspectRatio', value);

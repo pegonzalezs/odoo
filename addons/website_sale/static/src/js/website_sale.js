@@ -16,7 +16,7 @@ odoo.define('website_sale.cart', function (require) {
         },
         container: 'body',
         placement: 'auto',
-        template: '<div class="popover mycart-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+        template: '<div class="popover mycart-popover" role="tooltip"><div class="arrow"></div><h3 class="popover-header"></h3><div class="popover-body"></div></div>'
     }).on("mouseenter",function () {
         var self = this;
         clearTimeout(shopping_cart_link_counter);
@@ -389,8 +389,9 @@ odoo.define('website_sale.website_sale', function (require) {
             $.post($form.attr('action'), $form.serialize()+'&xhr=1');
           }
         });
-        $('.oe_cart').on('click', '.js_edit_address', function() {
-            $(this).parent('div.one_kanban').find('form.hide').attr('action', '/shop/address').submit();
+        $('.oe_cart').on('click', '.js_edit_address', function (ev) {
+            ev.preventDefault();
+            $(this).closest('div.one_kanban').find('form.d-none').attr('action', '/shop/address').submit();
         });
         $('.oe_cart').on('click', '.js_delete_product', function(e) {
             e.preventDefault();
