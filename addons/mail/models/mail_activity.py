@@ -172,7 +172,9 @@ class MailActivity(models.Model):
     def _onchange_activity_type_id(self):
         if self.activity_type_id:
             self.summary = self.activity_type_id.summary
-            self.date_deadline = (datetime.now() + timedelta(days=self.activity_type_id.days))
+            # Date.context_today is correct because date_deadline is a Date and is meant to be
+            # expressed in user TZ
+            self.date_deadline = fields.Date.context_today(self) + timedelta(days=self.activity_type_id.days)
 
     @api.onchange('recommended_activity_type_id')
     def _onchange_recommended_activity_type_id(self):
@@ -492,6 +494,19 @@ class MailActivityMixin(models.AbstractModel):
                 ('res_id', 'in', record_to_deactivate.ids)
             ]).unlink()
         return super(MailActivityMixin, self).toggle_active()
+
+    def activity_send_mail(self, template_id):
+        """ Automatically send an email based on the given mail.template, given
+        its ID. """
+        template = self.env['mail.template'].browse(template_id).exists()
+        if not template:
+            return False
+        for record in self.with_context(mail_post_autofollow=True):
+            record.message_post_with_template(
+                template_id,
+                composition_mode='comment'
+            )
+        return True
 
     def activity_schedule(self, act_type_xmlid='', date_deadline=None, summary='', note='', **act_values):
         """ Schedule an activity on each record of the current record set.
