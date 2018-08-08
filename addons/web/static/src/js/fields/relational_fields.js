@@ -366,6 +366,9 @@ var FieldMany2One = AbstractField.extend({
         var context = this.record.getContext(this.recordParams);
         var domain = this.record.getDomain(this.recordParams);
 
+        // Add the additionalContext
+        _.extend(context, this.additionalContext)
+
         var blacklisted_ids = this._getSearchBlacklist();
         if (blacklisted_ids.length > 0) {
             domain.push(['id', 'not in', blacklisted_ids]);
@@ -2496,9 +2499,9 @@ var FieldReference = FieldMany2One.extend({
      * @private
      */
     _reset: function () {
+        this._super.apply(this, arguments);
         var value = this.$('select').val();
         this._setState();
-        this._super.apply(this, arguments);
         this.$('select').val(this.value && this.value.model || value);
     },
     /**
