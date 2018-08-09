@@ -424,8 +424,6 @@ QUnit.test('chatter: post, receive and star messages', function (assert) {
     var done = assert.async();
     assert.expect(27);
 
-    var bus = this.services[1].prototype.bus;
-
     this.data.partner.records[0].message_ids = [1];
     this.data['mail.message'].records = [{
         author_id: ["1", "John Doe"],
@@ -499,7 +497,7 @@ QUnit.test('chatter: post, receive and star messages', function (assert) {
                     type: 'toggle_star',
                 };
                 var notification = [[false, 'res.partner'], data];
-                bus.trigger('notification', [notification]);
+                form.call('bus_service', 'trigger', 'notification', [notification]);
                 return $.when();
             }
             return this._super(route, args);
@@ -784,7 +782,6 @@ QUnit.test('chatter: discard changes on message post with post_refresh "recipien
     var getSuggestionsDef = $.Deferred();
 
     var messages = [];
-    var bus = this.services[1].prototype.bus;
     var form = createView({
         View: FormView,
         model: 'partner',
@@ -1664,7 +1661,7 @@ QUnit.test('does not render and crash when destroyed before chat system is ready
         intercepts: {
             get_session: function (event) {
                 event.stopPropagation();
-                event.data.callback({uid: 1});
+                event.data.callback({uid: 1, origin: 'http://web'});
             },
         },
     });
@@ -1675,6 +1672,79 @@ QUnit.test('does not render and crash when destroyed before chat system is ready
     // view is destroyed, all rpcs will be dropped, and many other mechanisms
     // relying on events will not work, such as the chat bus)
     def.resolve();
+});
+
+QUnit.test('chatter: do not duplicate messages on (un)star message', function (assert) {
+    assert.expect(4);
+
+    this.data.partner.records[0].message_ids = [1];
+    this.data['mail.message'].records = [{
+        author_id: ["1", "John Doe"],
+        body: "A message",
+        date: "2016-12-20 09:35:40",
+        id: 1,
+        is_note: false,
+        is_discussion: true,
+        is_notification: false,
+        is_starred: false,
+        model: 'partner',
+        res_id: 2,
+    }];
+
+    var form = createView({
+        View: FormView,
+        model: 'partner',
+        data: this.data,
+        services: this.services,
+        arch: '<form string="Partners">' +
+                '<sheet>' +
+                    '<field name="foo"/>' +
+                '</sheet>' +
+                '<div class="oe_chatter">' +
+                    '<field name="message_ids" widget="mail_thread" options="{\'display_log_button\': True}"/>' +
+                '</div>' +
+            '</form>',
+        res_id: 2,
+        mockRPC: function (route, args) {
+            if (args.method === 'toggle_message_starred') {
+                var messageData = _.findWhere(
+                    this.data['mail.message'].records,
+                    { id: args.args[0][0] }
+                );
+                messageData.is_starred = !messageData.is_starred;
+                // simulate notification received by mail_service from longpoll
+                var data = {
+                    info: false,
+                    message_ids: [messageData.id],
+                    starred: messageData.is_starred,
+                    type: 'toggle_star',
+                };
+                var notification = [[false, 'res.partner'], data];
+                form.call('bus_service', 'trigger', 'notification', [notification]);
+                return $.when();
+            }
+            return this._super(route, args);
+        },
+        session: {},
+    });
+
+    assert.strictEqual(form.$('.o_thread_message').length, 1,
+        "there should be a single message in the chatter");
+    assert.ok(form.$('.o_thread_message .o_thread_message_star.fa-star-o').length,
+        "message should not be starred");
+
+    // star message
+    form.$('.o_thread_message .o_thread_message_star').click();
+    assert.strictEqual(form.$('.o_thread_message').length, 1,
+        "there should still be a single message in the chatter after starring the message");
+
+    // unstar message
+    form.$('.o_thread_message .o_thread_message_star').click();
+    assert.strictEqual(form.$('.o_thread_message').length, 1,
+        "there should still be a single message in the chatter after unstarring the message");
+
+    //cleanup
+    form.destroy();
 });
 
 QUnit.module('FieldMany2ManyTagsEmail', {

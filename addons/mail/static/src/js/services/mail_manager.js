@@ -44,7 +44,6 @@ var _lt = core._lt;
 var PREVIEW_MSG_MAX_SIZE = 350;  // optimal for native english speakers
 
 var MailManager =  AbstractService.extend({
-    name: 'mail_service',
     dependencies: ['ajax', 'bus_service', 'local_storage'],
     _ODOOBOT_ID: "ODOOBOT", // default authorID for transient messages
 
@@ -52,7 +51,6 @@ var MailManager =  AbstractService.extend({
      * @override
      */
     start: function () {
-        this._busBus = this.call('bus_service', 'getBus');
         this._cannedResponses = [];
         this._mailBus = new Bus(this);
         this._commands = [];
@@ -471,7 +469,7 @@ var MailManager =  AbstractService.extend({
             channel = this._makeChannel(data, options);
             if (channel.getType() === 'dm') {
                 this._pinnedDmPartners.push(channel.getDirectPartnerID());
-                this._busBus.update_option(
+                this.call('bus_service', 'updateOption',
                     'bus_presence_partner_ids',
                     this._pinnedDmPartners
                 );
@@ -863,7 +861,7 @@ var MailManager =  AbstractService.extend({
             });
         }).then(function (result) {
             self._updateFromServer(result);
-            self._busBus.start_polling();
+            self.call('bus_service', 'startPolling');
         });
     },
     /**
@@ -1002,7 +1000,7 @@ var MailManager =  AbstractService.extend({
      * @param {boolean} options.isDisplayed
      */
     _notifyIncomingMessage: function (message, options) {
-        if (this._busBus.is_odoo_focused() && options.isDisplayed) {
+        if (this.call('bus_service', 'isOdooFocused') && options.isDisplayed) {
             // no need to notify
             return;
         }
@@ -1013,7 +1011,7 @@ var MailManager =  AbstractService.extend({
         var content = mailUtils.parseAndTransform(message.getBody(), mailUtils.stripHTML)
             .substr(0, PREVIEW_MSG_MAX_SIZE);
 
-        if (!this._busBus.is_odoo_focused()) {
+        if (!this.call('bus_service', 'isOdooFocused')) {
             this._outOfFocusUnreadMessageCounter++;
             var tabTitle = _.str.sprintf(
                 _t("%d Messages"),
@@ -1113,7 +1111,7 @@ var MailManager =  AbstractService.extend({
             var index = this._pinnedDmPartners.indexOf(channel.getDirectPartnerID());
             if (index > -1) {
                 this._pinnedDmPartners.splice(index, 1);
-                this._busBus.update_option(
+                this.call('bus_service', 'updateOption',
                     'bus_presence_partner_ids',
                     this._pinnedDmPartners
                 );
